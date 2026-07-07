@@ -42,6 +42,15 @@ wp option update timezone_string 'Asia/Jakarta'
 wp language core install id_ID --activate || true
 wp rewrite flush --hard
 
+echo "== 7. Halaman Form Isi Data (T2.6) =="
+PAGE_ID="$(wp post list --post_type=page --name=isi-data --field=ID | head -n1)"
+if [ -z "$PAGE_ID" ]; then
+  PAGE_ID="$(wp post create --post_type=page --post_title='Lengkapi Data Undangan' \
+    --post_name=isi-data --post_status=publish --porcelain)"
+fi
+wp post meta update "$PAGE_ID" _wp_page_template page-isi-data.php
+echo "Halaman /isi-data/ siap (ID $PAGE_ID)"
+
 echo
 echo "================================================================"
 echo "SELESAI. Langkah manual berikutnya:"
@@ -49,6 +58,9 @@ echo "1) hPanel → Advanced → Cron Jobs → tiap menit:"
 echo "   cd $(pwd) && wp cron event run --due-now >/dev/null 2>&1"
 echo "2) wp-admin → LiteSpeed Cache → Cache → Drop Query String:"
 echo "   to, utm_source, utm_medium, utm_campaign, ref"
+echo "   dan Cache → Excludes → URI: /isi-data/ (T2.7)"
 echo "3) wp-admin → FluentSMTP → sambungkan Brevo (T1.5)"
 echo "4) Simpan WP_APP_PASSWORD & FORM_TOKEN_SECRET di env n8n"
+echo "5) Setelah WF-02 dibuat di n8n, pasang URL webhooknya (T2.6):"
+echo "   wp config set N8N_FORM_WEBHOOK_URL 'https://n8n.harih.id/webhook/…' --type=constant"
 echo "================================================================"

@@ -55,21 +55,40 @@ function harih_youtube_id(string $url): string {
     return '';
 }
 
+/**
+ * Pustaka musik instrumental berlisensi (TASKS T1.15) — URL file => label.
+ * Host file di uploads sendiri; arsipkan bukti lisensinya. Form isi data
+ * otomatis menampilkan dropdown begitu array ini terisi.
+ */
+function harih_musik_library(): array {
+    return [
+        // 'https://harih.id/wp-content/uploads/musik/contoh.mp3' => 'Contoh — piano lembut',
+    ];
+}
+
+/** URL webhook n8n penerima form isi data (WF-02). Set via wp-config saat deploy. */
+function harih_form_webhook_url(): string {
+    if (defined('N8N_FORM_WEBHOOK_URL')) return (string) N8N_FORM_WEBHOOK_URL;
+    return (string) get_option('n8n_form_webhook_url', '');
+}
+
 /* =========================================================================
  * Aset
  * ========================================================================= */
 
 // Halaman toko: style child di atas Astra.
 add_action('wp_enqueue_scripts', function () {
-    if (is_singular('undangan')) return;
+    if (is_singular('undangan') || is_page_template('page-isi-data.php')) return;
     wp_enqueue_style('harih-child', get_stylesheet_uri(), [], HARIH_VERSION);
 }, 20);
 
-// Halaman undangan: buang SEMUA aset tema/plugin lain (Astra, WooCommerce, dst.)
-// lalu muat hanya aset undangan — halaman harus ringan & bebas bentrok CSS.
-// Konvensi: semua handle milik kita berawalan `undangan-`.
+// Halaman undangan & form isi data: buang SEMUA aset tema/plugin lain (Astra,
+// WooCommerce, dst.) lalu muat hanya aset kita — halaman harus ringan & bebas
+// bentrok CSS. Konvensi: semua handle milik kita berawalan `undangan-`.
 add_action('wp_enqueue_scripts', function () {
-    if (!is_singular('undangan')) return;
+    $is_undangan = is_singular('undangan');
+    $is_isidata  = is_page_template('page-isi-data.php');
+    if (!$is_undangan && !$is_isidata) return;
 
     global $wp_styles, $wp_scripts;
     foreach ((array) $wp_styles->queue as $handle) {
@@ -77,6 +96,13 @@ add_action('wp_enqueue_scripts', function () {
     }
     foreach ((array) $wp_scripts->queue as $handle) {
         if (strpos($handle, 'undangan-') !== 0) wp_dequeue_script($handle);
+    }
+
+    if ($is_isidata) {
+        wp_enqueue_style('undangan-fonts', harih_tema_fonts('tema-01'), [], null);
+        wp_enqueue_style('undangan-isidata', get_stylesheet_directory_uri() . '/undangan/shared/isi-data.css', [], HARIH_VERSION);
+        wp_enqueue_script('undangan-isidata-js', get_stylesheet_directory_uri() . '/undangan/shared/isi-data.js', [], HARIH_VERSION, true);
+        return;
     }
 
     $id   = get_queried_object_id();
@@ -109,9 +135,9 @@ add_action('wp_enqueue_scripts', function () {
     wp_add_inline_script('undangan-js', 'window.UNDANGAN = ' . wp_json_encode($cfg) . ';', 'before');
 }, 999);
 
-// Preconnect Google Fonts hanya di halaman undangan.
+// Preconnect Google Fonts hanya di halaman undangan & form isi data.
 add_filter('wp_resource_hints', function ($urls, $relation) {
-    if ($relation === 'preconnect' && is_singular('undangan')) {
+    if ($relation === 'preconnect' && (is_singular('undangan') || is_page_template('page-isi-data.php'))) {
         $urls[] = 'https://fonts.googleapis.com';
         $urls[] = ['href' => 'https://fonts.gstatic.com', 'crossorigin'];
     }
@@ -154,7 +180,16 @@ add_action('wp_head', function () {
     }
 }, 5);
 
-// Admin bar mengganggu layout fullscreen undangan.
+// Admin bar mengganggu layout fullscreen undangan & form.
 add_filter('show_admin_bar', function ($show) {
-    return is_singular('undangan') ? false : $show;
+    return (is_singular('undangan') || is_page_template('page-isi-data.php')) ? false : $show;
+});
+
+// Form isi data: jangan diindeks — URL berisi token order (T2.9 pelengkap).
+add_filter('wp_robots', function ($robots) {
+    if (is_page_template('page-isi-data.php')) {
+        $robots['noindex']  = true;
+        $robots['nofollow'] = true;
+    }
+    return $robots;
 });

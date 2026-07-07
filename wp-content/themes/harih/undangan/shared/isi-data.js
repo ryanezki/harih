@@ -1,0 +1,277 @@
+/**
+ * hariH — Form Isi Data (page-isi-data.php).
+ * Konfigurasi dari PHP: window.ISI_DATA = { webhook, maxFoto, maxSizeMB }.
+ *
+ * Kompresi gambar client-side (T2.8): re-encode via canvas sebelum upload.
+ * Menyelesaikan sekaligus: HEIC iPhone (iOS auto-transcode ke JPEG untuk
+ * accept jpeg/png/webp), payload >16 MB, orientasi EXIF (browser modern
+ * menerapkan orientasi saat drawImage), upload lambat di seluler — dan
+ * BONUS privasi: metadata EXIF (termasuk lokasi GPS) ikut terbuang.
+ *
+ * Submit (T2.10): XHR multipart langsung ke webhook n8n dengan progress bar.
+ * Field file TIDAK diberi atribut name — file mentah tidak pernah ikut
+ * FormData(form); yang dikirim hanya hasil kompresi (foto_0…foto_9, qris).
+ */
+(function () {
+    'use strict';
+
+    var cfg = window.ISI_DATA || {};
+    var $ = function (sel) { return document.querySelector(sel); };
+
+    var form = $('#isi-data-form');
+    if (!form) return;
+
+    var state = { foto: [], qris: null, uploading: false };
+
+    /* ================= Kompresi gambar ================= */
+
+    function loadImage(url) {
+        return new Promise(function (resolve, reject) {
+            var img = new Image();
+            img.onload = function () { resolve(img); };
+            img.onerror = reject;
+            img.src = url;
+        });
+    }
+
+    function toBlob(canvas, type, quality) {
+        return new Promise(function (resolve, reject) {
+            canvas.toBlob(function (b) { b ? resolve(b) : reject(new Error('encode gagal')); }, type, quality);
+        });
+    }
+
+    /**
+     * Re-encode gambar: skala maksimal maxDim px, format keluaran `type`.
+     * JPEG untuk foto; PNG untuk QRIS (kode QR rusak oleh artefak JPEG).
+     */
+    async function kompres(file, maxDim, type, namaBaru) {
+        var url = URL.createObjectURL(file);
+        try {
+            var img = await loadImage(url);
+            var w = img.naturalWidth, h = img.naturalHeight;
+            if (!w || !h) throw new Error('gambar tidak terbaca');
+
+            var scale = Math.min(1, maxDim / Math.max(w, h));
+            var canvas = document.createElement('canvas');
+            canvas.width = Math.round(w * scale);
+            canvas.height = Math.round(h * scale);
+            var ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+            var blob = await toBlob(canvas, type, 0.82);
+            if (type === 'image/jpeg' && blob.size > 900 * 1024) {
+                blob = await toBlob(canvas, type, 0.65); // foto sangat detail → turunkan kualitas
+            }
+            var ext = type === 'image/png' ? '.png' : '.jpg';
+            return new File([blob], namaBaru + ext, { type: type });
+        } finally {
+            URL.revokeObjectURL(url);
+        }
+    }
+
+    /* ================= Galeri foto ================= */
+
+    var inputFoto = $('#input-foto');
+    var fotoGrid = $('#foto-grid');
+    var pesanFoto = $('#pesan-foto');
+
+    function renderFoto() {
+        if (!fotoGrid) return;
+        fotoGrid.textContent = '';
+        state.foto.forEach(function (item, i) {
+            fotoGrid.appendChild(buatThumb(item, function () {
+                URL.revokeObjectURL(item.url);
+                state.foto.splice(i, 1);
+                renderFoto();
+            }));
+        });
+    }
+
+    function buatThumb(item, onHapus) {
+        var wrap = document.createElement('div');
+        wrap.className = 'foto-item';
+        var img = document.createElement('img');
+        img.src = item.url;
+        img.alt = '';
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'foto-hapus';
+        btn.setAttribute('aria-label', 'Hapus foto');
+        btn.textContent = '×';
+        btn.addEventListener('click', onHapus);
+        wrap.appendChild(img);
+        wrap.appendChild(btn);
+        return wrap;
+    }
+
+    if (inputFoto) {
+        inputFoto.addEventListener('change', async function () {
+            var files = Array.from(inputFoto.files || []);
+            if (pesanFoto) pesanFoto.textContent = '';
+
+            for (var i = 0; i < files.length; i++) {
+                var f = files[i];
+                if (state.foto.length >= cfg.maxFoto) {
+                    if (pesanFoto) pesanFoto.textContent = 'Maksimal ' + cfg.maxFoto + ' foto.';
+                    break;
+                }
+                if (!/^image\//.test(f.type)) {
+                    if (pesanFoto) pesanFoto.textContent = 'File bukan gambar: ' + f.name;
+                    continue;
+                }
+                try {
+                    if (pesanFoto) pesanFoto.textContent = 'Memproses foto ' + (i + 1) + '/' + files.length + '…';
+                    var hasil = await kompres(f, 1600, 'image/jpeg', 'foto-' + Date.now() + '-' + i);
+                    if (hasil.size > cfg.maxSizeMB * 1024 * 1024) {
+                        if (pesanFoto) pesanFoto.textContent = 'Foto terlalu besar setelah dikompresi: ' + f.name;
+                        continue;
+                    }
+                    state.foto.push({ file: hasil, url: URL.createObjectURL(hasil) });
+                    renderFoto();
+                    if (pesanFoto) pesanFoto.textContent = '';
+                } catch (e) {
+                    if (pesanFoto) pesanFoto.textContent = 'Gagal memproses ' + f.name + ' — coba foto lain.';
+                }
+            }
+            inputFoto.value = '';
+        });
+    }
+
+    /* ================= QRIS ================= */
+
+    var inputQris = $('#input-qris');
+    var qrisGrid = $('#qris-grid');
+    var pesanQris = $('#pesan-qris');
+
+    function renderQris() {
+        if (!qrisGrid) return;
+        qrisGrid.textContent = '';
+        if (state.qris) {
+            qrisGrid.appendChild(buatThumb(state.qris, function () {
+                URL.revokeObjectURL(state.qris.url);
+                state.qris = null;
+                renderQris();
+            }));
+        }
+    }
+
+    if (inputQris) {
+        inputQris.addEventListener('change', async function () {
+            var f = inputQris.files && inputQris.files[0];
+            if (pesanQris) pesanQris.textContent = '';
+            if (!f) return;
+            if (!/^image\//.test(f.type)) {
+                if (pesanQris) pesanQris.textContent = 'File bukan gambar.';
+                return;
+            }
+            try {
+                // PNG: kode QR harus tetap tajam agar bisa dipindai
+                var hasil = await kompres(f, 1200, 'image/png', 'qris-' + Date.now());
+                if (state.qris) URL.revokeObjectURL(state.qris.url);
+                state.qris = { file: hasil, url: URL.createObjectURL(hasil) };
+                renderQris();
+            } catch (e) {
+                if (pesanQris) pesanQris.textContent = 'Gagal memproses gambar QRIS.';
+            }
+            inputQris.value = '';
+        });
+    }
+
+    /* ================= Counter love story ================= */
+
+    var ls = $('#love-story');
+    var lsCount = $('#ls-count');
+    if (ls && lsCount) {
+        ls.addEventListener('input', function () { lsCount.textContent = ls.value.length; });
+    }
+
+    /* ================= Submit ================= */
+
+    var btnKirim = $('#btn-kirim');
+    var progress = $('#progress');
+    var progressBar = $('#progress-bar');
+    var kirimMsg = $('#kirim-msg');
+    var fields = $('#form-fields');
+
+    function tampilPesan(teks, error) {
+        kirimMsg.textContent = teks;
+        kirimMsg.classList.toggle('error', !!error);
+    }
+
+    window.addEventListener('beforeunload', function (e) {
+        if (state.uploading) { e.preventDefault(); e.returnValue = ''; }
+    });
+
+    form.addEventListener('submit', function (ev) {
+        ev.preventDefault();
+        if (state.uploading) return;
+
+        if (!form.reportValidity()) return; // validasi native (required, url, dsb.)
+        if (!cfg.webhook) {
+            tampilPesan('Formulir belum terhubung ke sistem — hubungi CS.', true);
+            return;
+        }
+
+        // Rakit payload SEBELUM fieldset di-disable (fieldset disabled = field
+        // tidak ikut FormData).
+        var fd = new FormData(form);
+        state.foto.forEach(function (item, i) { fd.append('foto_' + i, item.file); });
+        fd.append('jumlah_foto', String(state.foto.length));
+        if (state.qris) fd.append('qris', state.qris.file);
+
+        state.uploading = true;
+        fields.disabled = true;
+        btnKirim.disabled = true;
+        progress.hidden = false;
+        progressBar.style.width = '0%';
+        tampilPesan('Mengunggah… jangan tutup halaman ini.');
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', cfg.webhook);
+        xhr.timeout = 180000;
+        // Jangan set Content-Type manual — browser mengisi boundary multipart,
+        // dan tanpa header custom request tetap "simple" (tanpa preflight CORS).
+
+        xhr.upload.onprogress = function (e) {
+            if (e.lengthComputable) {
+                var pct = Math.round((e.loaded / e.total) * 100);
+                progressBar.style.width = pct + '%';
+                tampilPesan(pct < 100 ? 'Mengunggah… ' + pct + '%' : 'Memproses… sebentar lagi.');
+            }
+        };
+
+        function gagal(teks) {
+            state.uploading = false;
+            fields.disabled = false;
+            btnKirim.disabled = false;
+            progress.hidden = true;
+            tampilPesan(teks, true);
+        }
+
+        xhr.onload = function () {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                state.uploading = false;
+                progressBar.style.width = '100%';
+                form.hidden = true;
+                var sukses = $('#panel-sukses');
+                if (sukses) sukses.hidden = false;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                var pesan = 'Gagal mengirim (kode ' + xhr.status + '). Coba lagi — isian Anda tidak hilang.';
+                try {
+                    var body = JSON.parse(xhr.responseText);
+                    if (body && body.message) pesan = body.message;
+                } catch (e) { /* respons bukan JSON */ }
+                gagal(pesan);
+            }
+        };
+        xhr.onerror = function () {
+            gagal('Koneksi terputus — periksa jaringan lalu tekan Kirim lagi. Isian Anda tidak hilang.');
+        };
+        xhr.ontimeout = function () {
+            gagal('Waktu unggah habis — coba jaringan yang lebih stabil lalu kirim lagi.');
+        };
+
+        xhr.send(fd);
+    });
+})();

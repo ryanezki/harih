@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Preview Form Isi Data · hariH</title>
+<!--
+  PREVIEW STATIS untuk review visual & uji kompresi foto (TASKS T2.6/T2.8).
+  Memakai CSS & JS ASLI theme; webhook dikosongkan → tombol Kirim menampilkan
+  pesan "belum terhubung" (by design). Pilih beberapa foto dari galeri untuk
+  melihat kompresi + thumbnail bekerja. Markup mengikuti page-isi-data.php
+  (contoh: paket premium, order #123).
+-->
+<meta name="referrer" content="no-referrer">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="../wp-content/themes/harih/undangan/shared/isi-data.css">
+<style>
+.preview-ribbon{position:fixed;top:10px;left:10px;z-index:99;background:#34332c;color:#faf7f0;font:600 10px/1 system-ui;letter-spacing:.08em;padding:7px 10px;border-radius:999px;opacity:.85}
+</style>
+</head>
+<body class="isidata-body">
+<div class="preview-ribbon">PREVIEW · KIRIM NONAKTIF · KOMPRESI FOTO AKTIF</div>
+<div class="wrap">
+
+    <header class="isidata-header">
+        <p class="brand">hariH</p>
+        <h1>Lengkapi Data Undangan</h1>
+        <p class="sub">Pesanan <strong>#123</strong> · paket <strong>Premium</strong></p>
+        <p class="sub-kecil">Isi santai saja — setelah dikirim, undangan Anda terbit otomatis dalam hitungan menit.</p>
+    </header>
+
+    <div class="panel-sukses" id="panel-sukses" hidden>
+        <div class="cek" aria-hidden="true">✓</div>
+        <h2>Data diterima!</h2>
+        <p>Undangan Anda sedang dibuat. Link undangan akan dikirim ke <strong>WhatsApp &amp; email</strong> Anda dalam ±5 menit. Halaman ini boleh ditutup.</p>
+    </div>
+
+    <form id="isi-data-form" novalidate>
+        <input type="hidden" name="order" value="123">
+        <input type="hidden" name="key" value="preview">
+        <input type="hidden" name="paket" value="premium">
+
+        <fieldset id="form-fields">
+
+            <section class="kartu">
+                <h2>1. Pilih Tema</h2>
+                <div class="tema-grid">
+                    <label class="tema-card">
+                        <input type="radio" name="template_id" value="tema-01" checked required>
+                        <span class="tema-nama">Tema 01 — Botanical Elegan</span>
+                        <a class="tema-demo" href="tema-01.html" target="_blank" rel="noopener">Lihat contoh ↗</a>
+                    </label>
+                </div>
+            </section>
+
+            <section class="kartu">
+                <h2>2. Mempelai</h2>
+                <label class="field"><span>Nama mempelai pria *</span>
+                    <input type="text" name="nama_pria" maxlength="100" required placeholder="mis. Raka Pratama"></label>
+                <label class="field"><span>Orang tua mempelai pria</span>
+                    <input type="text" name="ortu_pria" maxlength="150" placeholder="mis. Bapak Hendra & Ibu Sari"></label>
+                <label class="field"><span>Nama mempelai wanita *</span>
+                    <input type="text" name="nama_wanita" maxlength="100" required placeholder="mis. Sela Ananda"></label>
+                <label class="field"><span>Orang tua mempelai wanita</span>
+                    <input type="text" name="ortu_wanita" maxlength="150" placeholder="mis. Bapak Budi & Ibu Rina"></label>
+            </section>
+
+            <section class="kartu">
+                <h2>3. Acara</h2>
+                <p class="kartu-note">Waktu ditampilkan dalam WIB.</p>
+                <div class="row-2">
+                    <label class="field"><span>Tanggal akad</span><input type="date" name="tanggal_akad"></label>
+                    <label class="field"><span>Waktu akad</span><input type="time" name="waktu_akad"></label>
+                </div>
+                <div class="row-2">
+                    <label class="field"><span>Tanggal resepsi *</span><input type="date" name="tanggal_resepsi" required></label>
+                    <label class="field"><span>Waktu resepsi *</span><input type="time" name="waktu_resepsi" required></label>
+                </div>
+                <label class="field"><span>Nama lokasi *</span>
+                    <input type="text" name="lokasi_nama" maxlength="150" required placeholder="mis. Graha Kencana"></label>
+                <label class="field"><span>Alamat lokasi *</span>
+                    <textarea name="lokasi_alamat" rows="2" maxlength="300" required placeholder="mis. Jl. Melati No. 12, Bandung"></textarea></label>
+                <label class="field"><span>Link Google Maps</span>
+                    <input type="url" name="gmaps_url" maxlength="300" inputmode="url" placeholder="https://maps.app.goo.gl/…"></label>
+            </section>
+
+            <section class="kartu">
+                <h2>4. Kisah Cinta <span class="paket-badge">Favorit+</span></h2>
+                <label class="field"><span>Ceritakan singkat kisah kalian (opsional)</span>
+                    <textarea name="love_story" id="love-story" rows="5" maxlength="2000" placeholder="Kami pertama kali bertemu…"></textarea></label>
+                <p class="counter"><span id="ls-count">0</span>/2000</p>
+            </section>
+
+            <section class="kartu">
+                <h2>5. Galeri Foto <span class="paket-badge">Favorit+</span></h2>
+                <p class="kartu-note">Maksimal 10 foto. Foto pertama menjadi sampul undangan. Foto dikompresi otomatis di perangkat Anda sebelum dikirim — aman untuk kuota.</p>
+                <div class="foto-grid" id="foto-grid"></div>
+                <label class="btn-file" for="input-foto">＋ Pilih foto</label>
+                <input type="file" id="input-foto" accept="image/jpeg,image/png,image/webp" multiple hidden>
+                <p class="pesan-file" id="pesan-foto" role="status"></p>
+            </section>
+
+            <section class="kartu">
+                <h2>6. Musik Latar</h2>
+                <p class="kartu-note">Pilihan musik akan ditambahkan tim kami saat proses pembuatan — atau sampaikan preferensi Anda ke CS setelah undangan jadi.</p>
+            </section>
+
+            <section class="kartu">
+                <h2>7. Amplop Digital <span class="paket-badge">Favorit+</span></h2>
+                <label class="field"><span>Rekening (satu per baris, opsional)</span>
+                    <textarea name="rekening" rows="3" maxlength="300" placeholder="BCA 1234567890 a.n. Nama&#10;Mandiri 9876543210 a.n. Nama"></textarea></label>
+                <div class="field">
+                    <span>Gambar QRIS (opsional)</span>
+                    <div class="foto-grid" id="qris-grid"></div>
+                    <label class="btn-file" for="input-qris">＋ Pilih gambar QRIS</label>
+                    <input type="file" id="input-qris" accept="image/jpeg,image/png,image/webp" hidden>
+                    <p class="pesan-file" id="pesan-qris" role="status"></p>
+                </div>
+            </section>
+
+            <section class="kartu">
+                <h2>8. Video / Live Streaming <span class="paket-badge">Premium</span></h2>
+                <label class="field"><span>Link video atau live streaming (opsional — bisa menyusul via CS)</span>
+                    <input type="url" name="video_url" maxlength="300" inputmode="url" placeholder="https://youtube.com/…"></label>
+            </section>
+
+            <section class="kartu">
+                <h2>9. Narahubung</h2>
+                <label class="field"><span>Nomor WhatsApp narahubung di undangan (opsional)</span>
+                    <input type="tel" name="wa_cp" maxlength="20" inputmode="tel" placeholder="08xxxxxxxxxx"></label>
+            </section>
+
+        </fieldset>
+
+        <div class="kirim-area">
+            <button type="submit" class="btn" id="btn-kirim">Kirim &amp; Buat Undangan</button>
+            <div class="progress" id="progress" hidden>
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <p class="kirim-msg" id="kirim-msg" role="status"></p>
+            <p class="bantuan">Kesulitan mengisi? <a href="#" onclick="return false">Hubungi CS</a></p>
+        </div>
+    </form>
+
+</div>
+
+<script>window.ISI_DATA = { webhook: '', maxFoto: 10, maxSizeMB: 2 };</script>
+<script src="../wp-content/themes/harih/undangan/shared/isi-data.js"></script>
+</body>
+</html>
