@@ -1,0 +1,11 @@
+/*
+Theme Name: hariH
+Description: Child theme Astra untuk platform undangan digital hariH. Halaman toko/checkout memakai Astra; halaman undangan (CPT undangan) dirender berdiri sendiri oleh single-undangan.php dengan aset di folder undangan/.
+Template: astra
+Version: 0.1.0
+Author: hariH
+Text Domain: harih
+*/
+
+/* Penyesuaian ringan halaman toko diletakkan di sini (halaman undangan TIDAK
+   memakai file ini — asetnya di undangan/shared + undangan/{tema}). */

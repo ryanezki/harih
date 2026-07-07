@@ -1,0 +1,180 @@
+# TASKS — Platform Undangan Digital (MVP 4 Minggu)
+
+**Sumber:** [blueprint-undangan-digital.md](./blueprint-undangan-digital.md) · **Status:** aktif · **Dibuat:** 2026-07-07
+
+**Cara pakai:** centang `- [x]` saat task selesai. ID task (`T1.4`, dst.) stabil — pakai untuk referensi di commit/diskusi. Referensi `§N` merujuk ke bagian blueprint.
+
+**Legenda:** tag **`[+]`** = task tambahan hasil analisis celah blueprint (tidak ada di blueprint asli), selalu disertai alasan singkat setelah tanda `—`.
+
+---
+
+## T0 — Keputusan & Prasyarat Owner (sebelum / hari pertama Minggu 1)
+
+### Keputusan (§16)
+- [x] **T0.1** Tentukan nama brand + domain → **Keputusan (2026-07-07): brand `hariH`, domain `harih.id`.** ⚠️ Verifikasi apakah `.id` termasuk jatah domain gratis Hostinger (ccTLD `.id` umumnya tidak termasuk & lebih mahal dari `.com`) dan siapkan dokumen identitas sesuai syarat registri PANDI
+- [x] **T0.2** Pilih payment gateway → **Keputusan: Duitku** (mendukung pendaftaran perorangan; QRIS/VA/e-wallet)
+- [x] **T0.3** Sumber desain 3 tema → **Keputusan: desain in-house via Claude Code (opsional + Figma connector).** Tidak beli template — isu lisensi tema gugur; lisensi musik (T1.15) tetap wajib
+- [x] **T0.4** Harga paket & komisi → **Keputusan: ikuti default blueprint** (Hemat 99rb / Favorit 179rb / Premium 299rb; komisi reseller 30%, diskon kupon 10%)
+- [x] **T0.5** Nomor WA bisnis → **sudah tersedia.** **[+]** Pastikan nomor tetap dipakai wajar (warm-up) sampai dipakai WAHA di Minggu 2 — nomor yang lama tidak aktif berisiko saat mulai kirim otomatis
+- [x] **T0.6** Rekening payout komisi reseller → **siap**
+
+### Akun & kredensial (§3)
+- [ ] **T0.7** Buat akun Brevo. **[+]** Verifikasi domain pengirim (SPF/DKIM/DMARC) segera setelah domain aktif — propagasi DNS lambat dan mem-block pengujian email di Minggu 2
+- [ ] **T0.8** Buat Google Cloud service account + simpan JSON key untuk n8n
+- [ ] **T0.9** Buat Google Sheet 3 tab (`orders`, `resellers`, `komisi`) sesuai skema §5, share ke email service account. **[+]** Format kolom nomor HP & tanggal sebagai *plain text* — Sheets otomatis menghapus `0` di depan nomor dan mengubah format tanggal
+- [ ] **T0.10** Daftar merchant **Duitku** mode **sandbox** (akun sandbox terpisah di sandbox.duitku.com) + simpan merchant code & API key
+- [ ] **T0.11 [+]** Ajukan pendaftaran merchant **production** (KYC + review situs) segera setelah katalog minimum + halaman legal live di Minggu 1 — approval butuh berhari-hari; ini risiko terbesar terhadap tanggal launch, sandbox tetap jalan paralel
+
+---
+
+## T1 — Minggu 1: Fondasi
+
+### Infrastruktur & keamanan
+- [ ] **T1.1** Install plugin inti via WP-CLI §4: `woocommerce`, `litespeed-cache`, `fluent-smtp`, `limit-login-attempts-reloaded` + plugin resmi **Duitku** untuk WooCommerce (T0.2)
+- [ ] **T1.2** Buat user bot n8n + Application Password (§4). **[+]** Role `editor`, bukan `administrator` — cukup untuk create post CPT + upload media; bocornya app password tidak berarti takeover situs (kupon/order memakai key WC terpisah)
+- [ ] **T1.3** Set `FORM_TOKEN_SECRET` di `wp-config.php` (nilai sama dengan env n8n) via `wp config set` (§4)
+- [ ] **T1.4** Konfigurasi LiteSpeed: drop query string `to`, `utm_*`, `ref` (§4); permalink *Post name*; matikan XML-RPC
+- [ ] **T1.5** FluentSMTP → Brevo untuk email bawaan WooCommerce (§4)
+- [ ] **T1.6 [+]** `define('DISABLE_WP_CRON', true)` + cron job nyata di hPanel Hostinger tiap menit (`wp cron event run --due-now`) — delivery webhook WooCommerce lewat Action Scheduler yang bergantung traffic; tanpa cron nyata, order di jam sepi baru terkirim ke n8n saat ada pengunjung berikutnya
+- [ ] **T1.7 [+]** Hardening VPS: UFW (tutup port 3000), WAHA bind `127.0.0.1` + `WAHA_API_KEY`, subdomain + reverse proxy + TLS Let's Encrypt untuk n8n, aktifkan auth UI n8n — perintah §4 mem-bind WAHA ke semua interface tanpa auth: siapa pun bisa kirim WA atas nama bisnis / membajak sesi
+- [ ] **T1.8 [+]** Inisialisasi git repo untuk mu-plugin & theme + tentukan alur deploy ke Hostinger (git pull / SFTP) — kode produksi harus ter-version-control sejak commit pertama
+
+### Kode inti WordPress
+- [ ] **T1.9** Buat mu-plugin `wp-content/mu-plugins/undangan-core.php` sesuai §6: CPT `undangan` & `ucapan`, register 21 meta, endpoint RSVP (POST + GET), filter ukuran gambar & `big_image_size_threshold`
+- [ ] **T1.10 [+]** Tutup kebocoran data REST di mu-plugin versi pertama: strip `meta` dari response untuk request tak terautentikasi (filter `rest_prepare_undangan`), blokir listing publik `wp/v2/undangan`, exclude CPT dari `wp-sitemap.xml`, `noindex` via `wp_robots`, matikan feed/oEmbed CPT — tanpa ini `GET /wp-json/wp/v2/undangan` tanpa auth membocorkan `rekening`, `wa_cp`, alamat & jadwal acara SEMUA pelanggan (`auth_callback` hanya membatasi tulis, bukan baca); template membaca meta server-side jadi REST baca publik memang tidak dibutuhkan
+- [ ] **T1.11 [+]** Filter `woocommerce_max_webhook_delivery_failures` → naikkan ambang (mis. 25) — WooCommerce menonaktifkan webhook secara permanen & senyap setelah ~5 delivery gagal; VPS restart 10 menit bisa mematikan seluruh pipeline order
+
+### Tema & halaman undangan
+- [ ] **T1.12** Child theme + `single-undangan.php` sesuai §7: 10 section mobile-first, snippet nama tamu client-side (`?to=`), musik play setelah tap, section kondisional per paket. **[+]** Whitelist `template_id` (`tema-01|02|03`, fallback default) sebelum dipakai membentuk path aset — anti path traversal; **[+]** escape semua output meta (`esc_html`/`esc_url`) — defense-in-depth XSS
+- [ ] **T1.13** Tema #1 selesai (desain + CSS + aset per keputusan T0.3); aset WebP ≤ 300 KB (§7)
+- [ ] **T1.14 [+]** Cetak Open Graph tags di `single-undangan.php` + katalog (`og:title` "Rina & Bima", `og:image` cover ±1200×630 < 600 KB, URL absolut) — undangan didistribusikan via share WA; tanpa OG, preview link tampak murahan dan merusak nilai produk
+- [ ] **T1.15 [+]** Mulai kurasi library musik: 5–10 track instrumental berlisensi komersial, arsipkan bukti lisensi, host file di uploads — "library musik" dijanjikan di semua paket tapi blueprint tidak punya task pengadaannya *(selesai paling lambat Minggu 2)*
+
+### WooCommerce & toko
+- [ ] **T1.16** Buat 3 produk paket (Hemat/Favorit/Premium) tipe *simple* sesuai tabel §10. **[+]** Set **virtual non-downloadable** (downloadable memicu auto-complete yang melompati status `processing`) dan **Sold individually** (qty 2 = bayar 2× tapi hanya dapat 1 token/undangan)
+- [ ] **T1.17 [+]** Ramping checkout: guest checkout aktif, pangkas field via `woocommerce_checkout_fields` (nama, email, phone saja), `billing_phone` **wajib + tervalidasi format** (dipakai sebagai nomor delivery WA — field terpenting), hook `woocommerce_add_to_cart_validation` kosongkan cart sebelum add (1 order = 1 paket) — checkout default meminta alamat lengkap dan menjatuhkan konversi mobile
+- [ ] **T1.18** Konfigurasi payment gateway sandbox + uji checkout sandbox end-to-end
+- [ ] **T1.19** Buat webhook WooCommerce → n8n (§4): Delivery URL `…/webhook/wc-order`, secret `WC_WEBHOOK_SECRET`. **[+]** Pakai topic **Action `woocommerce_order_status_processing`** alih-alih `Order updated` — fire tepat 1× per transisi status (bukan tiap update apa pun), mengecilkan race idempotency; n8n fetch detail order via WC REST
+- [ ] **T1.20** Halaman katalog versi minimum (cukup untuk pengajuan merchant T0.11; polish di Minggu 3)
+- [ ] **T1.21 [+]** Halaman legal: Syarat & Ketentuan (termasuk disclaimer hak cipta musik §7 + batasan masa aktif), Kebijakan Privasi, Kebijakan Refund, Kontak — prasyarat approval merchant gateway dan belum ada di sprint manapun
+
+---
+
+## T2 — Minggu 2: Mesin Otomasi
+
+### Infrastruktur n8n & WAHA
+- [ ] **T2.1** Jalankan WAHA di VPS + scan QR sesi `default` dengan nomor bisnis (§4). **[+]** Pin image versi **≥ 2026.6.1** (fitur kirim media baru digratiskan ke Core sejak rilis itu; tag lama = teks saja) dan pastikan RAM VPS ≥ 2 GB/swap atau pakai engine ringan NOWEB/GOWS — engine default WEBJS menjalankan Chromium 0,5–1 GB
+- [ ] **T2.2 [+]** Set env n8n: `N8N_PAYLOAD_SIZE_MAX=64` (+ cek `N8N_FORMDATA_FILE_SIZE_MAX`), `GENERIC_TIMEZONE=Asia/Jakarta`, `EXECUTIONS_DATA_PRUNE=true` + max age ±168 jam, dan naikkan `client_max_body_size` reverse proxy — default 16 MB menolak upload 10 foto; default UTC menggeser semua cron WIB 7 jam; data eksekusi menyimpan binary foto dan memenuhi disk VPS
+- [ ] **T2.3** Simpan semua kredensial §3 sebagai environment variable / credentials n8n (tidak ada yang hardcode)
+- [ ] **T2.4 [+]** Buat **WF-00 Error Workflow**: Error Trigger → alert email + WA ke owner (nama workflow, pesan error, order_id); set sebagai default error workflow SEMUA WF; aktifkan retry-on-fail (3×, backoff) di node HTTP kritis — tanpa ini kegagalan node (Brevo down, WP 500, quota Sheets) hanya terlihat kalau owner kebetulan membuka UI n8n, sementara customer sudah bayar
+- [ ] **T2.5** Siapkan template email transaksional di Brevo (DNS sudah terverifikasi dari T0.7)
+
+### Form isi data (§8)
+- [ ] **T2.6** Page template `page-isi-data.php`: verifikasi token HMAC server-side (kode §8), field lengkap §8, radio template bergambar, field mengikuti paket
+- [ ] **T2.7 [+]** Exclude `/isi-data/` dari cache LiteSpeed + kirim header no-cache dari template — validasi token adalah PHP per-request; halaman ter-cache berarti validasi tidak berjalan
+- [ ] **T2.8 [+]** Kompresi/re-encode gambar client-side (canvas → JPEG ≤ 500 KB) + `accept="image/jpeg,image/png,image/webp"` pada input file — sekaligus menyelesaikan: foto HEIC iPhone yang ditolak WP (iOS auto-transcode untuk accept ini), payload total >16 MB, orientasi EXIF terputar, dan upload lambat di koneksi seluler
+- [ ] **T2.9 [+]** Meta `Referrer-Policy: no-referrer` di halaman form — token order ada di URL dan bisa bocor lewat header `Referer`
+- [ ] **T2.10** Submit via `FormData` → webhook n8n + progress bar + halaman sukses (§8). **[+]** Disable tombol submit setelah klik — mencegah double-submit
+
+### WF-01 — Order Intake (§9)
+- [ ] **T2.11** Bangun WF-01: webhook raw body + verifikasi HMAC → filter status → idempotency → generate token → append `orders` → deteksi kupon `RES-` → email + WA link form. **[+]** Handle **ping webhook WC** (body hanya `webhook_id` → balas 200, stop) — ping saat webhook disimpan akan gagal verifikasi HMAC dan tercatat sebagai delivery gagal; **[+]** terima status `processing` **ATAU** `completed` — sebagian gateway/konfigurasi menset order langsung `completed`
+- [ ] **T2.12 [+]** Idempotency kuat di Sheets: pola **append-then-verify** (append dulu → baca balik semua baris `order_id` → lanjut hanya bila baris miliknya yang pertama) — lookup→append tidak atomik; dua delivery paralel bisa sama-sama lolos lookup dan menghasilkan dobel email/WA/komisi
+- [ ] **T2.13 [+]** Webhook WF-01 mode **Respond Immediately** — WooCommerce menghitung response lambat sebagai kegagalan delivery dan menyicil menuju auto-disable, padahal workflow-nya sukses
+- [ ] **T2.14 [+]** Fungsi normalisasi nomor HP dipakai bersama WF-01/02/03: strip non-digit, `0…`→`62…`, `8…`→`628…`, validasi panjang; cek `contact/check-exists` WAHA sebelum kirim; bila nomor tak terdaftar WA → tandai kolom `wa_status` di sheet dan andalkan email — `chatId` salah format = pesan hilang tanpa error
+- [ ] **T2.15 [+]** Hitung komisi dari **line item minus diskon** dalam satu Code node (bukan field `total` payload — bisa termasuk fee kanal pembayaran); uji dengan beberapa payload sandbox nyata
+
+### WF-02 — Generate Undangan (§9)
+- [ ] **T2.16** Bangun WF-02: verifikasi token → lookup status → loop upload foto ke `wp/v2/media` → susun payload + slug → create post `undangan` → QR qrserver → email delivery + lampiran QR → WA delivery → update sheet `SUDAH_JADI` → set order `completed`
+- [ ] **T2.17 [+]** Respond-to-Webhook **segera setelah** validasi token+status ("Data diterima — undangan dikirim ke WA ±5 menit") + langsung update status sheet ke `DIPROSES` sebelum proses berat — WF-02 berjalan menit-an; fetch mobile timeout → user submit ulang → dua eksekusi paralel sama-sama membaca `MENUNGGU_DATA` → undangan ganda
+- [ ] **T2.18 [+]** Enforcement server-side: `paket` & `template_id` dibaca dari sheet/line item order WC (BUKAN dari form/URL) + whitelist `template_id` per paket — parameter tak bertanda-tangan bisa diubah customer untuk upgrade paket gratis
+- [ ] **T2.19 [+]** Validasi file server-side di WF-02: maksimal 10 file, whitelist mime (jpeg/png/webp), batas ukuran — validasi JS client bisa dilewati siapa pun yang punya token (cukup curl), berisiko menghabiskan disk/inodes hosting
+- [ ] **T2.20 [+]** Set "Allowed Origins (CORS)" = `https://domain.com` di webhook form n8n; uji dari browser HP riil, bukan curl — tanpa header CORS, JS tidak bisa membaca respons lintas origin → user mengira gagal → submit ulang
+- [ ] **T2.21 [+]** Desain pesan WA agar berfungsi degradasi anggun ke teks+link (QR code cukup via email/halaman) — jaga-jaga perubahan model lisensi media WAHA
+- [ ] **T2.22 [+]** Monitoring sesi WAHA: cron n8n tiap 10 menit `GET /api/sessions` → alert **via email** bila status ≠ `WORKING` (kanal WA-nya sedang mati); semua node WAHA continue-on-fail + tulis kegagalan ke kolom `wa_status` agar bisa di-retry — sesi bisa logout/banned diam-diam dan seluruh delivery WA gagal senyap
+
+### Konten
+- [ ] **T2.23 [+]** Tulis copywriting semua pesan otomatis (email & WA): konfirmasi order + link form, delivery undangan + panduan share `?to=`, reminder H-3, ucapan H+1 + testimoni, welcome kit reseller, rekap komisi, nudge belum-isi-data — dibutuhkan WF-01/02/04/05 dan bukan pekerjaan 5 menit; minta review owner
+
+---
+
+## T3 — Minggu 3: Fitur & Reseller
+
+### Fitur halaman undangan
+- [ ] **T3.1** RSVP live: form + daftar ucapan via fetch ke endpoint §6, honeypot terpasang, handling 429 di client
+- [ ] **T3.2 [+]** Kirim header `X-LiteSpeed-Cache-Control: public, max-age=60` dari endpoint GET RSVP — endpoint REST tidak ter-cache LiteSpeed secara default, sehingga SETIAP pageview undangan memicu 1 hit PHP dan mematahkan strategi cache A2; staleness 60 detik dapat diterima untuk buku tamu
+- [ ] **T3.3 [+]** Rate limit RSVP ramah CGNAT: kunci per `IP + undangan_id` dan longgarkan (mis. 5/menit) — operator seluler Indonesia berbagi 1 IP publik untuk ribuan pengguna; aturan per-IP murni membuat tamu sesama operator saling mengunci saat resepsi
+- [ ] **T3.4** Amplop digital: tombol salin rekening (`navigator.clipboard`) + tampil gambar QRIS, sesuai paket (§7)
+- [ ] **T3.5** Tema #2 & #3 selesai *(buffer alami — bila jadwal terjepit, launch dengan 2 tema dapat diterima)*
+- [ ] **T3.6 [+]** Buat 1 undangan demo publik per tema (`/u/demo-tema-01` dst.) + tautkan dari halaman produk & katalog — customer harus bisa preview sebelum membeli; implisit di blueprint (`/u/demo`) tapi tidak pernah jadi task
+- [ ] **T3.7 [+]** State pasca-acara di template (countdown selesai → pesan "acara telah berlangsung") + dokumentasikan asumsi zona waktu WIB (atau label waktu di detail acara) — countdown negatif terlihat rusak; acara WITA/WIT meleset 1–2 jam
+- [ ] **T3.8** Polish halaman katalog. **[+]** Tambah halaman "Cara Pesan" + FAQ — menaikkan konversi & mengurangi beban CS
+
+### Reseller
+- [ ] **T3.9** Landing "Jadi Reseller" + WF-03 (§9): form → kode `RES-XXXX` → create kupon WC → append `resellers` → welcome kit WA
+- [ ] **T3.10 [+]** Anti-fraud reseller di WF-03: **approval manual owner** sebelum kupon dibuat (status `PENDING` di sheet), honeypot + rate limit di form, `usage_limit_per_user` pada kupon, idempotency by nomor WA, kebijakan tertulis soal self-deal — endpoint publik tanpa proteksi = mesin cetak kupon; reseller memakai kupon sendiri membocorkan ~37% margin (diskon 10% + komisi 30%)
+- [ ] **T3.11** WF-04 rekap komisi (§9): cron Senin 09:00 WIB → rekap `UNPAID` per reseller via WA + total ke owner
+
+### Reliabilitas pipeline
+- [ ] **T3.12 [+]** **WF rekonsiliasi order**: cron 15 menit `GET /wc/v3/orders?status=processing,completed` vs tab `orders` → proses order yang tertinggal; + cron harian cek `GET /wc/v3/webhooks` → alert bila status ≠ `active` — jaring pengaman universal terhadap auto-disable webhook, downtime n8n, dan delivery yang hilang; mode kegagalan paling berbahaya di seluruh sistem
+- [ ] **T3.13 [+]** Putuskan & implementasikan masa aktif paket: perluas WF-05 (set post ke `draft` via REST saat lewat masa aktif) ATAU hapus baris masa aktif dari tabel harga — masa aktif H+7/H+30/1 tahun saat ini dijual tanpa mekanisme penegakan
+
+---
+
+## T4 — Minggu 4: Hardening & Launch
+
+- [ ] **T4.1** WF-05 reminder harian 08:00 WIB (§9): H-3 cek data + H+1 testimoni & kode referral. **[+]** Tambah nudge WA bila status `MENUNGGU_DATA` > 24 jam — customer sudah bayar tapi lupa mengisi data = revenue yang bisa diselamatkan; **[+]** jalankan enforcement masa aktif (dari T3.13)
+- [ ] **T4.2** WF-06 backup mingguan (§9). **[+]** Tambah: export workflows n8n (JSON → git), backup volume sesi WAHA, ganti backup uploads ke **rsync incremental** (tar penuh mingguan membengkak), uji restore 1× — WF-06 versi blueprint hanya melindungi WordPress; workflow n8n & sesi WA adalah aset kritis tanpa backup
+- [ ] **T4.3 [+]** Pasang uptime monitoring gratis (UptimeRobot): situs WP, endpoint n8n, healthcheck WAHA — deteksi dini untuk semua mode kegagalan senyap
+- [ ] **T4.4** Uji idempotency (§12): kirim webhook 2×, submit form 2× → 1 baris, 1 email, 1 WA, tidak ada undangan ganda
+- [ ] **T4.5** Uji cache & beban: `?to=Budi` tetap `x-litespeed-cache: hit`, endpoint RSVP ter-cache (T3.2), halaman undangan cepat di 3G
+- [ ] **T4.6 [+]** Uji perangkat riil: iPhone Safari & Android Chrome — autoplay musik setelah tap, tombol salin rekening, upload foto dari galeri HP (HEIC), preview share WA (OG debugger; ingat WA meng-cache preview per URL) — perilaku Safari sering berbeda dari emulator
+- [ ] **T4.7** Jalankan seluruh QA checklist §13 + **QA tambahan** (daftar di bawah) sampai hijau semua
+- [ ] **T4.8** Aktifkan payment gateway mode **production** (asumsi approval T0.11 sudah keluar) + uji nominal kecil
+- [ ] **T4.9 [+]** Tulis runbook operasional 1 halaman untuk owner (cek harian, menangani order stuck, re-enable webhook WC, re-scan sesi WA) + SOP CS & revisi manual (kanal, siapa pegang wp-admin, SLA revisi 1×/3× sesuai paket) — sistem "tanpa campur tangan manusia" tetap butuh manusia saat rusak; layanan revisi dijual di pricing tapi prosesnya belum didefinisikan
+- [ ] **T4.10 [+]** *(Opsional)* Analytics ringan (GA4/Plausible) + Google Search Console (katalog terindeks, undangan ter-noindex) — tanpa data, keputusan v2 §15 hanya menebak
+- [ ] **T4.11** Rekrut 3 reseller pertama *(tugas owner, bukan dev)* + soft launch
+- [ ] **T4.12** **DoD final** (§12): order riil Rp 10.000 (produk uji tersembunyi) dari HP → undangan diterima di WA < 15 menit
+
+### QA tambahan [+] (melengkapi §13)
+- [ ] `GET /wp-json/wp/v2/undangan` tanpa auth → meta kosong / listing ditolak
+- [ ] CPT `undangan` tidak muncul di `wp-sitemap.xml`; single undangan punya meta robots `noindex`
+- [ ] Simpan ulang webhook WC (memicu ping) → tidak ada error di n8n, webhook tetap `active`
+- [ ] Ubah `paket=premium` di URL/form → undangan tetap sesuai paket yang dibayar
+- [ ] Upload via curl langsung ke webhook: file ke-11 / >2 MB / non-gambar → ditolak WF-02
+- [ ] Foto HEIC dari iPhone → masuk galeri sebagai JPEG dengan orientasi benar
+- [ ] Submit form kedua saat WF-02 masih berjalan → tertolak (status `DIPROSES`), tidak ada undangan ganda
+- [ ] Matikan n8n 10 menit saat ada order masuk → order tetap terproses setelah nyala (via WF rekonsiliasi T3.12)
+- [ ] Nomor `08xx`, `+62 8xx`, `628xx` di checkout → WA terkirim ke semua format
+- [ ] Share link undangan di WA → preview OG (judul + gambar) tampil benar
+- [ ] Buka undangan yang acaranya sudah lewat → state pasca-acara, bukan countdown negatif
+- [ ] Reseller memakai kupon sendiri → terdeteksi/tertolak sesuai kebijakan T3.10
+- [ ] Port 3000 VPS tidak bisa diakses dari luar; UI n8n hanya via HTTPS + auth
+
+---
+
+## DoD per Minggu
+
+| Minggu | Definition of Done |
+|---|---|
+| **1** | Checkout sandbox berhasil; `/u/demo` tampil sempurna di HP (§12). **[+]** REST publik tidak membocorkan meta (T1.10); pengajuan merchant production terkirim (T0.11); warm-up WA sudah berjalan (T0.5) |
+| **2** | 1 order sandbox mengalir end-to-end → undangan terbit + email & WA terkirim tanpa sentuhan manusia (§12). **[+]** WF-00 error workflow aktif; kegagalan node memunculkan alert ke owner |
+| **3** | Order berkupon `RES-*` otomatis tercatat komisinya + rekap WA terkirim (§12). **[+]** Uji downtime lulus: n8n mati 10 menit saat order masuk → order terproses setelah nyala (T3.12); demo semua tema live |
+| **4** | Checklist §13 + QA tambahan hijau semua; order riil Rp 10.000 dari HP → undangan di WA < 15 menit (§12) |
+
+---
+
+## Backlog v2 (setelah 100 order pertama — §15, §10)
+
+- [ ] Occasion baru dengan duplikasi tema: khitanan, aqiqah, wisuda (musiman Mei–September), e-card Lebaran
+- [ ] Add-on WA blast ke daftar tamu — Rp 50rb/200 tamu (n8n loop, delay acak 20–45 detik, hanya daftar dari customer)
+- [ ] Add-on buku tamu QR check-in — Rp 100rb
+- [ ] Amplop digital ter-escrow via QRIS dengan fee platform 2–5% *(perubahan model bisnis paling bernilai)*
+- [ ] Arsip otomatis undangan kedaluwarsa: set draft + hapus media H+90 untuk Hemat/Favorit *(pelengkap T3.13; menjaga disk/inodes)*
+- [ ] Migrasi log operasional Google Sheets → Postgres di VPS *(saat > 500 order/bulan — sekaligus menuntaskan sisa race condition idempotency Sheets yang non-atomik)*
+- [ ] Dashboard reseller; dashboard self-service customer untuk edit undangan
+- [ ] Custom domain per undangan · multi-bahasa · tema builder drag-and-drop *(non-goals v1 §15)*
+- [ ] Analytics & Search Console (bila T4.10 dilewati saat launch)
+
+---
+
+**Catatan known limitation (diterima untuk MVP):** idempotency Google Sheets tidak atomik — dimitigasi topic Action + append-then-verify (T1.19, T2.12); sisa risiko race sangat kecil dan hilang total saat migrasi Postgres di v2.

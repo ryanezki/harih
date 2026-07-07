@@ -1,0 +1,72 @@
+/* =========================================================================
+   Tema 01 — Botanical Elegan (hariH)
+   Skin di atas undangan/shared/undangan.css: palet sage tua + gading + emas,
+   tipografi Playfair Display + Plus Jakarta Sans, ornamen botani SVG inline
+   (tanpa file gambar — ringan & bebas request eksternal).
+   Menambah tema baru = duplikasi folder ini + daftarkan di undangan_get_temas()
+   dan harih_tema_fonts().
+   ========================================================================= */
+
+:root {
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+
+    --c-page: #e7e2d6;
+    --c-bg: #faf7f0;
+    --c-surface: #ffffff;
+    --c-ink: #34332c;
+    --c-ink-soft: #837f6e;
+    --c-line: #e6e1d2;
+    --c-accent: #3f5c4f;      /* sage tua */
+    --c-accent-ink: #f4f1e7;  /* gading */
+    --c-gold: #b4923f;
+    --radius: 18px;
+    --shadow: 0 12px 32px rgba(63, 92, 79, .10);
+
+    /* Cover tanpa foto: gradasi sage dalam */
+    --cover-fallback: radial-gradient(120% 90% at 50% 0%, #4d6e5f 0%, #3f5c4f 46%, #2e463b 100%);
+    --cover-overlay: linear-gradient(180deg, rgba(28, 42, 35, .30) 0%, rgba(28, 42, 35, .62) 100%);
+    --cover-ink: #f7f4ea;
+
+    /* Ornamen pembatas: garis — daun — belah ketupat — daun — garis (emas) */
+    --ornament: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20160%2040'%20fill='none'%3E%3Cpath%20d='M6%2020h44'%20stroke='%23b4923f'%20stroke-width='1'/%3E%3Cpath%20d='M110%2020h44'%20stroke='%23b4923f'%20stroke-width='1'/%3E%3Cpath%20d='M80%2011l7%209-7%209-7-9z'%20stroke='%23b4923f'%20stroke-width='1'/%3E%3Cpath%20d='M58%2020c4-7%2010-9%2010-9s-1%208-6%2011'%20stroke='%23b4923f'%20stroke-width='1'/%3E%3Cpath%20d='M102%2020c-4-7-10-9-10-9s1%208%206%2011'%20stroke='%23b4923f'%20stroke-width='1'/%3E%3C/svg%3E");
+}
+
+/* Tekstur halus latar luar kolom (terlihat di desktop) */
+body.undangan-body {
+    background-image: repeating-linear-gradient(45deg, rgba(63, 92, 79, .035) 0 2px, transparent 2px 14px);
+}
+
+/* Cover tanpa foto: bingkai ganda emas ala kartu undangan cetak */
+.cover:not(.has-photo) .cover-inner {
+    position: relative;
+    padding: 52px 30px;
+    border-radius: 8px;
+    box-shadow: inset 0 0 0 1px rgba(180, 146, 63, .60);
+}
+.cover:not(.has-photo) .cover-inner::after {
+    content: '';
+    position: absolute;
+    inset: 7px;
+    border-radius: 5px;
+    box-shadow: inset 0 0 0 1px rgba(180, 146, 63, .32);
+    pointer-events: none;
+}
+
+.cover-eyebrow { color: var(--c-gold); opacity: 1; }
+
+/* Tombol buka di atas foto/gradasi gelap: gading transparan */
+.cover .btn-open {
+    background: rgba(244, 241, 231, .14);
+    box-shadow: inset 0 0 0 1.5px rgba(244, 241, 231, .9);
+    color: var(--cover-ink);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+}
+
+.monogram { background: #f3efe2; }
+
+.section-intro, .prose { line-height: 1.85; }
+
+/* Kartu acara: aksen garis emas di kiri */
+.acara-card { border-left: 2px solid var(--c-gold); }
