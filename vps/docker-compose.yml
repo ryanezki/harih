@@ -1,0 +1,79 @@
+# =============================================================================
+# hariH — VPS stack: n8n (otomasi) + WAHA (WhatsApp gateway) + Caddy (TLS)
+# Persiapan TASKS T1.7 (hardening) + T2.1–T2.2 (env n8n/WAHA).
+# Cara pakai: lihat vps/README.md. Salin .env.example → .env lalu isi dulu.
+#
+# Keamanan (T1.7): n8n & WAHA di-bind ke 127.0.0.1 — TIDAK terekspos publik.
+# Satu-satunya pintu publik adalah Caddy (80/443) dengan TLS otomatis.
+# =============================================================================
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - N8N_DOMAIN=${N8N_DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+  n8n:
+    image: n8nio/n8n:latest   # pin ke tag spesifik setelah instalasi pertama stabil
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5678:5678"   # hanya localhost — akses publik lewat Caddy
+    environment:
+      - N8N_HOST=${N8N_DOMAIN}
+      - N8N_PROTOCOL=https
+      - WEBHOOK_URL=https://${N8N_DOMAIN}/
+      - N8N_PROXY_HOPS=1                     # di belakang 1 reverse proxy (IP client benar)
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      - GENERIC_TIMEZONE=Asia/Jakarta        # cron WF-04/05/06 dalam WIB (T2.2)
+      - TZ=Asia/Jakarta
+      - N8N_PAYLOAD_SIZE_MAX=64              # default 16 MB < upload form foto (T2.2)
+      - N8N_FORMDATA_FILE_SIZE_MAX=64
+      - N8N_DEFAULT_BINARY_DATA_MODE=filesystem
+      - EXECUTIONS_DATA_PRUNE=true           # data eksekusi (termasuk binary foto)
+      - EXECUTIONS_DATA_MAX_AGE=168          #   dibersihkan setelah 7 hari (T2.2)
+      - EXECUTIONS_DATA_PRUNE_MAX_COUNT=20000
+      # ---- dipakai Code node workflow via $env (blueprint §3) ----
+      - WP_URL=${WP_URL}
+      - WP_APP_USER=${WP_APP_USER}
+      - WP_APP_PASSWORD=${WP_APP_PASSWORD}
+      - WC_CK=${WC_CK}
+      - WC_CS=${WC_CS}
+      - WC_WEBHOOK_SECRET=${WC_WEBHOOK_SECRET}
+      - FORM_TOKEN_SECRET=${FORM_TOKEN_SECRET}
+      - BREVO_API_KEY=${BREVO_API_KEY}
+      - WAHA_URL=http://waha:3000            # antar-container via jaringan compose
+      - WAHA_API_KEY=${WAHA_API_KEY}
+      - SHEET_ID=${SHEET_ID}
+    volumes:
+      - n8n_data:/home/node/.n8n
+    depends_on:
+      - waha
+
+  waha:
+    image: devlikeapro/waha:latest   # WAJIB ≥ 2026.6.1 — fitur media gratis di Core (T2.1)
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"   # hanya localhost — JANGAN ganti ke 0.0.0.0 (T1.7)
+    environment:
+      - WAHA_API_KEY=${WAHA_API_KEY}
+      - WAHA_ENGINE=${WAHA_ENGINE:-WEBJS}   # RAM sempit? set NOWEB di .env (T2.1)
+      - WAHA_RESTART_ALL_SESSIONS=True      # sesi otomatis hidup lagi setelah restart
+      - TZ=Asia/Jakarta
+    volumes:
+      - waha_sessions:/app/.sessions
+      - waha_media:/app/.media
+
+volumes:
+  caddy_data:
+  caddy_config:
+  n8n_data:
+  waha_sessions:
+  waha_media:

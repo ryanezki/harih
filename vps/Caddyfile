@@ -1,0 +1,8 @@
+# Caddy — reverse proxy TLS untuk n8n (TASKS T1.7).
+# Sertifikat Let's Encrypt otomatis; syaratnya DNS A record {$N8N_DOMAIN}
+# sudah mengarah ke IP VPS ini dan port 80/443 terbuka.
+# WAHA sengaja TIDAK diproxy — akses dashboard hanya via SSH tunnel.
+
+{$N8N_DOMAIN} {
+	reverse_proxy n8n:5678
+}

@@ -36,7 +36,7 @@
 - [ ] **T1.4** Konfigurasi LiteSpeed: drop query string `to`, `utm_*`, `ref` (§4); permalink *Post name*; matikan XML-RPC
 - [ ] **T1.5** FluentSMTP → Brevo untuk email bawaan WooCommerce (§4)
 - [ ] **T1.6 [+]** `define('DISABLE_WP_CRON', true)` + cron job nyata di hPanel Hostinger tiap menit (`wp cron event run --due-now`) — delivery webhook WooCommerce lewat Action Scheduler yang bergantung traffic; tanpa cron nyata, order di jam sepi baru terkirim ke n8n saat ada pengunjung berikutnya
-- [ ] **T1.7 [+]** Hardening VPS: UFW (tutup port 3000), WAHA bind `127.0.0.1` + `WAHA_API_KEY`, subdomain + reverse proxy + TLS Let's Encrypt untuk n8n, aktifkan auth UI n8n — perintah §4 mem-bind WAHA ke semua interface tanpa auth: siapa pun bisa kirim WA atas nama bisnis / membajak sesi
+- [ ] **T1.7 [+]** Hardening VPS: UFW (tutup port 3000), WAHA bind `127.0.0.1` + `WAHA_API_KEY`, subdomain + reverse proxy + TLS Let's Encrypt untuk n8n, aktifkan auth UI n8n — perintah §4 mem-bind WAHA ke semua interface tanpa auth: siapa pun bisa kirim WA atas nama bisnis / membajak sesi → **paket siap di `vps/`**: docker-compose (bind `127.0.0.1` + API key) + Caddy TLS otomatis + panduan UFW di `vps/README.md`; sisa: buat DNS A `n8n.harih.id`, salin folder ke VPS, isi `.env`, `docker compose up -d`
 - [x] **T1.8 [+]** Inisialisasi git repo untuk mu-plugin & theme + tentukan alur deploy ke Hostinger (git pull / SFTP) — kode produksi harus ter-version-control sejak commit pertama → **selesai**: repo git + `README.md` (struktur, alur deploy rsync, dev lokal)
 
 ### Kode inti WordPress
@@ -63,9 +63,9 @@
 ## T2 — Minggu 2: Mesin Otomasi
 
 ### Infrastruktur n8n & WAHA
-- [ ] **T2.1** Jalankan WAHA di VPS + scan QR sesi `default` dengan nomor bisnis (§4). **[+]** Pin image versi **≥ 2026.6.1** (fitur kirim media baru digratiskan ke Core sejak rilis itu; tag lama = teks saja) dan pastikan RAM VPS ≥ 2 GB/swap atau pakai engine ringan NOWEB/GOWS — engine default WEBJS menjalankan Chromium 0,5–1 GB
-- [ ] **T2.2 [+]** Set env n8n: `N8N_PAYLOAD_SIZE_MAX=64` (+ cek `N8N_FORMDATA_FILE_SIZE_MAX`), `GENERIC_TIMEZONE=Asia/Jakarta`, `EXECUTIONS_DATA_PRUNE=true` + max age ±168 jam, dan naikkan `client_max_body_size` reverse proxy — default 16 MB menolak upload 10 foto; default UTC menggeser semua cron WIB 7 jam; data eksekusi menyimpan binary foto dan memenuhi disk VPS
-- [ ] **T2.3** Simpan semua kredensial §3 sebagai environment variable / credentials n8n (tidak ada yang hardcode)
+- [ ] **T2.1** Jalankan WAHA di VPS + scan QR sesi `default` dengan nomor bisnis (§4). **[+]** Pin image versi **≥ 2026.6.1** (fitur kirim media baru digratiskan ke Core sejak rilis itu; tag lama = teks saja) dan pastikan RAM VPS ≥ 2 GB/swap atau pakai engine ringan NOWEB/GOWS — engine default WEBJS menjalankan Chromium 0,5–1 GB → **compose siap** (`vps/docker-compose.yml`: engine via `.env`, auto-restart sesi, volume sessions+media, akses dashboard via SSH tunnel); sisa: jalankan di VPS + scan QR + pin tag versi
+- [ ] **T2.2 [+]** Set env n8n: `N8N_PAYLOAD_SIZE_MAX=64` (+ cek `N8N_FORMDATA_FILE_SIZE_MAX`), `GENERIC_TIMEZONE=Asia/Jakarta`, `EXECUTIONS_DATA_PRUNE=true` + max age ±168 jam, dan naikkan `client_max_body_size` reverse proxy — default 16 MB menolak upload 10 foto; default UTC menggeser semua cron WIB 7 jam; data eksekusi menyimpan binary foto dan memenuhi disk VPS → **semua env sudah di compose** (payload 64 MB, WIB, pruning 7 hari, binary mode filesystem, `WEBHOOK_URL`/`N8N_PROXY_HOPS`); reverse proxy = Caddy yang **tanpa limit body default** (tidak perlu `client_max_body_size`); verifikasi via `printenv` saat deploy
+- [ ] **T2.3** Simpan semua kredensial §3 sebagai environment variable / credentials n8n (tidak ada yang hardcode) → **template siap**: `vps/.env.example` memuat seluruh variabel §3 dengan keterangan sumbernya (`.env` di-gitignore); credentials UI n8n (Google service account, Brevo) diisi setelah n8n live
 - [ ] **T2.4 [+]** Buat **WF-00 Error Workflow**: Error Trigger → alert email + WA ke owner (nama workflow, pesan error, order_id); set sebagai default error workflow SEMUA WF; aktifkan retry-on-fail (3×, backoff) di node HTTP kritis — tanpa ini kegagalan node (Brevo down, WP 500, quota Sheets) hanya terlihat kalau owner kebetulan membuka UI n8n, sementara customer sudah bayar
 - [ ] **T2.5** Siapkan template email transaksional di Brevo (DNS sudah terverifikasi dari T0.7)
 
@@ -93,7 +93,7 @@
 - [ ] **T2.22 [+]** Monitoring sesi WAHA: cron n8n tiap 10 menit `GET /api/sessions` → alert **via email** bila status ≠ `WORKING` (kanal WA-nya sedang mati); semua node WAHA continue-on-fail + tulis kegagalan ke kolom `wa_status` agar bisa di-retry — sesi bisa logout/banned diam-diam dan seluruh delivery WA gagal senyap
 
 ### Konten
-- [ ] **T2.23 [+]** Tulis copywriting semua pesan otomatis (email & WA): konfirmasi order + link form, delivery undangan + panduan share `?to=`, reminder H-3, ucapan H+1 + testimoni, welcome kit reseller, rekap komisi, nudge belum-isi-data — dibutuhkan WF-01/02/04/05 dan bukan pekerjaan 5 menit; minta review owner
+- [ ] **T2.23 [+]** Tulis copywriting semua pesan otomatis (email & WA): konfirmasi order + link form, delivery undangan + panduan share `?to=`, reminder H-3, ucapan H+1 + testimoni, welcome kit reseller, rekap komisi, nudge belum-isi-data — dibutuhkan WF-01/02/04/05 dan bukan pekerjaan 5 menit; minta review owner → **draf lengkap** di `docs/copywriting-pesan.md`: 8 kelompok pesan (email+WA) + legenda variabel n8n + 3 caption promosi reseller + 2 alert internal (WF-00, sesi WAHA via email). Sisa: review gaya bahasa oleh owner
 
 ---
 
