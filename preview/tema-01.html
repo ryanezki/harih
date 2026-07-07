@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Preview Tema 01 — Botanical Elegan · hariH</title>
+<!--
+  PREVIEW STATIS untuk review visual (TASKS T1.13) — bukan output produksi.
+  Memakai CSS & JS ASLI dari theme (path relatif) + data contoh, jadi perubahan
+  pada undangan.css / tema-01/style.css / undangan.js langsung terlihat di sini.
+  Markup section mengikuti template-parts/undangan/*.php — bila partial berubah,
+  samakan file ini. Varian cover tanpa foto: hapus class "has-photo" + style di
+  <section id="cover">.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="../wp-content/themes/harih/undangan/shared/undangan.css">
+<link rel="stylesheet" href="../wp-content/themes/harih/undangan/tema-01/style.css">
+<style>
+.preview-ribbon{position:fixed;top:10px;left:10px;z-index:99;background:#34332c;color:#faf7f0;font:600 10px/1 system-ui;letter-spacing:.08em;padding:7px 10px;border-radius:999px;opacity:.85}
+</style>
+</head>
+<body class="undangan-body is-locked">
+<div class="preview-ribbon">PREVIEW · DATA CONTOH · FORM NONAKTIF</div>
+
+<main class="undangan" id="top">
+
+    <!-- 1. Cover (varian dengan foto) -->
+    <section class="section cover has-photo" id="cover" style="--cover-image:url(https://picsum.photos/seed/harih-cover/900/1400)">
+        <div class="cover-inner">
+            <p class="cover-eyebrow">Undangan Pernikahan</p>
+            <h1 class="cover-names">Raka <span class="amp" aria-hidden="true">&amp;</span> Sela</h1>
+            <p class="cover-date">Sabtu, 12 September 2026</p>
+            <div class="ornament" aria-hidden="true"></div>
+            <p class="cover-to">Kepada Yth.<br><span class="guest-name">Bapak/Ibu/Saudara/i</span></p>
+            <button type="button" class="btn btn-open" id="buka-undangan">Buka Undangan</button>
+        </div>
+    </section>
+
+    <!-- 2. Countdown -->
+    <section class="section countdown" id="countdown" data-reveal>
+        <h2 class="section-title">Menghitung Hari</h2>
+        <div class="countdown-grid" id="countdown-grid" data-target="2026-09-12T11:00:00+07:00">
+            <div class="cd-tile"><span class="cd-num" data-cd="hari">0</span><span class="cd-label">Hari</span></div>
+            <div class="cd-tile"><span class="cd-num" data-cd="jam">0</span><span class="cd-label">Jam</span></div>
+            <div class="cd-tile"><span class="cd-num" data-cd="menit">0</span><span class="cd-label">Menit</span></div>
+            <div class="cd-tile"><span class="cd-num" data-cd="detik">0</span><span class="cd-label">Detik</span></div>
+        </div>
+        <p class="countdown-done" id="countdown-done" hidden>Acara telah berlangsung — terima kasih atas doa &amp; restu Anda.</p>
+    </section>
+
+    <!-- 3. Mempelai -->
+    <section class="section mempelai" id="mempelai" data-reveal>
+        <p class="section-intro">Dengan memohon rahmat Tuhan Yang Maha Esa, dengan penuh sukacita kami mengundang Bapak/Ibu/Saudara/i pada pernikahan kami:</p>
+        <div class="mempelai-card">
+            <div class="monogram" aria-hidden="true">R</div>
+            <h3 class="mempelai-nama">Raka Pratama</h3>
+            <p class="mempelai-ortu">Putra dari Bapak Hendra Pratama &amp; Ibu Sari Wulandari</p>
+        </div>
+        <div class="mempelai-amp" aria-hidden="true">&amp;</div>
+        <div class="mempelai-card">
+            <div class="monogram" aria-hidden="true">S</div>
+            <h3 class="mempelai-nama">Sela Ananda</h3>
+            <p class="mempelai-ortu">Putri dari Bapak Budi Santoso &amp; Ibu Rina Melati</p>
+        </div>
+    </section>
+
+    <!-- 4. Acara -->
+    <section class="section acara" id="acara" data-reveal>
+        <h2 class="section-title">Rangkaian Acara</h2>
+        <div class="acara-card">
+            <h3 class="acara-jenis">Akad Nikah</h3>
+            <p class="acara-tanggal">Sabtu, 12 September 2026</p>
+            <p class="acara-waktu">08.00 WIB</p>
+        </div>
+        <div class="acara-card">
+            <h3 class="acara-jenis">Resepsi</h3>
+            <p class="acara-tanggal">Sabtu, 12 September 2026</p>
+            <p class="acara-waktu">11.00 WIB</p>
+        </div>
+        <div class="acara-lokasi">
+            <p class="lokasi-nama">Graha Kencana</p>
+            <p class="lokasi-alamat">Jl. Melati No. 12, Bandung</p>
+        </div>
+        <a class="btn" href="https://maps.google.com" target="_blank" rel="noopener">Buka Google Maps</a>
+    </section>
+
+    <!-- 5. Love story (paket ≥ Favorit) -->
+    <section class="section love-story" id="love-story" data-reveal>
+        <h2 class="section-title">Kisah Kami</h2>
+        <div class="prose">Kami pertama kali bertemu di sebuah kedai kopi kecil di Bandung, dipertemukan oleh teman yang sama.<br><br>Empat tahun kemudian, di tempat yang sama, Raka berlutut dan mengajukan pertanyaan paling penting dalam hidupnya — dan Sela menjawab "iya".</div>
+    </section>
+
+    <!-- 6. Galeri (paket ≥ Favorit) -->
+    <section class="section galeri" id="galeri" data-reveal>
+        <h2 class="section-title">Galeri</h2>
+        <div class="galeri-grid">
+            <img src="https://picsum.photos/seed/harih1/1200/900" alt="Galeri foto 1" loading="lazy" decoding="async">
+            <img src="https://picsum.photos/seed/harih2/800/800" alt="Galeri foto 2" loading="lazy" decoding="async">
+            <img src="https://picsum.photos/seed/harih3/800/800" alt="Galeri foto 3" loading="lazy" decoding="async">
+            <img src="https://picsum.photos/seed/harih4/800/800" alt="Galeri foto 4" loading="lazy" decoding="async">
+            <img src="https://picsum.photos/seed/harih5/800/800" alt="Galeri foto 5" loading="lazy" decoding="async">
+        </div>
+    </section>
+
+    <!-- 7. Video (paket Premium) -->
+    <section class="section video" id="video" data-reveal>
+        <h2 class="section-title">Video</h2>
+        <div class="video-frame">
+            <iframe src="https://www.youtube-nocookie.com/embed/M7lc1UVf-VE" title="Video pernikahan" loading="lazy" allowfullscreen
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+        </div>
+    </section>
+
+    <!-- 8. Amplop digital (paket ≥ Favorit) -->
+    <section class="section amplop" id="amplop" data-reveal>
+        <h2 class="section-title">Amplop Digital</h2>
+        <p class="section-intro">Doa restu Anda adalah hadiah terbaik bagi kami. Namun bila ingin berbagi tanda kasih, dapat melalui:</p>
+        <div class="rekening-item">
+            <span class="rekening-teks">BCA 1234567890 a.n. Raka Pratama</span>
+            <button type="button" class="btn-copy" data-copy="1234567890">Salin</button>
+        </div>
+        <div class="rekening-item">
+            <span class="rekening-teks">Mandiri 9876543210 a.n. Sela Ananda</span>
+            <button type="button" class="btn-copy" data-copy="9876543210">Salin</button>
+        </div>
+        <figure class="qris">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=480x480&data=https%3A%2F%2Fharih.id" alt="Kode QRIS" loading="lazy" decoding="async">
+            <figcaption>Scan QRIS dari aplikasi pembayaran apa pun</figcaption>
+        </figure>
+    </section>
+
+    <!-- 9. RSVP -->
+    <section class="section rsvp" id="rsvp" data-reveal>
+        <h2 class="section-title">Konfirmasi &amp; Ucapan</h2>
+        <form id="rsvp-form" autocomplete="off">
+            <input type="text" name="website" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
+            <label class="field"><span>Nama</span><input type="text" name="nama" id="rsvp-nama" maxlength="100" required></label>
+            <label class="field"><span>Kehadiran</span>
+                <select name="hadir" id="rsvp-hadir">
+                    <option value="hadir">Hadir</option>
+                    <option value="tidak">Berhalangan</option>
+                    <option value="ragu">Belum Pasti</option>
+                </select>
+            </label>
+            <label class="field"><span>Ucapan &amp; doa</span><textarea name="pesan" id="rsvp-pesan" rows="3" maxlength="1500"></textarea></label>
+            <button type="submit" class="btn" id="rsvp-submit">Kirim</button>
+            <p class="rsvp-msg" id="rsvp-msg" role="status"></p>
+        </form>
+        <div class="ucapan-list" id="ucapan-list" aria-live="polite">
+            <article class="ucapan-item">
+                <div class="ucapan-head"><span class="ucapan-nama">Dina &amp; keluarga</span><span class="badge badge-hadir">Hadir</span></div>
+                <p class="ucapan-pesan">Selamat menempuh hidup baru! Semoga samawa selalu 🤍</p>
+                <span class="ucapan-waktu">05 Sep 2026 14:20</span>
+            </article>
+            <article class="ucapan-item">
+                <div class="ucapan-head"><span class="ucapan-nama">Pak Agus</span><span class="badge badge-ragu">Belum Pasti</span></div>
+                <p class="ucapan-pesan">Semoga lancar sampai hari H ya. Doa terbaik dari kami sekeluarga.</p>
+                <span class="ucapan-waktu">04 Sep 2026 09:03</span>
+            </article>
+        </div>
+    </section>
+
+    <!-- 10. Penutup -->
+    <section class="section penutup" id="penutup">
+        <div class="ornament" aria-hidden="true"></div>
+        <p class="penutup-teks">Merupakan suatu kehormatan &amp; kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu.</p>
+        <p class="penutup-salam">Hormat kami,</p>
+        <p class="penutup-nama">Raka &amp; Sela</p>
+        <a class="btn btn-ghost" href="#" onclick="return false">Bagikan via WhatsApp</a>
+        <p class="penutup-cp"><a href="#" onclick="return false">Hubungi kami</a></p>
+        <p class="credit">Undangan digital oleh <a href="#" onclick="return false">hariH</a></p>
+    </section>
+
+</main>
+
+<script>window.UNDANGAN = { id: 0, restUrl: '', target: '2026-09-12T11:00:00+07:00', musik: '' };</script>
+<script src="../wp-content/themes/harih/undangan/shared/undangan.js"></script>
+</body>
+</html>

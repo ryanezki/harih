@@ -19,18 +19,18 @@
 - [x] **T0.6** Rekening payout komisi reseller → **siap**
 
 ### Akun & kredensial (§3)
-- [ ] **T0.7** Buat akun Brevo. **[+]** Verifikasi domain pengirim (SPF/DKIM/DMARC) segera setelah domain aktif — propagasi DNS lambat dan mem-block pengujian email di Minggu 2
-- [ ] **T0.8** Buat Google Cloud service account + simpan JSON key untuk n8n
-- [ ] **T0.9** Buat Google Sheet 3 tab (`orders`, `resellers`, `komisi`) sesuai skema §5, share ke email service account. **[+]** Format kolom nomor HP & tanggal sebagai *plain text* — Sheets otomatis menghapus `0` di depan nomor dan mengubah format tanggal
-- [ ] **T0.10** Daftar merchant **Duitku** mode **sandbox** (akun sandbox terpisah di sandbox.duitku.com) + simpan merchant code & API key
-- [ ] **T0.11 [+]** Ajukan pendaftaran merchant **production** (KYC + review situs) segera setelah katalog minimum + halaman legal live di Minggu 1 — approval butuh berhari-hari; ini risiko terbesar terhadap tanggal launch, sandbox tetap jalan paralel
+- [x] **T0.7** Buat akun Brevo. **[+]** Verifikasi domain pengirim (SPF/DKIM/DMARC) segera setelah domain aktif — propagasi DNS lambat dan mem-block pengujian email di Minggu 2 → **selesai** (2026-07-07)
+- [x] **T0.8** Buat Google Cloud service account + simpan JSON key untuk n8n → **selesai**
+- [x] **T0.9** Buat Google Sheet 3 tab (`orders`, `resellers`, `komisi`) sesuai skema §5, share ke email service account. **[+]** Format kolom nomor HP & tanggal sebagai *plain text* — Sheets otomatis menghapus `0` di depan nomor dan mengubah format tanggal → **selesai**
+- [x] **T0.10** Daftar merchant **Duitku** mode **sandbox** (akun sandbox terpisah di sandbox.duitku.com) + simpan merchant code & API key → **selesai**
+- [x] **T0.11 [+]** Ajukan pendaftaran merchant **production** (KYC + review situs) segera setelah katalog minimum + halaman legal live di Minggu 1 — approval butuh berhari-hari; ini risiko terbesar terhadap tanggal launch, sandbox tetap jalan paralel → **diajukan — pantau status approval Duitku**; pastikan situs live + halaman legal (T1.21) & katalog (T1.20) tersedia saat direview
 
 ---
 
 ## T1 — Minggu 1: Fondasi
 
 ### Infrastruktur & keamanan
-- [ ] **T1.1** Install plugin inti via WP-CLI §4: `woocommerce`, `litespeed-cache`, `fluent-smtp`, `limit-login-attempts-reloaded` + plugin resmi **Duitku** untuk WooCommerce (T0.2)
+- [ ] **T1.1** Install plugin inti via WP-CLI §4: `woocommerce`, `litespeed-cache`, `fluent-smtp`, `limit-login-attempts-reloaded` + plugin resmi **Duitku** untuk WooCommerce (T0.2) → **script siap**: `scripts/setup-hostinger.sh` mencakup bagian CLI T1.1–T1.6 (plugin, theme, user bot editor, `FORM_TOKEN_SECRET`, `DISABLE_WP_CRON`, permalink/timezone/locale) — tinggal jalankan via SSH setelah upload `wp-content/`
 - [ ] **T1.2** Buat user bot n8n + Application Password (§4). **[+]** Role `editor`, bukan `administrator` — cukup untuk create post CPT + upload media; bocornya app password tidak berarti takeover situs (kupon/order memakai key WC terpisah)
 - [ ] **T1.3** Set `FORM_TOKEN_SECRET` di `wp-config.php` (nilai sama dengan env n8n) via `wp config set` (§4)
 - [ ] **T1.4** Konfigurasi LiteSpeed: drop query string `to`, `utm_*`, `ref` (§4); permalink *Post name*; matikan XML-RPC
@@ -46,7 +46,7 @@
 
 ### Tema & halaman undangan
 - [x] **T1.12** Child theme + `single-undangan.php` sesuai §7: 10 section mobile-first, snippet nama tamu client-side (`?to=`), musik play setelah tap, section kondisional per paket. **[+]** Whitelist `template_id` (`tema-01|02|03`, fallback default) sebelum dipakai membentuk path aset — anti path traversal; **[+]** escape semua output meta (`esc_html`/`esc_url`) — defense-in-depth XSS → **kode di repo**: child theme `harih` (**parent: Astra** — dipakai halaman toko saja; halaman undangan dirender standalone dgn `wp_head`/`wp_footer` agar LiteSpeed/noindex/OG tetap jalan), 10 partial di `template-parts/undangan/`, arsitektur tema = skin CSS (`undangan/shared/` + `undangan/{tema}/`)
-- [ ] **T1.13** Tema #1 selesai (desain + CSS + aset per keputusan T0.3); aset WebP ≤ 300 KB (§7) → **v1 di repo**: tema-01 "Botanical Elegan" (Playfair Display + Plus Jakarta Sans, sage/gading/emas, ornamen SVG inline tanpa file gambar). Sisa: review visual owner di perangkat nyata + aset cover default & og:image default
+- [ ] **T1.13** Tema #1 selesai (desain + CSS + aset per keputusan T0.3); aset WebP ≤ 300 KB (§7) → **v1 di repo**: tema-01 "Botanical Elegan" (Playfair Display + Plus Jakarta Sans, sage/gading/emas, ornamen SVG inline tanpa file gambar). Sisa: review visual owner di perangkat nyata + aset cover default & og:image default. **Preview tersedia**: buka `preview/tema-01.html` di browser (pakai CSS/JS asli theme + data contoh)
 - [x] **T1.14 [+]** Cetak Open Graph tags di `single-undangan.php` + katalog (`og:title` "Rina & Bima", `og:image` cover ±1200×630 < 600 KB, URL absolut) — undangan didistribusikan via share WA; tanpa OG, preview link tampak murahan dan merusak nilai produk → **kode di repo** (`functions.php`): og:image = foto pertama galeri; og:image default per tema menyusul bersama T1.13; OG katalog menyusul saat halaman katalog dibuat (T1.20)
 - [ ] **T1.15 [+]** Mulai kurasi library musik: 5–10 track instrumental berlisensi komersial, arsipkan bukti lisensi, host file di uploads — "library musik" dijanjikan di semua paket tapi blueprint tidak punya task pengadaannya *(selesai paling lambat Minggu 2)*
 
@@ -56,7 +56,7 @@
 - [ ] **T1.18** Konfigurasi payment gateway sandbox + uji checkout sandbox end-to-end
 - [ ] **T1.19** Buat webhook WooCommerce → n8n (§4): Delivery URL `…/webhook/wc-order`, secret `WC_WEBHOOK_SECRET`. **[+]** Pakai topic **Action `woocommerce_order_status_processing`** alih-alih `Order updated` — fire tepat 1× per transisi status (bukan tiap update apa pun), mengecilkan race idempotency; n8n fetch detail order via WC REST
 - [ ] **T1.20** Halaman katalog versi minimum (cukup untuk pengajuan merchant T0.11; polish di Minggu 3)
-- [ ] **T1.21 [+]** Halaman legal: Syarat & Ketentuan (termasuk disclaimer hak cipta musik §7 + batasan masa aktif), Kebijakan Privasi, Kebijakan Refund, Kontak — prasyarat approval merchant gateway dan belum ada di sprint manapun
+- [ ] **T1.21 [+]** Halaman legal: Syarat & Ketentuan (termasuk disclaimer hak cipta musik §7 + batasan masa aktif), Kebijakan Privasi, Kebijakan Refund, Kontak — prasyarat approval merchant gateway dan belum ada di sprint manapun → **draf 4 halaman siap** di `docs/konten-legal/` (S&K, Privasi — menyebut UU PDP 27/2022, Refund, Kontak). Sisa: owner isi placeholder `{{…}}` (kontak, alamat usaha, angka kebijakan) + review, lalu publish sebagai halaman WP saat situs live
 
 ---
 
