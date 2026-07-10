@@ -1,0 +1,88 @@
+# =============================================================================
+# hariH — varian untuk VPS yang SUDAH punya Traefik + n8n produksi lain
+# (dipakai di VPS 31.97.50.197; varian fresh-VPS dengan Caddy: docker-compose.yml)
+#
+# Prinsip isolasi:
+#   - Instance n8n hariH TERPISAH dari n8n produksi (container, volume, env,
+#     domain sendiri) — timezone/payload/pruning hariH tidak menyentuh
+#     workflow penting yang sudah ada.
+#   - Menumpang Traefik existing via label (certresolver `mytlschallenge`,
+#     entrypoint `web,websecure`, network eksternal `root_default`).
+#   - WAHA hanya di network internal + 127.0.0.1 (dashboard via SSH tunnel).
+#
+# Deploy: salin sebagai /opt/harih/docker-compose.yml + .env → docker compose up -d
+# =============================================================================
+
+services:
+  n8n:
+    image: n8nio/n8n:latest   # pin tag setelah stabil
+    container_name: harih-n8n
+    restart: unless-stopped
+    environment:
+      - N8N_HOST=${N8N_DOMAIN}
+      - N8N_PROTOCOL=https
+      - WEBHOOK_URL=https://${N8N_DOMAIN}/
+      - N8N_PROXY_HOPS=1
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      - GENERIC_TIMEZONE=Asia/Jakarta
+      - TZ=Asia/Jakarta
+      - N8N_PAYLOAD_SIZE_MAX=64
+      - N8N_FORMDATA_FILE_SIZE_MAX=64
+      - N8N_DEFAULT_BINARY_DATA_MODE=filesystem
+      - EXECUTIONS_DATA_PRUNE=true
+      - EXECUTIONS_DATA_MAX_AGE=168
+      - EXECUTIONS_DATA_PRUNE_MAX_COUNT=20000
+      # ---- dipakai Code node via $env (blueprint §3) ----
+      - WP_URL=${WP_URL}
+      - WP_APP_USER=${WP_APP_USER}
+      - WP_APP_PASSWORD=${WP_APP_PASSWORD}
+      - WC_CK=${WC_CK}
+      - WC_CS=${WC_CS}
+      - WC_WEBHOOK_SECRET=${WC_WEBHOOK_SECRET}
+      - FORM_TOKEN_SECRET=${FORM_TOKEN_SECRET}
+      - BREVO_API_KEY=${BREVO_API_KEY}
+      - WAHA_URL=http://waha:3000
+      - WAHA_API_KEY=${WAHA_API_KEY}
+      - SHEET_ID=${SHEET_ID}
+    volumes:
+      - harih_n8n_data:/home/node/.n8n
+    networks:
+      - proxy      # dilihat Traefik
+      - internal   # jalur ke WAHA
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.harih-n8n.rule=Host(`${N8N_DOMAIN}`)
+      - traefik.http.routers.harih-n8n.tls=true
+      - traefik.http.routers.harih-n8n.entrypoints=web,websecure
+      - traefik.http.routers.harih-n8n.tls.certresolver=mytlschallenge
+      - traefik.http.services.harih-n8n.loadbalancer.server.port=5678
+    depends_on:
+      - waha
+
+  waha:
+    image: devlikeapro/waha:latest   # WAJIB ≥ 2026.6.1 (media gratis di Core)
+    container_name: harih-waha
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"   # dashboard via SSH tunnel; JANGAN publik
+    environment:
+      - WAHA_API_KEY=${WAHA_API_KEY}
+      - WAHA_ENGINE=${WAHA_ENGINE:-WEBJS}
+      - WAHA_RESTART_ALL_SESSIONS=True
+      - TZ=Asia/Jakarta
+    volumes:
+      - harih_waha_sessions:/app/.sessions
+      - harih_waha_media:/app/.media
+    networks:
+      - internal
+
+networks:
+  proxy:
+    external: true
+    name: root_default   # network tempat Traefik existing berada
+  internal: {}
+
+volumes:
+  harih_n8n_data:
+  harih_waha_sessions:
+  harih_waha_media:

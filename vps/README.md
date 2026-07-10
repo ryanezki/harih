@@ -1,6 +1,10 @@
-# hariH — Setup VPS (n8n + WAHA + Caddy)
+# hariH — Setup VPS (n8n + WAHA)
 
 Satu perintah `docker compose up -d` menjalankan seluruh mesin otomasi. Mencakup TASKS **T1.7** (hardening), **T2.1** (WAHA), **T2.2** (env n8n).
+
+> **Dua varian compose — pilih sesuai kondisi VPS:**
+> - `docker-compose.yml` — VPS kosong (stack lengkap termasuk Caddy TLS).
+> - `docker-compose.traefik.yml` — VPS yang **sudah punya Traefik + n8n lain** (kasus VPS 31.97.50.197): instance n8n hariH terpisah menumpang Traefik existing, tanpa Caddy. Salin file ini sebagai `/opt/harih/docker-compose.yml` di server. Langkah UFW & Caddy di bawah tidak berlaku untuk varian ini.
 
 ## Prasyarat
 
