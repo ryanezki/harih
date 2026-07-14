@@ -51,6 +51,9 @@ services:
       - internal   # jalur ke WAHA
     labels:
       - traefik.enable=true
+      # WAJIB saat container punya >1 network: tanpa ini Traefik bisa memilih
+      # IP network `internal` yang tidak ia jangkau → gateway timeout
+      - traefik.docker.network=root_default
       - traefik.http.routers.harih-n8n.rule=Host(`${N8N_DOMAIN}`)
       - traefik.http.routers.harih-n8n.tls=true
       - traefik.http.routers.harih-n8n.entrypoints=web,websecure
