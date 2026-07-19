@@ -1,0 +1,964 @@
+{
+  "name": "WF-02 — Generate Undangan (hariH)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "form-undangan",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "https://harih.id"
+        }
+      },
+      "id": "wf02-webhook",
+      "name": "Webhook Form",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-2200, 0],
+      "webhookId": "harih-form-undangan",
+      "notes": "Multipart dari isi-data.js. CORS (T2.20): tanpa Access-Control-Allow-Origin, JS tidak bisa membaca respons → user mengira gagal → submit ulang."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const crypto = require('crypto');\nconst body = $input.first().json.body || {};\nconst orderId = String(body.order || '').replace(/\\D/g, '');\nconst key = String(body.key || '');\n\n// Rumus identik page-isi-data.php & WF-01: substr(hmac_sha256(order_id, FORM_TOKEN_SECRET), 0, 16)\nlet valid = false;\nif (orderId && key && $env.FORM_TOKEN_SECRET) {\n  const expect = crypto.createHmac('sha256', $env.FORM_TOKEN_SECRET).update(orderId).digest('hex').slice(0, 16);\n  const a = Buffer.from(key);\n  const b = Buffer.from(expect);\n  valid = a.length === b.length && crypto.timingSafeEqual(a, b);\n}\nreturn [{ json: { valid, order_id: orderId } }];"
+      },
+      "id": "wf02-verif-token",
+      "name": "Verifikasi Token",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-1980, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "c-valid",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": "",
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "wf02-if-token",
+      "name": "Token Valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-1760, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: false, message: 'Link tidak valid. Buka kembali link dari email/WhatsApp Anda, atau hubungi CS hariH.' }) }}",
+        "options": {
+          "responseCode": 403
+        }
+      },
+      "id": "wf02-respond-403",
+      "name": "Respond 403 — Token",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-1540, 200]
+    },
+    {
+      "parameters": {},
+      "id": "wf02-stop-token",
+      "name": "Stop — Token Invalid",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [-1320, 200]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "sheet",
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "orders",
+          "mode": "name"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "order_id",
+              "lookupValue": "={{ $('Verifikasi Token').first().json.order_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "wf02-cari-order",
+      "name": "Cari Order di Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [-1540, -20],
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "googleApi": {
+          "name": "Google SA hariH"
+        }
+      },
+      "notes": "Always Output Data aktif: order tak ditemukan harus tetap menghasilkan respons 404, bukan webhook timeout."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const wh = $('Webhook Form').first();\nconst body = wh.json.body || {};\nconst bin = wh.binary || {};\nconst rows = $input.all().map((i) => i.json).filter((r) => r && r.order_id !== undefined && String(r.order_id) !== '');\nconst row = rows[0] || null;\n\nconst out = (route, extra) => [{ json: Object.assign({ route }, extra || {}) }];\n\nif (!row) return out('tidak_ditemukan');\nconst status = String(row.status || '').toUpperCase();\nif (status === 'SUDAH_JADI') return out('sudah_jadi', { link_undangan: String(row.link_undangan || '') });\nif (status !== 'MENUNGGU_DATA') return out('diproses');\n\n// ---- T2.18: paket & template dari SHEET (asal: line item WC via WF-01) — BUKAN dari form/URL ----\nconst paket = ['hemat', 'favorit', 'premium'].includes(String(row.paket || '').toLowerCase())\n  ? String(row.paket).toLowerCase()\n  : 'hemat'; // fallback teraman — tidak ada upgrade gratis; pastikan nama produk WC memuat kata paket (T1.16)\nconst plus = paket !== 'hemat';\nconst premium = paket === 'premium';\n\n// Whitelist tema per paket (§10) — samakan dengan undangan_get_temas() di cpt.php.\n// Saat tema premium hadir, tambahkan hanya di daftar premium.\nconst TEMA_DASAR = ['tema-01', 'tema-02', 'tema-03'];\nconst TEMA_PAKET = { hemat: TEMA_DASAR, favorit: TEMA_DASAR, premium: TEMA_DASAR };\nconst temaDiminta = String(body.template_id || '').toLowerCase();\nconst template_id = (TEMA_PAKET[paket] || []).includes(temaDiminta) ? temaDiminta : 'tema-01';\n\n// ---- T2.19: validasi file server-side (validasi JS bisa dilewati via curl) ----\nconst MIME = ['image/jpeg', 'image/png', 'image/webp'];\nconst MAX_BYTES = 2 * 1024 * 1024;\nfunction keBytes(s) {\n  const m = /^([\\d.]+)\\s*(b|kb|mb|gb)$/i.exec(String(s || '').trim());\n  if (!m) return 0; // metadata ukuran tidak terbaca → loloskan; WP & N8N_PAYLOAD_SIZE_MAX tetap membatasi\n  return parseFloat(m[1]) * { b: 1, kb: 1024, mb: 1048576, gb: 1073741824 }[m[2].toLowerCase()];\n}\nlet fotoKeys = Object.keys(bin)\n  .filter((k) => /^foto_\\d+$/.test(k))\n  .sort((a, b) => parseInt(a.slice(5), 10) - parseInt(b.slice(5), 10));\nconst masalah = [];\nif (fotoKeys.length > 10) masalah.push(`jumlah foto ${fotoKeys.length} melebihi 10`);\nfor (const k of fotoKeys.concat(bin.qris ? ['qris'] : [])) {\n  const f = bin[k] || {};\n  if (!MIME.includes(String(f.mimeType || '').toLowerCase())) masalah.push(`${k}: tipe ${f.mimeType || '?'} tidak diizinkan`);\n  if (keBytes(f.fileSize) > MAX_BYTES) masalah.push(`${k}: ${f.fileSize} melebihi 2 MB`);\n}\nif (masalah.length) return out('file_invalid', { pesan: 'File ditolak — ' + masalah.join('; ') });\n\n// Paket hemat tidak punya galeri/amplop: file & field kelas atas diabaikan (T2.18/T2.19)\nif (!plus) fotoKeys = [];\nconst adaQris = plus && !!bin.qris;\n\nconst t = (v, n) => String(v == null ? '' : v).trim().slice(0, n);\nconst data = {\n  route: 'ok',\n  order_id: String(row.order_id),\n  row_number: row.row_number,\n  paket,\n  template_id,\n  nama: String(row.nama || 'Kak'),\n  nama_depan: String(row.nama || 'Kak').split(' ')[0],\n  email: String(row.email || ''),\n  wa: String(row.wa || '').replace(/\\D/g, ''),\n  nama_pria: t(body.nama_pria, 100),\n  nama_wanita: t(body.nama_wanita, 100),\n  ortu_pria: t(body.ortu_pria, 150),\n  ortu_wanita: t(body.ortu_wanita, 150),\n  tanggal_akad: t(body.tanggal_akad, 10),\n  waktu_akad: t(body.waktu_akad, 5),\n  tanggal_resepsi: t(body.tanggal_resepsi, 10),\n  waktu_resepsi: t(body.waktu_resepsi, 5),\n  lokasi_nama: t(body.lokasi_nama, 150),\n  lokasi_alamat: t(body.lokasi_alamat, 300),\n  gmaps_url: t(body.gmaps_url, 300),\n  love_story: plus ? t(body.love_story, 2000) : '',\n  musik_url: t(body.musik_url, 300),\n  video_url: premium ? t(body.video_url, 300) : '',\n  rekening: plus ? t(body.rekening, 300) : '',\n  wa_cp: t(body.wa_cp, 20),\n  foto_keys: fotoKeys,\n  ada_qris: adaQris,\n  total_file: fotoKeys.length + (adaQris ? 1 : 0),\n  tgl_acara: t(body.tanggal_resepsi, 10),\n};\nif (!data.nama_pria || !data.nama_wanita || !data.tanggal_resepsi) {\n  return out('file_invalid', { pesan: 'Data wajib belum lengkap: nama kedua mempelai dan tanggal resepsi harus diisi.' });\n}\nreturn [{ json: data }];"
+      },
+      "id": "wf02-cek-validasi",
+      "name": "Cek Order & Validasi",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-1320, -20]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "c-ok",
+              "leftValue": "={{ $json.route }}",
+              "rightValue": "ok",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "wf02-if-ok",
+      "name": "Route OK?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-1100, -20]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "c-jadi",
+              "leftValue": "={{ $json.route }}",
+              "rightValue": "sudah_jadi",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "wf02-if-sudah-jadi",
+      "name": "Sudah Jadi?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-880, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, message: 'Undangan Anda sudah pernah dibuat — cek WhatsApp/email untuk link-nya.', link: $json.link_undangan }) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "wf02-respond-jadi",
+      "name": "Respond 200 — Sudah Jadi",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-660, 120],
+      "notes": "Idempoten (§9): submit ulang saat sudah jadi tidak membuat undangan kedua."
+    },
+    {
+      "parameters": {},
+      "id": "wf02-stop-jadi",
+      "name": "Stop — Sudah Jadi",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [-440, 120]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "c-file",
+              "leftValue": "={{ $json.route }}",
+              "rightValue": "file_invalid",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "wf02-if-file",
+      "name": "File Invalid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-660, 320]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: false, message: $json.pesan }) }}",
+        "options": {
+          "responseCode": 422
+        }
+      },
+      "id": "wf02-respond-file",
+      "name": "Respond 422 — File",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-440, 260]
+    },
+    {
+      "parameters": {},
+      "id": "wf02-stop-file",
+      "name": "Stop — File Invalid",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [-220, 260]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "c-proses",
+              "leftValue": "={{ $json.route }}",
+              "rightValue": "diproses",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "wf02-if-diproses",
+      "name": "Sedang Diproses?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-440, 440]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: false, message: 'Data Anda sedang diproses — undangan dikirim ke WhatsApp & email dalam beberapa menit. Tidak perlu submit ulang.' }) }}",
+        "options": {
+          "responseCode": 409
+        }
+      },
+      "id": "wf02-respond-diproses",
+      "name": "Respond 409 — Diproses",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-220, 380],
+      "notes": "T2.17: mencegah eksekusi paralel dari double-submit saat WF-02 masih berjalan."
+    },
+    {
+      "parameters": {},
+      "id": "wf02-stop-diproses",
+      "name": "Stop — Diproses",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [0, 380]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: false, message: 'Pesanan tidak ditemukan. Hubungi CS hariH dengan menyebut nomor pesanan Anda.' }) }}",
+        "options": {
+          "responseCode": 404
+        }
+      },
+      "id": "wf02-respond-404",
+      "name": "Respond 404 — Order",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-220, 520]
+    },
+    {
+      "parameters": {},
+      "id": "wf02-stop-404",
+      "name": "Stop — Tidak Ditemukan",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [0, 520]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, message: 'Data diterima — undangan sedang dibuat. Link dikirim ke WhatsApp & email Anda dalam ±5 menit.' }) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "wf02-respond-ok",
+      "name": "Respond 200 — Diterima",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-880, -20],
+      "notes": "T2.17: respons SEBELUM proses berat — fetch mobile timeout memicu submit ulang & undangan ganda."
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "sheet",
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "orders",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $json.row_number }}",
+            "status": "DIPROSES"
+          },
+          "matchingColumns": ["row_number"],
+          "schema": []
+        },
+        "options": {
+          "cellFormat": "RAW"
+        }
+      },
+      "id": "wf02-set-diproses",
+      "name": "Set Status DIPROSES",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [-660, -20],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "googleApi": {
+          "name": "Google SA hariH"
+        }
+      },
+      "notes": "Langsung setelah respons (T2.17): submit kedua akan tertolak 409 selama proses berjalan."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "c-ada-file",
+              "leftValue": "={{ $('Cek Order & Validasi').first().json.total_file }}",
+              "rightValue": 0,
+              "operator": { "type": "number", "operation": "gt" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "wf02-if-ada-file",
+      "name": "Ada File?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-440, -20]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Satu item per file agar node HTTP upload berjalan per file (loop bawaan n8n).\n// Binary dioper sebagai referensi — aman untuk mode binary filesystem.\nconst wh = $('Webhook Form').first();\nconst d = $('Cek Order & Validasi').first().json;\nconst items = [];\n\nd.foto_keys.forEach((k, i) => {\n  const meta = wh.binary[k];\n  const ext = { 'image/png': 'png', 'image/webp': 'webp' }[String(meta.mimeType || '').toLowerCase()] || 'jpg';\n  items.push({\n    json: { jenis: 'foto', filename: `undangan-${d.order_id}-foto-${i + 1}.${ext}` },\n    binary: { data: meta },\n  });\n});\n\nif (d.ada_qris) {\n  items.push({\n    json: { jenis: 'qris', filename: `undangan-${d.order_id}-qris.png` },\n    binary: { data: wh.binary.qris },\n  });\n}\n\nreturn items;"
+      },
+      "id": "wf02-pisah-file",
+      "name": "Pisahkan File",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-220, -120]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.WP_URL }}/wp-json/wp/v2/media",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Disposition", "value": "=attachment; filename=\"{{ $json.filename }}\"" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "data",
+        "options": {}
+      },
+      "id": "wf02-upload-media",
+      "name": "Upload Media (WP)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [0, -120],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "httpBasicAuth": {
+          "name": "WP REST hariH"
+        }
+      },
+      "notes": "Credential Basic Auth: user = WP_APP_USER, password = WP_APP_PASSWORD (Application Password bot shop_manager). WP memvalidasi ulang tipe file saat sideload."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const crypto = require('crypto');\nconst d = $('Cek Order & Validasi').first().json;\n\n// Korelasi upload → jenis berdasarkan urutan item (n8n mempertahankan urutan)\nlet files = [];\nlet uploads = [];\ntry {\n  files = $('Pisahkan File').all().map((i) => i.json);\n  uploads = $('Upload Media (WP)').all().map((i) => i.json);\n} catch (e) { /* jalur tanpa file (mis. paket hemat) */ }\n\nconst galeri = [];\nlet qrisUrl = '';\nuploads.forEach((u, i) => {\n  if (!u || !u.source_url) return;\n  if ((files[i] || {}).jenis === 'qris') qrisUrl = u.source_url;\n  else galeri.push(u.source_url);\n});\n\nconst slugify = (s) => String(s).toLowerCase().normalize('NFKD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');\nconst p1 = d.nama_pria.split(' ')[0];\nconst w1 = d.nama_wanita.split(' ')[0];\nconst slug = `${slugify(p1 + '-' + w1) || 'undangan'}-${crypto.randomBytes(2).toString('hex')}`;\n\nconst post_payload = {\n  title: `${p1} & ${w1}`,\n  slug,\n  status: 'publish',\n  meta: {\n    paket: d.paket,\n    template_id: d.template_id,\n    order_id: d.order_id,\n    nama_pria: d.nama_pria,\n    nama_wanita: d.nama_wanita,\n    ortu_pria: d.ortu_pria,\n    ortu_wanita: d.ortu_wanita,\n    tanggal_akad: d.tanggal_akad,\n    waktu_akad: d.waktu_akad,\n    tanggal_resepsi: d.tanggal_resepsi,\n    waktu_resepsi: d.waktu_resepsi,\n    lokasi_nama: d.lokasi_nama,\n    lokasi_alamat: d.lokasi_alamat,\n    gmaps_url: d.gmaps_url,\n    love_story: d.love_story,\n    galeri: JSON.stringify(galeri),\n    musik_url: d.musik_url,\n    video_url: d.video_url,\n    rekening: d.rekening,\n    qris_media_url: qrisUrl,\n    wa_cp: d.wa_cp,\n  },\n};\n\nreturn [{ json: { post_payload } }];"
+      },
+      "id": "wf02-susun-payload",
+      "name": "Susun Payload Undangan",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [220, -20]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.WP_URL }}/wp-json/wp/v2/undangan",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.post_payload) }}",
+        "options": {}
+      },
+      "id": "wf02-buat-post",
+      "name": "Buat Post Undangan",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [440, -20],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "httpBasicAuth": {
+          "name": "WP REST hariH"
+        }
+      },
+      "notes": "Sanitasi final tetap di WP (register_post_meta cpt.php) — whitelist tema, galeri max 10, URL di-escape."
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.qrserver.com/v1/create-qr-code/",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "size", "value": "600x600" },
+            { "name": "data", "value": "={{ $json.link }}" }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "wf02-ambil-qr",
+      "name": "Ambil QR Code",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [660, -20],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "onError": "continueRegularOutput",
+      "notes": "T2.21: QR gagal ≠ delivery gagal — email tetap terkirim tanpa lampiran, WA memang teks+link saja."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const d = $('Cek Order & Validasi').first().json;\nconst post = $('Buat Post Undangan').first().json;\nconst link = String(post.link || '');\nif (!link) throw new Error('Permalink undangan tidak ditemukan di respons WP');\n\nconst p1 = d.nama_pria.split(' ')[0];\nconst w1 = d.nama_wanita.split(' ')[0];\nconst paketLabel = d.paket.charAt(0).toUpperCase() + d.paket.slice(1);\nconst masaAktif = { hemat: 'sampai H+7', favorit: 'sampai H+30', premium: 'sampai 1 tahun setelah acara' }[d.paket];\nconst jatahRevisi = { hemat: '', favorit: '1×', premium: '3× + prioritas' }[d.paket];\nconst contoh = `${link}?to=Budi%20Santoso`;\n\n// Lampiran QR — bila node QR gagal (continueRegularOutput), kirim email tanpa lampiran\nlet qrB64 = '';\ntry {\n  const buf = await this.helpers.getBinaryDataBuffer(0, 'data');\n  if (buf && buf.length > 100) qrB64 = buf.toString('base64');\n} catch (e) {\n  const item = $input.first();\n  const b = item.binary && item.binary.data && item.binary.data.data;\n  if (b && b.length > 100) qrB64 = b;\n}\n\n// WhatsApp — template 2b docs/copywriting-pesan.md (teks+link saja, T2.21)\nconst pesanWa = `🎉 Undanganmu sudah jadi, ${d.nama_depan}!\\n\\n*${p1} & ${w1}*\\n${link}\\n\\n📤 *Cara bagikan dengan nama tamu:*\\ntambahkan *?to=Nama%20Tamu* di belakang link\\n(ganti spasi dengan %20)\\n\\nContoh:\\n${contoh}\\n\\n📩 QR code + panduan lengkap sudah dikirim ke emailmu.\\n🗓️ Masa aktif: ${masaAktif}.\\n\\nSemoga lancar sampai hari H! 🤍\\n— hariH`;\n\n// Email — template 2a\nconst barisRevisi = jatahRevisi ? `<li>Revisi data: ${jatahRevisi} via CS.</li>` : '';\nconst barisQr = qrB64\n  ? '<p>Terlampir <strong>QR code</strong> undanganmu — cocok untuk dicetak di kartu fisik atau standee.</p>'\n  : '';\nconst html = `<div style=\"font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;color:#333;line-height:1.6\">\n<p>Halo ${d.nama_depan},</p>\n<p>Selamat! Undangan digitalmu sudah tayang:</p>\n<p style=\"text-align:center;margin:24px 0\"><a href=\"${link}\" style=\"background:#5f6f56;color:#ffffff;padding:14px 28px;border-radius:6px;text-decoration:none;font-weight:bold\">BUKA UNDANGAN</a></p>\n<p style=\"font-size:13px;color:#666\"><a href=\"${link}\">${link}</a></p>\n<p><strong>Cara membagikan dengan nama tamu</strong> (nama muncul di halaman pembuka):<br>tambahkan <code>?to=Nama%20Tamu</code> di belakang link — ganti spasi dengan <code>%20</code>.</p>\n<p>Contoh: <a href=\"${contoh}\">${contoh}</a></p>\n${barisQr}\n<p><strong>Info paket ${paketLabel}:</strong></p>\n<ul>\n<li>Masa aktif halaman: ${masaAktif}.</li>\n${barisRevisi}\n</ul>\n<p>Semoga lancar sampai hari H! 🤍<br>Tim hariH · <a href=\"https://harih.id\">harih.id</a></p>\n</div>`;\n\nif (!$env.BREVO_SENDER_EMAIL) throw new Error('Env BREVO_SENDER_EMAIL belum di-set di container n8n');\nconst emailPayload = {\n  sender: { name: $env.BREVO_SENDER_NAME || 'hariH', email: $env.BREVO_SENDER_EMAIL },\n  to: [{ email: d.email, name: d.nama }],\n  subject: `🎉 Undangan ${p1} & ${w1} sudah jadi!`,\n  htmlContent: html,\n};\nif (qrB64) emailPayload.attachment = [{ name: 'qr-undangan.png', content: qrB64 }];\n\nreturn [{ json: { pesan_wa: pesanWa, email_payload: emailPayload, wa: d.wa, row_number: d.row_number, link } }];"
+      },
+      "id": "wf02-siapkan-pesan",
+      "name": "Siapkan Pesan Delivery",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, -20]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.brevo.com/v3/smtp/email",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "api-key", "value": "={{ $env.BREVO_API_KEY }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.email_payload) }}",
+        "options": {}
+      },
+      "id": "wf02-kirim-email",
+      "name": "Kirim Email Delivery (Brevo)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1100, -20],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "c-wa-valid",
+              "leftValue": "={{ $('Siapkan Pesan Delivery').first().json.wa }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "notEmpty", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "wf02-if-wa-valid",
+      "name": "Nomor WA Valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1320, -20]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.WAHA_URL }}/api/contacts/check-exists",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "phone", "value": "={{ $('Siapkan Pesan Delivery').first().json.wa }}" },
+            { "name": "session", "value": "default" }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-Api-Key", "value": "={{ $env.WAHA_API_KEY }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "wf02-cek-nomor",
+      "name": "Cek Nomor WA (WAHA)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1540, -60],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "c-exists",
+              "leftValue": "={{ $json.numberExists }}",
+              "rightValue": "",
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "wf02-if-terdaftar",
+      "name": "Terdaftar di WA?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1760, -100]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.WAHA_URL }}/api/sendText",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-Api-Key", "value": "={{ $env.WAHA_API_KEY }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ session: 'default', chatId: $json.chatId || ($('Siapkan Pesan Delivery').first().json.wa + '@c.us'), text: $('Siapkan Pesan Delivery').first().json.pesan_wa }) }}",
+        "options": {}
+      },
+      "id": "wf02-kirim-wa",
+      "name": "Kirim WA (WAHA)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1980, -140],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "s1", "name": "wa_status", "type": "string", "value": "TERKIRIM" },
+            { "id": "s2", "name": "row_number", "type": "number", "value": "={{ $('Siapkan Pesan Delivery').first().json.row_number }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "wf02-set-terkirim",
+      "name": "Status: TERKIRIM",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [2200, -200]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "s1", "name": "wa_status", "type": "string", "value": "GAGAL_KIRIM" },
+            { "id": "s2", "name": "row_number", "type": "number", "value": "={{ $('Siapkan Pesan Delivery').first().json.row_number }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "wf02-set-gagal-kirim",
+      "name": "Status: GAGAL_KIRIM",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [2200, -60]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "s1", "name": "wa_status", "type": "string", "value": "TIDAK_TERDAFTAR" },
+            { "id": "s2", "name": "row_number", "type": "number", "value": "={{ $('Siapkan Pesan Delivery').first().json.row_number }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "wf02-set-tidak-terdaftar",
+      "name": "Status: TIDAK_TERDAFTAR",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1980, 20]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "s1", "name": "wa_status", "type": "string", "value": "GAGAL_CEK" },
+            { "id": "s2", "name": "row_number", "type": "number", "value": "={{ $('Siapkan Pesan Delivery').first().json.row_number }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "wf02-set-gagal-cek",
+      "name": "Status: GAGAL_CEK",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1760, 100]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "s1", "name": "wa_status", "type": "string", "value": "TIDAK_VALID" },
+            { "id": "s2", "name": "row_number", "type": "number", "value": "={{ $('Siapkan Pesan Delivery').first().json.row_number }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "wf02-set-tidak-valid",
+      "name": "Status: TIDAK_VALID",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1540, 180]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "sheet",
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "orders",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $json.row_number }}",
+            "status": "SUDAH_JADI",
+            "link_undangan": "={{ $('Siapkan Pesan Delivery').first().json.link }}",
+            "tgl_acara": "={{ $('Cek Order & Validasi').first().json.tgl_acara }}",
+            "wa_status": "={{ $json.wa_status }}"
+          },
+          "matchingColumns": ["row_number"],
+          "schema": []
+        },
+        "options": {
+          "cellFormat": "RAW"
+        }
+      },
+      "id": "wf02-update-selesai",
+      "name": "Update Baris SUDAH_JADI",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [2460, 20],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "googleApi": {
+          "name": "Google SA hariH"
+        }
+      },
+      "notes": "tgl_acara dipakai WF-05 (reminder H-3 & H+1); wa_status utk kirim-ulang manual bila gagal."
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ $env.WP_URL }}/wp-json/wc/v3/orders/{{ $('Cek Order & Validasi').first().json.order_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"status\":\"completed\"}",
+        "options": {}
+      },
+      "id": "wf02-order-completed",
+      "name": "Set Order Completed (WC)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2680, 20],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "httpBasicAuth": {
+          "name": "WC REST hariH"
+        }
+      },
+      "notes": "Aman dari loop: webhook WC hanya topic status_processing, transisi ke completed tidak memicunya."
+    },
+    {
+      "parameters": {},
+      "id": "wf02-selesai",
+      "name": "Selesai",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [2900, 20]
+    }
+  ],
+  "connections": {
+    "Webhook Form": {
+      "main": [[{ "node": "Verifikasi Token", "type": "main", "index": 0 }]]
+    },
+    "Verifikasi Token": {
+      "main": [[{ "node": "Token Valid?", "type": "main", "index": 0 }]]
+    },
+    "Token Valid?": {
+      "main": [
+        [{ "node": "Cari Order di Sheet", "type": "main", "index": 0 }],
+        [{ "node": "Respond 403 — Token", "type": "main", "index": 0 }]
+      ]
+    },
+    "Respond 403 — Token": {
+      "main": [[{ "node": "Stop — Token Invalid", "type": "main", "index": 0 }]]
+    },
+    "Cari Order di Sheet": {
+      "main": [[{ "node": "Cek Order & Validasi", "type": "main", "index": 0 }]]
+    },
+    "Cek Order & Validasi": {
+      "main": [[{ "node": "Route OK?", "type": "main", "index": 0 }]]
+    },
+    "Route OK?": {
+      "main": [
+        [{ "node": "Respond 200 — Diterima", "type": "main", "index": 0 }],
+        [{ "node": "Sudah Jadi?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Sudah Jadi?": {
+      "main": [
+        [{ "node": "Respond 200 — Sudah Jadi", "type": "main", "index": 0 }],
+        [{ "node": "File Invalid?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Respond 200 — Sudah Jadi": {
+      "main": [[{ "node": "Stop — Sudah Jadi", "type": "main", "index": 0 }]]
+    },
+    "File Invalid?": {
+      "main": [
+        [{ "node": "Respond 422 — File", "type": "main", "index": 0 }],
+        [{ "node": "Sedang Diproses?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Respond 422 — File": {
+      "main": [[{ "node": "Stop — File Invalid", "type": "main", "index": 0 }]]
+    },
+    "Sedang Diproses?": {
+      "main": [
+        [{ "node": "Respond 409 — Diproses", "type": "main", "index": 0 }],
+        [{ "node": "Respond 404 — Order", "type": "main", "index": 0 }]
+      ]
+    },
+    "Respond 409 — Diproses": {
+      "main": [[{ "node": "Stop — Diproses", "type": "main", "index": 0 }]]
+    },
+    "Respond 404 — Order": {
+      "main": [[{ "node": "Stop — Tidak Ditemukan", "type": "main", "index": 0 }]]
+    },
+    "Respond 200 — Diterima": {
+      "main": [[{ "node": "Set Status DIPROSES", "type": "main", "index": 0 }]]
+    },
+    "Set Status DIPROSES": {
+      "main": [[{ "node": "Ada File?", "type": "main", "index": 0 }]]
+    },
+    "Ada File?": {
+      "main": [
+        [{ "node": "Pisahkan File", "type": "main", "index": 0 }],
+        [{ "node": "Susun Payload Undangan", "type": "main", "index": 0 }]
+      ]
+    },
+    "Pisahkan File": {
+      "main": [[{ "node": "Upload Media (WP)", "type": "main", "index": 0 }]]
+    },
+    "Upload Media (WP)": {
+      "main": [[{ "node": "Susun Payload Undangan", "type": "main", "index": 0 }]]
+    },
+    "Susun Payload Undangan": {
+      "main": [[{ "node": "Buat Post Undangan", "type": "main", "index": 0 }]]
+    },
+    "Buat Post Undangan": {
+      "main": [[{ "node": "Ambil QR Code", "type": "main", "index": 0 }]]
+    },
+    "Ambil QR Code": {
+      "main": [[{ "node": "Siapkan Pesan Delivery", "type": "main", "index": 0 }]]
+    },
+    "Siapkan Pesan Delivery": {
+      "main": [[{ "node": "Kirim Email Delivery (Brevo)", "type": "main", "index": 0 }]]
+    },
+    "Kirim Email Delivery (Brevo)": {
+      "main": [[{ "node": "Nomor WA Valid?", "type": "main", "index": 0 }]]
+    },
+    "Nomor WA Valid?": {
+      "main": [
+        [{ "node": "Cek Nomor WA (WAHA)", "type": "main", "index": 0 }],
+        [{ "node": "Status: TIDAK_VALID", "type": "main", "index": 0 }]
+      ]
+    },
+    "Cek Nomor WA (WAHA)": {
+      "main": [
+        [{ "node": "Terdaftar di WA?", "type": "main", "index": 0 }],
+        [{ "node": "Status: GAGAL_CEK", "type": "main", "index": 0 }]
+      ]
+    },
+    "Terdaftar di WA?": {
+      "main": [
+        [{ "node": "Kirim WA (WAHA)", "type": "main", "index": 0 }],
+        [{ "node": "Status: TIDAK_TERDAFTAR", "type": "main", "index": 0 }]
+      ]
+    },
+    "Kirim WA (WAHA)": {
+      "main": [
+        [{ "node": "Status: TERKIRIM", "type": "main", "index": 0 }],
+        [{ "node": "Status: GAGAL_KIRIM", "type": "main", "index": 0 }]
+      ]
+    },
+    "Status: TERKIRIM": {
+      "main": [[{ "node": "Update Baris SUDAH_JADI", "type": "main", "index": 0 }]]
+    },
+    "Status: GAGAL_KIRIM": {
+      "main": [[{ "node": "Update Baris SUDAH_JADI", "type": "main", "index": 0 }]]
+    },
+    "Status: TIDAK_TERDAFTAR": {
+      "main": [[{ "node": "Update Baris SUDAH_JADI", "type": "main", "index": 0 }]]
+    },
+    "Status: GAGAL_CEK": {
+      "main": [[{ "node": "Update Baris SUDAH_JADI", "type": "main", "index": 0 }]]
+    },
+    "Status: TIDAK_VALID": {
+      "main": [[{ "node": "Update Baris SUDAH_JADI", "type": "main", "index": 0 }]]
+    },
+    "Update Baris SUDAH_JADI": {
+      "main": [[{ "node": "Set Order Completed (WC)", "type": "main", "index": 0 }]]
+    },
+    "Set Order Completed (WC)": {
+      "main": [[{ "node": "Selesai", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Jakarta"
+  },
+  "pinData": {}
+}
