@@ -9,6 +9,7 @@
 | `WF-04-rekap-komisi.json` | Cron Senin 09:00 WIB: rekap UNPAID per reseller via WA + total ke owner | T3.11 |
 | `WF-05-reminder-harian.json` | Cron harian 08:00 WIB: nudge belum-isi-data (24–48 jam), reminder H-3, ucapan H+1 | T4.1 |
 | `WF-07-monitor-waha.json` | Cron 10 menit: sesi WAHA ≠ `WORKING` → alert email owner (max 1×/jam) | T2.22 |
+| `WF-08-rekonsiliasi-order.json` | Cron 15 menit: order WC yang tak ada di sheet → kirim ulang ke WF-01 (loopback ber-HMAC) + cron harian cek status webhook WC | T3.12 |
 
 **WF-06 (backup mingguan) bukan workflow n8n** — diimplementasikan sebagai script host `vps/backup-harih.sh` (rsync incremental, arsip volume WAHA/n8n, export workflow JSON, retensi 4 minggu, alert Brevo mandiri). Alasan: rsync/akses volume Docker/SSH keluar tidak tersedia dari dalam kontainer n8n. Cara pasang ada di header script.
 
@@ -19,6 +20,10 @@
 **Alur WF-03 (dua webhook dalam satu workflow):**
 - `POST /webhook/daftar-reseller` — honeypot `website` (bot dapat sukses palsu) → rate limit 5/jam/IP → normalisasi & `check-exists` nomor WA (welcome kit hanya via WA) → idempotency by nomor WA → generate kode `RES-XXXX` unik → append `resellers` status **PENDING** → notifikasi owner (WA + email) berisi **link approval ber-HMAC**. Kupon TIDAK dibuat di tahap ini (T3.10).
 - `GET /webhook/approve-reseller?kode=…&key=…` — verifikasi HMAC → status masih PENDING (klik dua kali idempoten) → buat kupon WC (`percent 10`, `individual_use`, `usage_limit_per_user: 1`) → status `AKTIF` → welcome kit 6a + caption promosi 6b via WA.
+
+**Alur WF-08 (dua cron dalam satu workflow):**
+- **Tiap 15 menit** — ambil order WC 7 hari terakhir (status `processing`/`completed`) → banding dengan tab `orders` → yang tak ada di sheet & berumur > 10 menit di-POST ulang ke `http://localhost:5678/webhook/wc-order` dengan payload + signature HMAC persis seperti webhook WC asli → **seluruh logika intake tetap satu pintu di WF-01** (idempotency, komisi, email/WA — tidak ada duplikasi). Setiap temuan = insiden → owner di-alert WA+email; nihil temuan = senyap.
+- **Harian 07:30 WIB** — `GET /wc/v3/webhooks`: webhook `…/webhook/wc-order` hilang atau berstatus bukan `active` → alert owner berisi langkah re-enable.
 
 **Kontrak form landing "Jadi Reseller"** (halaman WP menyusul — T3.9): POST multipart/urlencoded ke `/webhook/daftar-reseller` dengan field `nama`, `wa`, `bank`, `norek`, plus input tersembunyi `website` yang HARUS kosong (honeypot). Respons JSON `{ok, message}` — tampilkan `message` apa adanya; 200 = sukses/duplikat, 422 = data kurang / bukan nomor WA, 429 = rate limit.
 
@@ -44,7 +49,7 @@
 ## Import
 
 1. n8n → **Workflows → ⋯ → Import from File** → `WF-00-error-handler.json`, simpan.
-2. Import WF-01, WF-02, WF-03, WF-04, WF-05, WF-07. Buka tiap node **Google Sheets** / **HTTP dengan Basic Auth** → pilih credential yang dibuat di atas (referensi credential tidak ikut terbawa saat import) → pada node Sheets, klik refresh mapping kolom agar schema terbaca.
+2. Import WF-01, WF-02, WF-03, WF-04, WF-05, WF-07, WF-08. Buka tiap node **Google Sheets** / **HTTP dengan Basic Auth** → pilih credential yang dibuat di atas (referensi credential tidak ikut terbawa saat import) → pada node Sheets, klik refresh mapping kolom agar schema terbaca.
 3. Di **semua** WF selain WF-00: **Settings (⚙) → Error Workflow → `WF-00 — Error Handler (hariH)`** (T2.4).
 4. **Activate** semuanya. URL produksi:
    - WF-01: `https://n8n.harih.id/webhook/wc-order`
@@ -75,6 +80,7 @@
 11. **WF-00**: paksa error (mis. kosongkan sementara `BREVO_SENDER_EMAIL`) → owner menerima alert email + WA.
 12. **WF-07**: stop kontainer WAHA sebentar → dalam ≤ 10 menit owner menerima email "Sesi WhatsApp DOWN" (dan tidak di-spam tiap 10 menit sesudahnya).
 13. **WF-06**: jalankan `bash /opt/harih/backup-harih.sh` → 4 artefak muncul di `/opt/harih/backups/`; uji restore dump + `tar -tzf` arsip.
+14. **WF-08** (= QA "matikan n8n 10 menit"): nonaktifkan webhook WC di wp-admin → buat order sandbox → aktifkan lagi webhook → dalam ≤ 15 menit order terproses via rekonsiliasi (baris sheet + email/WA masuk) dan owner menerima alert "order tertinggal"; keesokan 07:30 owner menerima alert webhook non-aktif bila lupa diaktifkan.
 
 ## Catatan desain
 
@@ -86,4 +92,5 @@
 - Nudge WF-05 memakai jendela umur 24–48 jam sehingga cron harian mengirimnya tepat **sekali** tanpa kolom penanda.
 - **Enforcement masa aktif (T3.13) sengaja belum dipasang** di WF-05 — keputusan bisnis (enforce vs hapus dari pricing) masih terbuka; titik pasangnya sudah ditandai di node `Susun Pesan Harian`.
 - Menolak reseller = abaikan link approval + hapus/tandai barisnya di sheet (tidak ada tombol tolak — jalur jarang, manual cukup).
-- Bila WF-02 gagal di tengah (status sheet macet `DIPROSES`): WF-00 sudah memberi alert; pulihkan dengan ubah status baris ke `MENUNGGU_DATA` lalu minta customer submit ulang (masuk runbook T4.9). Jaring pengaman otomatis menyusul di WF rekonsiliasi (T3.12).
+- Bila WF-02 gagal di tengah (status sheet macet `DIPROSES`): WF-00 sudah memberi alert; pulihkan dengan ubah status baris ke `MENUNGGU_DATA` lalu minta customer submit ulang (masuk runbook T4.9).
+- Batasan WF-08: jendela rekonsiliasi 7 hari & 100 order per siklus (cukup untuk volume MVP; menyentuh batas 100 dilaporkan di alert), order lebih muda dari 10 menit dilewati (delivery normal mungkin masih jalan), dan loopback mensyaratkan **WF-01 Active** — kegagalan loopback tercantum di alert owner.
