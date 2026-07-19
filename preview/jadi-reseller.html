@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Preview Jadi Reseller · hariH</title>
+<!--
+  PREVIEW STATIS untuk review visual (TASKS T3.9) — bukan output produksi.
+  Memakai katalog.css ASLI theme (path relatif). Markup mengikuti
+  page-jadi-reseller.php — bila template berubah, samakan file ini.
+  Form nonaktif (webhook hanya ada di produksi).
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="../wp-content/themes/harih/katalog.css">
+<style>
+.preview-ribbon{position:fixed;top:10px;left:10px;z-index:99;background:#34332c;color:#faf7f0;font:600 10px/1 system-ui;letter-spacing:.08em;padding:7px 10px;border-radius:999px;opacity:.85}
+</style>
+</head>
+<body class="katalog-body">
+<div class="preview-ribbon">PREVIEW · FORM NONAKTIF</div>
+
+<header class="hero">
+    <p class="brand"><a href="katalog.html">hariH</a></p>
+    <h1>Jadi reseller,<br>dapat komisi 30% tiap order.</h1>
+    <p class="hero-sub">Bagikan undangan digital mulai <strong>Rp 99 ribu</strong> ke kenalan &amp; media sosialmu. Pembeli hemat 10% pakai kodemu — kamu terima komisi 30%. Semua dari HP.</p>
+    <div class="hero-cta">
+        <a class="btn btn-utama" href="#daftar">Daftar Sekarang</a>
+        <a class="btn btn-garis" href="katalog.html">Lihat Katalog ↗</a>
+    </div>
+</header>
+
+<main>
+    <section class="cara">
+        <h2>Cara kerjanya</h2>
+        <ol class="cara-grid">
+            <li><span class="cara-no">1</span><strong>Daftar &amp; verifikasi</strong><span>Isi form di bawah. Kami verifikasi maksimal 1×24 jam, lalu kode kupon pribadimu dikirim via WhatsApp.</span></li>
+            <li><span class="cara-no">2</span><strong>Bagikan kodemu</strong><span>Promosikan katalog + kode kuponmu — caption siap pakai kami sediakan. Pembeli hemat 10%.</span></li>
+            <li><span class="cara-no">3</span><strong>Terima komisi</strong><span>Komisi 30% dari tiap order tercatat otomatis. Rekap + payout ke rekeningmu tiap Senin pagi.</span></li>
+        </ol>
+    </section>
+
+    <section class="paket" id="daftar">
+        <h2>Daftar jadi reseller</h2>
+
+        <form class="form-kartu" onsubmit="return false">
+            <label class="field"><span>Nama lengkap *</span>
+                <input type="text" name="nama" maxlength="100" required placeholder="mis. Dina Rahma"></label>
+            <label class="field"><span>Nomor WhatsApp aktif *</span>
+                <input type="tel" name="wa" maxlength="20" inputmode="tel" required placeholder="08xxxxxxxxxx">
+                <small>Kode kupon, welcome kit, dan rekap komisi dikirim ke nomor ini.</small></label>
+            <div class="row-2">
+                <label class="field"><span>Bank / e-wallet *</span>
+                    <input type="text" name="bank" maxlength="50" required placeholder="mis. BCA / DANA"></label>
+                <label class="field"><span>Nomor rekening *</span>
+                    <input type="text" name="norek" maxlength="40" inputmode="numeric" required placeholder="untuk payout komisi"></label>
+            </div>
+            <button type="submit" class="btn btn-utama btn-blok" disabled>Daftar Jadi Reseller</button>
+            <p class="kirim-msg">Preview — form aktif hanya di situs produksi.</p>
+        </form>
+
+        <div class="aturan">
+            <h3>Ketentuan singkat</h3>
+            <ul class="paket-fitur">
+                <li>Promosikan ke kenalan &amp; media sosialmu sendiri — bukan spam ke grup acak.</li>
+                <li>Kode kupon tidak berlaku untuk pembelian sendiri.</li>
+                <li>Komisi 30% dihitung dari nilai order setelah diskon; payout tiap Senin.</li>
+                <li>hariH dapat menonaktifkan kode yang disalahgunakan.</li>
+            </ul>
+        </div>
+    </section>
+</main>
+
+<footer class="kaki">
+    <p class="brand">hariH</p>
+    <nav class="kaki-nav">
+        <a href="katalog.html">Katalog</a>
+        <a href="#">Kontak</a>
+        <a href="#">Syarat &amp; Ketentuan</a>
+    </nav>
+    <p class="kaki-cc">© 2026 hariH · harih.id</p>
+</footer>
+
+</body>
+</html>

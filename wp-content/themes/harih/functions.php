@@ -72,13 +72,24 @@ function harih_form_webhook_url(): string {
     return (string) get_option('n8n_form_webhook_url', '');
 }
 
+/**
+ * URL webhook pendaftaran reseller (WF-03). Default: diturunkan dari URL form
+ * (ganti path `form-undangan` → `daftar-reseller`) supaya tanpa konfigurasi
+ * tambahan; override via konstanta bila path webhook berbeda.
+ */
+function harih_reseller_webhook_url(): string {
+    if (defined('N8N_RESELLER_WEBHOOK_URL')) return (string) N8N_RESELLER_WEBHOOK_URL;
+    $form = harih_form_webhook_url();
+    return $form !== '' ? str_replace('form-undangan', 'daftar-reseller', $form) : '';
+}
+
 /* =========================================================================
  * Aset
  * ========================================================================= */
 
 // Halaman toko: style child di atas Astra.
 add_action('wp_enqueue_scripts', function () {
-    if (is_singular('undangan') || is_page_template('page-isi-data.php') || is_page_template('page-katalog.php')) return;
+    if (is_singular('undangan') || is_page_template('page-isi-data.php') || is_page_template('page-katalog.php') || is_page_template('page-jadi-reseller.php')) return;
     wp_enqueue_style('harih-child', get_stylesheet_uri(), [], HARIH_VERSION);
 }, 20);
 
@@ -89,7 +100,8 @@ add_action('wp_enqueue_scripts', function () {
     $is_undangan = is_singular('undangan');
     $is_isidata  = is_page_template('page-isi-data.php');
     $is_katalog  = is_page_template('page-katalog.php');
-    if (!$is_undangan && !$is_isidata && !$is_katalog) return;
+    $is_reseller = is_page_template('page-jadi-reseller.php');
+    if (!$is_undangan && !$is_isidata && !$is_katalog && !$is_reseller) return;
 
     global $wp_styles, $wp_scripts;
     foreach ((array) $wp_styles->queue as $handle) {
@@ -99,9 +111,12 @@ add_action('wp_enqueue_scripts', function () {
         if (strpos($handle, 'undangan-') !== 0) wp_dequeue_script($handle);
     }
 
-    if ($is_katalog) {
+    if ($is_katalog || $is_reseller) {
         wp_enqueue_style('undangan-fonts', harih_tema_fonts('tema-01'), [], null);
         wp_enqueue_style('undangan-katalog', get_stylesheet_directory_uri() . '/katalog.css', [], HARIH_VERSION);
+        if ($is_reseller) {
+            wp_enqueue_script('undangan-reseller-js', get_stylesheet_directory_uri() . '/reseller.js', [], HARIH_VERSION, true);
+        }
         return;
     }
 
@@ -144,7 +159,7 @@ add_action('wp_enqueue_scripts', function () {
 
 // Preconnect Google Fonts hanya di halaman standalone kita.
 add_filter('wp_resource_hints', function ($urls, $relation) {
-    if ($relation === 'preconnect' && (is_singular('undangan') || is_page_template('page-isi-data.php') || is_page_template('page-katalog.php'))) {
+    if ($relation === 'preconnect' && (is_singular('undangan') || is_page_template('page-isi-data.php') || is_page_template('page-katalog.php') || is_page_template('page-jadi-reseller.php'))) {
         $urls[] = 'https://fonts.googleapis.com';
         $urls[] = ['href' => 'https://fonts.gstatic.com', 'crossorigin'];
     }

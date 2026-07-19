@@ -25,7 +25,7 @@
 - **Tiap 15 menit** — ambil order WC 7 hari terakhir (status `processing`/`completed`) → banding dengan tab `orders` → yang tak ada di sheet & berumur > 10 menit di-POST ulang ke `http://localhost:5678/webhook/wc-order` dengan payload + signature HMAC persis seperti webhook WC asli → **seluruh logika intake tetap satu pintu di WF-01** (idempotency, komisi, email/WA — tidak ada duplikasi). Setiap temuan = insiden → owner di-alert WA+email; nihil temuan = senyap.
 - **Harian 07:30 WIB** — `GET /wc/v3/webhooks`: webhook `…/webhook/wc-order` hilang atau berstatus bukan `active` → alert owner berisi langkah re-enable.
 
-**Kontrak form landing "Jadi Reseller"** (halaman WP menyusul — T3.9): POST multipart/urlencoded ke `/webhook/daftar-reseller` dengan field `nama`, `wa`, `bank`, `norek`, plus input tersembunyi `website` yang HARUS kosong (honeypot). Respons JSON `{ok, message}` — tampilkan `message` apa adanya; 200 = sukses/duplikat, 422 = data kurang / bukan nomor WA, 429 = rate limit.
+**Kontrak form landing "Jadi Reseller"** (implementasi: `page-jadi-reseller.php` + `reseller.js` di theme — T3.9): POST multipart/urlencoded ke `/webhook/daftar-reseller` dengan field `nama`, `wa`, `bank`, `norek`, plus input tersembunyi `website` yang HARUS kosong (honeypot). Respons JSON `{ok, message}` — tampilkan `message` apa adanya; 200 = sukses/duplikat, 422 = data kurang / bukan nomor WA, 429 = rate limit.
 
 ## Prasyarat (urut, sekali jalan)
 

@@ -78,6 +78,15 @@ wp option update show_on_front page
 wp option update page_on_front "$PAGE_ID"
 echo "  Front page → /beranda/ (ID $PAGE_ID, template page-katalog.php)"
 
+echo "== 4b. Landing Jadi Reseller (T3.9) =="
+RSL_ID="$(wp post list --post_type=page --name=jadi-reseller --field=ID | head -n1)"
+if [ -z "$RSL_ID" ]; then
+  RSL_ID="$(wp post create --post_type=page --post_title='Jadi Reseller hariH' \
+    --post_name=jadi-reseller --post_status=publish --porcelain)"
+fi
+wp post meta update "$RSL_ID" _wp_page_template page-jadi-reseller.php
+echo "  /jadi-reseller/ siap (ID $RSL_ID) — form aktif setelah N8N_FORM_WEBHOOK_URL diset & WF-03 Active"
+
 echo "== 5. Halaman legal — draft dengan slug final (T1.21) =="
 # Konten diambil owner dari docs/konten-legal/*.md (isi placeholder {{...}}
 # dulu) lalu publish. Slug dibuat sekarang supaya link footer katalog stabil.
