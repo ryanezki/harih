@@ -8,6 +8,21 @@
 
 ---
 
+## ⏸ CHECKPOINT SESI — 2026-07-15
+
+**Kondisi:** infra LIVE dua-duanya. WordPress+tema+form di `https://harih.id` (demo `/u/demo-tema-01/` ✓, proteksi REST/403/sitemap ✓). Mesin otomasi di VPS `31.97.50.197` (`/opt/harih`): `harih-n8n` di `https://n8n.harih.id` (fix gateway-timeout via label `traefik.docker.network` ✓) + `harih-waha` 2026.6.2 auth aktif — terisolasi dari n8n produksi owner (`root-n8n-1`, jangan disentuh).
+
+**Menunggu di awal sesi berikutnya:**
+1. `git add vps/docker-compose.traefik.yml && git commit` — perubahan kredensial dashboard WAHA (user `harih`, pass = `WAHA_API_KEY`) **belum ter-commit** (shell tool mati di akhir sesi; file sudah tersimpan). Server mungkin sudah/belum di-apply owner via SSH manual — verifikasi `docker exec harih-waha printenv | grep -c WAHA_DASHBOARD` (harus 2).
+2. Verifikasi login dashboard WAHA (`harih` + nilai `WAHA_API_KEY`) → owner **scan QR** sesi `default` → status `WORKING` (T2.1).
+3. Owner buat **akun owner n8n** di `https://n8n.harih.id` (kalau belum).
+4. Lanjut pekerjaan inti: **JSON workflow siap-import** — WF-00 error handler → WF-01 order intake (HMAC+ping, `processing|completed`, append-then-verify, respond-immediately, komisi line-item) → WF-02 generate undangan (token, `DIPROSES`, enforcement paket, validasi file, upload media, QR, delivery) sesuai §9 + `[+]` T2.
+5. Setelahnya: T1.19 webhook WC (isi `WC_WEBHOOK_SECRET` di `vps/.env` + `/opt/harih/.env` saat itu), credentials UI n8n (Google SA + Brevo), WF-03–06, produk & katalog (T1.16–T1.21).
+
+**Akses:** Hostinger `ssh -p 65002 u803921702@147.93.80.20` (WP: `domains/harih.id/public_html`) · VPS `ssh root@31.97.50.197` · rahasia di `vps/.env` (lokal, gitignored) = `/opt/harih/.env` (server). Git terakhir: `b7dc103`.
+
+---
+
 ## T0 — Keputusan & Prasyarat Owner (sebelum / hari pertama Minggu 1)
 
 ### Keputusan (§16)

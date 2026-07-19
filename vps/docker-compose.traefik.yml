@@ -70,6 +70,10 @@ services:
       - "127.0.0.1:3000:3000"   # dashboard via SSH tunnel; JANGAN publik
     environment:
       - WAHA_API_KEY=${WAHA_API_KEY}
+      # Login dashboard (hanya terjangkau via SSH tunnel): user `harih`,
+      # password = nilai WAHA_API_KEY — eksplisit, tidak bergantung default versi
+      - WAHA_DASHBOARD_USERNAME=harih
+      - WAHA_DASHBOARD_PASSWORD=${WAHA_API_KEY}
       - WAHA_ENGINE=${WAHA_ENGINE:-WEBJS}
       - WAHA_RESTART_ALL_SESSIONS=True
       - TZ=Asia/Jakarta
