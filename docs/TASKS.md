@@ -15,7 +15,7 @@
 - **VPS** (`/opt/harih`): `.env` server sinkron (+5 key: OWNER_*, BREVO_SENDER_*, `WC_WEBHOOK_SECRET` terisi — sama dgn lokal); compose baru live (`NODE_FUNCTION_ALLOW_BUILTIN=crypto` ✓, WAHA dashboard user `harih` ✓); **8 workflow + 2 credentials (`WC REST hariH`, `WP REST hariH`) terimpor via CLI** — semua masih INACTIVE; backup WF-06 terpasang LENGKAP: script + SSH key VPS→Hostinger + cron `0 19 * * 6` (UTC = Minggu 02:00 WIB) + **uji jalan penuh sukses** (dump via mysqldump langsung — `wp db export` gagal senyap di Hostinger).
 - **Smoke test** `scripts/cek-live.sh`: 11 lulus; sisa merah/kuning semuanya menunggu aksi owner di bawah.
 
-**Aksi owner (urutan disarankan; sebagian besar dari browser):**
+**Aksi owner — panduan langkah-demi-langkah lengkap di `docs/panduan-go-live.md`** (status server 2026-07-19 malam: baru webhook WC yang beres; Google SA / aktivasi workflow / QR WAHA / FluentSMTP / legal / Duitku belum). Ringkasan urutan:
 1. **hPanel → Email**: pastikan mailbox `hi@harih.id` ada — semua alert dikirim ke sana.
 2. **n8n** (`https://n8n.harih.id`): buat akun owner (kalau belum) → login → Credentials → buat **`Google SA hariH`** (tipe Google Service Account API, dari JSON key T0.8) → buka 8 workflow: pastikan node Sheets/HTTP memakai credential yang benar (WC/WP REST sudah terimpor; pilih dari dropdown bila belum tertaut) → Settings tiap WF (kecuali WF-00): **Error Workflow = WF-00** → **Activate** semuanya. ⚠️ Aktifkan WF-07 monitor SETELAH scan QR (kalau tidak, email "WAHA down" tiap jam).
 3. **Google Sheet**: tambah header kolom — `orders`: `wa_status` (M), `exec_id` (N), `mempelai` (O); `resellers`: `status` (G).
