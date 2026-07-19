@@ -1,0 +1,765 @@
+{
+  "name": "WF-01 — Order Intake (hariH)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wc-order",
+        "responseMode": "onReceived",
+        "options": {
+          "rawBody": true
+        }
+      },
+      "id": "wf01-webhook",
+      "name": "Webhook WC Order",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-1540, 0],
+      "webhookId": "harih-wc-order",
+      "notes": "Respond Immediately (T2.13): WC menghitung respons lambat sebagai delivery gagal. Raw Body wajib untuk verifikasi HMAC."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const crypto = require('crypto');\nconst item = $input.first();\nconst headers = item.json.headers || {};\nconst sig = headers['x-wc-webhook-signature'] || '';\n\n// Raw body ada di binary `data`; getBinaryDataBuffer aman utk mode binary filesystem\nlet raw;\ntry {\n  raw = await this.helpers.getBinaryDataBuffer(0, 'data');\n} catch (e) {\n  const b64 = item.binary && item.binary.data && item.binary.data.data;\n  if (!b64) throw new Error('Raw body tidak ditemukan — pastikan opsi Raw Body aktif di node Webhook');\n  raw = Buffer.from(b64, 'base64');\n}\nconst text = raw.toString('utf8');\n\n// Ping WC saat webhook disimpan: body form-encoded `webhook_id=..` tanpa signature valid (T2.11)\nif (/^webhook_id=\\d+/.test(text.trim())) {\n  return [{ json: { ping: true, order_id: 0 } }];\n}\n\nif (!$env.WC_WEBHOOK_SECRET) throw new Error('Env WC_WEBHOOK_SECRET belum di-set di container n8n');\nconst expect = crypto.createHmac('sha256', $env.WC_WEBHOOK_SECRET).update(raw).digest('base64');\nconst a = Buffer.from(String(sig));\nconst b = Buffer.from(expect);\nif (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {\n  throw new Error(`Signature webhook WC tidak valid (delivery: ${headers['x-wc-webhook-delivery-id'] || '-'}) — cek WC_WEBHOOK_SECRET sama di WooCommerce & env n8n`);\n}\n\nconst body = JSON.parse(text);\n// Topic Action (T1.19): body = { action, arg: order_id }. Fallback body.id bila topic Order dipakai.\nconst orderId = Number(body.arg || body.id || 0);\nif (!orderId) throw new Error('order_id tidak ditemukan di payload webhook WC');\nreturn [{ json: { ping: false, order_id: orderId } }];"
+      },
+      "id": "wf01-verif-hmac",
+      "name": "Verifikasi HMAC & Ping",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-1320, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "c-ping",
+              "leftValue": "={{ $json.ping }}",
+              "rightValue": "",
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "wf01-if-ping",
+      "name": "Ping?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-1100, 0]
+    },
+    {
+      "parameters": {},
+      "id": "wf01-stop-ping",
+      "name": "Stop — Ping WC",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [-880, -160]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.WP_URL }}/wp-json/wc/v3/orders/{{ $json.order_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "options": {}
+      },
+      "id": "wf01-ambil-order",
+      "name": "Ambil Detail Order (WC REST)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-880, 0],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "httpBasicAuth": {
+          "name": "WC REST hariH"
+        }
+      },
+      "notes": "Topic Action hanya mengirim order_id — detail order di-fetch dari WC REST. Credential Basic Auth: user = WC_CK, password = WC_CS."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "c-processing",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "processing",
+              "operator": { "type": "string", "operation": "equals" }
+            },
+            {
+              "id": "c-completed",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "completed",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "wf01-if-status",
+      "name": "Status Dibayar?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-660, 0],
+      "notes": "processing ATAU completed (T2.11) — sebagian gateway langsung menset completed."
+    },
+    {
+      "parameters": {},
+      "id": "wf01-stop-status",
+      "name": "Stop — Status Lain",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [-440, 160]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const crypto = require('crypto');\nconst o = $input.first().json;\n\n// Fungsi normalisasi nomor bersama (T2.14) — jaga identik dengan WF-02/WF-03\nfunction normalisasiWa(input) {\n  let d = String(input || '').replace(/\\D/g, '');\n  if (!d) return '';\n  if (d.startsWith('0')) d = '62' + d.slice(1);\n  else if (d.startsWith('620')) d = '62' + d.slice(3);\n  else if (d.startsWith('8')) d = '62' + d;\n  if (!d.startsWith('62') || d.length < 10 || d.length > 15) return '';\n  return d;\n}\n\nconst billing = o.billing || {};\nconst nama = [billing.first_name, billing.last_name].filter(Boolean).join(' ').trim() || 'Kak';\nconst namaDepan = billing.first_name || nama;\nconst email = billing.email || '';\nconst wa = normalisasiWa(billing.phone);\n\nconst items = Array.isArray(o.line_items) ? o.line_items : [];\nconst namaItem = (items[0] && items[0].name ? items[0].name : '').toLowerCase();\nconst paket = ['hemat', 'favorit', 'premium'].find((p) => namaItem.includes(p)) || '';\n\n// T2.15: dasar komisi = jumlah line item SETELAH diskon kupon (li.total),\n// BUKAN o.total yang bisa memuat fee kanal pembayaran\nconst dasarKomisi = items.reduce((s, li) => s + (parseFloat(li.total) || 0), 0);\n\nconst kupon = ((o.coupon_lines && o.coupon_lines[0] && o.coupon_lines[0].code) || '').toUpperCase();\n\n// Token HARUS identik dgn page-isi-data.php: substr(hash_hmac('sha256', order_id, FORM_TOKEN_SECRET), 0, 16)\nif (!$env.FORM_TOKEN_SECRET) throw new Error('Env FORM_TOKEN_SECRET belum di-set di container n8n');\nconst token = crypto.createHmac('sha256', $env.FORM_TOKEN_SECRET).update(String(o.id)).digest('hex').slice(0, 16);\nconst linkForm = `${$env.WP_URL}/isi-data/?order=${o.id}&key=${token}${paket ? `&paket=${paket}` : ''}`;\n\nconst tglOrder = String(o.date_paid || o.date_created || '').replace('T', ' ').slice(0, 16);\n\nreturn [{ json: {\n  order_id: String(o.id),\n  tgl_order: tglOrder,\n  nama,\n  nama_depan: namaDepan,\n  email,\n  wa,\n  paket,\n  kupon,\n  total: String(o.total),\n  token,\n  link_form: linkForm,\n  dasar_komisi: dasarKomisi,\n  komisi: Math.round(dasarKomisi * 0.3),\n  exec_id: String($execution.id),\n} }];"
+      },
+      "id": "wf01-siapkan-data",
+      "name": "Siapkan Data Order",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-440, 0]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "sheet",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "orders",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "order_id": "={{ $json.order_id }}",
+            "tgl_order": "={{ $json.tgl_order }}",
+            "nama": "={{ $json.nama }}",
+            "email": "={{ $json.email }}",
+            "wa": "={{ $json.wa }}",
+            "paket": "={{ $json.paket }}",
+            "kupon": "={{ $json.kupon }}",
+            "total": "={{ $json.total }}",
+            "token": "={{ $json.token }}",
+            "status": "MENUNGGU_DATA",
+            "link_undangan": "",
+            "tgl_acara": "",
+            "wa_status": "",
+            "exec_id": "={{ $json.exec_id }}"
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {
+          "cellFormat": "RAW"
+        }
+      },
+      "id": "wf01-append-order",
+      "name": "Append Baris Order",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [-220, 0],
+      "credentials": {
+        "googleApi": {
+          "name": "Google SA hariH"
+        }
+      },
+      "notes": "cellFormat RAW: nomor HP/tanggal tetap teks (T0.9). Kolom wa_status & exec_id harus ada di header tab orders."
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "sheet",
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "orders",
+          "mode": "name"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "order_id",
+              "lookupValue": "={{ $('Siapkan Data Order').first().json.order_id }}"
+            }
+          ]
+        },
+        "options": {
+          "returnAllMatches": "returnAllMatches"
+        }
+      },
+      "id": "wf01-baca-ulang",
+      "name": "Baca Ulang Orders",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [0, 0],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "googleApi": {
+          "name": "Google SA hariH"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Append-then-verify (T2.12): lanjut HANYA bila baris kita adalah yang pertama utk order_id ini.\n// Lookup->append tidak atomik; dua delivery paralel bisa sama-sama lolos lookup.\nconst d = $('Siapkan Data Order').first().json;\nconst rows = $input.all().map((i) => i.json).filter((r) => String(r.order_id) === String(d.order_id));\n\nif (!rows.length) {\n  throw new Error(`Verifikasi idempotency gagal: baris order ${d.order_id} tidak terbaca kembali dari sheet`);\n}\n\nrows.sort((a, b) => (a.row_number || 0) - (b.row_number || 0));\nconst milikku = rows.find((r) => String(r.exec_id || '') === d.exec_id);\nif (!milikku) {\n  throw new Error(`Verifikasi idempotency gagal: exec_id ${d.exec_id} tidak ditemukan — pastikan header kolom 'wa_status' dan 'exec_id' ada di tab orders`);\n}\n\nconst duplikat = String(rows[0].exec_id || '') !== d.exec_id;\nreturn [{ json: { ...d, duplikat, row_number: milikku.row_number, hapus_row: duplikat ? milikku.row_number : 0 } }];"
+      },
+      "id": "wf01-cek-duplikat",
+      "name": "Cek Duplikat",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "c-dup",
+              "leftValue": "={{ $json.duplikat }}",
+              "rightValue": "",
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "wf01-if-duplikat",
+      "name": "Duplikat?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [440, 0]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "sheet",
+        "operation": "delete",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "orders",
+          "mode": "name"
+        },
+        "toDelete": "rows",
+        "startIndex": "={{ $json.hapus_row }}",
+        "numberToDelete": 1
+      },
+      "id": "wf01-hapus-duplikat",
+      "name": "Hapus Baris Duplikat",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [660, -160],
+      "credentials": {
+        "googleApi": {
+          "name": "Google SA hariH"
+        }
+      },
+      "notes": "Baris duplikat kita sendiri dihapus agar WF-05 (reminder) tidak membaca order dua kali."
+    },
+    {
+      "parameters": {},
+      "id": "wf01-stop-duplikat",
+      "name": "Stop — Duplikat",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [880, -160]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "c-kupon",
+              "leftValue": "={{ $json.kupon }}",
+              "rightValue": "RES-",
+              "operator": { "type": "string", "operation": "startsWith" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "wf01-if-kupon",
+      "name": "Kupon Reseller?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [660, 40]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "sheet",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "komisi",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "tgl": "={{ $json.tgl_order.slice(0, 10) }}",
+            "order_id": "={{ $json.order_id }}",
+            "kode": "={{ $json.kupon }}",
+            "total_order": "={{ String($json.dasar_komisi) }}",
+            "komisi": "={{ String($json.komisi) }}",
+            "status": "UNPAID"
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {
+          "cellFormat": "RAW"
+        }
+      },
+      "id": "wf01-catat-komisi",
+      "name": "Catat Komisi (UNPAID)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [880, 120],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "googleApi": {
+          "name": "Google SA hariH"
+        }
+      },
+      "notes": "Komisi 30% dari line item setelah diskon (T2.15) — bukan dari field total payload."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const d = $('Cek Duplikat').first().json;\nconst paketLabel = d.paket ? d.paket.charAt(0).toUpperCase() + d.paket.slice(1) : 'Undangan Digital';\n\n// WhatsApp — template 1b docs/copywriting-pesan.md\nconst pesanWa = `Halo ${d.nama_depan}! 🤍\\n\\nPembayaran pesanan *#${d.order_id}* (paket *${paketLabel}*) sudah kami terima. Terima kasih!\\n\\nTinggal satu langkah lagi — isi data undanganmu di sini (±10 menit):\\n${d.link_form}\\n\\n⏱️ Setelah data dikirim, undangan jadi otomatis dalam ±5 menit.\\n🔒 Link ini pribadi, jangan dibagikan ya.\\n\\nAda pertanyaan? Balas saja pesan ini.\\n— hariH`;\n\n// Email — template 1a\nconst html = `<div style=\"font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;color:#333;line-height:1.6\">\n<p>Halo ${d.nama_depan},</p>\n<p>Terima kasih! Pembayaran untuk pesanan <strong>#${d.order_id}</strong> (paket <strong>${paketLabel}</strong>) sudah kami terima.</p>\n<p>Tinggal satu langkah lagi: isi data undanganmu (±10 menit) lewat tombol di bawah. Setelah dikirim, undangan langsung jadi otomatis dalam ±5 menit dan dikirim ke email &amp; WhatsApp-mu.</p>\n<p style=\"text-align:center;margin:28px 0\"><a href=\"${d.link_form}\" style=\"background:#5f6f56;color:#ffffff;padding:14px 28px;border-radius:6px;text-decoration:none;font-weight:bold\">ISI DATA UNDANGAN</a></p>\n<p style=\"font-size:13px;color:#666\">Tombol tidak berfungsi? Salin link ini:<br><a href=\"${d.link_form}\">${d.link_form}</a></p>\n<p><strong>Catatan penting:</strong></p>\n<ul>\n<li>Link ini <strong>pribadi</strong> — jangan dibagikan ke siapa pun.</li>\n<li>Siapkan: nama kedua mempelai &amp; orang tua, tanggal/lokasi acara, dan (sesuai paket) foto-foto terbaikmu.</li>\n</ul>\n<p>Butuh bantuan? Balas email ini atau hubungi CS kami.</p>\n<p>Salam hangat,<br>Tim hariH · <a href=\"https://harih.id\">harih.id</a></p>\n</div>`;\n\nif (!$env.BREVO_SENDER_EMAIL) throw new Error('Env BREVO_SENDER_EMAIL belum di-set di container n8n');\nconst emailPayload = {\n  sender: { name: $env.BREVO_SENDER_NAME || 'hariH', email: $env.BREVO_SENDER_EMAIL },\n  to: [{ email: d.email, name: d.nama }],\n  subject: `Pesanan #${d.order_id} diterima — yuk isi data undanganmu ✨`,\n  htmlContent: html,\n};\n\nreturn [{ json: { ...d, pesan_wa: pesanWa, email_payload: emailPayload } }];"
+      },
+      "id": "wf01-siapkan-pesan",
+      "name": "Siapkan Pesan",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1100, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.brevo.com/v3/smtp/email",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "api-key", "value": "={{ $env.BREVO_API_KEY }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.email_payload) }}",
+        "options": {}
+      },
+      "id": "wf01-kirim-email",
+      "name": "Kirim Email (Brevo)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1320, 0],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "notes": "Email dikirim lebih dulu — kanal paling andal. Gagal setelah 3x retry → workflow error → alert WF-00."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "c-wa-valid",
+              "leftValue": "={{ $('Siapkan Pesan').first().json.wa }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "notEmpty", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "wf01-if-wa-valid",
+      "name": "Nomor WA Valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1540, 0]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.WAHA_URL }}/api/contacts/check-exists",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "phone", "value": "={{ $('Siapkan Pesan').first().json.wa }}" },
+            { "name": "session", "value": "default" }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-Api-Key", "value": "={{ $env.WAHA_API_KEY }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "wf01-cek-nomor",
+      "name": "Cek Nomor WA (WAHA)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1760, -40],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput",
+      "notes": "T2.14: chatId salah format = pesan hilang tanpa error. T2.22: continue-on-fail + catat wa_status."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "c-exists",
+              "leftValue": "={{ $json.numberExists }}",
+              "rightValue": "",
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "wf01-if-terdaftar",
+      "name": "Terdaftar di WA?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1980, -80]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.WAHA_URL }}/api/sendText",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-Api-Key", "value": "={{ $env.WAHA_API_KEY }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ session: 'default', chatId: $json.chatId || ($('Siapkan Pesan').first().json.wa + '@c.us'), text: $('Siapkan Pesan').first().json.pesan_wa }) }}",
+        "options": {}
+      },
+      "id": "wf01-kirim-wa",
+      "name": "Kirim WA (WAHA)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2200, -120],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput",
+      "notes": "chatId diambil dari respons check-exists bila ada (format paling akurat)."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "s1", "name": "wa_status", "type": "string", "value": "TERKIRIM" },
+            { "id": "s2", "name": "row_number", "type": "number", "value": "={{ $('Cek Duplikat').first().json.row_number }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "wf01-set-terkirim",
+      "name": "Status: TERKIRIM",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [2420, -180]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "s1", "name": "wa_status", "type": "string", "value": "GAGAL_KIRIM" },
+            { "id": "s2", "name": "row_number", "type": "number", "value": "={{ $('Cek Duplikat').first().json.row_number }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "wf01-set-gagal-kirim",
+      "name": "Status: GAGAL_KIRIM",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [2420, -40]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "s1", "name": "wa_status", "type": "string", "value": "TIDAK_TERDAFTAR" },
+            { "id": "s2", "name": "row_number", "type": "number", "value": "={{ $('Cek Duplikat').first().json.row_number }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "wf01-set-tidak-terdaftar",
+      "name": "Status: TIDAK_TERDAFTAR",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [2200, 40]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "s1", "name": "wa_status", "type": "string", "value": "GAGAL_CEK" },
+            { "id": "s2", "name": "row_number", "type": "number", "value": "={{ $('Cek Duplikat').first().json.row_number }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "wf01-set-gagal-cek",
+      "name": "Status: GAGAL_CEK",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1980, 120]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "s1", "name": "wa_status", "type": "string", "value": "TIDAK_VALID" },
+            { "id": "s2", "name": "row_number", "type": "number", "value": "={{ $('Cek Duplikat').first().json.row_number }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "wf01-set-tidak-valid",
+      "name": "Status: TIDAK_VALID",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1760, 200]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "sheet",
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "orders",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $json.row_number }}",
+            "wa_status": "={{ $json.wa_status }}"
+          },
+          "matchingColumns": ["row_number"],
+          "schema": []
+        },
+        "options": {
+          "cellFormat": "RAW"
+        }
+      },
+      "id": "wf01-update-wa-status",
+      "name": "Update wa_status",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [2680, 40],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "googleApi": {
+          "name": "Google SA hariH"
+        }
+      },
+      "notes": "wa_status GAGAL_*/TIDAK_* dipakai runbook & monitor T2.22 untuk kirim ulang manual."
+    },
+    {
+      "parameters": {},
+      "id": "wf01-selesai",
+      "name": "Selesai",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [2900, 40]
+    }
+  ],
+  "connections": {
+    "Webhook WC Order": {
+      "main": [[{ "node": "Verifikasi HMAC & Ping", "type": "main", "index": 0 }]]
+    },
+    "Verifikasi HMAC & Ping": {
+      "main": [[{ "node": "Ping?", "type": "main", "index": 0 }]]
+    },
+    "Ping?": {
+      "main": [
+        [{ "node": "Stop — Ping WC", "type": "main", "index": 0 }],
+        [{ "node": "Ambil Detail Order (WC REST)", "type": "main", "index": 0 }]
+      ]
+    },
+    "Ambil Detail Order (WC REST)": {
+      "main": [[{ "node": "Status Dibayar?", "type": "main", "index": 0 }]]
+    },
+    "Status Dibayar?": {
+      "main": [
+        [{ "node": "Siapkan Data Order", "type": "main", "index": 0 }],
+        [{ "node": "Stop — Status Lain", "type": "main", "index": 0 }]
+      ]
+    },
+    "Siapkan Data Order": {
+      "main": [[{ "node": "Append Baris Order", "type": "main", "index": 0 }]]
+    },
+    "Append Baris Order": {
+      "main": [[{ "node": "Baca Ulang Orders", "type": "main", "index": 0 }]]
+    },
+    "Baca Ulang Orders": {
+      "main": [[{ "node": "Cek Duplikat", "type": "main", "index": 0 }]]
+    },
+    "Cek Duplikat": {
+      "main": [[{ "node": "Duplikat?", "type": "main", "index": 0 }]]
+    },
+    "Duplikat?": {
+      "main": [
+        [{ "node": "Hapus Baris Duplikat", "type": "main", "index": 0 }],
+        [{ "node": "Kupon Reseller?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Hapus Baris Duplikat": {
+      "main": [[{ "node": "Stop — Duplikat", "type": "main", "index": 0 }]]
+    },
+    "Kupon Reseller?": {
+      "main": [
+        [{ "node": "Catat Komisi (UNPAID)", "type": "main", "index": 0 }],
+        [{ "node": "Siapkan Pesan", "type": "main", "index": 0 }]
+      ]
+    },
+    "Catat Komisi (UNPAID)": {
+      "main": [[{ "node": "Siapkan Pesan", "type": "main", "index": 0 }]]
+    },
+    "Siapkan Pesan": {
+      "main": [[{ "node": "Kirim Email (Brevo)", "type": "main", "index": 0 }]]
+    },
+    "Kirim Email (Brevo)": {
+      "main": [[{ "node": "Nomor WA Valid?", "type": "main", "index": 0 }]]
+    },
+    "Nomor WA Valid?": {
+      "main": [
+        [{ "node": "Cek Nomor WA (WAHA)", "type": "main", "index": 0 }],
+        [{ "node": "Status: TIDAK_VALID", "type": "main", "index": 0 }]
+      ]
+    },
+    "Cek Nomor WA (WAHA)": {
+      "main": [
+        [{ "node": "Terdaftar di WA?", "type": "main", "index": 0 }],
+        [{ "node": "Status: GAGAL_CEK", "type": "main", "index": 0 }]
+      ]
+    },
+    "Terdaftar di WA?": {
+      "main": [
+        [{ "node": "Kirim WA (WAHA)", "type": "main", "index": 0 }],
+        [{ "node": "Status: TIDAK_TERDAFTAR", "type": "main", "index": 0 }]
+      ]
+    },
+    "Kirim WA (WAHA)": {
+      "main": [
+        [{ "node": "Status: TERKIRIM", "type": "main", "index": 0 }],
+        [{ "node": "Status: GAGAL_KIRIM", "type": "main", "index": 0 }]
+      ]
+    },
+    "Status: TERKIRIM": {
+      "main": [[{ "node": "Update wa_status", "type": "main", "index": 0 }]]
+    },
+    "Status: GAGAL_KIRIM": {
+      "main": [[{ "node": "Update wa_status", "type": "main", "index": 0 }]]
+    },
+    "Status: TIDAK_TERDAFTAR": {
+      "main": [[{ "node": "Update wa_status", "type": "main", "index": 0 }]]
+    },
+    "Status: GAGAL_CEK": {
+      "main": [[{ "node": "Update wa_status", "type": "main", "index": 0 }]]
+    },
+    "Status: TIDAK_VALID": {
+      "main": [[{ "node": "Update wa_status", "type": "main", "index": 0 }]]
+    },
+    "Update wa_status": {
+      "main": [[{ "node": "Selesai", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Jakarta"
+  },
+  "pinData": {}
+}

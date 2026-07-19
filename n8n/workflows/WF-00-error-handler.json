@@ -1,0 +1,103 @@
+{
+  "name": "WF-00 — Error Handler (hariH)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "wf00-error-trigger",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [-560, 0]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Payload Error Trigger: { execution: { id, url, error, lastNodeExecuted, mode }, workflow: { id, name } }\nconst j = $input.first().json;\nconst exec = j.execution || {};\nconst wf = j.workflow || {};\nconst err = exec.error || {};\n\nconst namaWf = wf.name || '-';\nconst namaNode = (err.node && err.node.name) || exec.lastNodeExecuted || '-';\nconst pesanErr = err.message || err.description || 'Tidak diketahui';\nconst linkEksekusi = exec.url || '-';\nconst waktu = new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta', hour12: false });\n\n// Template alert 8a — docs/copywriting-pesan.md (order_id tidak tersedia di payload trigger; lihat link eksekusi)\nconst teks = `🚨 *[hariH] Workflow GAGAL*\\nWF: ${namaWf}\\nNode: ${namaNode}\\nError: ${pesanErr}\\nWaktu: ${waktu} WIB\\n\\nCek eksekusi: ${linkEksekusi}\\nCustomer mungkin sudah bayar tapi belum menerima apa pun — prioritaskan.`;\n\n// Normalisasi nomor WA owner (fungsi bersama T2.14, versi ringkas)\nlet ownerWa = String($env.OWNER_WA || '').replace(/\\D/g, '');\nif (ownerWa.startsWith('0')) ownerWa = '62' + ownerWa.slice(1);\nelse if (ownerWa.startsWith('8')) ownerWa = '62' + ownerWa;\n\nconst emailPayload = {\n  sender: { name: $env.BREVO_SENDER_NAME || 'hariH', email: $env.BREVO_SENDER_EMAIL },\n  to: [{ email: $env.OWNER_EMAIL }],\n  subject: `🚨 [hariH] Workflow GAGAL: ${namaWf}`,\n  htmlContent: `<pre style=\"font-family:Arial,Helvetica,sans-serif;white-space:pre-wrap;font-size:14px;color:#333\">${teks.replace(/\\*/g, '')}</pre>`,\n};\n\nreturn [{ json: { teks, owner_wa: ownerWa, email_payload: emailPayload } }];"
+      },
+      "id": "wf00-susun-alert",
+      "name": "Susun Pesan Alert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-340, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.brevo.com/v3/smtp/email",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "api-key", "value": "={{ $env.BREVO_API_KEY }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.email_payload) }}",
+        "options": {}
+      },
+      "id": "wf00-email-owner",
+      "name": "Email Owner (Brevo)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-120, 0],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "onError": "continueRegularOutput",
+      "notes": "Gagal pun lanjut ke WA — dua kanal saling backup; WF-00 tidak boleh error berantai."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.WAHA_URL }}/api/sendText",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-Api-Key", "value": "={{ $env.WAHA_API_KEY }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ session: 'default', chatId: $('Susun Pesan Alert').first().json.owner_wa + '@c.us', text: $('Susun Pesan Alert').first().json.teks }) }}",
+        "options": {}
+      },
+      "id": "wf00-wa-owner",
+      "name": "WA Owner (WAHA)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [100, 0],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput",
+      "notes": "Bila sesi WAHA down, email sudah terkirim lebih dulu (kasus 8b copywriting)."
+    },
+    {
+      "parameters": {},
+      "id": "wf00-selesai",
+      "name": "Selesai",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [320, 0]
+    }
+  ],
+  "connections": {
+    "Error Trigger": {
+      "main": [[{ "node": "Susun Pesan Alert", "type": "main", "index": 0 }]]
+    },
+    "Susun Pesan Alert": {
+      "main": [[{ "node": "Email Owner (Brevo)", "type": "main", "index": 0 }]]
+    },
+    "Email Owner (Brevo)": {
+      "main": [[{ "node": "WA Owner (WAHA)", "type": "main", "index": 0 }]]
+    },
+    "WA Owner (WAHA)": {
+      "main": [[{ "node": "Selesai", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Jakarta"
+  },
+  "pinData": {}
+}

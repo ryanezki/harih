@@ -44,6 +44,13 @@ services:
       - WAHA_URL=http://waha:3000
       - WAHA_API_KEY=${WAHA_API_KEY}
       - SHEET_ID=${SHEET_ID}
+      # Code node WF-00/01/02 memakai require('crypto') utk HMAC (signature WC + token form)
+      - NODE_FUNCTION_ALLOW_BUILTIN=crypto
+      # Kontak alert WF-00 + identitas pengirim email Brevo
+      - OWNER_EMAIL=${OWNER_EMAIL}
+      - OWNER_WA=${OWNER_WA}
+      - BREVO_SENDER_EMAIL=${BREVO_SENDER_EMAIL}
+      - BREVO_SENDER_NAME=${BREVO_SENDER_NAME:-hariH}
     volumes:
       - harih_n8n_data:/home/node/.n8n
     networks:
