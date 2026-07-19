@@ -15,6 +15,14 @@ add_filter('big_image_size_threshold', fn() => 1600);
 
 // Matikan XML-RPC (T1.4 — versi kode; tidak bergantung setting plugin).
 add_filter('xmlrpc_enabled', '__return_false');
+// Filter di atas hanya menolak method ber-autentikasi — endpoint tetap balas
+// 200 dan bisa disalahgunakan (pingback, probing). Tolak request-nya utuh.
+add_action('init', function () {
+    if (defined('XMLRPC_REQUEST') && XMLRPC_REQUEST) {
+        status_header(403);
+        exit('XML-RPC dinonaktifkan.');
+    }
+}, 0);
 
 // Jangan bocorkan versi WordPress.
 add_filter('the_generator', '__return_empty_string');

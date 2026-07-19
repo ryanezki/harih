@@ -8,16 +8,22 @@
 
 ---
 
-## ⏸ CHECKPOINT SESI — 2026-07-19
+## ⏸ CHECKPOINT SESI — 2026-07-19 (malam — DEPLOY TEREKSEKUSI)
 
-**Kondisi:** infra LIVE dua-duanya. WordPress+tema+form di `https://harih.id` (demo `/u/demo-tema-01/` ✓). Mesin otomasi di VPS `31.97.50.197` (`/opt/harih`): `harih-n8n` + `harih-waha` 2026.6.2. **Baru:** SEMUA workflow otomasi selesai dibangun — `n8n/workflows/` berisi WF-00 (error), WF-01 (order intake), WF-02 (generate undangan), WF-03 (reseller + approval link HMAC), WF-04 (rekap komisi), WF-05 (reminder harian), WF-07 (monitor WAHA), WF-08 (rekonsiliasi order — loopback ber-HMAC ke WF-01 + cek webhook harian); WF-06 = script host `vps/backup-harih.sh` (rsync + volume Docker tak terjangkau dari kontainer n8n). Panduan import/credential/uji 13 skenario di `n8n/workflows/README.md`. Compose menambah env baru (`NODE_FUNCTION_ALLOW_BUILTIN=crypto`, `OWNER_EMAIL`, `OWNER_WA`, `BREVO_SENDER_*`) — **server belum di-redeploy**; placeholder `OWNER_EMAIL`/`OWNER_WA` di `vps/.env` lokal masih harus diisi nilai asli.
+**Kondisi: hampir semuanya LIVE.** Deploy penuh dijalankan dari Mac baru (SSH key terpasang di kedua server):
+- **WordPress** (`https://harih.id`): wp-content terbaru ter-rsync (3 tema, katalog, reseller, xmlrpc hard-block); `buat-toko.sh` DIJALANKAN — 3 produk (ID 20/21/22, SKU `HARIH-*`), guest checkout + format IDR, front page `/beranda/` (katalog), `/jadi-reseller/` live, 4 halaman legal DRAFT (ID 25–28); `N8N_FORM_WEBHOOK_URL` terpasang di wp-config; **webhook WC dibuat (ID 1, status PAUSED, secret terisi)** — aktifkan bersama workflow.
+- **VPS** (`/opt/harih`): `.env` server sinkron (+5 key: OWNER_*, BREVO_SENDER_*, `WC_WEBHOOK_SECRET` terisi — sama dgn lokal); compose baru live (`NODE_FUNCTION_ALLOW_BUILTIN=crypto` ✓, WAHA dashboard user `harih` ✓); **8 workflow + 2 credentials (`WC REST hariH`, `WP REST hariH`) terimpor via CLI** — semua masih INACTIVE; backup WF-06 terpasang LENGKAP: script + SSH key VPS→Hostinger + cron `0 19 * * 6` (UTC = Minggu 02:00 WIB) + **uji jalan penuh sukses** (dump via mysqldump langsung — `wp db export` gagal senyap di Hostinger).
+- **Smoke test** `scripts/cek-live.sh`: 11 lulus; sisa merah/kuning semuanya menunggu aksi owner di bawah.
 
-**Menunggu di awal sesi berikutnya:**
-1. Owner: verifikasi login dashboard WAHA (`harih` + nilai `WAHA_API_KEY`; cek `docker exec harih-waha printenv | grep -c WAHA_DASHBOARD` = 2) → **scan QR** sesi `default` → status `WORKING` (T2.1); buat **akun owner n8n**; sambungkan Brevo di FluentSMTP (T1.5).
-2. Deploy update n8n: `OWNER_EMAIL`/`OWNER_WA` **sudah terisi** di `vps/.env` lokal (2026-07-19) → tinggal samakan ke `/opt/harih/.env` + salin compose baru → `docker compose up -d n8n`. ⚠️ Pastikan mailbox `hi@harih.id` benar-benar ada (buat di hPanel → Email bila belum) — semua alert dikirim KE alamat itu. ⚠️ Deploy menunggu akses SSH dari Mac baru: jaringan saat ini memblokir SSH keluar (timeout ke kedua server); kunci `~/.ssh/id_ed25519` sudah dibuat, belum terdaftar di server.
-3. Import 8 workflow + buat 3 credentials UI (`Google SA hariH`, `WC REST hariH`, `WP REST hariH`) + kolom sheet baru (orders: `wa_status`/`exec_id`/`mempelai`; resellers: `status`) + set `N8N_FORM_WEBHOOK_URL` di wp-config + webhook WC T1.19 + pasang `backup-harih.sh` (SSH key + cron) — semua langkah urut di `n8n/workflows/README.md`.
-4. Toko: upload `wp-content/` terbaru (page-katalog.php + katalog.css + functions.php) → jalankan `scripts/buat-toko.sh` via SSH (produk 3 paket + guest checkout + front page katalog + 4 draft legal) → review visual katalog (`preview/katalog.html` utk cek lokal) → install plugin Duitku sandbox (T1.18) → uji checkout end-to-end (DoD Minggu 2) → publish halaman legal → ajukan review Duitku production (T0.11). Landing "Jadi Reseller" ikut terpasang otomatis oleh script.
-5. Setelahnya: review visual tema-02/03 (`preview/tema-02.html`, `preview/tema-03.html`) + buat demo live per tema (T3.6), review runbook (`docs/runbook.md`), keputusan masa aktif (T3.13), template email Brevo (T2.5), musik library (T1.15), aset cover/og:image default (sisa T1.13).
+**Aksi owner (urutan disarankan; sebagian besar dari browser):**
+1. **hPanel → Email**: pastikan mailbox `hi@harih.id` ada — semua alert dikirim ke sana.
+2. **n8n** (`https://n8n.harih.id`): buat akun owner (kalau belum) → login → Credentials → buat **`Google SA hariH`** (tipe Google Service Account API, dari JSON key T0.8) → buka 8 workflow: pastikan node Sheets/HTTP memakai credential yang benar (WC/WP REST sudah terimpor; pilih dari dropdown bila belum tertaut) → Settings tiap WF (kecuali WF-00): **Error Workflow = WF-00** → **Activate** semuanya. ⚠️ Aktifkan WF-07 monitor SETELAH scan QR (kalau tidak, email "WAHA down" tiap jam).
+3. **Google Sheet**: tambah header kolom — `orders`: `wa_status` (M), `exec_id` (N), `mempelai` (O); `resellers`: `status` (G).
+4. **WAHA**: SSH tunnel → dashboard (user `harih`, pass = `WAHA_API_KEY`) → **scan QR** sesi `default` → `WORKING` (T2.1) → baru aktifkan WF-07.
+5. **WooCommerce**: webhook ID 1 PAUSED → **Active** (setelah WF-01 aktif); FluentSMTP → sambungkan Brevo (T1.5).
+6. **Halaman legal**: isi placeholder dari `docs/konten-legal/*.md` → publish 4 draft (ID 25–28) — prasyarat review Duitku.
+7. **Duitku**: install plugin + sandbox (T1.18) → uji checkout end-to-end dari HP (DoD Minggu 2) → jalankan ulang `bash scripts/cek-live.sh` (target: hijau semua kecuali yang memang belum) → ajukan/pantau review production (T0.11).
+8. Kemudian: buat demo live tema-02/03 (T3.6), review visual tema & runbook, keputusan masa aktif (T3.13), musik library (T1.15), aset og:image default (sisa T1.13), uji restore backup 1× (sisa T4.2).
 
 **Akses:** Hostinger `ssh -p 65002 u803921702@147.93.80.20` (WP: `domains/harih.id/public_html`) · VPS `ssh root@31.97.50.197` · rahasia di `vps/.env` (lokal, gitignored) = `/opt/harih/.env` (server). Git terakhir: `b7dc103`.
 

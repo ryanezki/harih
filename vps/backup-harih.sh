@@ -55,7 +55,10 @@ mkdir -p "$BASE"/db "$BASE"/uploads "$BASE"/waha "$BASE"/n8n
 echo "=== Backup hariH $TGL — mulai $(date '+%T %Z') ==="
 
 # 1) Database WordPress (dump penuh → gzip, verifikasi integritas + ukuran)
-ssh $SSH_OPSI "$SSH_TUJUAN" "cd $WP_PATH && wp db export - --single-transaction --quick" \
+#    Catatan: `wp db export` gagal SENYAP di Hostinger (rc 255 tanpa pesan;
+#    WP-CLI 2.12 + mysqldump MariaDB 11) — dump langsung via mysqldump dengan
+#    kredensial dibaca dari wp-config di sisi server.
+ssh $SSH_OPSI "$SSH_TUJUAN" "cd $WP_PATH && mysqldump --no-tablespaces --single-transaction --quick -h\$(wp config get DB_HOST) -u\$(wp config get DB_USER) -p\$(wp config get DB_PASSWORD) \$(wp config get DB_NAME)" \
   | gzip > "$BASE/db/db-$TGL.sql.gz"
 gunzip -t "$BASE/db/db-$TGL.sql.gz"
 UKURAN=$(stat -c %s "$BASE/db/db-$TGL.sql.gz")
