@@ -1,0 +1,119 @@
+{
+  "name": "WF-05 — Reminder & Post-Event (hariH)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * *"
+            }
+          ]
+        }
+      },
+      "id": "wf05-cron",
+      "name": "Harian 08:00 WIB",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-680, 0]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "sheet",
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "orders",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "wf05-baca-orders",
+      "name": "Baca Orders",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [-460, 0],
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "googleApi": {
+          "name": "Google SA hariH"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const rows = $input.all().map((i) => i.json).filter((r) => r && r.order_id);\n\nconst zona = 'Asia/Jakarta';\nconst ymd = (d) => d.toLocaleDateString('en-CA', { timeZone: zona });\nconst now = new Date();\nconst h3 = ymd(new Date(now.getTime() + 3 * 86400000));\nconst kemarin = ymd(new Date(now.getTime() - 86400000));\n\nconst items = [];\nfor (const r of rows) {\n  const wa = String(r.wa || '').replace(/\\D/g, '');\n  if (!wa) continue;\n  const status = String(r.status || '').toUpperCase();\n  const nama = String(r.nama || 'Kak').split(' ')[0];\n  const mempelai = String(r.mempelai || '').trim();\n  const tglAcara = String(r.tgl_acara || '').slice(0, 10);\n\n  // Nudge belum isi data (T4.1 [+], template 3): hanya jendela 24–48 jam →\n  // terkirim tepat SEKALI oleh cron harian, tanpa perlu kolom penanda.\n  if (status === 'MENUNGGU_DATA') {\n    const t = new Date(String(r.tgl_order || '').replace(' ', 'T') + ':00+07:00');\n    const umurJam = (now - t) / 3600000;\n    if (isFinite(umurJam) && umurJam >= 24 && umurJam < 48) {\n      const paket = String(r.paket || '').toLowerCase();\n      const link = `${$env.WP_URL}/isi-data/?order=${r.order_id}&key=${r.token}${paket ? `&paket=${paket}` : ''}`;\n      items.push({ json: { wa, label: `nudge #${r.order_id}`, teks: `Halo ${nama} 👋\\n\\nPesanan *#${r.order_id}* kamu sudah aktif, tapi data undangannya belum diisi.\\n\\nIsi sekarang (±10 menit), undangannya langsung jadi:\\n${link}\\n\\nAda kendala saat mengisi? Balas pesan ini, kami bantu sampai selesai.\\n— hariH` } });\n    }\n  }\n\n  if (status !== 'SUDAH_JADI') continue;\n\n  // Reminder H-3 (template 4)\n  if (tglAcara === h3 && r.link_undangan) {\n    const utk = mempelai ? `hari bahagia ${mempelai}` : 'hari bahagiamu';\n    items.push({ json: { wa, label: `h-3 #${r.order_id}`, teks: `Halo ${nama}! Tinggal *3 hari* menuju ${utk} 🎉\\n\\nYuk cek undangannya sekali lagi — pastikan tanggal, waktu, lokasi, dan nama sudah benar:\\n${r.link_undangan}\\n\\nAda yang perlu dikoreksi? Hubungi kami hari ini juga supaya sempat direvisi.\\n\\nSemoga persiapannya lancar! 🤍\\n— hariH` } });\n  }\n\n  // Selamat H+1 + testimoni (template 5)\n  if (tglAcara === kemarin) {\n    const sapaan = mempelai ? `, ${mempelai}` : '';\n    items.push({ json: { wa, label: `h+1 #${r.order_id}`, teks: `Selamat menempuh hidup baru${sapaan}! 🎊\\n\\nTerima kasih sudah mempercayakan undangan digital kalian ke hariH — semoga menjadi keluarga yang bahagia.\\n\\n🙏 Kalau berkenan, balas pesan ini dengan kesan singkatmu memakai hariH. Testimonimu sangat berarti untuk kami.\\n\\n💝 Punya kerabat yang akan menikah? Bagikan hariH ke mereka: https://harih.id/\\n\\n— hariH` } });\n  }\n}\n\n// Kosong → tidak ada item → node kirim tidak berjalan (normal, bukan error)\nreturn items;"
+      },
+      "id": "wf05-susun-pesan",
+      "name": "Susun Pesan Harian",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-240, 0],
+      "notes": "Enforcement masa aktif (T3.13) BELUM di sini — keputusan bisnis masih terbuka; titik pasangnya nanti node tambahan setelah node ini."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.WAHA_URL }}/api/sendText",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-Api-Key", "value": "={{ $env.WAHA_API_KEY }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ session: 'default', chatId: $json.wa + '@c.us', text: $json.teks }) }}",
+        "options": {}
+      },
+      "id": "wf05-kirim-wa",
+      "name": "Kirim WA (WAHA)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-20, 0],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput",
+      "notes": "Satu nomor gagal tidak menghentikan reminder lain; sesi WA down tertangkap WF-07."
+    },
+    {
+      "parameters": {},
+      "id": "wf05-selesai",
+      "name": "Selesai",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [200, 0]
+    }
+  ],
+  "connections": {
+    "Harian 08:00 WIB": {
+      "main": [[{ "node": "Baca Orders", "type": "main", "index": 0 }]]
+    },
+    "Baca Orders": {
+      "main": [[{ "node": "Susun Pesan Harian", "type": "main", "index": 0 }]]
+    },
+    "Susun Pesan Harian": {
+      "main": [[{ "node": "Kirim WA (WAHA)", "type": "main", "index": 0 }]]
+    },
+    "Kirim WA (WAHA)": {
+      "main": [[{ "node": "Selesai", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Jakarta"
+  },
+  "pinData": {}
+}

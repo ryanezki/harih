@@ -1,0 +1,207 @@
+{
+  "name": "WF-04 — Rekap Komisi (hariH)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * 1"
+            }
+          ]
+        }
+      },
+      "id": "wf04-cron",
+      "name": "Senin 09:00 WIB",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-900, 0],
+      "notes": "WIB dijamin GENERIC_TIMEZONE=Asia/Jakarta + timezone workflow."
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "sheet",
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "komisi",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "wf04-baca-komisi",
+      "name": "Baca Komisi",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [-680, 0],
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "googleApi": {
+          "name": "Google SA hariH"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "sheet",
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "resellers",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "wf04-baca-resellers",
+      "name": "Baca Resellers",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [-460, 0],
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "googleApi": {
+          "name": "Google SA hariH"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const komisi = $('Baca Komisi').all().map((i) => i.json)\n  .filter((r) => r && r.order_id && String(r.status || '').toUpperCase() === 'UNPAID');\nconst resellers = $('Baca Resellers').all().map((i) => i.json).filter((r) => r && r.kode);\n\nconst byKode = {};\nfor (const k of komisi) {\n  const kode = String(k.kode || '').toUpperCase();\n  if (!kode) continue;\n  (byKode[kode] = byKode[kode] || []).push(k);\n}\n\nconst fmt = (n) => Number(n || 0).toLocaleString('id-ID');\nconst periode = `s/d ${new Date().toLocaleDateString('id-ID', { timeZone: 'Asia/Jakarta', day: 'numeric', month: 'long', year: 'numeric' })}`;\n\nconst kirim = [];\nconst anomali = [];\nconst barisOwner = [];\nlet totalSemua = 0;\n\nfor (const [kode, rows] of Object.entries(byKode)) {\n  const r = resellers.find((x) => String(x.kode).toUpperCase() === kode);\n  const total = rows.reduce((s, x) => s + (parseFloat(x.komisi) || 0), 0);\n  totalSemua += total;\n\n  barisOwner.push(`• ${kode}${r ? ` (${r.nama})` : ''} · ${rows.length} order · Rp ${fmt(total)}${r ? ` → ${r.bank} ${r.norek}` : ' → ⚠️ data reseller tidak ditemukan'}`);\n\n  const wa = r ? String(r.wa || '').replace(/\\D/g, '') : '';\n  if (!wa) { anomali.push(kode); continue; }\n\n  // Template 7a docs/copywriting-pesan.md (rincian tanpa kolom paket — tidak ada di tab komisi)\n  const rincian = rows.map((x) => `• #${x.order_id} · order Rp ${fmt(x.total_order)} · komisi Rp ${fmt(x.komisi)}`).join('\\n');\n  kirim.push({ wa, teks: `💸 *Rekap Komisi hariH* — ${periode}\\n\\nHalo ${r.nama}! Ini hasil penjualanmu:\\n\\n${rincian}\\n\\nTotal komisi: *Rp ${fmt(total)}*\\nPayout ke ${r.bank} ${r.norek} diproses hari ini.\\n\\nTerima kasih & semangat terus! 🚀\\n— hariH` });\n}\n\nlet ownerWa = String($env.OWNER_WA || '').replace(/\\D/g, '');\nif (ownerWa.startsWith('0')) ownerWa = '62' + ownerWa.slice(1);\nelse if (ownerWa.startsWith('8')) ownerWa = '62' + ownerWa;\n\n// Template 7b — juga dikirim saat kosong (heartbeat mingguan: WF-04 hidup)\nconst jumlah = Object.keys(byKode).length;\nconst ownerTeks = jumlah === 0\n  ? `📊 *[hariH] Rekap komisi — ${periode}*\\n\\nTidak ada komisi UNPAID minggu ini.`\n  : `📊 *[hariH] Rekap komisi — ${periode}*\\n\\n${jumlah} reseller · total payout *Rp ${fmt(totalSemua)}*\\n\\n${barisOwner.join('\\n')}${anomali.length ? `\\n\\n⚠️ Rekap tidak terkirim ke: ${anomali.join(', ')} (data/nomor bermasalah)` : ''}\\n\\n✅ Setelah transfer, ubah status di sheet komisi → PAID.`;\n\nreturn [{ json: { owner_wa: ownerWa, owner_teks: ownerTeks, kirim } }];"
+      },
+      "id": "wf04-susun-rekap",
+      "name": "Susun Rekap",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-240, 0]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Satu item per reseller — node WA berikutnya berjalan per item.\nreturn ($input.first().json.kirim || []).map((k) => ({ json: k }));"
+      },
+      "id": "wf04-pecah",
+      "name": "Pecah Per Reseller",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-20, -100]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.WAHA_URL }}/api/sendText",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-Api-Key", "value": "={{ $env.WAHA_API_KEY }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ session: 'default', chatId: $json.wa + '@c.us', text: $json.teks }) }}",
+        "options": {}
+      },
+      "id": "wf04-kirim-reseller",
+      "name": "Kirim Rekap Reseller (WAHA)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [200, -100],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput",
+      "notes": "Satu nomor gagal tidak boleh menghentikan rekap reseller lain; kegagalan terlihat di riwayat eksekusi."
+    },
+    {
+      "parameters": {},
+      "id": "wf04-selesai-reseller",
+      "name": "Selesai Kirim Reseller",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [420, -100]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.WAHA_URL }}/api/sendText",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-Api-Key", "value": "={{ $env.WAHA_API_KEY }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ session: 'default', chatId: $json.owner_wa + '@c.us', text: $json.owner_teks }) }}",
+        "options": {}
+      },
+      "id": "wf04-kirim-owner",
+      "name": "Kirim Rekap Owner (WAHA)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-20, 100],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "notes": "Gagal setelah retry → error → alert WF-00 (rekap owner adalah pemicu payout manual)."
+    },
+    {
+      "parameters": {},
+      "id": "wf04-selesai",
+      "name": "Selesai",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [200, 100]
+    }
+  ],
+  "connections": {
+    "Senin 09:00 WIB": {
+      "main": [[{ "node": "Baca Komisi", "type": "main", "index": 0 }]]
+    },
+    "Baca Komisi": {
+      "main": [[{ "node": "Baca Resellers", "type": "main", "index": 0 }]]
+    },
+    "Baca Resellers": {
+      "main": [[{ "node": "Susun Rekap", "type": "main", "index": 0 }]]
+    },
+    "Susun Rekap": {
+      "main": [[
+        { "node": "Pecah Per Reseller", "type": "main", "index": 0 },
+        { "node": "Kirim Rekap Owner (WAHA)", "type": "main", "index": 0 }
+      ]]
+    },
+    "Pecah Per Reseller": {
+      "main": [[{ "node": "Kirim Rekap Reseller (WAHA)", "type": "main", "index": 0 }]]
+    },
+    "Kirim Rekap Reseller (WAHA)": {
+      "main": [[{ "node": "Selesai Kirim Reseller", "type": "main", "index": 0 }]]
+    },
+    "Kirim Rekap Owner (WAHA)": {
+      "main": [[{ "node": "Selesai", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Jakarta"
+  },
+  "pinData": {}
+}

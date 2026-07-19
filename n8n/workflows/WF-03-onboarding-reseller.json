@@ -1,0 +1,977 @@
+{
+  "name": "WF-03 — Onboarding Reseller (hariH)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "daftar-reseller",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "https://harih.id"
+        }
+      },
+      "id": "wf03-webhook-daftar",
+      "name": "Webhook Daftar",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-2200, -200],
+      "webhookId": "harih-daftar-reseller",
+      "notes": "Kontrak form landing (T3.9): POST nama, wa, bank, norek + field honeypot `website` (harus kosong)."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const j = $input.first().json;\nconst body = j.body || {};\nconst headers = j.headers || {};\n\n// Honeypot (T3.10): bot mengisi field tersembunyi `website` → pura-pura sukses, tidak diproses\nif (String(body.website || '').trim() !== '') return [{ json: { route: 'honeypot' } }];\n\n// Rate limit ringan per IP (T3.10): max 5 pendaftaran/jam/IP — endpoint publik tanpa ini = mesin cetak kupon\nconst ip = String(headers['x-forwarded-for'] || headers['x-real-ip'] || 'tanpa-ip').split(',')[0].trim();\nconst sd = $getWorkflowStaticData('global');\nconst now = Date.now();\nsd.ipLog = sd.ipLog || {};\nfor (const k of Object.keys(sd.ipLog)) {\n  sd.ipLog[k] = sd.ipLog[k].filter((t) => now - t < 3600000);\n  if (!sd.ipLog[k].length) delete sd.ipLog[k];\n}\nsd.ipLog[ip] = sd.ipLog[ip] || [];\nif (sd.ipLog[ip].length >= 5) return [{ json: { route: 'rate' } }];\nsd.ipLog[ip].push(now);\n\n// Fungsi normalisasi nomor bersama (T2.14) — identik WF-01\nfunction normalisasiWa(input) {\n  let d = String(input || '').replace(/\\D/g, '');\n  if (!d) return '';\n  if (d.startsWith('0')) d = '62' + d.slice(1);\n  else if (d.startsWith('620')) d = '62' + d.slice(3);\n  else if (d.startsWith('8')) d = '62' + d;\n  if (!d.startsWith('62') || d.length < 10 || d.length > 15) return '';\n  return d;\n}\n\nconst t = (v, n) => String(v == null ? '' : v).trim().slice(0, n);\nconst nama = t(body.nama, 100);\nconst wa = normalisasiWa(body.wa);\nconst bank = t(body.bank, 50);\nconst norek = t(body.norek, 40).replace(/[^0-9\\- ]/g, '');\n\nif (!nama || !wa || !bank || !norek) {\n  return [{ json: { route: 'invalid', pesan: 'Lengkapi nama, nomor WhatsApp yang valid, bank, dan nomor rekening.' } }];\n}\nreturn [{ json: { route: 'ok', nama, wa, bank, norek } }];"
+      },
+      "id": "wf03-validasi",
+      "name": "Validasi Pendaftaran",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-1980, -200]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "c-ok",
+              "leftValue": "={{ $json.route }}",
+              "rightValue": "ok",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "wf03-if-ok",
+      "name": "Route OK?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-1760, -200]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "c-honeypot",
+              "leftValue": "={{ $json.route }}",
+              "rightValue": "honeypot",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "wf03-if-honeypot",
+      "name": "Honeypot?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-1540, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, message: 'Pendaftaran diterima! Kami hubungi via WhatsApp setelah diverifikasi.' }) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "wf03-respond-honeypot",
+      "name": "Respond 200 — Honeypot",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-1320, -60],
+      "notes": "Bot diberi respons sukses palsu agar tidak belajar dari penolakan."
+    },
+    {
+      "parameters": {},
+      "id": "wf03-stop-honeypot",
+      "name": "Stop — Honeypot",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [-1100, -60]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "c-rate",
+              "leftValue": "={{ $json.route }}",
+              "rightValue": "rate",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "wf03-if-rate",
+      "name": "Rate Limit?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-1320, 140]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: false, message: 'Terlalu banyak percobaan — coba lagi dalam 1 jam.' }) }}",
+        "options": {
+          "responseCode": 429
+        }
+      },
+      "id": "wf03-respond-rate",
+      "name": "Respond 429 — Rate Limit",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-1100, 80]
+    },
+    {
+      "parameters": {},
+      "id": "wf03-stop-rate",
+      "name": "Stop — Rate Limit",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [-880, 80]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: false, message: $json.pesan }) }}",
+        "options": {
+          "responseCode": 422
+        }
+      },
+      "id": "wf03-respond-invalid",
+      "name": "Respond 422 — Data Kurang",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-1100, 240]
+    },
+    {
+      "parameters": {},
+      "id": "wf03-stop-invalid",
+      "name": "Stop — Data Kurang",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [-880, 240]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.WAHA_URL }}/api/contacts/check-exists",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "phone", "value": "={{ $json.wa }}" },
+            { "name": "session", "value": "default" }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-Api-Key", "value": "={{ $env.WAHA_API_KEY }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "wf03-cek-nomor",
+      "name": "Cek Nomor WA (WAHA)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-1540, -260],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput",
+      "notes": "Welcome kit hanya via WA — nomor wajib terdaftar. Bila WAHA sedang down, pendaftaran tetap lolos (ditolak hanya bila numberExists === false eksplisit)."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "c-bukan-wa",
+              "leftValue": "={{ $json.numberExists === false }}",
+              "rightValue": "",
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "wf03-if-bukan-wa",
+      "name": "Bukan Nomor WA?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-1320, -260]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: false, message: 'Nomor tersebut tidak terdaftar di WhatsApp — kode kupon & rekap komisi dikirim via WA. Periksa lagi nomornya.' }) }}",
+        "options": {
+          "responseCode": 422
+        }
+      },
+      "id": "wf03-respond-bukan-wa",
+      "name": "Respond 422 — Bukan WA",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-1100, -400]
+    },
+    {
+      "parameters": {},
+      "id": "wf03-stop-bukan-wa",
+      "name": "Stop — Bukan WA",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [-880, -400]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "sheet",
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "resellers",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "wf03-baca-resellers",
+      "name": "Baca Resellers",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [-1100, -220],
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "googleApi": {
+          "name": "Google SA hariH"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const crypto = require('crypto');\nconst d = $('Validasi Pendaftaran').first().json;\nconst rows = $input.all().map((i) => i.json).filter((r) => r && r.kode);\n\n// Idempotency by nomor WA (T3.10): satu nomor = satu kode\nif (rows.some((r) => String(r.wa || '').replace(/\\D/g, '') === d.wa)) {\n  return [{ json: { route: 'sudah_ada' } }];\n}\n\n// Kode RES-XXXX unik — charset tanpa karakter ambigu (0/O, 1/I/L)\nconst ada = new Set(rows.map((r) => String(r.kode).toUpperCase()));\nconst HURUF = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';\nlet kode = '';\nfor (let p = 0; p < 20 && !kode; p++) {\n  let k = 'RES-';\n  const b = crypto.randomBytes(4);\n  for (let i = 0; i < 4; i++) k += HURUF[b[i] % HURUF.length];\n  if (!ada.has(k)) kode = k;\n}\nif (!kode) throw new Error('Gagal membuat kode reseller unik setelah 20 percobaan');\n\n// Link approval owner (T3.10) — HMAC dgn FORM_TOKEN_SECRET, verifikasi di webhook approve\nconst key = crypto.createHmac('sha256', $env.FORM_TOKEN_SECRET).update(kode).digest('hex').slice(0, 16);\nconst linkApprove = `https://${$env.N8N_HOST || 'n8n.harih.id'}/webhook/approve-reseller?kode=${kode}&key=${key}`;\n\nconst tglDaftar = new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Jakarta' }).slice(0, 16);\n\nlet ownerWa = String($env.OWNER_WA || '').replace(/\\D/g, '');\nif (ownerWa.startsWith('0')) ownerWa = '62' + ownerWa.slice(1);\nelse if (ownerWa.startsWith('8')) ownerWa = '62' + ownerWa;\n\nconst teksOwner = `🔔 *[hariH] Pendaftar reseller baru*\\nNama: ${d.nama}\\nWA: ${d.wa}\\nPayout: ${d.bank} ${d.norek}\\nKode (setelah aktif): *${kode}*\\n\\nSetuju? Ketuk untuk AKTIFKAN (buat kupon + kirim welcome kit):\\n${linkApprove}\\n\\nUntuk menolak: abaikan pesan ini, lalu hapus/tandai barisnya di sheet resellers.`;\n\nconst emailOwner = {\n  sender: { name: $env.BREVO_SENDER_NAME || 'hariH', email: $env.BREVO_SENDER_EMAIL },\n  to: [{ email: $env.OWNER_EMAIL }],\n  subject: `[hariH] Approval reseller: ${d.nama} (${kode})`,\n  htmlContent: `<div style=\"font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;color:#333;line-height:1.6\">\\n<p>Pendaftar reseller baru menunggu approval:</p>\\n<ul><li>Nama: <strong>${d.nama}</strong></li><li>WA: ${d.wa}</li><li>Payout: ${d.bank} ${d.norek}</li><li>Kode (setelah aktif): <strong>${kode}</strong></li></ul>\\n<p style=\"text-align:center;margin:24px 0\"><a href=\"${linkApprove}\" style=\"background:#5f6f56;color:#ffffff;padding:14px 28px;border-radius:6px;text-decoration:none;font-weight:bold\">AKTIFKAN RESELLER</a></p>\\n<p style=\"font-size:13px;color:#666\">Menolak? Abaikan email ini, lalu hapus/tandai barisnya di sheet <code>resellers</code>.</p>\\n</div>`,\n};\n\nreturn [{ json: { route: 'ok', ...d, kode, tgl_daftar: tglDaftar, owner_wa: ownerWa, teks_owner: teksOwner, email_owner: emailOwner } }];"
+      },
+      "id": "wf03-buat-kode",
+      "name": "Cek Duplikat & Buat Kode",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-880, -220]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "c-dup",
+              "leftValue": "={{ $json.route }}",
+              "rightValue": "sudah_ada",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "wf03-if-sudah-ada",
+      "name": "Sudah Terdaftar?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-660, -220]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, message: 'Nomor WhatsApp ini sudah terdaftar sebagai reseller. Belum menerima kode? Hubungi CS hariH.' }) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "wf03-respond-sudah-ada",
+      "name": "Respond 200 — Sudah Terdaftar",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-440, -360]
+    },
+    {
+      "parameters": {},
+      "id": "wf03-stop-sudah-ada",
+      "name": "Stop — Sudah Terdaftar",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [-220, -360]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "sheet",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "resellers",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "kode": "={{ $json.kode }}",
+            "nama": "={{ $json.nama }}",
+            "wa": "={{ $json.wa }}",
+            "bank": "={{ $json.bank }}",
+            "norek": "={{ $json.norek }}",
+            "tgl_daftar": "={{ $json.tgl_daftar }}",
+            "status": "PENDING"
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {
+          "cellFormat": "RAW"
+        }
+      },
+      "id": "wf03-append-reseller",
+      "name": "Append Reseller (PENDING)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [-440, -180],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "googleApi": {
+          "name": "Google SA hariH"
+        }
+      },
+      "notes": "T3.10: kupon TIDAK dibuat di sini — menunggu approval owner. Butuh header kolom `status` di tab resellers."
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, message: 'Pendaftaran diterima! Kami verifikasi maksimal 1×24 jam — kode kupon & welcome kit dikirim ke WhatsApp kamu setelah disetujui.' }) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "wf03-respond-ok",
+      "name": "Respond 200 — Terdaftar",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-220, -180]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.WAHA_URL }}/api/sendText",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-Api-Key", "value": "={{ $env.WAHA_API_KEY }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ session: 'default', chatId: $('Cek Duplikat & Buat Kode').first().json.owner_wa + '@c.us', text: $('Cek Duplikat & Buat Kode').first().json.teks_owner }) }}",
+        "options": {}
+      },
+      "id": "wf03-wa-owner",
+      "name": "WA Owner — Approval",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [0, -180],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput",
+      "notes": "WA gagal pun email approval tetap dikirim — dua kanal saling backup."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.brevo.com/v3/smtp/email",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "api-key", "value": "={{ $env.BREVO_API_KEY }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($('Cek Duplikat & Buat Kode').first().json.email_owner) }}",
+        "options": {}
+      },
+      "id": "wf03-email-owner",
+      "name": "Email Owner — Approval",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [220, -180],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {},
+      "id": "wf03-selesai-daftar",
+      "name": "Selesai Daftar",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [440, -180]
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "approve-reseller",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "wf03-webhook-approve",
+      "name": "Webhook Approve",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-2200, 560],
+      "webhookId": "harih-approve-reseller",
+      "notes": "Diklik owner dari WA/email. Query: ?kode=RES-XXXX&key=<hmac16>."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const crypto = require('crypto');\nconst q = $input.first().json.query || {};\nconst kode = String(q.kode || '').toUpperCase().trim();\nconst key = String(q.key || '');\n\nlet valid = false;\nif (/^RES-[A-Z0-9]{4}$/.test(kode) && key && $env.FORM_TOKEN_SECRET) {\n  const expect = crypto.createHmac('sha256', $env.FORM_TOKEN_SECRET).update(kode).digest('hex').slice(0, 16);\n  const a = Buffer.from(key);\n  const b = Buffer.from(expect);\n  valid = a.length === b.length && crypto.timingSafeEqual(a, b);\n}\nreturn [{ json: { valid, kode } }];"
+      },
+      "id": "wf03-verif-approve",
+      "name": "Verifikasi Link Approve",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-1980, 560]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "c-approve-valid",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": "",
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "wf03-if-approve-valid",
+      "name": "Link Approve Valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-1760, 560]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "Link approval tidak valid.",
+        "options": {
+          "responseCode": 403
+        }
+      },
+      "id": "wf03-respond-403-approve",
+      "name": "Respond 403 — Approve",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-1540, 740]
+    },
+    {
+      "parameters": {},
+      "id": "wf03-stop-approve-invalid",
+      "name": "Stop — Approve Invalid",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [-1320, 740]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "sheet",
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "resellers",
+          "mode": "name"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "kode",
+              "lookupValue": "={{ $json.kode }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "wf03-baca-by-kode",
+      "name": "Baca Reseller (Kode)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [-1540, 540],
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "googleApi": {
+          "name": "Google SA hariH"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const kode = $('Verifikasi Link Approve').first().json.kode;\nconst rows = $input.all().map((i) => i.json).filter((r) => r && String(r.kode || '').toUpperCase() === kode);\nconst row = rows[0];\n\nif (!row) return [{ json: { route: 'tidak_ada', kode } }];\nif (String(row.status || '').toUpperCase() === 'AKTIF') return [{ json: { route: 'sudah_aktif', kode } }];\n\nreturn [{ json: {\n  route: 'ok',\n  kode,\n  row_number: row.row_number,\n  nama: String(row.nama || ''),\n  wa: String(row.wa || '').replace(/\\D/g, ''),\n} }];"
+      },
+      "id": "wf03-cek-status-reseller",
+      "name": "Cek Status Reseller",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-1320, 540]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "c-tidak-ada",
+              "leftValue": "={{ $json.route }}",
+              "rightValue": "tidak_ada",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "wf03-if-tidak-ada",
+      "name": "Kode Tidak Ditemukan?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-1100, 540]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=Kode {{ $json.kode }} tidak ditemukan di sheet resellers.",
+        "options": {
+          "responseCode": 404
+        }
+      },
+      "id": "wf03-respond-404-kode",
+      "name": "Respond 404 — Kode",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-880, 700]
+    },
+    {
+      "parameters": {},
+      "id": "wf03-stop-404-kode",
+      "name": "Stop — Kode Tidak Ada",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [-660, 700]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "c-aktif",
+              "leftValue": "={{ $json.route }}",
+              "rightValue": "sudah_aktif",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "wf03-if-sudah-aktif",
+      "name": "Sudah Aktif?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-880, 480]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=Reseller {{ $json.kode }} sudah aktif sebelumnya — tidak ada yang perlu dilakukan lagi.",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "wf03-respond-sudah-aktif",
+      "name": "Respond 200 — Sudah Aktif",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-660, 560],
+      "notes": "Idempoten: link approval diklik dua kali tidak membuat kupon ganda."
+    },
+    {
+      "parameters": {},
+      "id": "wf03-stop-sudah-aktif",
+      "name": "Stop — Sudah Aktif",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [-440, 560]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.WP_URL }}/wp-json/wc/v3/coupons",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ code: $json.kode, discount_type: 'percent', amount: '10', individual_use: true, usage_limit_per_user: 1, description: 'Kupon reseller hariH — ' + $json.nama }) }}",
+        "options": {}
+      },
+      "id": "wf03-buat-kupon",
+      "name": "Buat Kupon WC",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-660, 420],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "httpBasicAuth": {
+          "name": "WC REST hariH"
+        }
+      },
+      "notes": "T3.10: usage_limit_per_user=1 — satu customer hanya bisa memakai kode ini sekali."
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=✓ Reseller {{ $('Cek Status Reseller').first().json.kode }} ({{ $('Cek Status Reseller').first().json.nama }}) diaktifkan — kupon dibuat, welcome kit sedang dikirim via WhatsApp.",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "wf03-respond-diaktifkan",
+      "name": "Respond 200 — Diaktifkan",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-440, 420]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "sheet",
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "resellers",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $('Cek Status Reseller').first().json.row_number }}",
+            "status": "AKTIF"
+          },
+          "matchingColumns": ["row_number"],
+          "schema": []
+        },
+        "options": {
+          "cellFormat": "RAW"
+        }
+      },
+      "id": "wf03-set-aktif",
+      "name": "Set Status AKTIF",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [-220, 420],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "googleApi": {
+          "name": "Google SA hariH"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const d = $('Cek Status Reseller').first().json;\n\n// Welcome kit — template 6a docs/copywriting-pesan.md\nconst pesan6a = `Selamat bergabung sebagai reseller hariH, ${d.nama}! 🎉\\n\\nKode kuponmu: *${d.kode}*\\n\\nCara kerjanya:\\n1️⃣ Bagikan katalog: https://harih.id/\\n2️⃣ Pembeli memasukkan kode *${d.kode}* saat checkout → mereka hemat *10%*\\n3️⃣ Kamu dapat komisi *30%* dari setiap order 💸\\n\\nRekap + payout komisi dikirim tiap *Senin pagi*.\\n\\nAturan singkat:\\n• Promosikan ke kenalan & media sosialmu sendiri (bukan spam grup acak)\\n• Kode tidak berlaku untuk pembelian sendiri\\n\\nCaption siap pakai menyusul di pesan berikutnya 👇\\n— hariH`;\n\n// Caption promosi — template 6b\nconst pesan6b = `Contoh caption — tinggal salin & sesuaikan:\\n\\n1) Buat kamu yang mau nikah tapi budget undangan mepet 👰🤵\\nUndangan digital mulai *99rb*, jadi dalam *hitungan menit*, bisa dibuka semua tamu dari WhatsApp. Ada RSVP, galeri foto, amplop digital.\\nCek: https://harih.id/ — pakai kode *${d.kode}* biar hemat 10%!\\n\\n2) Nikahan makin praktis ✨ Nggak perlu cetak ratusan undangan — kirim 1 link, semua tamu kebagian, nama tamu bisa otomatis muncul. Mulai 99 ribu aja.\\nhttps://harih.id/ · kode diskon: *${d.kode}*\\n\\n3) [Untuk story] Bantu share dong 🙏 Temen/saudara ada yang mau nikah? Undangan digital cantik + cepet + murah meriah. DM aku atau langsung ke https://harih.id/, jangan lupa kode *${d.kode}* ya!`;\n\nreturn [{ json: { chat_id: d.wa + '@c.us', pesan_6a: pesan6a, pesan_6b: pesan6b } }];"
+      },
+      "id": "wf03-siapkan-welcome",
+      "name": "Siapkan Welcome Kit",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [0, 420]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.WAHA_URL }}/api/sendText",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-Api-Key", "value": "={{ $env.WAHA_API_KEY }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ session: 'default', chatId: $json.chat_id, text: $json.pesan_6a }) }}",
+        "options": {}
+      },
+      "id": "wf03-kirim-welcome",
+      "name": "Kirim Welcome Kit (WAHA)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [220, 420],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "notes": "Gagal setelah retry → error → alert WF-00 (reseller aktif tapi belum tahu kodenya = wajib ditindak)."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.WAHA_URL }}/api/sendText",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-Api-Key", "value": "={{ $env.WAHA_API_KEY }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ session: 'default', chatId: $('Siapkan Welcome Kit').first().json.chat_id, text: $('Siapkan Welcome Kit').first().json.pesan_6b }) }}",
+        "options": {}
+      },
+      "id": "wf03-kirim-caption",
+      "name": "Kirim Caption Promosi (WAHA)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [440, 420],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput",
+      "notes": "Pesan 6a sudah sampai — kegagalan caption tidak kritis, jangan sampai memicu alert."
+    },
+    {
+      "parameters": {},
+      "id": "wf03-selesai-approve",
+      "name": "Selesai Approve",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [660, 420]
+    }
+  ],
+  "connections": {
+    "Webhook Daftar": {
+      "main": [[{ "node": "Validasi Pendaftaran", "type": "main", "index": 0 }]]
+    },
+    "Validasi Pendaftaran": {
+      "main": [[{ "node": "Route OK?", "type": "main", "index": 0 }]]
+    },
+    "Route OK?": {
+      "main": [
+        [{ "node": "Cek Nomor WA (WAHA)", "type": "main", "index": 0 }],
+        [{ "node": "Honeypot?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Honeypot?": {
+      "main": [
+        [{ "node": "Respond 200 — Honeypot", "type": "main", "index": 0 }],
+        [{ "node": "Rate Limit?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Respond 200 — Honeypot": {
+      "main": [[{ "node": "Stop — Honeypot", "type": "main", "index": 0 }]]
+    },
+    "Rate Limit?": {
+      "main": [
+        [{ "node": "Respond 429 — Rate Limit", "type": "main", "index": 0 }],
+        [{ "node": "Respond 422 — Data Kurang", "type": "main", "index": 0 }]
+      ]
+    },
+    "Respond 429 — Rate Limit": {
+      "main": [[{ "node": "Stop — Rate Limit", "type": "main", "index": 0 }]]
+    },
+    "Respond 422 — Data Kurang": {
+      "main": [[{ "node": "Stop — Data Kurang", "type": "main", "index": 0 }]]
+    },
+    "Cek Nomor WA (WAHA)": {
+      "main": [[{ "node": "Bukan Nomor WA?", "type": "main", "index": 0 }]]
+    },
+    "Bukan Nomor WA?": {
+      "main": [
+        [{ "node": "Respond 422 — Bukan WA", "type": "main", "index": 0 }],
+        [{ "node": "Baca Resellers", "type": "main", "index": 0 }]
+      ]
+    },
+    "Respond 422 — Bukan WA": {
+      "main": [[{ "node": "Stop — Bukan WA", "type": "main", "index": 0 }]]
+    },
+    "Baca Resellers": {
+      "main": [[{ "node": "Cek Duplikat & Buat Kode", "type": "main", "index": 0 }]]
+    },
+    "Cek Duplikat & Buat Kode": {
+      "main": [[{ "node": "Sudah Terdaftar?", "type": "main", "index": 0 }]]
+    },
+    "Sudah Terdaftar?": {
+      "main": [
+        [{ "node": "Respond 200 — Sudah Terdaftar", "type": "main", "index": 0 }],
+        [{ "node": "Append Reseller (PENDING)", "type": "main", "index": 0 }]
+      ]
+    },
+    "Respond 200 — Sudah Terdaftar": {
+      "main": [[{ "node": "Stop — Sudah Terdaftar", "type": "main", "index": 0 }]]
+    },
+    "Append Reseller (PENDING)": {
+      "main": [[{ "node": "Respond 200 — Terdaftar", "type": "main", "index": 0 }]]
+    },
+    "Respond 200 — Terdaftar": {
+      "main": [[{ "node": "WA Owner — Approval", "type": "main", "index": 0 }]]
+    },
+    "WA Owner — Approval": {
+      "main": [[{ "node": "Email Owner — Approval", "type": "main", "index": 0 }]]
+    },
+    "Email Owner — Approval": {
+      "main": [[{ "node": "Selesai Daftar", "type": "main", "index": 0 }]]
+    },
+    "Webhook Approve": {
+      "main": [[{ "node": "Verifikasi Link Approve", "type": "main", "index": 0 }]]
+    },
+    "Verifikasi Link Approve": {
+      "main": [[{ "node": "Link Approve Valid?", "type": "main", "index": 0 }]]
+    },
+    "Link Approve Valid?": {
+      "main": [
+        [{ "node": "Baca Reseller (Kode)", "type": "main", "index": 0 }],
+        [{ "node": "Respond 403 — Approve", "type": "main", "index": 0 }]
+      ]
+    },
+    "Respond 403 — Approve": {
+      "main": [[{ "node": "Stop — Approve Invalid", "type": "main", "index": 0 }]]
+    },
+    "Baca Reseller (Kode)": {
+      "main": [[{ "node": "Cek Status Reseller", "type": "main", "index": 0 }]]
+    },
+    "Cek Status Reseller": {
+      "main": [[{ "node": "Kode Tidak Ditemukan?", "type": "main", "index": 0 }]]
+    },
+    "Kode Tidak Ditemukan?": {
+      "main": [
+        [{ "node": "Respond 404 — Kode", "type": "main", "index": 0 }],
+        [{ "node": "Sudah Aktif?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Respond 404 — Kode": {
+      "main": [[{ "node": "Stop — Kode Tidak Ada", "type": "main", "index": 0 }]]
+    },
+    "Sudah Aktif?": {
+      "main": [
+        [{ "node": "Respond 200 — Sudah Aktif", "type": "main", "index": 0 }],
+        [{ "node": "Buat Kupon WC", "type": "main", "index": 0 }]
+      ]
+    },
+    "Respond 200 — Sudah Aktif": {
+      "main": [[{ "node": "Stop — Sudah Aktif", "type": "main", "index": 0 }]]
+    },
+    "Buat Kupon WC": {
+      "main": [[{ "node": "Respond 200 — Diaktifkan", "type": "main", "index": 0 }]]
+    },
+    "Respond 200 — Diaktifkan": {
+      "main": [[{ "node": "Set Status AKTIF", "type": "main", "index": 0 }]]
+    },
+    "Set Status AKTIF": {
+      "main": [[{ "node": "Siapkan Welcome Kit", "type": "main", "index": 0 }]]
+    },
+    "Siapkan Welcome Kit": {
+      "main": [[{ "node": "Kirim Welcome Kit (WAHA)", "type": "main", "index": 0 }]]
+    },
+    "Kirim Welcome Kit (WAHA)": {
+      "main": [[{ "node": "Kirim Caption Promosi (WAHA)", "type": "main", "index": 0 }]]
+    },
+    "Kirim Caption Promosi (WAHA)": {
+      "main": [[{ "node": "Selesai Approve", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Jakarta"
+  },
+  "pinData": {}
+}
