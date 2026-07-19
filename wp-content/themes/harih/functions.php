@@ -78,17 +78,18 @@ function harih_form_webhook_url(): string {
 
 // Halaman toko: style child di atas Astra.
 add_action('wp_enqueue_scripts', function () {
-    if (is_singular('undangan') || is_page_template('page-isi-data.php')) return;
+    if (is_singular('undangan') || is_page_template('page-isi-data.php') || is_page_template('page-katalog.php')) return;
     wp_enqueue_style('harih-child', get_stylesheet_uri(), [], HARIH_VERSION);
 }, 20);
 
-// Halaman undangan & form isi data: buang SEMUA aset tema/plugin lain (Astra,
-// WooCommerce, dst.) lalu muat hanya aset kita — halaman harus ringan & bebas
-// bentrok CSS. Konvensi: semua handle milik kita berawalan `undangan-`.
+// Halaman undangan, form isi data & katalog: buang SEMUA aset tema/plugin lain
+// (Astra, WooCommerce, dst.) lalu muat hanya aset kita — halaman harus ringan
+// & bebas bentrok CSS. Konvensi: semua handle milik kita berawalan `undangan-`.
 add_action('wp_enqueue_scripts', function () {
     $is_undangan = is_singular('undangan');
     $is_isidata  = is_page_template('page-isi-data.php');
-    if (!$is_undangan && !$is_isidata) return;
+    $is_katalog  = is_page_template('page-katalog.php');
+    if (!$is_undangan && !$is_isidata && !$is_katalog) return;
 
     global $wp_styles, $wp_scripts;
     foreach ((array) $wp_styles->queue as $handle) {
@@ -96,6 +97,12 @@ add_action('wp_enqueue_scripts', function () {
     }
     foreach ((array) $wp_scripts->queue as $handle) {
         if (strpos($handle, 'undangan-') !== 0) wp_dequeue_script($handle);
+    }
+
+    if ($is_katalog) {
+        wp_enqueue_style('undangan-fonts', harih_tema_fonts('tema-01'), [], null);
+        wp_enqueue_style('undangan-katalog', get_stylesheet_directory_uri() . '/katalog.css', [], HARIH_VERSION);
+        return;
     }
 
     if ($is_isidata) {
@@ -135,9 +142,9 @@ add_action('wp_enqueue_scripts', function () {
     wp_add_inline_script('undangan-js', 'window.UNDANGAN = ' . wp_json_encode($cfg) . ';', 'before');
 }, 999);
 
-// Preconnect Google Fonts hanya di halaman undangan & form isi data.
+// Preconnect Google Fonts hanya di halaman standalone kita.
 add_filter('wp_resource_hints', function ($urls, $relation) {
-    if ($relation === 'preconnect' && (is_singular('undangan') || is_page_template('page-isi-data.php'))) {
+    if ($relation === 'preconnect' && (is_singular('undangan') || is_page_template('page-isi-data.php') || is_page_template('page-katalog.php'))) {
         $urls[] = 'https://fonts.googleapis.com';
         $urls[] = ['href' => 'https://fonts.gstatic.com', 'crossorigin'];
     }
