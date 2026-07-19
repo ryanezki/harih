@@ -13,6 +13,8 @@ if (!defined('ABSPATH')) exit;
 function undangan_get_temas(): array {
     return [
         'tema-01' => 'Tema 01 — Botanical Elegan',
+        'tema-02' => 'Tema 02 — Senja Terakota',
+        'tema-03' => 'Tema 03 — Langit Malam',
     ];
 }
 

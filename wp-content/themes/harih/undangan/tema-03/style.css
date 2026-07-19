@@ -1,0 +1,98 @@
+/* =========================================================================
+   Tema 03 — Langit Malam (hariH)
+   Skin GELAP di atas undangan/shared/undangan.css: palet biru malam + emas,
+   tipografi Prata + Manrope, motif bintang. Karena latar gelap, skin ini juga
+   meng-override komponen yang warnanya hardcoded di shared (badge RSVP, pesan
+   error) + menjaga QRIS tetap terbaca pemindai. Ornamen SVG inline.
+   Terdaftar di undangan_get_temas() dan harih_tema_fonts().
+   ========================================================================= */
+
+:root {
+    --font-display: 'Prata', Georgia, serif;
+    --font-body: 'Manrope', system-ui, -apple-system, sans-serif;
+
+    --c-page: #0c1220;
+    --c-bg: #131b2e;
+    --c-surface: #1b2540;
+    --c-ink: #e8e4d8;
+    --c-ink-soft: #a2a7b8;
+    --c-line: #2a3452;
+    --c-accent: #c9a45c;      /* emas — tombol berlatar emas, teks navy */
+    --c-accent-ink: #171f33;
+    --c-gold: #c9a45c;
+    --radius: 16px;
+    --shadow: 0 14px 34px rgba(0, 0, 0, .35);
+
+    /* Cover tanpa foto: langit malam bertabur bintang */
+    --cover-fallback:
+        radial-gradient(1.5px 1.5px at 22% 26%, rgba(240, 234, 217, .55) 50%, transparent 51%),
+        radial-gradient(1px 1px at 66% 16%, rgba(240, 234, 217, .40) 50%, transparent 51%),
+        radial-gradient(1.2px 1.2px at 82% 40%, rgba(240, 234, 217, .45) 50%, transparent 51%),
+        radial-gradient(1px 1px at 38% 52%, rgba(240, 234, 217, .35) 50%, transparent 51%),
+        radial-gradient(1.4px 1.4px at 12% 66%, rgba(240, 234, 217, .40) 50%, transparent 51%),
+        radial-gradient(1px 1px at 54% 78%, rgba(240, 234, 217, .30) 50%, transparent 51%),
+        linear-gradient(180deg, #223154 0%, #131c33 55%, #0b1122 100%);
+    --cover-overlay: linear-gradient(180deg, rgba(8, 12, 24, .18) 0%, rgba(8, 12, 24, .66) 100%);
+    --cover-ink: #f0ead9;
+
+    /* Ornamen pembatas: garis — titik — bintang 4 sudut — titik — garis (emas) */
+    --ornament: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20160%2040'%20fill='none'%3E%3Cpath%20d='M6%2020h40'%20stroke='%23c9a45c'%20stroke-width='1'/%3E%3Cpath%20d='M114%2020h40'%20stroke='%23c9a45c'%20stroke-width='1'/%3E%3Ccircle%20cx='52'%20cy='20'%20r='1.5'%20fill='%23c9a45c'/%3E%3Ccircle%20cx='108'%20cy='20'%20r='1.5'%20fill='%23c9a45c'/%3E%3Cpath%20d='M80%208l3%209%209%203-9%203-3%209-3-9-9-3%209-3z'%20fill='%23c9a45c'/%3E%3Cpath%20d='M64%2014l2%203-2%203-2-3z'%20fill='%23c9a45c'/%3E%3Cpath%20d='M96%2014l2%203-2%203-2-3z'%20fill='%23c9a45c'/%3E%3C/svg%3E");
+}
+
+/* Prata hanya punya weight 400 — browser mensintesis 500/600; aman */
+
+/* Taburan bintang halus di latar luar kolom (terlihat di desktop) */
+body.undangan-body {
+    background-image: radial-gradient(rgba(201, 164, 92, .10) 1px, transparent 1.6px);
+    background-size: 26px 26px;
+}
+
+/* Cover tanpa foto: bingkai emas tipis */
+.cover:not(.has-photo) .cover-inner {
+    position: relative;
+    padding: 52px 30px;
+    border-radius: 10px;
+    box-shadow: inset 0 0 0 1px rgba(201, 164, 92, .55);
+}
+.cover:not(.has-photo) .cover-inner::after {
+    content: '';
+    position: absolute;
+    inset: 7px;
+    border-radius: 6px;
+    box-shadow: inset 0 0 0 1px rgba(201, 164, 92, .25);
+    pointer-events: none;
+}
+
+.cover-eyebrow { color: var(--c-gold); opacity: 1; }
+
+/* Tombol buka di atas foto/langit malam: emas transparan */
+.cover .btn-open {
+    background: rgba(201, 164, 92, .14);
+    box-shadow: inset 0 0 0 1.5px rgba(201, 164, 92, .85);
+    color: var(--cover-ink);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+}
+
+.monogram { background: #232e4e; color: var(--c-gold); }
+
+.section-intro, .prose { line-height: 1.85; }
+
+/* Kartu acara: garis emas kiri di atas permukaan navy */
+.acara-card { border-left: 2px solid var(--c-gold); }
+
+/* ---- Penyesuaian mode gelap utk warna hardcoded di shared ---- */
+
+.badge-hadir { background: rgba(122, 190, 140, .16); color: #9fd4ae; }
+.badge-tidak { background: rgba(160, 168, 190, .14); color: #b9c0d2; }
+.badge-ragu  { background: rgba(201, 164, 92, .18); color: #dcc08a; }
+.rsvp-msg.error { color: #e08a71; }
+
+/* Placeholder field agar terbaca di permukaan navy */
+.field input::placeholder, .field textarea::placeholder { color: rgba(232, 228, 216, .35); }
+
+/* QRIS wajib berlatar terang agar bisa dipindai dari layar gelap */
+.qris img { background: #ffffff; padding: 10px; }
+
+/* Galeri: bingkai tipis supaya foto tidak "mengambang" di latar gelap */
+.galeri-grid img { outline: 1px solid var(--c-line); outline-offset: -1px; }

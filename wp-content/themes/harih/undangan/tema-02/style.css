@@ -1,0 +1,79 @@
+/* =========================================================================
+   Tema 02 — Senja Terakota (hariH)
+   Skin di atas undangan/shared/undangan.css: palet terakota + krem hangat +
+   tembaga, tipografi Cormorant Garamond + Karla, motif lengkung (arch) senja.
+   Ornamen SVG inline — tanpa file gambar. Terdaftar di undangan_get_temas()
+   dan harih_tema_fonts().
+   ========================================================================= */
+
+:root {
+    --font-display: 'Cormorant Garamond', Georgia, serif;
+    --font-body: 'Karla', system-ui, -apple-system, sans-serif;
+
+    --c-page: #ecdfd2;
+    --c-bg: #fbf6f0;
+    --c-surface: #ffffff;
+    --c-ink: #3a2e26;
+    --c-ink-soft: #8d7c6e;
+    --c-line: #ecdccd;
+    --c-accent: #a15436;      /* terakota */
+    --c-accent-ink: #faf3ea;  /* krem */
+    --c-gold: #be7a4a;        /* tembaga */
+    --radius: 20px;
+    --shadow: 0 12px 32px rgba(161, 84, 54, .10);
+
+    /* Cover tanpa foto: gradasi langit senja */
+    --cover-fallback: linear-gradient(180deg, #c97c4f 0%, #a15436 55%, #6f3120 100%);
+    --cover-overlay: linear-gradient(180deg, rgba(59, 30, 18, .24) 0%, rgba(59, 30, 18, .58) 100%);
+    --cover-ink: #faf1e6;
+
+    /* Ornamen pembatas: garis — titik — matahari senja — titik — garis (tembaga) */
+    --ornament: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20160%2040'%20fill='none'%3E%3Cpath%20d='M6%2020h42'%20stroke='%23be7a4a'%20stroke-width='1'/%3E%3Cpath%20d='M112%2020h42'%20stroke='%23be7a4a'%20stroke-width='1'/%3E%3Ccircle%20cx='56'%20cy='20'%20r='1.5'%20fill='%23be7a4a'/%3E%3Ccircle%20cx='104'%20cy='20'%20r='1.5'%20fill='%23be7a4a'/%3E%3Cpath%20d='M68%2023a12%2012%200%200%201%2024%200'%20stroke='%23be7a4a'%20stroke-width='1'/%3E%3Cpath%20d='M64%2023h32'%20stroke='%23be7a4a'%20stroke-width='1'/%3E%3Cpath%20d='M80%206v5'%20stroke='%23be7a4a'%20stroke-width='1'/%3E%3Cpath%20d='M69%209l3%204'%20stroke='%23be7a4a'%20stroke-width='1'/%3E%3Cpath%20d='M91%209l-3%204'%20stroke='%23be7a4a'%20stroke-width='1'/%3E%3C/svg%3E");
+}
+
+/* Cormorant lebih ramping dari Playfair — sedikit dibesarkan agar setara */
+.cover-names { font-size: clamp(38px, 10vw, 50px); }
+.section-title { font-size: 32px; }
+
+/* Tekstur titik hangat di latar luar kolom (terlihat di desktop) */
+body.undangan-body {
+    background-image: radial-gradient(rgba(161, 84, 54, .05) 1px, transparent 1.5px);
+    background-size: 18px 18px;
+}
+
+/* Cover tanpa foto: bingkai LENGKUNG (arch) khas senja — pembeda utama tema */
+.cover:not(.has-photo) .cover-inner {
+    position: relative;
+    padding: 72px 34px 52px;
+    border-radius: 175px 175px 14px 14px;
+    box-shadow: inset 0 0 0 1px rgba(250, 241, 230, .55);
+}
+.cover:not(.has-photo) .cover-inner::after {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border-radius: 168px 168px 9px 9px;
+    box-shadow: inset 0 0 0 1px rgba(250, 241, 230, .28);
+    pointer-events: none;
+}
+
+.cover-eyebrow { color: var(--cover-ink); letter-spacing: .34em; opacity: .9; }
+
+/* Tombol buka di atas foto/gradasi: krem transparan */
+.cover .btn-open {
+    background: rgba(250, 241, 230, .16);
+    box-shadow: inset 0 0 0 1.5px rgba(250, 241, 230, .9);
+    color: var(--cover-ink);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+}
+
+.monogram { background: #f6e7d9; }
+
+.section-intro, .prose { line-height: 1.85; }
+
+/* Kartu acara: aksen garis tembaga di ATAS (membedakan dari tema-01) */
+.acara-card { border-top: 2px solid var(--c-gold); }
+
+/* Tile countdown ikut motif lengkung */
+.cd-tile { border-radius: 14px 14px var(--radius) var(--radius); }

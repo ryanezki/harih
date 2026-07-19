@@ -37,6 +37,8 @@ function harih_paket_aktif(int $post_id): string {
 function harih_tema_fonts(string $tema): string {
     $map = [
         'tema-01' => 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap',
+        'tema-02' => 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Karla:wght@400;500;600&display=swap',
+        'tema-03' => 'https://fonts.googleapis.com/css2?family=Prata&family=Manrope:wght@400;500;600&display=swap',
     ];
     return $map[$tema] ?? '';
 }
