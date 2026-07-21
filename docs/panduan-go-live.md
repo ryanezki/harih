@@ -15,15 +15,27 @@ Buka `https://n8n.harih.id` dari browser.
 
 **Verifikasi:** setelah login terlihat 8 workflow berawalan `WF-…` (semuanya Inactive — biarkan, jangan diaktifkan manual; nanti diaktifkan otomatis setelah credential lengkap).
 
-## Langkah 2 — File kunci Google Service Account (5 menit)
+## Langkah 2 — File kunci Google Service Account (5–10 menit)
 
 Ini pembuka blokir terbesar — tanpa ini WF-01/02 tidak bisa menulis ke Google Sheet.
 
-1. Cari file JSON key yang diunduh saat setup service account (T0.8). Hilang? Buat baru: [console.cloud.google.com](https://console.cloud.google.com) → IAM & Admin → Service Accounts → akun yang dipakai hariH → Keys → **Add key → JSON** → file terunduh.
-2. Simpan file itu sebagai **`vps/google-sa.json`** di folder proyek `harih` di Mac (timpa nama file aslinya). File ini akan di-gitignore — tidak akan pernah ter-commit.
-3. Buka file-nya sebentar, salin nilai `client_email` (…@…iam.gserviceaccount.com).
+**2a. Cek dulu: pernah dibuat atau belum?** Buka Google Sheet hariH → tombol **Share** → lihat daftar yang punya akses:
+- **Ada email berakhiran `…iam.gserviceaccount.com`** → SA pernah dibuat. Bagian setelah `@` (sebelum `.iam`) adalah **PROJECT ID**-nya. Di [console.cloud.google.com](https://console.cloud.google.com), klik **pemilih project di bar atas** (sebelah logo — ini penyebab umum "kosong": Console membuka project lain) → pilih project itu → lanjut ke 2c.
+- **Tidak ada** → SA memang belum dibuat → lanjut ke 2b.
 
-**Verifikasi:** buka Google Sheet hariH → Share → pastikan `client_email` tadi terdaftar sebagai **Editor**. Belum? Tambahkan.
+**2b. Buat dari nol** (login dengan akun Google pemilik Sheet):
+1. [console.cloud.google.com](https://console.cloud.google.com) → pemilih project (bar atas) → **New Project** → nama `harih` → Create → pastikan project `harih` yang terpilih.
+2. Menu ☰ → **APIs & Services → Library** → cari **Google Sheets API** → **Enable**. Ulangi untuk **Google Drive API** (dipakai n8n untuk membuka spreadsheet).
+3. Menu ☰ → **IAM & Admin → Service Accounts** → **Create service account** → nama `n8n-harih` → Create and continue → bagian role **lewati saja** (akses cukup lewat share Sheet) → Done.
+
+**2c. Unduh kunci JSON:**
+1. Klik service account-nya → tab **Keys** → **Add key → Create new key → JSON** → Create → file `.json` terunduh.
+2. Pindahkan & ganti namanya menjadi **`vps/google-sa.json`** di folder proyek `harih` di Mac. File ini sudah di-gitignore — tidak akan pernah ter-commit.
+3. Buka filenya sebentar, salin nilai `client_email` (…@…iam.gserviceaccount.com).
+
+**2d. Share Sheet ke SA:** Google Sheet → **Share** → tempel `client_email` → role **Editor** → hilangkan centang "Notify" → Share.
+
+**Verifikasi:** `client_email` muncul di daftar share sebagai Editor, dan file `vps/google-sa.json` ada di Mac.
 
 ## Langkah 3 — Kolom baru di Google Sheet (2 menit)
 
