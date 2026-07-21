@@ -7,7 +7,10 @@
       "name": "Error Trigger",
       "type": "n8n-nodes-base.errorTrigger",
       "typeVersion": 1,
-      "position": [-560, 0]
+      "position": [
+        -560,
+        0
+      ]
     },
     {
       "parameters": {
@@ -18,7 +21,10 @@
       "name": "Susun Pesan Alert",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-340, 0]
+      "position": [
+        -340,
+        0
+      ]
     },
     {
       "parameters": {
@@ -27,7 +33,10 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "api-key", "value": "={{ $env.BREVO_API_KEY }}" }
+            {
+              "name": "api-key",
+              "value": "={{ $env.BREVO_API_KEY }}"
+            }
           ]
         },
         "sendBody": true,
@@ -39,7 +48,10 @@
       "name": "Email Owner (Brevo)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [-120, 0],
+      "position": [
+        -120,
+        0
+      ],
       "retryOnFail": true,
       "maxTries": 2,
       "waitBetweenTries": 3000,
@@ -53,7 +65,10 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "X-Api-Key", "value": "={{ $env.WAHA_API_KEY }}" }
+            {
+              "name": "X-Api-Key",
+              "value": "={{ $env.WAHA_API_KEY }}"
+            }
           ]
         },
         "sendBody": true,
@@ -65,7 +80,10 @@
       "name": "WA Owner (WAHA)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [100, 0],
+      "position": [
+        100,
+        0
+      ],
       "retryOnFail": true,
       "maxTries": 2,
       "waitBetweenTries": 5000,
@@ -78,21 +96,56 @@
       "name": "Selesai",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [320, 0]
+      "position": [
+        320,
+        0
+      ]
     }
   ],
   "connections": {
     "Error Trigger": {
-      "main": [[{ "node": "Susun Pesan Alert", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Susun Pesan Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Susun Pesan Alert": {
-      "main": [[{ "node": "Email Owner (Brevo)", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Email Owner (Brevo)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Email Owner (Brevo)": {
-      "main": [[{ "node": "WA Owner (WAHA)", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "WA Owner (WAHA)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "WA Owner (WAHA)": {
-      "main": [[{ "node": "Selesai", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Selesai",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {

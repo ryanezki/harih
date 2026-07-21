@@ -14,7 +14,10 @@
       "name": "Webhook Daftar",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [-2200, -200],
+      "position": [
+        -2200,
+        -200
+      ],
       "webhookId": "harih-daftar-reseller",
       "notes": "Kontrak form landing (T3.9): POST nama, wa, bank, norek + field honeypot `website` (harus kosong)."
     },
@@ -27,7 +30,10 @@
       "name": "Validasi Pendaftaran",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-1980, -200]
+      "position": [
+        -1980,
+        -200
+      ]
     },
     {
       "parameters": {
@@ -42,7 +48,10 @@
               "id": "c-ok",
               "leftValue": "={{ $json.route }}",
               "rightValue": "ok",
-              "operator": { "type": "string", "operation": "equals" }
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
             }
           ],
           "combinator": "and"
@@ -53,7 +62,10 @@
       "name": "Route OK?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [-1760, -200]
+      "position": [
+        -1760,
+        -200
+      ]
     },
     {
       "parameters": {
@@ -68,7 +80,10 @@
               "id": "c-honeypot",
               "leftValue": "={{ $json.route }}",
               "rightValue": "honeypot",
-              "operator": { "type": "string", "operation": "equals" }
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
             }
           ],
           "combinator": "and"
@@ -79,7 +94,10 @@
       "name": "Honeypot?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [-1540, 0]
+      "position": [
+        -1540,
+        0
+      ]
     },
     {
       "parameters": {
@@ -93,7 +111,10 @@
       "name": "Respond 200 — Honeypot",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [-1320, -60],
+      "position": [
+        -1320,
+        -60
+      ],
       "notes": "Bot diberi respons sukses palsu agar tidak belajar dari penolakan."
     },
     {
@@ -102,7 +123,10 @@
       "name": "Stop — Honeypot",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [-1100, -60]
+      "position": [
+        -1100,
+        -60
+      ]
     },
     {
       "parameters": {
@@ -117,7 +141,10 @@
               "id": "c-rate",
               "leftValue": "={{ $json.route }}",
               "rightValue": "rate",
-              "operator": { "type": "string", "operation": "equals" }
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
             }
           ],
           "combinator": "and"
@@ -128,7 +155,10 @@
       "name": "Rate Limit?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [-1320, 140]
+      "position": [
+        -1320,
+        140
+      ]
     },
     {
       "parameters": {
@@ -142,7 +172,10 @@
       "name": "Respond 429 — Rate Limit",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [-1100, 80]
+      "position": [
+        -1100,
+        80
+      ]
     },
     {
       "parameters": {},
@@ -150,7 +183,10 @@
       "name": "Stop — Rate Limit",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [-880, 80]
+      "position": [
+        -880,
+        80
+      ]
     },
     {
       "parameters": {
@@ -164,7 +200,10 @@
       "name": "Respond 422 — Data Kurang",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [-1100, 240]
+      "position": [
+        -1100,
+        240
+      ]
     },
     {
       "parameters": {},
@@ -172,7 +211,10 @@
       "name": "Stop — Data Kurang",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [-880, 240]
+      "position": [
+        -880,
+        240
+      ]
     },
     {
       "parameters": {
@@ -181,14 +223,23 @@
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
-            { "name": "phone", "value": "={{ $json.wa }}" },
-            { "name": "session", "value": "default" }
+            {
+              "name": "phone",
+              "value": "={{ $json.wa }}"
+            },
+            {
+              "name": "session",
+              "value": "default"
+            }
           ]
         },
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "X-Api-Key", "value": "={{ $env.WAHA_API_KEY }}" }
+            {
+              "name": "X-Api-Key",
+              "value": "={{ $env.WAHA_API_KEY }}"
+            }
           ]
         },
         "options": {}
@@ -197,7 +248,10 @@
       "name": "Cek Nomor WA (WAHA)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [-1540, -260],
+      "position": [
+        -1540,
+        -260
+      ],
       "retryOnFail": true,
       "maxTries": 2,
       "waitBetweenTries": 5000,
@@ -217,7 +271,11 @@
               "id": "c-bukan-wa",
               "leftValue": "={{ $json.numberExists === false }}",
               "rightValue": "",
-              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
             }
           ],
           "combinator": "and"
@@ -228,7 +286,10 @@
       "name": "Bukan Nomor WA?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [-1320, -260]
+      "position": [
+        -1320,
+        -260
+      ]
     },
     {
       "parameters": {
@@ -242,7 +303,10 @@
       "name": "Respond 422 — Bukan WA",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [-1100, -400]
+      "position": [
+        -1100,
+        -400
+      ]
     },
     {
       "parameters": {},
@@ -250,7 +314,10 @@
       "name": "Stop — Bukan WA",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [-880, -400]
+      "position": [
+        -880,
+        -400
+      ]
     },
     {
       "parameters": {
@@ -273,13 +340,17 @@
       "name": "Baca Resellers",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [-1100, -220],
+      "position": [
+        -1100,
+        -220
+      ],
       "alwaysOutputData": true,
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000,
       "credentials": {
         "googleApi": {
+          "id": "GOOGLESAHARIH001",
           "name": "Google SA hariH"
         }
       }
@@ -293,7 +364,10 @@
       "name": "Cek Duplikat & Buat Kode",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-880, -220]
+      "position": [
+        -880,
+        -220
+      ]
     },
     {
       "parameters": {
@@ -308,7 +382,10 @@
               "id": "c-dup",
               "leftValue": "={{ $json.route }}",
               "rightValue": "sudah_ada",
-              "operator": { "type": "string", "operation": "equals" }
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
             }
           ],
           "combinator": "and"
@@ -319,7 +396,10 @@
       "name": "Sudah Terdaftar?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [-660, -220]
+      "position": [
+        -660,
+        -220
+      ]
     },
     {
       "parameters": {
@@ -333,7 +413,10 @@
       "name": "Respond 200 — Sudah Terdaftar",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [-440, -360]
+      "position": [
+        -440,
+        -360
+      ]
     },
     {
       "parameters": {},
@@ -341,7 +424,10 @@
       "name": "Stop — Sudah Terdaftar",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [-220, -360]
+      "position": [
+        -220,
+        -360
+      ]
     },
     {
       "parameters": {
@@ -370,7 +456,71 @@
             "status": "PENDING"
           },
           "matchingColumns": [],
-          "schema": []
+          "schema": [
+            {
+              "id": "kode",
+              "displayName": "kode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nama",
+              "displayName": "nama",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "wa",
+              "displayName": "wa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "bank",
+              "displayName": "bank",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "norek",
+              "displayName": "norek",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tgl_daftar",
+              "displayName": "tgl_daftar",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
         },
         "options": {
           "cellFormat": "RAW"
@@ -380,12 +530,16 @@
       "name": "Append Reseller (PENDING)",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [-440, -180],
+      "position": [
+        -440,
+        -180
+      ],
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000,
       "credentials": {
         "googleApi": {
+          "id": "GOOGLESAHARIH001",
           "name": "Google SA hariH"
         }
       },
@@ -403,7 +557,10 @@
       "name": "Respond 200 — Terdaftar",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [-220, -180]
+      "position": [
+        -220,
+        -180
+      ]
     },
     {
       "parameters": {
@@ -412,7 +569,10 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "X-Api-Key", "value": "={{ $env.WAHA_API_KEY }}" }
+            {
+              "name": "X-Api-Key",
+              "value": "={{ $env.WAHA_API_KEY }}"
+            }
           ]
         },
         "sendBody": true,
@@ -424,7 +584,10 @@
       "name": "WA Owner — Approval",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [0, -180],
+      "position": [
+        0,
+        -180
+      ],
       "retryOnFail": true,
       "maxTries": 2,
       "waitBetweenTries": 5000,
@@ -438,7 +601,10 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "api-key", "value": "={{ $env.BREVO_API_KEY }}" }
+            {
+              "name": "api-key",
+              "value": "={{ $env.BREVO_API_KEY }}"
+            }
           ]
         },
         "sendBody": true,
@@ -450,7 +616,10 @@
       "name": "Email Owner — Approval",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [220, -180],
+      "position": [
+        220,
+        -180
+      ],
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000
@@ -461,7 +630,10 @@
       "name": "Selesai Daftar",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [440, -180]
+      "position": [
+        440,
+        -180
+      ]
     },
     {
       "parameters": {
@@ -474,7 +646,10 @@
       "name": "Webhook Approve",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [-2200, 560],
+      "position": [
+        -2200,
+        560
+      ],
       "webhookId": "harih-approve-reseller",
       "notes": "Diklik owner dari WA/email. Query: ?kode=RES-XXXX&key=<hmac16>."
     },
@@ -487,7 +662,10 @@
       "name": "Verifikasi Link Approve",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-1980, 560]
+      "position": [
+        -1980,
+        560
+      ]
     },
     {
       "parameters": {
@@ -502,7 +680,11 @@
               "id": "c-approve-valid",
               "leftValue": "={{ $json.valid }}",
               "rightValue": "",
-              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
             }
           ],
           "combinator": "and"
@@ -513,7 +695,10 @@
       "name": "Link Approve Valid?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [-1760, 560]
+      "position": [
+        -1760,
+        560
+      ]
     },
     {
       "parameters": {
@@ -527,7 +712,10 @@
       "name": "Respond 403 — Approve",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [-1540, 740]
+      "position": [
+        -1540,
+        740
+      ]
     },
     {
       "parameters": {},
@@ -535,7 +723,10 @@
       "name": "Stop — Approve Invalid",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [-1320, 740]
+      "position": [
+        -1320,
+        740
+      ]
     },
     {
       "parameters": {
@@ -566,13 +757,17 @@
       "name": "Baca Reseller (Kode)",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [-1540, 540],
+      "position": [
+        -1540,
+        540
+      ],
       "alwaysOutputData": true,
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000,
       "credentials": {
         "googleApi": {
+          "id": "GOOGLESAHARIH001",
           "name": "Google SA hariH"
         }
       }
@@ -586,7 +781,10 @@
       "name": "Cek Status Reseller",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-1320, 540]
+      "position": [
+        -1320,
+        540
+      ]
     },
     {
       "parameters": {
@@ -601,7 +799,10 @@
               "id": "c-tidak-ada",
               "leftValue": "={{ $json.route }}",
               "rightValue": "tidak_ada",
-              "operator": { "type": "string", "operation": "equals" }
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
             }
           ],
           "combinator": "and"
@@ -612,7 +813,10 @@
       "name": "Kode Tidak Ditemukan?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [-1100, 540]
+      "position": [
+        -1100,
+        540
+      ]
     },
     {
       "parameters": {
@@ -626,7 +830,10 @@
       "name": "Respond 404 — Kode",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [-880, 700]
+      "position": [
+        -880,
+        700
+      ]
     },
     {
       "parameters": {},
@@ -634,7 +841,10 @@
       "name": "Stop — Kode Tidak Ada",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [-660, 700]
+      "position": [
+        -660,
+        700
+      ]
     },
     {
       "parameters": {
@@ -649,7 +859,10 @@
               "id": "c-aktif",
               "leftValue": "={{ $json.route }}",
               "rightValue": "sudah_aktif",
-              "operator": { "type": "string", "operation": "equals" }
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
             }
           ],
           "combinator": "and"
@@ -660,7 +873,10 @@
       "name": "Sudah Aktif?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [-880, 480]
+      "position": [
+        -880,
+        480
+      ]
     },
     {
       "parameters": {
@@ -674,7 +890,10 @@
       "name": "Respond 200 — Sudah Aktif",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [-660, 560],
+      "position": [
+        -660,
+        560
+      ],
       "notes": "Idempoten: link approval diklik dua kali tidak membuat kupon ganda."
     },
     {
@@ -683,7 +902,10 @@
       "name": "Stop — Sudah Aktif",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [-440, 560]
+      "position": [
+        -440,
+        560
+      ]
     },
     {
       "parameters": {
@@ -700,12 +922,16 @@
       "name": "Buat Kupon WC",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [-660, 420],
+      "position": [
+        -660,
+        420
+      ],
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000,
       "credentials": {
         "httpBasicAuth": {
+          "id": "HARIHWCREST00001",
           "name": "WC REST hariH"
         }
       },
@@ -723,7 +949,10 @@
       "name": "Respond 200 — Diaktifkan",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [-440, 420]
+      "position": [
+        -440,
+        420
+      ]
     },
     {
       "parameters": {
@@ -746,8 +975,29 @@
             "row_number": "={{ $('Cek Status Reseller').first().json.row_number }}",
             "status": "AKTIF"
           },
-          "matchingColumns": ["row_number"],
-          "schema": []
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
         },
         "options": {
           "cellFormat": "RAW"
@@ -757,12 +1007,16 @@
       "name": "Set Status AKTIF",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [-220, 420],
+      "position": [
+        -220,
+        420
+      ],
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000,
       "credentials": {
         "googleApi": {
+          "id": "GOOGLESAHARIH001",
           "name": "Google SA hariH"
         }
       }
@@ -776,7 +1030,10 @@
       "name": "Siapkan Welcome Kit",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [0, 420]
+      "position": [
+        0,
+        420
+      ]
     },
     {
       "parameters": {
@@ -785,7 +1042,10 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "X-Api-Key", "value": "={{ $env.WAHA_API_KEY }}" }
+            {
+              "name": "X-Api-Key",
+              "value": "={{ $env.WAHA_API_KEY }}"
+            }
           ]
         },
         "sendBody": true,
@@ -797,7 +1057,10 @@
       "name": "Kirim Welcome Kit (WAHA)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [220, 420],
+      "position": [
+        220,
+        420
+      ],
       "retryOnFail": true,
       "maxTries": 2,
       "waitBetweenTries": 5000,
@@ -810,7 +1073,10 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "X-Api-Key", "value": "={{ $env.WAHA_API_KEY }}" }
+            {
+              "name": "X-Api-Key",
+              "value": "={{ $env.WAHA_API_KEY }}"
+            }
           ]
         },
         "sendBody": true,
@@ -822,7 +1088,10 @@
       "name": "Kirim Caption Promosi (WAHA)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [440, 420],
+      "position": [
+        440,
+        420
+      ],
       "retryOnFail": true,
       "maxTries": 2,
       "waitBetweenTries": 5000,
@@ -835,138 +1104,453 @@
       "name": "Selesai Approve",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [660, 420]
+      "position": [
+        660,
+        420
+      ]
     }
   ],
   "connections": {
     "Webhook Daftar": {
-      "main": [[{ "node": "Validasi Pendaftaran", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Validasi Pendaftaran",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Validasi Pendaftaran": {
-      "main": [[{ "node": "Route OK?", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Route OK?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Route OK?": {
       "main": [
-        [{ "node": "Cek Nomor WA (WAHA)", "type": "main", "index": 0 }],
-        [{ "node": "Honeypot?", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Cek Nomor WA (WAHA)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Honeypot?",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Honeypot?": {
       "main": [
-        [{ "node": "Respond 200 — Honeypot", "type": "main", "index": 0 }],
-        [{ "node": "Rate Limit?", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Respond 200 — Honeypot",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Rate Limit?",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Respond 200 — Honeypot": {
-      "main": [[{ "node": "Stop — Honeypot", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Stop — Honeypot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Rate Limit?": {
       "main": [
-        [{ "node": "Respond 429 — Rate Limit", "type": "main", "index": 0 }],
-        [{ "node": "Respond 422 — Data Kurang", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Respond 429 — Rate Limit",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond 422 — Data Kurang",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Respond 429 — Rate Limit": {
-      "main": [[{ "node": "Stop — Rate Limit", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Stop — Rate Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Respond 422 — Data Kurang": {
-      "main": [[{ "node": "Stop — Data Kurang", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Stop — Data Kurang",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Cek Nomor WA (WAHA)": {
-      "main": [[{ "node": "Bukan Nomor WA?", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Bukan Nomor WA?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Bukan Nomor WA?": {
       "main": [
-        [{ "node": "Respond 422 — Bukan WA", "type": "main", "index": 0 }],
-        [{ "node": "Baca Resellers", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Respond 422 — Bukan WA",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Baca Resellers",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Respond 422 — Bukan WA": {
-      "main": [[{ "node": "Stop — Bukan WA", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Stop — Bukan WA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Baca Resellers": {
-      "main": [[{ "node": "Cek Duplikat & Buat Kode", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Cek Duplikat & Buat Kode",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Cek Duplikat & Buat Kode": {
-      "main": [[{ "node": "Sudah Terdaftar?", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Sudah Terdaftar?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Sudah Terdaftar?": {
       "main": [
-        [{ "node": "Respond 200 — Sudah Terdaftar", "type": "main", "index": 0 }],
-        [{ "node": "Append Reseller (PENDING)", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Respond 200 — Sudah Terdaftar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append Reseller (PENDING)",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Respond 200 — Sudah Terdaftar": {
-      "main": [[{ "node": "Stop — Sudah Terdaftar", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Stop — Sudah Terdaftar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Append Reseller (PENDING)": {
-      "main": [[{ "node": "Respond 200 — Terdaftar", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Respond 200 — Terdaftar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Respond 200 — Terdaftar": {
-      "main": [[{ "node": "WA Owner — Approval", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "WA Owner — Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "WA Owner — Approval": {
-      "main": [[{ "node": "Email Owner — Approval", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Email Owner — Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Email Owner — Approval": {
-      "main": [[{ "node": "Selesai Daftar", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Selesai Daftar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Webhook Approve": {
-      "main": [[{ "node": "Verifikasi Link Approve", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Verifikasi Link Approve",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Verifikasi Link Approve": {
-      "main": [[{ "node": "Link Approve Valid?", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Link Approve Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Link Approve Valid?": {
       "main": [
-        [{ "node": "Baca Reseller (Kode)", "type": "main", "index": 0 }],
-        [{ "node": "Respond 403 — Approve", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Baca Reseller (Kode)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond 403 — Approve",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Respond 403 — Approve": {
-      "main": [[{ "node": "Stop — Approve Invalid", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Stop — Approve Invalid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Baca Reseller (Kode)": {
-      "main": [[{ "node": "Cek Status Reseller", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Cek Status Reseller",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Cek Status Reseller": {
-      "main": [[{ "node": "Kode Tidak Ditemukan?", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Kode Tidak Ditemukan?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Kode Tidak Ditemukan?": {
       "main": [
-        [{ "node": "Respond 404 — Kode", "type": "main", "index": 0 }],
-        [{ "node": "Sudah Aktif?", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Respond 404 — Kode",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sudah Aktif?",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Respond 404 — Kode": {
-      "main": [[{ "node": "Stop — Kode Tidak Ada", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Stop — Kode Tidak Ada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Sudah Aktif?": {
       "main": [
-        [{ "node": "Respond 200 — Sudah Aktif", "type": "main", "index": 0 }],
-        [{ "node": "Buat Kupon WC", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Respond 200 — Sudah Aktif",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Buat Kupon WC",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Respond 200 — Sudah Aktif": {
-      "main": [[{ "node": "Stop — Sudah Aktif", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Stop — Sudah Aktif",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Buat Kupon WC": {
-      "main": [[{ "node": "Respond 200 — Diaktifkan", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Respond 200 — Diaktifkan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Respond 200 — Diaktifkan": {
-      "main": [[{ "node": "Set Status AKTIF", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Set Status AKTIF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Set Status AKTIF": {
-      "main": [[{ "node": "Siapkan Welcome Kit", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Siapkan Welcome Kit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Siapkan Welcome Kit": {
-      "main": [[{ "node": "Kirim Welcome Kit (WAHA)", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Kirim Welcome Kit (WAHA)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Kirim Welcome Kit (WAHA)": {
-      "main": [[{ "node": "Kirim Caption Promosi (WAHA)", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Kirim Caption Promosi (WAHA)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Kirim Caption Promosi (WAHA)": {
-      "main": [[{ "node": "Selesai Approve", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Selesai Approve",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {

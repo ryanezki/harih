@@ -16,7 +16,10 @@
       "name": "Tiap 15 Menit",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
-      "position": [-1120, -100],
+      "position": [
+        -1120,
+        -100
+      ],
       "notes": "Jaring pengaman T3.12: menangkap order yang hilang karena webhook WC ter-disable senyap / n8n sempat mati."
     },
     {
@@ -28,11 +31,26 @@
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
-            { "name": "status", "value": "any" },
-            { "name": "per_page", "value": "100" },
-            { "name": "orderby", "value": "date" },
-            { "name": "order", "value": "desc" },
-            { "name": "after", "value": "={{ new Date(Date.now() - 7 * 86400000).toISOString() }}" }
+            {
+              "name": "status",
+              "value": "any"
+            },
+            {
+              "name": "per_page",
+              "value": "100"
+            },
+            {
+              "name": "orderby",
+              "value": "date"
+            },
+            {
+              "name": "order",
+              "value": "desc"
+            },
+            {
+              "name": "after",
+              "value": "={{ new Date(Date.now() - 7 * 86400000).toISOString() }}"
+            }
           ]
         },
         "options": {}
@@ -41,13 +59,17 @@
       "name": "Ambil Order WC (7 Hari)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [-900, -100],
+      "position": [
+        -900,
+        -100
+      ],
       "alwaysOutputData": true,
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000,
       "credentials": {
         "httpBasicAuth": {
+          "id": "HARIHWCREST00001",
           "name": "WC REST hariH"
         }
       },
@@ -62,7 +84,10 @@
       "name": "Kumpulkan Order WC",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-680, -100]
+      "position": [
+        -680,
+        -100
+      ]
     },
     {
       "parameters": {
@@ -85,13 +110,17 @@
       "name": "Baca Orders Sheet",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [-460, -100],
+      "position": [
+        -460,
+        -100
+      ],
       "alwaysOutputData": true,
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000,
       "credentials": {
         "googleApi": {
+          "id": "GOOGLESAHARIH001",
           "name": "Google SA hariH"
         }
       }
@@ -105,7 +134,10 @@
       "name": "Cari Order Tertinggal",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-240, -100]
+      "position": [
+        -240,
+        -100
+      ]
     },
     {
       "parameters": {
@@ -114,7 +146,10 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "x-wc-webhook-signature", "value": "={{ $json.signature }}" }
+            {
+              "name": "x-wc-webhook-signature",
+              "value": "={{ $json.signature }}"
+            }
           ]
         },
         "sendBody": true,
@@ -127,7 +162,10 @@
       "name": "Kirim Ulang ke WF-01",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [-20, -100],
+      "position": [
+        -20,
+        -100
+      ],
       "retryOnFail": true,
       "maxTries": 2,
       "waitBetweenTries": 5000,
@@ -143,7 +181,10 @@
       "name": "Susun Alert Rekonsiliasi",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [200, -100],
+      "position": [
+        200,
+        -100
+      ],
       "notes": "Rekonsiliasi yang MENEMUKAN sesuatu = insiden — owner selalu diberi tahu; nihil temuan = senyap."
     },
     {
@@ -153,7 +194,10 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "X-Api-Key", "value": "={{ $env.WAHA_API_KEY }}" }
+            {
+              "name": "X-Api-Key",
+              "value": "={{ $env.WAHA_API_KEY }}"
+            }
           ]
         },
         "sendBody": true,
@@ -165,7 +209,10 @@
       "name": "WA Owner — Rekonsiliasi",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [420, -100],
+      "position": [
+        420,
+        -100
+      ],
       "retryOnFail": true,
       "maxTries": 2,
       "waitBetweenTries": 5000,
@@ -178,7 +225,10 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "api-key", "value": "={{ $env.BREVO_API_KEY }}" }
+            {
+              "name": "api-key",
+              "value": "={{ $env.BREVO_API_KEY }}"
+            }
           ]
         },
         "sendBody": true,
@@ -190,7 +240,10 @@
       "name": "Email Owner — Rekonsiliasi",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [640, -100],
+      "position": [
+        640,
+        -100
+      ],
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000
@@ -201,7 +254,10 @@
       "name": "Selesai Rekonsiliasi",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [860, -100]
+      "position": [
+        860,
+        -100
+      ]
     },
     {
       "parameters": {
@@ -218,7 +274,10 @@
       "name": "Harian 07:30 WIB",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
-      "position": [-1120, 400],
+      "position": [
+        -1120,
+        400
+      ],
       "notes": "T3.12: WooCommerce menonaktifkan webhook secara permanen & senyap setelah delivery gagal beruntun."
     },
     {
@@ -230,7 +289,10 @@
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
-            { "name": "per_page", "value": "100" }
+            {
+              "name": "per_page",
+              "value": "100"
+            }
           ]
         },
         "options": {}
@@ -239,13 +301,17 @@
       "name": "Cek Webhook WC",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [-900, 400],
+      "position": [
+        -900,
+        400
+      ],
       "alwaysOutputData": true,
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000,
       "credentials": {
         "httpBasicAuth": {
+          "id": "HARIHWCREST00001",
           "name": "WC REST hariH"
         }
       }
@@ -259,7 +325,10 @@
       "name": "Evaluasi Webhook",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-680, 400]
+      "position": [
+        -680,
+        400
+      ]
     },
     {
       "parameters": {
@@ -274,7 +343,11 @@
               "id": "c-alert-webhook",
               "leftValue": "={{ $json.perlu_alert }}",
               "rightValue": "",
-              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
             }
           ],
           "combinator": "and"
@@ -285,7 +358,10 @@
       "name": "Perlu Alert Webhook?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [-460, 400]
+      "position": [
+        -460,
+        400
+      ]
     },
     {
       "parameters": {
@@ -294,7 +370,10 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "X-Api-Key", "value": "={{ $env.WAHA_API_KEY }}" }
+            {
+              "name": "X-Api-Key",
+              "value": "={{ $env.WAHA_API_KEY }}"
+            }
           ]
         },
         "sendBody": true,
@@ -306,7 +385,10 @@
       "name": "WA Owner — Webhook",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [-240, 320],
+      "position": [
+        -240,
+        320
+      ],
       "retryOnFail": true,
       "maxTries": 2,
       "waitBetweenTries": 5000,
@@ -319,7 +401,10 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "api-key", "value": "={{ $env.BREVO_API_KEY }}" }
+            {
+              "name": "api-key",
+              "value": "={{ $env.BREVO_API_KEY }}"
+            }
           ]
         },
         "sendBody": true,
@@ -331,7 +416,10 @@
       "name": "Email Owner — Webhook",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [-20, 320],
+      "position": [
+        -20,
+        320
+      ],
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000
@@ -342,57 +430,184 @@
       "name": "Selesai Cek Webhook",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [200, 400]
+      "position": [
+        200,
+        400
+      ]
     }
   ],
   "connections": {
     "Tiap 15 Menit": {
-      "main": [[{ "node": "Ambil Order WC (7 Hari)", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Ambil Order WC (7 Hari)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Ambil Order WC (7 Hari)": {
-      "main": [[{ "node": "Kumpulkan Order WC", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Kumpulkan Order WC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Kumpulkan Order WC": {
-      "main": [[{ "node": "Baca Orders Sheet", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Baca Orders Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Baca Orders Sheet": {
-      "main": [[{ "node": "Cari Order Tertinggal", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Cari Order Tertinggal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Cari Order Tertinggal": {
-      "main": [[{ "node": "Kirim Ulang ke WF-01", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Kirim Ulang ke WF-01",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Kirim Ulang ke WF-01": {
-      "main": [[{ "node": "Susun Alert Rekonsiliasi", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Susun Alert Rekonsiliasi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Susun Alert Rekonsiliasi": {
-      "main": [[{ "node": "WA Owner — Rekonsiliasi", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "WA Owner — Rekonsiliasi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "WA Owner — Rekonsiliasi": {
-      "main": [[{ "node": "Email Owner — Rekonsiliasi", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Email Owner — Rekonsiliasi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Email Owner — Rekonsiliasi": {
-      "main": [[{ "node": "Selesai Rekonsiliasi", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Selesai Rekonsiliasi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Harian 07:30 WIB": {
-      "main": [[{ "node": "Cek Webhook WC", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Cek Webhook WC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Cek Webhook WC": {
-      "main": [[{ "node": "Evaluasi Webhook", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Evaluasi Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Evaluasi Webhook": {
-      "main": [[{ "node": "Perlu Alert Webhook?", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Perlu Alert Webhook?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Perlu Alert Webhook?": {
       "main": [
-        [{ "node": "WA Owner — Webhook", "type": "main", "index": 0 }],
-        [{ "node": "Selesai Cek Webhook", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "WA Owner — Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Selesai Cek Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "WA Owner — Webhook": {
-      "main": [[{ "node": "Email Owner — Webhook", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Email Owner — Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Email Owner — Webhook": {
-      "main": [[{ "node": "Selesai Cek Webhook", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Selesai Cek Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {

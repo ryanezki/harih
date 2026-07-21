@@ -14,7 +14,10 @@
       "name": "Webhook WC Order",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [-1540, 0],
+      "position": [
+        -1540,
+        0
+      ],
       "webhookId": "harih-wc-order",
       "notes": "Respond Immediately (T2.13): WC menghitung respons lambat sebagai delivery gagal. Raw Body wajib untuk verifikasi HMAC."
     },
@@ -27,7 +30,10 @@
       "name": "Verifikasi HMAC & Ping",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-1320, 0]
+      "position": [
+        -1320,
+        0
+      ]
     },
     {
       "parameters": {
@@ -42,7 +48,11 @@
               "id": "c-ping",
               "leftValue": "={{ $json.ping }}",
               "rightValue": "",
-              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
             }
           ],
           "combinator": "and"
@@ -53,7 +63,10 @@
       "name": "Ping?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [-1100, 0]
+      "position": [
+        -1100,
+        0
+      ]
     },
     {
       "parameters": {},
@@ -61,7 +74,10 @@
       "name": "Stop — Ping WC",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [-880, -160]
+      "position": [
+        -880,
+        -160
+      ]
     },
     {
       "parameters": {
@@ -75,12 +91,16 @@
       "name": "Ambil Detail Order (WC REST)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [-880, 0],
+      "position": [
+        -880,
+        0
+      ],
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000,
       "credentials": {
         "httpBasicAuth": {
+          "id": "HARIHWCREST00001",
           "name": "WC REST hariH"
         }
       },
@@ -99,13 +119,19 @@
               "id": "c-processing",
               "leftValue": "={{ $json.status }}",
               "rightValue": "processing",
-              "operator": { "type": "string", "operation": "equals" }
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
             },
             {
               "id": "c-completed",
               "leftValue": "={{ $json.status }}",
               "rightValue": "completed",
-              "operator": { "type": "string", "operation": "equals" }
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
             }
           ],
           "combinator": "or"
@@ -116,7 +142,10 @@
       "name": "Status Dibayar?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [-660, 0],
+      "position": [
+        -660,
+        0
+      ],
       "notes": "processing ATAU completed (T2.11) — sebagian gateway langsung menset completed."
     },
     {
@@ -125,7 +154,10 @@
       "name": "Stop — Status Lain",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [-440, 160]
+      "position": [
+        -440,
+        160
+      ]
     },
     {
       "parameters": {
@@ -136,7 +168,10 @@
       "name": "Siapkan Data Order",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-440, 0]
+      "position": [
+        -440,
+        0
+      ]
     },
     {
       "parameters": {
@@ -172,7 +207,134 @@
             "exec_id": "={{ $json.exec_id }}"
           },
           "matchingColumns": [],
-          "schema": []
+          "schema": [
+            {
+              "id": "order_id",
+              "displayName": "order_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tgl_order",
+              "displayName": "tgl_order",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nama",
+              "displayName": "nama",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "wa",
+              "displayName": "wa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "paket",
+              "displayName": "paket",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "kupon",
+              "displayName": "kupon",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "total",
+              "displayName": "total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "token",
+              "displayName": "token",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "link_undangan",
+              "displayName": "link_undangan",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tgl_acara",
+              "displayName": "tgl_acara",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "wa_status",
+              "displayName": "wa_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "exec_id",
+              "displayName": "exec_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
         },
         "options": {
           "cellFormat": "RAW"
@@ -182,9 +344,13 @@
       "name": "Append Baris Order",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [-220, 0],
+      "position": [
+        -220,
+        0
+      ],
       "credentials": {
         "googleApi": {
+          "id": "GOOGLESAHARIH001",
           "name": "Google SA hariH"
         }
       },
@@ -221,12 +387,16 @@
       "name": "Baca Ulang Orders",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [0, 0],
+      "position": [
+        0,
+        0
+      ],
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000,
       "credentials": {
         "googleApi": {
+          "id": "GOOGLESAHARIH001",
           "name": "Google SA hariH"
         }
       }
@@ -240,7 +410,10 @@
       "name": "Cek Duplikat",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [220, 0]
+      "position": [
+        220,
+        0
+      ]
     },
     {
       "parameters": {
@@ -255,7 +428,11 @@
               "id": "c-dup",
               "leftValue": "={{ $json.duplikat }}",
               "rightValue": "",
-              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
             }
           ],
           "combinator": "and"
@@ -266,7 +443,10 @@
       "name": "Duplikat?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [440, 0]
+      "position": [
+        440,
+        0
+      ]
     },
     {
       "parameters": {
@@ -291,9 +471,13 @@
       "name": "Hapus Baris Duplikat",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [660, -160],
+      "position": [
+        660,
+        -160
+      ],
       "credentials": {
         "googleApi": {
+          "id": "GOOGLESAHARIH001",
           "name": "Google SA hariH"
         }
       },
@@ -305,7 +489,10 @@
       "name": "Stop — Duplikat",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [880, -160]
+      "position": [
+        880,
+        -160
+      ]
     },
     {
       "parameters": {
@@ -320,7 +507,10 @@
               "id": "c-kupon",
               "leftValue": "={{ $json.kupon }}",
               "rightValue": "RES-",
-              "operator": { "type": "string", "operation": "startsWith" }
+              "operator": {
+                "type": "string",
+                "operation": "startsWith"
+              }
             }
           ],
           "combinator": "and"
@@ -331,7 +521,10 @@
       "name": "Kupon Reseller?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [660, 40]
+      "position": [
+        660,
+        40
+      ]
     },
     {
       "parameters": {
@@ -359,7 +552,62 @@
             "status": "UNPAID"
           },
           "matchingColumns": [],
-          "schema": []
+          "schema": [
+            {
+              "id": "tgl",
+              "displayName": "tgl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "order_id",
+              "displayName": "order_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "kode",
+              "displayName": "kode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "total_order",
+              "displayName": "total_order",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "komisi",
+              "displayName": "komisi",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
         },
         "options": {
           "cellFormat": "RAW"
@@ -369,12 +617,16 @@
       "name": "Catat Komisi (UNPAID)",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [880, 120],
+      "position": [
+        880,
+        120
+      ],
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000,
       "credentials": {
         "googleApi": {
+          "id": "GOOGLESAHARIH001",
           "name": "Google SA hariH"
         }
       },
@@ -389,7 +641,10 @@
       "name": "Siapkan Pesan",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1100, 0]
+      "position": [
+        1100,
+        0
+      ]
     },
     {
       "parameters": {
@@ -398,7 +653,10 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "api-key", "value": "={{ $env.BREVO_API_KEY }}" }
+            {
+              "name": "api-key",
+              "value": "={{ $env.BREVO_API_KEY }}"
+            }
           ]
         },
         "sendBody": true,
@@ -410,7 +668,10 @@
       "name": "Kirim Email (Brevo)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1320, 0],
+      "position": [
+        1320,
+        0
+      ],
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000,
@@ -429,7 +690,11 @@
               "id": "c-wa-valid",
               "leftValue": "={{ $('Siapkan Pesan').first().json.wa }}",
               "rightValue": "",
-              "operator": { "type": "string", "operation": "notEmpty", "singleValue": true }
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
             }
           ],
           "combinator": "and"
@@ -440,7 +705,10 @@
       "name": "Nomor WA Valid?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [1540, 0]
+      "position": [
+        1540,
+        0
+      ]
     },
     {
       "parameters": {
@@ -449,14 +717,23 @@
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
-            { "name": "phone", "value": "={{ $('Siapkan Pesan').first().json.wa }}" },
-            { "name": "session", "value": "default" }
+            {
+              "name": "phone",
+              "value": "={{ $('Siapkan Pesan').first().json.wa }}"
+            },
+            {
+              "name": "session",
+              "value": "default"
+            }
           ]
         },
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "X-Api-Key", "value": "={{ $env.WAHA_API_KEY }}" }
+            {
+              "name": "X-Api-Key",
+              "value": "={{ $env.WAHA_API_KEY }}"
+            }
           ]
         },
         "options": {}
@@ -465,7 +742,10 @@
       "name": "Cek Nomor WA (WAHA)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1760, -40],
+      "position": [
+        1760,
+        -40
+      ],
       "retryOnFail": true,
       "maxTries": 2,
       "waitBetweenTries": 5000,
@@ -485,7 +765,11 @@
               "id": "c-exists",
               "leftValue": "={{ $json.numberExists }}",
               "rightValue": "",
-              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
             }
           ],
           "combinator": "and"
@@ -496,7 +780,10 @@
       "name": "Terdaftar di WA?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [1980, -80]
+      "position": [
+        1980,
+        -80
+      ]
     },
     {
       "parameters": {
@@ -505,7 +792,10 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "X-Api-Key", "value": "={{ $env.WAHA_API_KEY }}" }
+            {
+              "name": "X-Api-Key",
+              "value": "={{ $env.WAHA_API_KEY }}"
+            }
           ]
         },
         "sendBody": true,
@@ -517,7 +807,10 @@
       "name": "Kirim WA (WAHA)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [2200, -120],
+      "position": [
+        2200,
+        -120
+      ],
       "retryOnFail": true,
       "maxTries": 2,
       "waitBetweenTries": 5000,
@@ -528,8 +821,18 @@
       "parameters": {
         "assignments": {
           "assignments": [
-            { "id": "s1", "name": "wa_status", "type": "string", "value": "TERKIRIM" },
-            { "id": "s2", "name": "row_number", "type": "number", "value": "={{ $('Cek Duplikat').first().json.row_number }}" }
+            {
+              "id": "s1",
+              "name": "wa_status",
+              "type": "string",
+              "value": "TERKIRIM"
+            },
+            {
+              "id": "s2",
+              "name": "row_number",
+              "type": "number",
+              "value": "={{ $('Cek Duplikat').first().json.row_number }}"
+            }
           ]
         },
         "options": {}
@@ -538,14 +841,27 @@
       "name": "Status: TERKIRIM",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [2420, -180]
+      "position": [
+        2420,
+        -180
+      ]
     },
     {
       "parameters": {
         "assignments": {
           "assignments": [
-            { "id": "s1", "name": "wa_status", "type": "string", "value": "GAGAL_KIRIM" },
-            { "id": "s2", "name": "row_number", "type": "number", "value": "={{ $('Cek Duplikat').first().json.row_number }}" }
+            {
+              "id": "s1",
+              "name": "wa_status",
+              "type": "string",
+              "value": "GAGAL_KIRIM"
+            },
+            {
+              "id": "s2",
+              "name": "row_number",
+              "type": "number",
+              "value": "={{ $('Cek Duplikat').first().json.row_number }}"
+            }
           ]
         },
         "options": {}
@@ -554,14 +870,27 @@
       "name": "Status: GAGAL_KIRIM",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [2420, -40]
+      "position": [
+        2420,
+        -40
+      ]
     },
     {
       "parameters": {
         "assignments": {
           "assignments": [
-            { "id": "s1", "name": "wa_status", "type": "string", "value": "TIDAK_TERDAFTAR" },
-            { "id": "s2", "name": "row_number", "type": "number", "value": "={{ $('Cek Duplikat').first().json.row_number }}" }
+            {
+              "id": "s1",
+              "name": "wa_status",
+              "type": "string",
+              "value": "TIDAK_TERDAFTAR"
+            },
+            {
+              "id": "s2",
+              "name": "row_number",
+              "type": "number",
+              "value": "={{ $('Cek Duplikat').first().json.row_number }}"
+            }
           ]
         },
         "options": {}
@@ -570,14 +899,27 @@
       "name": "Status: TIDAK_TERDAFTAR",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [2200, 40]
+      "position": [
+        2200,
+        40
+      ]
     },
     {
       "parameters": {
         "assignments": {
           "assignments": [
-            { "id": "s1", "name": "wa_status", "type": "string", "value": "GAGAL_CEK" },
-            { "id": "s2", "name": "row_number", "type": "number", "value": "={{ $('Cek Duplikat').first().json.row_number }}" }
+            {
+              "id": "s1",
+              "name": "wa_status",
+              "type": "string",
+              "value": "GAGAL_CEK"
+            },
+            {
+              "id": "s2",
+              "name": "row_number",
+              "type": "number",
+              "value": "={{ $('Cek Duplikat').first().json.row_number }}"
+            }
           ]
         },
         "options": {}
@@ -586,14 +928,27 @@
       "name": "Status: GAGAL_CEK",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [1980, 120]
+      "position": [
+        1980,
+        120
+      ]
     },
     {
       "parameters": {
         "assignments": {
           "assignments": [
-            { "id": "s1", "name": "wa_status", "type": "string", "value": "TIDAK_VALID" },
-            { "id": "s2", "name": "row_number", "type": "number", "value": "={{ $('Cek Duplikat').first().json.row_number }}" }
+            {
+              "id": "s1",
+              "name": "wa_status",
+              "type": "string",
+              "value": "TIDAK_VALID"
+            },
+            {
+              "id": "s2",
+              "name": "row_number",
+              "type": "number",
+              "value": "={{ $('Cek Duplikat').first().json.row_number }}"
+            }
           ]
         },
         "options": {}
@@ -602,7 +957,10 @@
       "name": "Status: TIDAK_VALID",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [1760, 200]
+      "position": [
+        1760,
+        200
+      ]
     },
     {
       "parameters": {
@@ -625,8 +983,29 @@
             "row_number": "={{ $json.row_number }}",
             "wa_status": "={{ $json.wa_status }}"
           },
-          "matchingColumns": ["row_number"],
-          "schema": []
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "wa_status",
+              "displayName": "wa_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
         },
         "options": {
           "cellFormat": "RAW"
@@ -636,12 +1015,16 @@
       "name": "Update wa_status",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [2680, 40],
+      "position": [
+        2680,
+        40
+      ],
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000,
       "credentials": {
         "googleApi": {
+          "id": "GOOGLESAHARIH001",
           "name": "Google SA hariH"
         }
       },
@@ -653,108 +1036,343 @@
       "name": "Selesai",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [2900, 40]
+      "position": [
+        2900,
+        40
+      ]
     }
   ],
   "connections": {
     "Webhook WC Order": {
-      "main": [[{ "node": "Verifikasi HMAC & Ping", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Verifikasi HMAC & Ping",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Verifikasi HMAC & Ping": {
-      "main": [[{ "node": "Ping?", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Ping?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Ping?": {
       "main": [
-        [{ "node": "Stop — Ping WC", "type": "main", "index": 0 }],
-        [{ "node": "Ambil Detail Order (WC REST)", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Stop — Ping WC",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ambil Detail Order (WC REST)",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Ambil Detail Order (WC REST)": {
-      "main": [[{ "node": "Status Dibayar?", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Status Dibayar?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Status Dibayar?": {
       "main": [
-        [{ "node": "Siapkan Data Order", "type": "main", "index": 0 }],
-        [{ "node": "Stop — Status Lain", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Siapkan Data Order",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop — Status Lain",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Siapkan Data Order": {
-      "main": [[{ "node": "Append Baris Order", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Append Baris Order",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Append Baris Order": {
-      "main": [[{ "node": "Baca Ulang Orders", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Baca Ulang Orders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Baca Ulang Orders": {
-      "main": [[{ "node": "Cek Duplikat", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Cek Duplikat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Cek Duplikat": {
-      "main": [[{ "node": "Duplikat?", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Duplikat?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Duplikat?": {
       "main": [
-        [{ "node": "Hapus Baris Duplikat", "type": "main", "index": 0 }],
-        [{ "node": "Kupon Reseller?", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Hapus Baris Duplikat",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Kupon Reseller?",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Hapus Baris Duplikat": {
-      "main": [[{ "node": "Stop — Duplikat", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Stop — Duplikat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Kupon Reseller?": {
       "main": [
-        [{ "node": "Catat Komisi (UNPAID)", "type": "main", "index": 0 }],
-        [{ "node": "Siapkan Pesan", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Catat Komisi (UNPAID)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Siapkan Pesan",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Catat Komisi (UNPAID)": {
-      "main": [[{ "node": "Siapkan Pesan", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Siapkan Pesan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Siapkan Pesan": {
-      "main": [[{ "node": "Kirim Email (Brevo)", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Kirim Email (Brevo)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Kirim Email (Brevo)": {
-      "main": [[{ "node": "Nomor WA Valid?", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Nomor WA Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Nomor WA Valid?": {
       "main": [
-        [{ "node": "Cek Nomor WA (WAHA)", "type": "main", "index": 0 }],
-        [{ "node": "Status: TIDAK_VALID", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Cek Nomor WA (WAHA)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Status: TIDAK_VALID",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Cek Nomor WA (WAHA)": {
       "main": [
-        [{ "node": "Terdaftar di WA?", "type": "main", "index": 0 }],
-        [{ "node": "Status: GAGAL_CEK", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Terdaftar di WA?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Status: GAGAL_CEK",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Terdaftar di WA?": {
       "main": [
-        [{ "node": "Kirim WA (WAHA)", "type": "main", "index": 0 }],
-        [{ "node": "Status: TIDAK_TERDAFTAR", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Kirim WA (WAHA)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Status: TIDAK_TERDAFTAR",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Kirim WA (WAHA)": {
       "main": [
-        [{ "node": "Status: TERKIRIM", "type": "main", "index": 0 }],
-        [{ "node": "Status: GAGAL_KIRIM", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Status: TERKIRIM",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Status: GAGAL_KIRIM",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Status: TERKIRIM": {
-      "main": [[{ "node": "Update wa_status", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Update wa_status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Status: GAGAL_KIRIM": {
-      "main": [[{ "node": "Update wa_status", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Update wa_status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Status: TIDAK_TERDAFTAR": {
-      "main": [[{ "node": "Update wa_status", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Update wa_status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Status: GAGAL_CEK": {
-      "main": [[{ "node": "Update wa_status", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Update wa_status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Status: TIDAK_VALID": {
-      "main": [[{ "node": "Update wa_status", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Update wa_status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Update wa_status": {
-      "main": [[{ "node": "Selesai", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Selesai",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {

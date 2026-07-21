@@ -16,7 +16,10 @@
       "name": "Senin 09:00 WIB",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
-      "position": [-900, 0],
+      "position": [
+        -900,
+        0
+      ],
       "notes": "WIB dijamin GENERIC_TIMEZONE=Asia/Jakarta + timezone workflow."
     },
     {
@@ -40,13 +43,17 @@
       "name": "Baca Komisi",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [-680, 0],
+      "position": [
+        -680,
+        0
+      ],
       "alwaysOutputData": true,
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000,
       "credentials": {
         "googleApi": {
+          "id": "GOOGLESAHARIH001",
           "name": "Google SA hariH"
         }
       }
@@ -72,13 +79,17 @@
       "name": "Baca Resellers",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [-460, 0],
+      "position": [
+        -460,
+        0
+      ],
       "alwaysOutputData": true,
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000,
       "credentials": {
         "googleApi": {
+          "id": "GOOGLESAHARIH001",
           "name": "Google SA hariH"
         }
       }
@@ -92,7 +103,10 @@
       "name": "Susun Rekap",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-240, 0]
+      "position": [
+        -240,
+        0
+      ]
     },
     {
       "parameters": {
@@ -103,7 +117,10 @@
       "name": "Pecah Per Reseller",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-20, -100]
+      "position": [
+        -20,
+        -100
+      ]
     },
     {
       "parameters": {
@@ -112,7 +129,10 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "X-Api-Key", "value": "={{ $env.WAHA_API_KEY }}" }
+            {
+              "name": "X-Api-Key",
+              "value": "={{ $env.WAHA_API_KEY }}"
+            }
           ]
         },
         "sendBody": true,
@@ -124,7 +144,10 @@
       "name": "Kirim Rekap Reseller (WAHA)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [200, -100],
+      "position": [
+        200,
+        -100
+      ],
       "retryOnFail": true,
       "maxTries": 2,
       "waitBetweenTries": 5000,
@@ -137,7 +160,10 @@
       "name": "Selesai Kirim Reseller",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [420, -100]
+      "position": [
+        420,
+        -100
+      ]
     },
     {
       "parameters": {
@@ -146,7 +172,10 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "X-Api-Key", "value": "={{ $env.WAHA_API_KEY }}" }
+            {
+              "name": "X-Api-Key",
+              "value": "={{ $env.WAHA_API_KEY }}"
+            }
           ]
         },
         "sendBody": true,
@@ -158,7 +187,10 @@
       "name": "Kirim Rekap Owner (WAHA)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [-20, 100],
+      "position": [
+        -20,
+        100
+      ],
       "retryOnFail": true,
       "maxTries": 2,
       "waitBetweenTries": 5000,
@@ -170,33 +202,94 @@
       "name": "Selesai",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [200, 100]
+      "position": [
+        200,
+        100
+      ]
     }
   ],
   "connections": {
     "Senin 09:00 WIB": {
-      "main": [[{ "node": "Baca Komisi", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Baca Komisi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Baca Komisi": {
-      "main": [[{ "node": "Baca Resellers", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Baca Resellers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Baca Resellers": {
-      "main": [[{ "node": "Susun Rekap", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Susun Rekap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Susun Rekap": {
-      "main": [[
-        { "node": "Pecah Per Reseller", "type": "main", "index": 0 },
-        { "node": "Kirim Rekap Owner (WAHA)", "type": "main", "index": 0 }
-      ]]
+      "main": [
+        [
+          {
+            "node": "Pecah Per Reseller",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Kirim Rekap Owner (WAHA)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Pecah Per Reseller": {
-      "main": [[{ "node": "Kirim Rekap Reseller (WAHA)", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Kirim Rekap Reseller (WAHA)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Kirim Rekap Reseller (WAHA)": {
-      "main": [[{ "node": "Selesai Kirim Reseller", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Selesai Kirim Reseller",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Kirim Rekap Owner (WAHA)": {
-      "main": [[{ "node": "Selesai", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Selesai",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {

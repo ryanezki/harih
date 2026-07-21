@@ -16,7 +16,10 @@
       "name": "Tiap 10 Menit",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
-      "position": [-680, 0]
+      "position": [
+        -680,
+        0
+      ]
     },
     {
       "parameters": {
@@ -25,13 +28,19 @@
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
-            { "name": "all", "value": "true" }
+            {
+              "name": "all",
+              "value": "true"
+            }
           ]
         },
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "X-Api-Key", "value": "={{ $env.WAHA_API_KEY }}" }
+            {
+              "name": "X-Api-Key",
+              "value": "={{ $env.WAHA_API_KEY }}"
+            }
           ]
         },
         "options": {}
@@ -40,7 +49,10 @@
       "name": "Cek Sesi WAHA",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [-460, 0],
+      "position": [
+        -460,
+        0
+      ],
       "retryOnFail": true,
       "maxTries": 2,
       "waitBetweenTries": 5000,
@@ -56,7 +68,10 @@
       "name": "Evaluasi Status",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-240, 0]
+      "position": [
+        -240,
+        0
+      ]
     },
     {
       "parameters": {
@@ -71,7 +86,11 @@
               "id": "c-kirim",
               "leftValue": "={{ $json.kirim }}",
               "rightValue": "",
-              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
             }
           ],
           "combinator": "and"
@@ -82,7 +101,10 @@
       "name": "Perlu Alert?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [-20, 0]
+      "position": [
+        -20,
+        0
+      ]
     },
     {
       "parameters": {
@@ -91,7 +113,10 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "api-key", "value": "={{ $env.BREVO_API_KEY }}" }
+            {
+              "name": "api-key",
+              "value": "={{ $env.BREVO_API_KEY }}"
+            }
           ]
         },
         "sendBody": true,
@@ -103,7 +128,10 @@
       "name": "Email Owner (Brevo)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [200, -80],
+      "position": [
+        200,
+        -80
+      ],
       "retryOnFail": true,
       "maxTries": 2,
       "waitBetweenTries": 3000
@@ -114,30 +142,81 @@
       "name": "Selesai",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [200, 80]
+      "position": [
+        200,
+        80
+      ]
     }
   ],
   "connections": {
     "Tiap 10 Menit": {
-      "main": [[{ "node": "Cek Sesi WAHA", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Cek Sesi WAHA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Cek Sesi WAHA": {
       "main": [
-        [{ "node": "Evaluasi Status", "type": "main", "index": 0 }],
-        [{ "node": "Evaluasi Status", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Evaluasi Status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Evaluasi Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Evaluasi Status": {
-      "main": [[{ "node": "Perlu Alert?", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Perlu Alert?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Perlu Alert?": {
       "main": [
-        [{ "node": "Email Owner (Brevo)", "type": "main", "index": 0 }],
-        [{ "node": "Selesai", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Email Owner (Brevo)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Selesai",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Email Owner (Brevo)": {
-      "main": [[{ "node": "Selesai", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Selesai",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {

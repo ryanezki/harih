@@ -14,7 +14,10 @@
       "name": "Webhook Form",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [-2200, 0],
+      "position": [
+        -2200,
+        0
+      ],
       "webhookId": "harih-form-undangan",
       "notes": "Multipart dari isi-data.js. CORS (T2.20): tanpa Access-Control-Allow-Origin, JS tidak bisa membaca respons → user mengira gagal → submit ulang."
     },
@@ -27,7 +30,10 @@
       "name": "Verifikasi Token",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-1980, 0]
+      "position": [
+        -1980,
+        0
+      ]
     },
     {
       "parameters": {
@@ -42,7 +48,11 @@
               "id": "c-valid",
               "leftValue": "={{ $json.valid }}",
               "rightValue": "",
-              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
             }
           ],
           "combinator": "and"
@@ -53,7 +63,10 @@
       "name": "Token Valid?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [-1760, 0]
+      "position": [
+        -1760,
+        0
+      ]
     },
     {
       "parameters": {
@@ -67,7 +80,10 @@
       "name": "Respond 403 — Token",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [-1540, 200]
+      "position": [
+        -1540,
+        200
+      ]
     },
     {
       "parameters": {},
@@ -75,7 +91,10 @@
       "name": "Stop — Token Invalid",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [-1320, 200]
+      "position": [
+        -1320,
+        200
+      ]
     },
     {
       "parameters": {
@@ -106,13 +125,17 @@
       "name": "Cari Order di Sheet",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [-1540, -20],
+      "position": [
+        -1540,
+        -20
+      ],
       "alwaysOutputData": true,
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000,
       "credentials": {
         "googleApi": {
+          "id": "GOOGLESAHARIH001",
           "name": "Google SA hariH"
         }
       },
@@ -127,7 +150,10 @@
       "name": "Cek Order & Validasi",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-1320, -20]
+      "position": [
+        -1320,
+        -20
+      ]
     },
     {
       "parameters": {
@@ -142,7 +168,10 @@
               "id": "c-ok",
               "leftValue": "={{ $json.route }}",
               "rightValue": "ok",
-              "operator": { "type": "string", "operation": "equals" }
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
             }
           ],
           "combinator": "and"
@@ -153,7 +182,10 @@
       "name": "Route OK?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [-1100, -20]
+      "position": [
+        -1100,
+        -20
+      ]
     },
     {
       "parameters": {
@@ -168,7 +200,10 @@
               "id": "c-jadi",
               "leftValue": "={{ $json.route }}",
               "rightValue": "sudah_jadi",
-              "operator": { "type": "string", "operation": "equals" }
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
             }
           ],
           "combinator": "and"
@@ -179,7 +214,10 @@
       "name": "Sudah Jadi?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [-880, 200]
+      "position": [
+        -880,
+        200
+      ]
     },
     {
       "parameters": {
@@ -193,7 +231,10 @@
       "name": "Respond 200 — Sudah Jadi",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [-660, 120],
+      "position": [
+        -660,
+        120
+      ],
       "notes": "Idempoten (§9): submit ulang saat sudah jadi tidak membuat undangan kedua."
     },
     {
@@ -202,7 +243,10 @@
       "name": "Stop — Sudah Jadi",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [-440, 120]
+      "position": [
+        -440,
+        120
+      ]
     },
     {
       "parameters": {
@@ -217,7 +261,10 @@
               "id": "c-file",
               "leftValue": "={{ $json.route }}",
               "rightValue": "file_invalid",
-              "operator": { "type": "string", "operation": "equals" }
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
             }
           ],
           "combinator": "and"
@@ -228,7 +275,10 @@
       "name": "File Invalid?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [-660, 320]
+      "position": [
+        -660,
+        320
+      ]
     },
     {
       "parameters": {
@@ -242,7 +292,10 @@
       "name": "Respond 422 — File",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [-440, 260]
+      "position": [
+        -440,
+        260
+      ]
     },
     {
       "parameters": {},
@@ -250,7 +303,10 @@
       "name": "Stop — File Invalid",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [-220, 260]
+      "position": [
+        -220,
+        260
+      ]
     },
     {
       "parameters": {
@@ -265,7 +321,10 @@
               "id": "c-proses",
               "leftValue": "={{ $json.route }}",
               "rightValue": "diproses",
-              "operator": { "type": "string", "operation": "equals" }
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
             }
           ],
           "combinator": "and"
@@ -276,7 +335,10 @@
       "name": "Sedang Diproses?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [-440, 440]
+      "position": [
+        -440,
+        440
+      ]
     },
     {
       "parameters": {
@@ -290,7 +352,10 @@
       "name": "Respond 409 — Diproses",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [-220, 380],
+      "position": [
+        -220,
+        380
+      ],
       "notes": "T2.17: mencegah eksekusi paralel dari double-submit saat WF-02 masih berjalan."
     },
     {
@@ -299,7 +364,10 @@
       "name": "Stop — Diproses",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [0, 380]
+      "position": [
+        0,
+        380
+      ]
     },
     {
       "parameters": {
@@ -313,7 +381,10 @@
       "name": "Respond 404 — Order",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [-220, 520]
+      "position": [
+        -220,
+        520
+      ]
     },
     {
       "parameters": {},
@@ -321,7 +392,10 @@
       "name": "Stop — Tidak Ditemukan",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [0, 520]
+      "position": [
+        0,
+        520
+      ]
     },
     {
       "parameters": {
@@ -335,7 +409,10 @@
       "name": "Respond 200 — Diterima",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [-880, -20],
+      "position": [
+        -880,
+        -20
+      ],
       "notes": "T2.17: respons SEBELUM proses berat — fetch mobile timeout memicu submit ulang & undangan ganda."
     },
     {
@@ -359,8 +436,29 @@
             "row_number": "={{ $json.row_number }}",
             "status": "DIPROSES"
           },
-          "matchingColumns": ["row_number"],
-          "schema": []
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
         },
         "options": {
           "cellFormat": "RAW"
@@ -370,12 +468,16 @@
       "name": "Set Status DIPROSES",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [-660, -20],
+      "position": [
+        -660,
+        -20
+      ],
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000,
       "credentials": {
         "googleApi": {
+          "id": "GOOGLESAHARIH001",
           "name": "Google SA hariH"
         }
       },
@@ -394,7 +496,10 @@
               "id": "c-ada-file",
               "leftValue": "={{ $('Cek Order & Validasi').first().json.total_file }}",
               "rightValue": 0,
-              "operator": { "type": "number", "operation": "gt" }
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
             }
           ],
           "combinator": "and"
@@ -405,7 +510,10 @@
       "name": "Ada File?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [-440, -20]
+      "position": [
+        -440,
+        -20
+      ]
     },
     {
       "parameters": {
@@ -416,7 +524,10 @@
       "name": "Pisahkan File",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-220, -120]
+      "position": [
+        -220,
+        -120
+      ]
     },
     {
       "parameters": {
@@ -427,7 +538,10 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Content-Disposition", "value": "=attachment; filename=\"{{ $json.filename }}\"" }
+            {
+              "name": "Content-Disposition",
+              "value": "=attachment; filename=\"{{ $json.filename }}\""
+            }
           ]
         },
         "sendBody": true,
@@ -439,12 +553,16 @@
       "name": "Upload Media (WP)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [0, -120],
+      "position": [
+        0,
+        -120
+      ],
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000,
       "credentials": {
         "httpBasicAuth": {
+          "id": "HARIHWPREST00001",
           "name": "WP REST hariH"
         }
       },
@@ -459,7 +577,10 @@
       "name": "Susun Payload Undangan",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [220, -20]
+      "position": [
+        220,
+        -20
+      ]
     },
     {
       "parameters": {
@@ -476,12 +597,16 @@
       "name": "Buat Post Undangan",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [440, -20],
+      "position": [
+        440,
+        -20
+      ],
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000,
       "credentials": {
         "httpBasicAuth": {
+          "id": "HARIHWPREST00001",
           "name": "WP REST hariH"
         }
       },
@@ -494,8 +619,14 @@
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
-            { "name": "size", "value": "600x600" },
-            { "name": "data", "value": "={{ $json.link }}" }
+            {
+              "name": "size",
+              "value": "600x600"
+            },
+            {
+              "name": "data",
+              "value": "={{ $json.link }}"
+            }
           ]
         },
         "options": {
@@ -510,7 +641,10 @@
       "name": "Ambil QR Code",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [660, -20],
+      "position": [
+        660,
+        -20
+      ],
       "retryOnFail": true,
       "maxTries": 2,
       "waitBetweenTries": 3000,
@@ -526,7 +660,10 @@
       "name": "Siapkan Pesan Delivery",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [880, -20]
+      "position": [
+        880,
+        -20
+      ]
     },
     {
       "parameters": {
@@ -535,7 +672,10 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "api-key", "value": "={{ $env.BREVO_API_KEY }}" }
+            {
+              "name": "api-key",
+              "value": "={{ $env.BREVO_API_KEY }}"
+            }
           ]
         },
         "sendBody": true,
@@ -547,7 +687,10 @@
       "name": "Kirim Email Delivery (Brevo)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1100, -20],
+      "position": [
+        1100,
+        -20
+      ],
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000
@@ -565,7 +708,11 @@
               "id": "c-wa-valid",
               "leftValue": "={{ $('Siapkan Pesan Delivery').first().json.wa }}",
               "rightValue": "",
-              "operator": { "type": "string", "operation": "notEmpty", "singleValue": true }
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
             }
           ],
           "combinator": "and"
@@ -576,7 +723,10 @@
       "name": "Nomor WA Valid?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [1320, -20]
+      "position": [
+        1320,
+        -20
+      ]
     },
     {
       "parameters": {
@@ -585,14 +735,23 @@
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
-            { "name": "phone", "value": "={{ $('Siapkan Pesan Delivery').first().json.wa }}" },
-            { "name": "session", "value": "default" }
+            {
+              "name": "phone",
+              "value": "={{ $('Siapkan Pesan Delivery').first().json.wa }}"
+            },
+            {
+              "name": "session",
+              "value": "default"
+            }
           ]
         },
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "X-Api-Key", "value": "={{ $env.WAHA_API_KEY }}" }
+            {
+              "name": "X-Api-Key",
+              "value": "={{ $env.WAHA_API_KEY }}"
+            }
           ]
         },
         "options": {}
@@ -601,7 +760,10 @@
       "name": "Cek Nomor WA (WAHA)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1540, -60],
+      "position": [
+        1540,
+        -60
+      ],
       "retryOnFail": true,
       "maxTries": 2,
       "waitBetweenTries": 5000,
@@ -620,7 +782,11 @@
               "id": "c-exists",
               "leftValue": "={{ $json.numberExists }}",
               "rightValue": "",
-              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
             }
           ],
           "combinator": "and"
@@ -631,7 +797,10 @@
       "name": "Terdaftar di WA?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [1760, -100]
+      "position": [
+        1760,
+        -100
+      ]
     },
     {
       "parameters": {
@@ -640,7 +809,10 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "X-Api-Key", "value": "={{ $env.WAHA_API_KEY }}" }
+            {
+              "name": "X-Api-Key",
+              "value": "={{ $env.WAHA_API_KEY }}"
+            }
           ]
         },
         "sendBody": true,
@@ -652,7 +824,10 @@
       "name": "Kirim WA (WAHA)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1980, -140],
+      "position": [
+        1980,
+        -140
+      ],
       "retryOnFail": true,
       "maxTries": 2,
       "waitBetweenTries": 5000,
@@ -662,8 +837,18 @@
       "parameters": {
         "assignments": {
           "assignments": [
-            { "id": "s1", "name": "wa_status", "type": "string", "value": "TERKIRIM" },
-            { "id": "s2", "name": "row_number", "type": "number", "value": "={{ $('Siapkan Pesan Delivery').first().json.row_number }}" }
+            {
+              "id": "s1",
+              "name": "wa_status",
+              "type": "string",
+              "value": "TERKIRIM"
+            },
+            {
+              "id": "s2",
+              "name": "row_number",
+              "type": "number",
+              "value": "={{ $('Siapkan Pesan Delivery').first().json.row_number }}"
+            }
           ]
         },
         "options": {}
@@ -672,14 +857,27 @@
       "name": "Status: TERKIRIM",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [2200, -200]
+      "position": [
+        2200,
+        -200
+      ]
     },
     {
       "parameters": {
         "assignments": {
           "assignments": [
-            { "id": "s1", "name": "wa_status", "type": "string", "value": "GAGAL_KIRIM" },
-            { "id": "s2", "name": "row_number", "type": "number", "value": "={{ $('Siapkan Pesan Delivery').first().json.row_number }}" }
+            {
+              "id": "s1",
+              "name": "wa_status",
+              "type": "string",
+              "value": "GAGAL_KIRIM"
+            },
+            {
+              "id": "s2",
+              "name": "row_number",
+              "type": "number",
+              "value": "={{ $('Siapkan Pesan Delivery').first().json.row_number }}"
+            }
           ]
         },
         "options": {}
@@ -688,14 +886,27 @@
       "name": "Status: GAGAL_KIRIM",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [2200, -60]
+      "position": [
+        2200,
+        -60
+      ]
     },
     {
       "parameters": {
         "assignments": {
           "assignments": [
-            { "id": "s1", "name": "wa_status", "type": "string", "value": "TIDAK_TERDAFTAR" },
-            { "id": "s2", "name": "row_number", "type": "number", "value": "={{ $('Siapkan Pesan Delivery').first().json.row_number }}" }
+            {
+              "id": "s1",
+              "name": "wa_status",
+              "type": "string",
+              "value": "TIDAK_TERDAFTAR"
+            },
+            {
+              "id": "s2",
+              "name": "row_number",
+              "type": "number",
+              "value": "={{ $('Siapkan Pesan Delivery').first().json.row_number }}"
+            }
           ]
         },
         "options": {}
@@ -704,14 +915,27 @@
       "name": "Status: TIDAK_TERDAFTAR",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [1980, 20]
+      "position": [
+        1980,
+        20
+      ]
     },
     {
       "parameters": {
         "assignments": {
           "assignments": [
-            { "id": "s1", "name": "wa_status", "type": "string", "value": "GAGAL_CEK" },
-            { "id": "s2", "name": "row_number", "type": "number", "value": "={{ $('Siapkan Pesan Delivery').first().json.row_number }}" }
+            {
+              "id": "s1",
+              "name": "wa_status",
+              "type": "string",
+              "value": "GAGAL_CEK"
+            },
+            {
+              "id": "s2",
+              "name": "row_number",
+              "type": "number",
+              "value": "={{ $('Siapkan Pesan Delivery').first().json.row_number }}"
+            }
           ]
         },
         "options": {}
@@ -720,14 +944,27 @@
       "name": "Status: GAGAL_CEK",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [1760, 100]
+      "position": [
+        1760,
+        100
+      ]
     },
     {
       "parameters": {
         "assignments": {
           "assignments": [
-            { "id": "s1", "name": "wa_status", "type": "string", "value": "TIDAK_VALID" },
-            { "id": "s2", "name": "row_number", "type": "number", "value": "={{ $('Siapkan Pesan Delivery').first().json.row_number }}" }
+            {
+              "id": "s1",
+              "name": "wa_status",
+              "type": "string",
+              "value": "TIDAK_VALID"
+            },
+            {
+              "id": "s2",
+              "name": "row_number",
+              "type": "number",
+              "value": "={{ $('Siapkan Pesan Delivery').first().json.row_number }}"
+            }
           ]
         },
         "options": {}
@@ -736,7 +973,10 @@
       "name": "Status: TIDAK_VALID",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [1540, 180]
+      "position": [
+        1540,
+        180
+      ]
     },
     {
       "parameters": {
@@ -763,8 +1003,65 @@
             "wa_status": "={{ $json.wa_status }}",
             "mempelai": "={{ $('Siapkan Pesan Delivery').first().json.mempelai }}"
           },
-          "matchingColumns": ["row_number"],
-          "schema": []
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "link_undangan",
+              "displayName": "link_undangan",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tgl_acara",
+              "displayName": "tgl_acara",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "wa_status",
+              "displayName": "wa_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "mempelai",
+              "displayName": "mempelai",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
         },
         "options": {
           "cellFormat": "RAW"
@@ -774,12 +1071,16 @@
       "name": "Update Baris SUDAH_JADI",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [2460, 20],
+      "position": [
+        2460,
+        20
+      ],
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000,
       "credentials": {
         "googleApi": {
+          "id": "GOOGLESAHARIH001",
           "name": "Google SA hariH"
         }
       },
@@ -800,12 +1101,16 @@
       "name": "Set Order Completed (WC)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [2680, 20],
+      "position": [
+        2680,
+        20
+      ],
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000,
       "credentials": {
         "httpBasicAuth": {
+          "id": "HARIHWCREST00001",
           "name": "WC REST hariH"
         }
       },
@@ -817,144 +1122,467 @@
       "name": "Selesai",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [2900, 20]
+      "position": [
+        2900,
+        20
+      ]
     }
   ],
   "connections": {
     "Webhook Form": {
-      "main": [[{ "node": "Verifikasi Token", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Verifikasi Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Verifikasi Token": {
-      "main": [[{ "node": "Token Valid?", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Token Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Token Valid?": {
       "main": [
-        [{ "node": "Cari Order di Sheet", "type": "main", "index": 0 }],
-        [{ "node": "Respond 403 — Token", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Cari Order di Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond 403 — Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Respond 403 — Token": {
-      "main": [[{ "node": "Stop — Token Invalid", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Stop — Token Invalid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Cari Order di Sheet": {
-      "main": [[{ "node": "Cek Order & Validasi", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Cek Order & Validasi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Cek Order & Validasi": {
-      "main": [[{ "node": "Route OK?", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Route OK?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Route OK?": {
       "main": [
-        [{ "node": "Respond 200 — Diterima", "type": "main", "index": 0 }],
-        [{ "node": "Sudah Jadi?", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Respond 200 — Diterima",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sudah Jadi?",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Sudah Jadi?": {
       "main": [
-        [{ "node": "Respond 200 — Sudah Jadi", "type": "main", "index": 0 }],
-        [{ "node": "File Invalid?", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Respond 200 — Sudah Jadi",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "File Invalid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Respond 200 — Sudah Jadi": {
-      "main": [[{ "node": "Stop — Sudah Jadi", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Stop — Sudah Jadi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "File Invalid?": {
       "main": [
-        [{ "node": "Respond 422 — File", "type": "main", "index": 0 }],
-        [{ "node": "Sedang Diproses?", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Respond 422 — File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sedang Diproses?",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Respond 422 — File": {
-      "main": [[{ "node": "Stop — File Invalid", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Stop — File Invalid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Sedang Diproses?": {
       "main": [
-        [{ "node": "Respond 409 — Diproses", "type": "main", "index": 0 }],
-        [{ "node": "Respond 404 — Order", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Respond 409 — Diproses",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond 404 — Order",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Respond 409 — Diproses": {
-      "main": [[{ "node": "Stop — Diproses", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Stop — Diproses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Respond 404 — Order": {
-      "main": [[{ "node": "Stop — Tidak Ditemukan", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Stop — Tidak Ditemukan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Respond 200 — Diterima": {
-      "main": [[{ "node": "Set Status DIPROSES", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Set Status DIPROSES",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Set Status DIPROSES": {
-      "main": [[{ "node": "Ada File?", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Ada File?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Ada File?": {
       "main": [
-        [{ "node": "Pisahkan File", "type": "main", "index": 0 }],
-        [{ "node": "Susun Payload Undangan", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Pisahkan File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Susun Payload Undangan",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Pisahkan File": {
-      "main": [[{ "node": "Upload Media (WP)", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Upload Media (WP)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Upload Media (WP)": {
-      "main": [[{ "node": "Susun Payload Undangan", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Susun Payload Undangan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Susun Payload Undangan": {
-      "main": [[{ "node": "Buat Post Undangan", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Buat Post Undangan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Buat Post Undangan": {
-      "main": [[{ "node": "Ambil QR Code", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Ambil QR Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Ambil QR Code": {
-      "main": [[{ "node": "Siapkan Pesan Delivery", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Siapkan Pesan Delivery",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Siapkan Pesan Delivery": {
-      "main": [[{ "node": "Kirim Email Delivery (Brevo)", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Kirim Email Delivery (Brevo)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Kirim Email Delivery (Brevo)": {
-      "main": [[{ "node": "Nomor WA Valid?", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Nomor WA Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Nomor WA Valid?": {
       "main": [
-        [{ "node": "Cek Nomor WA (WAHA)", "type": "main", "index": 0 }],
-        [{ "node": "Status: TIDAK_VALID", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Cek Nomor WA (WAHA)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Status: TIDAK_VALID",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Cek Nomor WA (WAHA)": {
       "main": [
-        [{ "node": "Terdaftar di WA?", "type": "main", "index": 0 }],
-        [{ "node": "Status: GAGAL_CEK", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Terdaftar di WA?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Status: GAGAL_CEK",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Terdaftar di WA?": {
       "main": [
-        [{ "node": "Kirim WA (WAHA)", "type": "main", "index": 0 }],
-        [{ "node": "Status: TIDAK_TERDAFTAR", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Kirim WA (WAHA)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Status: TIDAK_TERDAFTAR",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Kirim WA (WAHA)": {
       "main": [
-        [{ "node": "Status: TERKIRIM", "type": "main", "index": 0 }],
-        [{ "node": "Status: GAGAL_KIRIM", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Status: TERKIRIM",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Status: GAGAL_KIRIM",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Status: TERKIRIM": {
-      "main": [[{ "node": "Update Baris SUDAH_JADI", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Update Baris SUDAH_JADI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Status: GAGAL_KIRIM": {
-      "main": [[{ "node": "Update Baris SUDAH_JADI", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Update Baris SUDAH_JADI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Status: TIDAK_TERDAFTAR": {
-      "main": [[{ "node": "Update Baris SUDAH_JADI", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Update Baris SUDAH_JADI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Status: GAGAL_CEK": {
-      "main": [[{ "node": "Update Baris SUDAH_JADI", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Update Baris SUDAH_JADI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Status: TIDAK_VALID": {
-      "main": [[{ "node": "Update Baris SUDAH_JADI", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Update Baris SUDAH_JADI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Update Baris SUDAH_JADI": {
-      "main": [[{ "node": "Set Order Completed (WC)", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Set Order Completed (WC)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Set Order Completed (WC)": {
-      "main": [[{ "node": "Selesai", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Selesai",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
