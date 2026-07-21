@@ -46,6 +46,9 @@ services:
       - SHEET_ID=${SHEET_ID}
       # Code node WF-00/01/02 memakai require('crypto') utk HMAC (signature WC + token form)
       - NODE_FUNCTION_ALLOW_BUILTIN=crypto
+      # n8n versi baru memblokir $env di Code node secara default — workflow kita
+      # membaca semua secret via $env (by design, §9 blueprint)
+      - N8N_BLOCK_ENV_ACCESS_IN_NODE=false
       # Kontak alert WF-00 + identitas pengirim email Brevo
       - OWNER_EMAIL=${OWNER_EMAIL}
       - OWNER_WA=${OWNER_WA}
