@@ -1,8 +1,8 @@
 # Kebijakan Refund — hariH
 
-> **DRAF v1 (2026-07-07)** — review & sesuaikan sebelum dipublikasikan sebagai halaman `/kebijakan-refund/`. Angka hari/persentase adalah usulan default — konfirmasi owner. Placeholder `{{…}}` wajib diisi.
+> Dipublikasikan sebagai halaman situs pada 22 Juli 2026.
 
-Terakhir diperbarui: {{TANGGAL_PUBLISH}}
+Terakhir diperbarui: 22 Juli 2026
 
 Undangan digital hariH adalah **produk digital yang diproses otomatis**. Kebijakan refund berikut berlaku untuk semua pesanan.
 
@@ -10,7 +10,7 @@ Undangan digital hariH adalah **produk digital yang diproses otomatis**. Kebijak
 
 Anda dapat membatalkan pesanan dan menerima **refund 100%** selama:
 - formulir pengisian data **belum dikirim** (undangan belum diterbitkan), dan
-- pengajuan dilakukan maksimal **{{7 hari}}** sejak pembayaran.
+- pengajuan dilakukan maksimal **7 hari** sejak pembayaran.
 
 Biaya kanal pembayaran (bila dipotong oleh payment gateway) dapat mengurangi jumlah yang dikembalikan.
 
@@ -30,4 +30,4 @@ Karena undangan telah dibuat dan diserahkan, **refund tidak tersedia**, kecuali 
 
 ## 4. Cara Mengajukan
 
-Hubungi CS (lihat halaman [Kontak](/kontak/)) dengan menyertakan **nomor pesanan** dan alasan pengajuan. Refund yang disetujui diproses maksimal **{{7 hari kerja}}** ke metode pembayaran asal atau transfer bank atas nama pemesan.
+Hubungi CS (lihat halaman [Kontak](/kontak/)) dengan menyertakan **nomor pesanan** dan alasan pengajuan. Refund yang disetujui diproses maksimal **7 hari kerja** ke metode pembayaran asal atau transfer bank atas nama pemesan.

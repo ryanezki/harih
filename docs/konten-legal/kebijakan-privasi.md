@@ -1,8 +1,8 @@
 # Kebijakan Privasi — hariH
 
-> **DRAF v1 (2026-07-07)** — review & sesuaikan sebelum dipublikasikan sebagai halaman `/kebijakan-privasi/`. Bukan nasihat hukum. Placeholder `{{…}}` wajib diisi.
+> Dipublikasikan sebagai halaman situs pada 22 Juli 2026.
 
-Terakhir diperbarui: {{TANGGAL_PUBLISH}}
+Terakhir diperbarui: 22 Juli 2026
 
 hariH (harih.id) menghormati privasi Anda. Kebijakan ini menjelaskan data apa yang kami kumpulkan, untuk apa, dan hak Anda — disusun dengan memperhatikan UU No. 27 Tahun 2022 tentang Pelindungan Data Pribadi.
 
@@ -45,9 +45,9 @@ Masing-masing tunduk pada kebijakan privasinya sendiri.
 
 ## 5. Penyimpanan & Retensi
 
-- Data undangan dan foto disimpan selama masa aktif paket, dan dihapus/diarsipkan setelahnya (paling lambat {{90 hari}} setelah masa aktif berakhir, kecuali diwajibkan lain oleh hukum).
+- Data undangan dan foto disimpan selama masa aktif paket, dan dihapus/diarsipkan setelahnya (paling lambat 90 hari setelah masa aktif berakhir, kecuali diwajibkan lain oleh hukum).
 - Data pemesanan dan pembayaran disimpan sesuai kebutuhan pembukuan.
-- Cadangan (backup) rutin disimpan terenkripsi/terbatas akses dengan retensi {{4 minggu}}.
+- Cadangan (backup) rutin disimpan terenkripsi/terbatas akses dengan retensi 4 minggu.
 
 ## 6. Keamanan
 
@@ -55,11 +55,11 @@ Kami menerapkan langkah wajar: HTTPS di seluruh situs, pembatasan akses data, to
 
 ## 7. Hak Anda
 
-Anda berhak meminta akses, koreksi, atau penghapusan data pribadi Anda (termasuk penghapusan halaman undangan sebelum masa aktif berakhir, dan penghapusan ucapan tamu tertentu). Ajukan melalui halaman [Kontak](/kontak/); kami tanggapi selambatnya {{7 hari kerja}}.
+Anda berhak meminta akses, koreksi, atau penghapusan data pribadi Anda (termasuk penghapusan halaman undangan sebelum masa aktif berakhir, dan penghapusan ucapan tamu tertentu). Ajukan melalui halaman [Kontak](/kontak/); kami tanggapi selambatnya 7 hari kerja.
 
 ## 8. Cookie
 
-Situs memakai cookie fungsional seperlunya (keranjang belanja & proses checkout). Kami tidak memakai cookie iklan pihak ketiga. {{Sesuaikan bila memasang analytics.}}
+Situs memakai cookie fungsional seperlunya (keranjang belanja & proses checkout). Kami tidak memakai cookie iklan pihak ketiga.
 
 ## 9. Perubahan Kebijakan
 
@@ -67,4 +67,4 @@ Perubahan diumumkan di halaman ini beserta tanggal pembaruan.
 
 ## 10. Kontak
 
-Pertanyaan privasi: email {{cs@harih.id}} · WhatsApp {{+62 8xx-xxxx-xxxx}}.
+Pertanyaan privasi: email hi@harih.id · WhatsApp +62 822-5197-5575.

@@ -1,8 +1,8 @@
 # Syarat & Ketentuan — hariH
 
-> **DRAF v1 (2026-07-07)** — review & sesuaikan sebelum dipublikasikan sebagai halaman `/syarat-ketentuan/`. Bukan nasihat hukum; untuk kepastian, konsultasikan ke praktisi hukum. Placeholder `{{…}}` wajib diisi.
+> Dipublikasikan sebagai halaman situs pada 22 Juli 2026.
 
-Terakhir diperbarui: {{TANGGAL_PUBLISH}}
+Terakhir diperbarui: 22 Juli 2026
 
 ## 1. Tentang Layanan
 
@@ -36,7 +36,7 @@ Setelah masa aktif berakhir, halaman undangan dinonaktifkan dan media (foto) dap
 ## 5. Revisi
 
 - Perubahan data dilakukan oleh tim kami melalui CS sesuai jatah paket: **Hemat: tanpa revisi manual · Favorit: 1× · Premium: 3× (prioritas)**.
-- Revisi diproses maksimal {{1×24 jam kerja}} setelah diterima CS. Ajukan revisi selambat-lambatnya {{H-3}} sebelum tanggal acara.
+- Revisi diproses maksimal 1×24 jam kerja setelah diterima CS. Ajukan revisi selambat-lambatnya H-3 sebelum tanggal acara.
 
 ## 6. Konten Anda
 
@@ -81,4 +81,4 @@ S&K ini tunduk pada hukum Republik Indonesia.
 
 ## 16. Kontak
 
-Pertanyaan mengenai S&K ini: lihat halaman [Kontak](/kontak/) — email {{cs@harih.id}} · WhatsApp {{+62 8xx-xxxx-xxxx}}.
+Pertanyaan mengenai S&K ini: lihat halaman [Kontak](/kontak/) — email hi@harih.id · WhatsApp +62 822-5197-5575.
