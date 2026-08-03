@@ -16,12 +16,13 @@ Hasil pemeriksaan langsung hari ini:
 
 | Sehat ✓ | Bermasalah ✗ |
 |---|---|
-| Katalog, 4 halaman legal, landing reseller → 200 | `/u/demo-tema-02/` & `/u/demo-tema-03/` → **404** (ditautkan dari form berbayar) |
-| `/wp-json/wp/v2/undangan` → **401** tanpa auth (meta tidak bocor) | `wp-sitemap-users-1.xml` **menyiarkan username** `n8nbot` & `hiharih-id` |
-| Undangan `noindex` ✓ · cache LiteSpeed **hit** pada `?to=` ✓ | Katalog **tanpa `og:image`**; undangan paket Hemat juga (galeri kosong by design) |
-| `xmlrpc.php` → 403 · port 3000 WAHA tidak terjangkau publik ✓ | `<title>` front page literal **`harih.id`**, tanpa meta description |
-| n8n `/healthz` → 200 · WF-03 aktif (approve-reseller → 403 tanpa HMAC) | `/hello-world/` masih tayang & masuk sitemap |
-| Rahasia tidak pernah ter-commit (`vps/.env`, `google-sa.json` gitignored) ✓ | Repo **tanpa remote** — satu-satunya salinan ada di Mac ini |
+| Katalog, 4 halaman legal, landing reseller → 200 | **Foto demo masih placeholder** (lumut/batu, bukan foto pernikahan) — aset jualan utama |
+| Demo ketiga tema → 200, skin terbedakan ✓ *(P0.2, 2026-08-03)* | Katalog **tanpa `og:image`**; undangan paket Hemat juga (galeri kosong by design) |
+| `wp-sitemap-users-1.xml` → **404**, username tertutup ✓ *(P0.4)* | `<title>` front page literal **`harih.id`**, tanpa meta description |
+| `/wp-json/wp/v2/undangan` → **401** tanpa auth (meta tidak bocor) | Repo **tanpa remote** — satu-satunya salinan ada di Mac ini |
+| Undangan `noindex` ✓ · cache LiteSpeed **hit** pada `?to=` ✓ | Image Docker masih `:latest`; monitor n8n hanya dari dalam n8n |
+| `xmlrpc.php` → 403 · port 3000 WAHA tidak terjangkau publik ✓ | Artefak uji (#29, #40 + 2 undangan + baris sheet) masih di produksi |
+| n8n `/healthz` → 200 · WF-03 aktif · smoke test **21/21 hijau** | Musik & masa aktif: dijanjikan di pricing, belum ada mekanismenya |
 
 **Blocker tunggal untuk menerima uang riil:** akun Duitku production belum diajukan (P0.1).
 
@@ -38,25 +39,28 @@ Hasil pemeriksaan langsung hari ini:
   **Langkah:** (1) isi formulir aplikasi merchant personal di dashboard Duitku — situs live + 4 halaman legal + katalog sudah siap direview; (2) pantau approval (butuh berhari-hari); (3) setelah approve: WooCommerce → Settings → Payments → Duitku → ganti mode **Production** + Merchant Code & API Key production; (4) buat produk uji tersembunyi Rp 10.000 (`catalog_visibility=hidden`), pesan dari HP, verifikasi undangan sampai di WA < 15 menit, lalu hapus produknya.
   **Selesai bila:** 1 order riil Rp 10.000 lolos end-to-end dari HP dan dana masuk ke rekening merchant.
 
-- [ ] **P0.2** **Demo tema-02 & tema-03** *(eks-T3.6)*
-  **Kenapa:** **bug live di jalur berbayar.** `page-isi-data.php:92` menautkan `/u/demo-{tema}/` untuk ketiga tema; tema-02 & tema-03 masih 404. Customer yang sudah membayar mengklik "Lihat contoh ↗" dan mendapat halaman error tepat saat sedang memilih tema.
-  **Langkah:** buat 2 post `undangan` demo via WP-CLI dengan slug `demo-tema-02` & `demo-tema-03` (meta lengkap + galeri, mengikuti pola `demo-tema-01`), lalu tautkan ketiganya dari section demo di `page-katalog.php` (sekarang hanya menaut tema-01).
-  **Selesai bila:** ketiga URL `/u/demo-tema-0{1,2,3}/` → 200 dan tertaut dari katalog + form.
+- [x] **P0.2** **Demo tema-02 & tema-03** *(eks-T3.6)* → **SELESAI 2026-08-03**
+  Bug live tertutup: `page-isi-data.php:92` menautkan `/u/demo-{tema}/` untuk ketiga tema, tapi tema-02 & tema-03 masih 404 — customer yang sudah bayar dapat halaman error tepat saat memilih tema.
+  **Hasil:** `scripts/buat-demo.sh` (idempotent by slug, bisa dijalankan ulang setelah rebuild) membuat `demo-tema-02` (Bima & Ayu) & `demo-tema-03` (Damar & Kirana); katalog kini menaut **ketiga** demo, daftarnya diturunkan dari `undangan_get_temas()` sehingga tema baru otomatis ikut. Ketiga URL 200, skin CSS benar per tema, 10 section, `og:image` ada. Diverifikasi visual di viewport HP: tema-02 & tema-03 tampil jelas berbeda.
+  **Keputusan yang dicatat:** isi ketiga demo sengaja identik (selain nama & lokasi) supaya yang terbandingkan adalah skin-nya, dan semuanya paket `premium` supaya seluruh section terlihat. Konsekuensi: karena `cover_image` = foto pertama galeri, cover demo berfoto — ornamen khas cover tanpa foto (arch tema-02, bingkai emas tema-03) hanya muncul di `preview/tema-0{2,3}.html` dan pada undangan customer yang tidak mengunggah foto.
 
-- [ ] **P0.3** **Aset `og:image` default** *(sisa eks-T1.13/T1.14)*
-  **Kenapa:** preview share WhatsApp adalah etalase produk, dan WA adalah kanal distribusi utama (reseller membagikan katalog; tamu membagikan undangan). Sekarang: katalog **tidak punya** `og:image` sama sekali, dan `functions.php:190` hanya mencetak `og:image` bila `galeri[0]` ada — sementara WF-02 sengaja mengabaikan galeri untuk paket **Hemat**, sehingga **seluruh undangan Hemat** (paket volume, 99rb) di-share tanpa gambar.
-  **Langkah:** buat 4 aset 1200×630 WebP/JPEG ≤ 300 KB (1 katalog + 1 per tema), simpan di uploads; tambahkan fallback di `functions.php` (`og:image` = galeri[0] → aset default tema) dan `og:image` statis di `page-katalog.php`.
-  **Selesai bila:** share `/` dan `/u/demo-tema-0{1,2,3}/` ke WA menampilkan gambar; undangan paket Hemat tanpa foto tetap punya `og:image`.
+- [ ] **P0.3** **Aset visual: foto demo + `og:image` default** *(sisa eks-T1.13/T1.14)* 👤 *(butuh keputusan sumber foto)*
+  **Kenapa (dua masalah, satu akar — belum ada aset visual sungguhan):**
+  1. **Foto demo masih placeholder.** Ketiga demo memakai `demo-cover.jpg` dkk. yang isinya **lumut & batu, bukan foto pernikahan** (terlihat saat verifikasi visual P0.2). Ini aset jualan utama — calon customer membukanya sebelum membeli, dan reseller membagikannya. Undangan pernikahan yang sampulnya batu berlumut merusak persepsi harga.
+  2. **`og:image` kosong di dua titik.** Katalog tidak punya `og:image` sama sekali, dan `functions.php:190` hanya mencetak `og:image` bila `galeri[0]` ada — sementara WF-02 sengaja mengabaikan galeri untuk paket **Hemat**, jadi **seluruh undangan Hemat** (paket volume, 99rb) di-share ke WA tanpa gambar.
+  **Langkah:** (1) tentukan sumber foto — stok berlisensi (Unsplash/Pexels lisensi komersial) atau foto asli; 3–4 foto pasangan/detail pernikahan, ganti isi galeri demo; (2) buat 4 aset OG 1200×630 ≤ 300 KB (1 katalog + 1 per tema); (3) tambah fallback di `functions.php` (`og:image` = galeri[0] → aset default per tema) dan `og:image` statis di `page-katalog.php`.
+  **Selesai bila:** ketiga demo memakai foto pernikahan sungguhan; share `/` dan `/u/demo-tema-0{1,2,3}/` ke WA menampilkan gambar; undangan paket Hemat tanpa foto tetap punya `og:image`.
 
-- [ ] **P0.4** **Tutup kebocoran username lewat sitemap** *(temuan baru — keamanan)*
-  **Kenapa:** `https://harih.id/wp-sitemap-users-1.xml` menyiarkan `n8nbot` dan `hiharih-id` ke publik. `hardening.php` sudah menutup REST `/wp/v2/users` dan me-404-kan arsip author, **tapi provider `users` di sitemap masih terbuka** — username bot pemegang Application Password (jalur n8n membuat post & upload media) jadi target brute force yang sudah diketahui penyerang. Limit-login melindungi, tapi separuh kredensial seharusnya tidak gratis.
-  **Langkah:** tambah `add_filter('wp_sitemaps_add_provider', …)` di `wp-content/mu-plugins/undangan-core/hardening.php` untuk membuang provider `users`; tambahkan check baru di `scripts/cek-live.sh` (sitemap index tidak memuat `wp-sitemap-users`, dan URL langsungnya 404).
-  **Selesai bila:** `/wp-sitemap-users-1.xml` → 404 dan `cek-live.sh` menguji hal ini.
+- [x] **P0.4** **Tutup kebocoran username lewat sitemap** *(temuan baru — keamanan)* → **SELESAI 2026-08-03**
+  `wp-sitemap-users-1.xml` menyiarkan `n8nbot` (pemegang Application Password n8n) dan `hiharih-id` ke publik — jalur enumerasi yang tersisa setelah REST `/wp/v2/users` & arsip author ditutup di T1.10/T1.11.
+  **Hasil:** provider `users` dibuang via `wp_sitemaps_add_provider`, **plus** 404 eksplisit untuk query var `sitemap=users` — rewrite rule-nya tetap terdaftar meski provider dibuang, dan tanpa itu WP membalas 200 berisi HTML biasa (soft-404 yang bisa terindeks sebagai duplikat homepage, dan ikut mencetak tautan `/author/` dari byline post). 2 check baru di `cek-live.sh`.
+  **Verifikasi:** `wp-sitemap-users-1.xml` → 404 tanpa username · `/author/hiharih-id/` → 404 · sitemap index tinggal pages + products + product_cat · smoke test 21/21 hijau.
 
-- [ ] **P0.5** **Bersihkan artefak uji dari produksi**
-  **Kenapa:** data uji ikut diproses otomasi yang sudah aktif — WF-05 akan mengirim reminder H-3/H+1 ke baris uji, WF-04 memasukkan komisi palsu ke rekap Senin, dan `/hello-world/` (post bawaan WordPress) tayang serta terindeks di situs komersial.
-  **Langkah:** hapus order #29 & #40 (WC), undangan `raka-sela-e998` & `raka-solehah-d445` beserta media-nya, baris terkait di sheet `orders` & `komisi`, dan post `hello-world`. Sebagian besar bisa via WP-CLI dari sini.
-  **Selesai bila:** sheet `orders`/`komisi` hanya berisi data riil, `/hello-world/` → 404, tidak ada undangan uji tersisa.
+- [ ] **P0.5** **Bersihkan artefak uji dari produksi** *(sebagian selesai)*
+  **Kenapa:** data uji ikut diproses otomasi yang sudah aktif — WF-05 akan mengirim reminder H-3/H+1 ke baris uji, dan WF-04 memasukkan komisi palsu ke rekap Senin.
+  ✅ Post & komentar sample bawaan WordPress dihapus (2026-08-03, bersamaan P0.4 — satu-satunya sumber byline `/author/` yang tersisa); `/hello-world/` → 404.
+  **Sisa:** order #29 & #40 (WC), undangan `raka-sela-e998` & `raka-solehah-d445` beserta media-nya, baris terkait di sheet `orders` & `komisi`. Bisa via WP-CLI + edit sheet — bilang saja "bersihkan".
+  **Selesai bila:** sheet `orders`/`komisi` hanya berisi data riil, tidak ada undangan uji tersisa.
 
 - [ ] **P0.6** **Kurasi library musik** *(eks-T1.15 — keputusan 2026-08-03: kurasi, bukan hapus klaim)*
   **Kenapa:** "musik latar instrumental" dijual di **ketiga** paket (katalog, deskripsi produk WC) dan diatur di S&K §7, tapi `harih_musik_library()` (`functions.php:65`) masih kosong — form isi data hanya menulis "akan ditambahkan tim kami". Fitur terjual tapi belum ada = beban CS tiap order + risiko klaim.

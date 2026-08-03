@@ -68,7 +68,21 @@ function harih_url_beli(string $sku): string {
     return add_query_arg('add-to-cart', $id, wc_get_checkout_url());
 }
 
-$harih_demo = home_url('/u/demo-tema-01/');
+/**
+ * Demo per tema (P0.2) — daftarnya diturunkan dari `undangan_get_temas()`
+ * supaya tema baru otomatis ikut tertaut di sini (slug demo: `demo-{tema}`,
+ * dibuat oleh scripts/buat-demo.sh).
+ */
+$harih_temas = function_exists('undangan_get_temas')
+    ? undangan_get_temas()
+    : ['tema-01' => 'Tema 01 — Botanical Elegan'];
+
+/** "Tema 01 — Botanical Elegan" → "Botanical Elegan" (label tombol demo). */
+function harih_nama_tema(string $label): string {
+    $bagian = preg_split('/\s*—\s*/u', $label, 2);
+    return trim($bagian[1] ?? $label);
+}
+
 $harih_ada_reseller = (bool) get_page_by_path('jadi-reseller');
 ?><!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -92,7 +106,7 @@ $harih_ada_reseller = (bool) get_page_by_path('jadi-reseller');
     <p class="hero-sub">Pilih paket, bayar, isi data — undangan cantikmu langsung terkirim ke WhatsApp &amp; email. Tanpa antre desainer, mulai <strong>Rp 99 ribu</strong>.</p>
     <div class="hero-cta">
         <a class="btn btn-utama" href="#paket">Lihat Paket</a>
-        <a class="btn btn-garis" href="<?php echo esc_url($harih_demo); ?>" target="_blank" rel="noopener">Lihat Contoh Undangan ↗</a>
+        <a class="btn btn-garis" href="#demo">Lihat Contoh Undangan</a>
     </div>
 </header>
 
@@ -129,10 +143,14 @@ $harih_ada_reseller = (bool) get_page_by_path('jadi-reseller');
         <p class="paket-catatan">Harga sekali bayar — tanpa biaya tersembunyi. Undangan tetap jadi <strong>instan &amp; otomatis</strong> di semua paket.</p>
     </section>
 
-    <section class="demo">
+    <section class="demo" id="demo">
         <h2>Lihat dulu hasilnya</h2>
-        <p>Buka contoh undangan dari HP-mu — persis seperti yang akan diterima tamu.</p>
-        <a class="btn btn-garis" href="<?php echo esc_url($harih_demo); ?>" target="_blank" rel="noopener">Demo Tema Botanical Elegan ↗</a>
+        <p>Buka contoh undangan dari HP-mu — persis seperti yang akan diterima tamu. Isi ketiganya sengaja dibuat sama, supaya kamu bisa membandingkan tampilan tiap tema.</p>
+        <div class="demo-tema">
+            <?php foreach ($harih_temas as $harih_tid => $harih_label) : ?>
+                <a class="btn btn-garis" href="<?php echo esc_url(home_url('/u/demo-' . $harih_tid . '/')); ?>" target="_blank" rel="noopener"><?php echo esc_html(harih_nama_tema($harih_label)); ?> ↗</a>
+            <?php endforeach; ?>
+        </div>
     </section>
 
     <section class="faq">
