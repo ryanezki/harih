@@ -16,9 +16,10 @@ Hasil pemeriksaan langsung hari ini:
 
 | Sehat ✓ | Bermasalah ✗ |
 |---|---|
-| Katalog, 4 halaman legal, landing reseller → 200 | **Foto demo masih placeholder Picsum** (lumut/batu) — aset jualan utama *(P0.3)* |
-| Demo ketiga tema → 200, skin terbedakan ✓ *(P0.2)* | Katalog **tanpa `og:image`**; undangan paket Hemat juga *(P0.3)* |
-| `wp-sitemap-users-1.xml` → **404**, username tertutup ✓ *(P0.4)* | Musik & masa aktif: dijanjikan di pricing, belum ada mekanismenya *(P0.6, P2.1)* |
+| Katalog, 4 halaman legal, landing reseller → 200 | **Musik** dijanjikan di pricing ketiga paket, belum ada *(P0.6)* |
+| Demo ketiga tema → 200, skin terbedakan ✓ *(P0.2)* | **Masa aktif** tertulis di katalog & S&K, belum ada mekanismenya *(P2.1)* |
+| Foto stok berlisensi + `og:image` berbrand per tema ✓ *(P0.3)* | Duitku production belum diajukan — belum bisa terima uang *(P0.1)* |
+| `wp-sitemap-users-1.xml` → **404**, username tertutup ✓ *(P0.4)* | Kontras cover: aman untuk foto terang ✓ — tapi belum diuji di HP nyata *(P2.2)* |
 | `/wp-json/wp/v2/undangan` → **401** tanpa auth (meta tidak bocor) | `N8N_ENCRYPTION_KEY` & `vps/.env` belum di password manager *(P1.1)* |
 | Undangan `noindex` ✓ · cache LiteSpeed **hit** pada `?to=` ✓ | Backup mingguan belum pernah diuji restore *(P1.2)* |
 | Kode ter-backup: `github.com/ryanezki/harih` (private) ✓ *(P1.1)* | Monitor n8n hanya hidup **di dalam** n8n — tak ada pengawas eksternal *(P1.3)* |
