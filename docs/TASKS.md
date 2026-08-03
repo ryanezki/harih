@@ -32,7 +32,7 @@ Hasil pemeriksaan langsung hari ini:
 
 **Blocker tunggal untuk menerima uang riil:** akun Duitku production belum diajukan (P0.1).
 
-**Akses:** Hostinger `ssh -p 65002 u803921702@147.93.80.20` (WP: `domains/harih.id/public_html`) · VPS `ssh root@31.97.50.197` (`/opt/harih`) · rahasia: `vps/.env` + `vps/google-sa.json` (lokal, gitignored) = cermin server · operasional: [`docs/runbook.md`](./runbook.md) · import n8n: [`n8n/workflows/README.md`](../n8n/workflows/README.md).
+**Akses:** Hostinger `ssh -p 65002 u803921702@147.93.80.20` (WP: `domains/harih.id/public_html`) · VPS `ssh root@31.97.50.197` (`/opt/harih`) · rahasia: `vps/.env` + `vps/google-sa.json` (lokal, gitignored) = cermin server · aksi owner: [`docs/panduan-manual.md`](./panduan-manual.md) · operasional: [`docs/runbook.md`](./runbook.md) · import n8n: [`n8n/workflows/README.md`](../n8n/workflows/README.md).
 
 ---
 
