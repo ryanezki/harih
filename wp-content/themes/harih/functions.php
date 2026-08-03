@@ -204,16 +204,73 @@ add_action('wp_head', function () {
     }
 }, 5);
 
+/* =========================================================================
+ * SEO dasar (P2.4)
+ * ========================================================================= */
+
+/**
+ * Halaman utilitas: tidak punya konten untuk dicari, jadi dikeluarkan dari
+ * sitemap DAN diberi noindex. `/isi-data/` bahkan membalas 403 tanpa token —
+ * mendaftarkannya di sitemap hanya melahirkan error di Search Console;
+ * `/shop/` duplikat katalog front page dan bersaing untuk kata kunci yang sama
+ * (halaman produk tetap boleh terindeks — itu bisa punya nilai cari sendiri).
+ */
+function harih_halaman_utilitas(): array {
+    $ids = [];
+    if ($p = get_page_by_path('isi-data')) {
+        $ids[] = (int) $p->ID;
+    }
+    if (function_exists('wc_get_page_id')) {
+        foreach (['cart', 'checkout', 'myaccount', 'shop'] as $key) {
+            $ids[] = (int) wc_get_page_id($key);
+        }
+    }
+    return array_values(array_unique(array_filter($ids, fn($id) => $id > 0)));
+}
+
+add_filter('wp_sitemaps_posts_query_args', function ($args, $post_type) {
+    if ($post_type !== 'page') return $args;
+    if ($ids = harih_halaman_utilitas()) {
+        $args['post__not_in'] = array_merge((array) ($args['post__not_in'] ?? []), $ids);
+    }
+    return $args;
+}, 10, 2);
+
+/**
+ * Judul dokumen halaman standalone. Sebelumnya judul front page literal
+ * "harih.id" — tanpa satu pun kata yang dicari calon customer di Google,
+ * dan itu juga judul yang muncul saat link disalin ke luar WhatsApp.
+ */
+add_filter('document_title_parts', function ($parts) {
+    if (is_page_template('page-katalog.php')) {
+        $parts['title'] = 'Undangan Digital Otomatis, Mulai Rp 99 Ribu';
+        $parts['site']  = 'hariH';
+        unset($parts['tagline'], $parts['page']);
+    } elseif (is_page_template('page-jadi-reseller.php')) {
+        $parts['title'] = 'Jadi Reseller — Komisi 30% Tiap Order';
+        $parts['site']  = 'hariH';
+        unset($parts['tagline'], $parts['page']);
+    }
+    return $parts;
+});
+
 // Admin bar mengganggu layout fullscreen undangan & form.
 add_filter('show_admin_bar', function ($show) {
     return (is_singular('undangan') || is_page_template('page-isi-data.php')) ? false : $show;
 });
 
 // Form isi data: jangan diindeks — URL berisi token order (T2.9 pelengkap).
+// Halaman utilitas lain (cart/checkout/akun/shop) ikut di-noindex — P2.4.
 add_filter('wp_robots', function ($robots) {
     if (is_page_template('page-isi-data.php')) {
         $robots['noindex']  = true;
         $robots['nofollow'] = true;
+        return $robots;
+    }
+    // is_shop() dipakai terpisah: halaman shop Woo adalah archive post-type,
+    // is_page() tidak mengenalinya.
+    if ((function_exists('is_shop') && is_shop()) || is_page(harih_halaman_utilitas())) {
+        $robots['noindex'] = true;
     }
     return $robots;
 });

@@ -18,11 +18,12 @@ Hasil pemeriksaan langsung hari ini:
 |---|---|
 | Katalog, 4 halaman legal, landing reseller → 200 | **Foto demo masih placeholder** (lumut/batu, bukan foto pernikahan) — aset jualan utama |
 | Demo ketiga tema → 200, skin terbedakan ✓ *(P0.2, 2026-08-03)* | Katalog **tanpa `og:image`**; undangan paket Hemat juga (galeri kosong by design) |
-| `wp-sitemap-users-1.xml` → **404**, username tertutup ✓ *(P0.4)* | `<title>` front page literal **`harih.id`**, tanpa meta description |
+| `wp-sitemap-users-1.xml` → **404**, username tertutup ✓ *(P0.4)* | Belum ada analytics/Search Console — funnel tidak terukur sama sekali |
 | `/wp-json/wp/v2/undangan` → **401** tanpa auth (meta tidak bocor) | Repo **tanpa remote** — satu-satunya salinan ada di Mac ini |
 | Undangan `noindex` ✓ · cache LiteSpeed **hit** pada `?to=` ✓ | Monitor n8n hanya hidup di dalam n8n — tak ada pengawas eksternal |
 | Image Docker terpin: n8n 2.29.10 · WAHA 2026.6.2 ✓ *(P1.4)* | `N8N_ENCRYPTION_KEY` & `vps/.env` belum tersimpan di password manager |
 | Kode ter-backup: `github.com/ryanezki/harih` (private) ✓ *(P1.1)* | Backup mingguan belum pernah diuji restore |
+| Judul/description SEO & sitemap bersih ✓ *(P2.4)* | — |
 | `xmlrpc.php` → 403 · port 3000 WAHA tidak terjangkau publik ✓ | Artefak uji (#29, #40 + 2 undangan + baris sheet) masih di produksi |
 | n8n `/healthz` → 200 · WF-03 aktif · smoke test **21/21 hijau** | Musik & masa aktif: dijanjikan di pricing, belum ada mekanismenya |
 
@@ -117,10 +118,14 @@ Hasil pemeriksaan langsung hari ini:
 - [ ] **P2.3** **QA checklist §13 formal** *(eks-T4.7)*
   Jalankan `scripts/cek-live.sh` (perluas dulu: check sitemap-users dari P0.4 dan keberadaan `og:image` dari P0.3) + sisa langkah manual di checklist §13 blueprint dan daftar QA tambahan (bagian bawah dokumen ini). Banyak yang sudah de-facto lolos saat uji T1.18 — yang perlu adalah satu putaran formal dan tercatat.
 
-- [ ] **P2.4** **SEO dasar**
-  **Kenapa:** judul front page sekarang literal `harih.id` — tanpa kata kunci apa pun di hasil Google; tidak ada meta description; `/isi-data/` masuk sitemap padahal 403 tanpa token; `/shop/` terindeks dan bersaing dengan katalog untuk kata kunci yang sama.
-  **Langkah:** isi tagline situs + judul/description khusus di `page-katalog.php`; keluarkan halaman utilitas dari sitemap; putuskan `noindex` untuk `/shop/` (halaman produk WC boleh tetap terindeks).
-  **Selesai bila:** `<title>` dan meta description katalog memuat "undangan digital", sitemap hanya berisi halaman yang memang untuk publik.
+- [x] **P2.4** **SEO dasar** → **SELESAI 2026-08-03**
+  Judul front page sebelumnya literal `harih.id` — tanpa satu pun kata yang dicari calon customer, dan itu juga judul yang muncul saat link disalin ke luar WhatsApp.
+  **Hasil:**
+  - `document_title_parts` untuk katalog & landing reseller → "Undangan Digital Otomatis, Mulai Rp 99 Ribu – hariH" dan "Jadi Reseller — Komisi 30% Tiap Order – hariH"
+  - `<meta name="description">` di katalog (±155 karakter) & landing reseller
+  - nama situs `harih.id` → **hariH** (ikut memperbaiki header/footer email WooCommerce) + tagline terisi
+  - halaman utilitas (`isi-data`, cart, checkout, my-account, shop) dikeluarkan dari sitemap **dan** di-`noindex`. `/isi-data/` membalas 403 tanpa token — mendaftarkannya di sitemap hanya melahirkan error Search Console; `/shop/` duplikat katalog front page. Halaman produk tetap terindeks (bisa punya nilai cari sendiri).
+  **Verifikasi:** sitemap halaman tinggal 6 URL konten asli (katalog, reseller, 4 legal); index tinggal pages + products + product_cat; smoke test 21/21 hijau.
 
 - [ ] **P2.5** **Analytics + Search Console** *(eks-T4.10)*
   Tanpa data, kebocoran funnel (katalog → checkout → isi data → terbit) hanya bisa ditebak, dan keputusan v2 §15 jadi tebakan. Plausible/GA4 + verifikasi Search Console (pastikan katalog terindeks & undangan tetap `noindex`).

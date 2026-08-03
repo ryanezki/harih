@@ -89,6 +89,8 @@ $harih_ada_reseller = (bool) get_page_by_path('jadi-reseller');
 <head>
 <meta charset="<?php bloginfo('charset'); ?>">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<?php /* Deskripsi SERP (P2.4) — ±155 karakter, memuat kata kunci + harga + kanal */ ?>
+<meta name="description" content="Undangan pernikahan digital yang jadi otomatis dalam hitungan menit dan langsung terkirim ke WhatsApp. RSVP, galeri foto, amplop digital. Mulai Rp 99 ribu.">
 <?php /* Open Graph katalog (T1.14) — og:image default menyusul bersama aset tema (T1.13) */ ?>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="hariH">

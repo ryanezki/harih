@@ -20,6 +20,7 @@ $webhook = harih_reseller_webhook_url();
 <head>
 <meta charset="<?php bloginfo('charset'); ?>">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Jadi reseller undangan digital hariH: pembeli hemat 10% pakai kodemu, kamu terima komisi 30% tiap order. Payout tiap Senin, semua bisa dari HP.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="hariH">
 <meta property="og:locale" content="id_ID">
