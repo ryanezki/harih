@@ -16,16 +16,17 @@ Hasil pemeriksaan langsung hari ini:
 
 | Sehat ✓ | Bermasalah ✗ |
 |---|---|
-| Katalog, 4 halaman legal, landing reseller → 200 | **Foto demo masih placeholder** (lumut/batu, bukan foto pernikahan) — aset jualan utama |
-| Demo ketiga tema → 200, skin terbedakan ✓ *(P0.2, 2026-08-03)* | Katalog **tanpa `og:image`**; undangan paket Hemat juga (galeri kosong by design) |
-| `wp-sitemap-users-1.xml` → **404**, username tertutup ✓ *(P0.4)* | Belum ada analytics/Search Console — funnel tidak terukur sama sekali |
-| `/wp-json/wp/v2/undangan` → **401** tanpa auth (meta tidak bocor) | Repo **tanpa remote** — satu-satunya salinan ada di Mac ini |
-| Undangan `noindex` ✓ · cache LiteSpeed **hit** pada `?to=` ✓ | Monitor n8n hanya hidup di dalam n8n — tak ada pengawas eksternal |
-| Image Docker terpin: n8n 2.29.10 · WAHA 2026.6.2 ✓ *(P1.4)* | `N8N_ENCRYPTION_KEY` & `vps/.env` belum tersimpan di password manager |
-| Kode ter-backup: `github.com/ryanezki/harih` (private) ✓ *(P1.1)* | Backup mingguan belum pernah diuji restore |
+| Katalog, 4 halaman legal, landing reseller → 200 | **Foto demo masih placeholder Picsum** (lumut/batu) — aset jualan utama *(P0.3)* |
+| Demo ketiga tema → 200, skin terbedakan ✓ *(P0.2)* | Katalog **tanpa `og:image`**; undangan paket Hemat juga *(P0.3)* |
+| `wp-sitemap-users-1.xml` → **404**, username tertutup ✓ *(P0.4)* | Musik & masa aktif: dijanjikan di pricing, belum ada mekanismenya *(P0.6, P2.1)* |
+| `/wp-json/wp/v2/undangan` → **401** tanpa auth (meta tidak bocor) | `N8N_ENCRYPTION_KEY` & `vps/.env` belum di password manager *(P1.1)* |
+| Undangan `noindex` ✓ · cache LiteSpeed **hit** pada `?to=` ✓ | Backup mingguan belum pernah diuji restore *(P1.2)* |
+| Kode ter-backup: `github.com/ryanezki/harih` (private) ✓ *(P1.1)* | Monitor n8n hanya hidup **di dalam** n8n — tak ada pengawas eksternal *(P1.3)* |
+| Image Docker terpin: n8n 2.29.10 · WAHA 2026.6.2 ✓ *(P1.4)* | Analytics & Search Console belum ada — funnel tak terukur *(P2.5)* |
 | Judul/description SEO & sitemap bersih ✓ *(P2.4)* | — |
-| `xmlrpc.php` → 403 · port 3000 WAHA tidak terjangkau publik ✓ | Artefak uji (#29, #40 + 2 undangan + baris sheet) masih di produksi |
-| n8n `/healthz` → 200 · WF-03 aktif · smoke test **21/21 hijau** | Musik & masa aktif: dijanjikan di pricing, belum ada mekanismenya |
+| Produksi **nol data uji** ✓ *(P0.5)* — sheet tinggal header | — |
+| `xmlrpc.php` → 403 · port 3000 WAHA tidak terjangkau publik ✓ | — |
+| n8n `/healthz` → 200 · WF aktif · smoke test **21/21 hijau** | — |
 
 **Blocker tunggal untuk menerima uang riil:** akun Duitku production belum diajukan (P0.1).
 
@@ -59,11 +60,11 @@ Hasil pemeriksaan langsung hari ini:
   **Hasil:** provider `users` dibuang via `wp_sitemaps_add_provider`, **plus** 404 eksplisit untuk query var `sitemap=users` — rewrite rule-nya tetap terdaftar meski provider dibuang, dan tanpa itu WP membalas 200 berisi HTML biasa (soft-404 yang bisa terindeks sebagai duplikat homepage, dan ikut mencetak tautan `/author/` dari byline post). 2 check baru di `cek-live.sh`.
   **Verifikasi:** `wp-sitemap-users-1.xml` → 404 tanpa username · `/author/hiharih-id/` → 404 · sitemap index tinggal pages + products + product_cat · smoke test 21/21 hijau.
 
-- [ ] **P0.5** **Bersihkan artefak uji dari produksi** *(sebagian selesai)*
-  **Kenapa:** data uji ikut diproses otomasi yang sudah aktif — WF-05 akan mengirim reminder H-3/H+1 ke baris uji, dan WF-04 memasukkan komisi palsu ke rekap Senin.
-  ✅ Post & komentar sample bawaan WordPress dihapus (2026-08-03, bersamaan P0.4 — satu-satunya sumber byline `/author/` yang tersisa); `/hello-world/` → 404.
-  **Sisa:** order #29 & #40 (WC), undangan `raka-sela-e998` & `raka-solehah-d445` beserta media-nya, baris terkait di sheet `orders` & `komisi`. Bisa via WP-CLI + edit sheet — bilang saja "bersihkan".
-  **Selesai bila:** sheet `orders`/`komisi` hanya berisi data riil, tidak ada undangan uji tersisa.
+- [x] **P0.5** **Bersihkan artefak uji dari produksi** → **SELESAI 2026-08-03**
+  Data uji ikut diproses otomasi yang sudah aktif: baris order #29 ber-`tgl_acara` 2026-09-12 akan memicu reminder H-3 WF-05 ke nomor owner pada 9 September.
+  **Dihapus permanen** (setelah verifikasi backup DB 2026-08-01 + mirror uploads ada): 2 order WC (#29, #40 — via `wc_get_order()->delete(true)`, HPOS), 2 undangan uji (`raka-sela-e998`, `raka-solehah-d445`), 3 media milik order #29 (2 foto + QRIS), 2 baris tab `orders`, serta post & komentar sample bawaan WordPress.
+  **Tersisa di produksi: nol data uji** — 3 undangan demo, 3 foto demo + placeholder WC, `wp_wc_orders` kosong, tab `orders`/`komisi`/`resellers` tinggal header. Tidak ada file yatim di uploads. Demo tetap 200 dengan galeri & `og:image` utuh; smoke test 21/21.
+  **Catatan alat:** tab sheet bisa dibaca/diedit dari CLI tanpa n8n — service account `vps/google-sa.json` + JWT RS256 yang ditandatangani `openssl` (tanpa library Google). Berguna untuk skenario pemulihan di runbook §4.
 
 - [ ] **P0.6** **Kurasi library musik** *(eks-T1.15 — keputusan 2026-08-03: kurasi, bukan hapus klaim)*
   **Kenapa:** "musik latar instrumental" dijual di **ketiga** paket (katalog, deskripsi produk WC) dan diatur di S&K §7, tapi `harih_musik_library()` (`functions.php:65`) masih kosong — form isi data hanya menulis "akan ditambahkan tim kami". Fitur terjual tapi belum ada = beban CS tiap order + risiko klaim.
