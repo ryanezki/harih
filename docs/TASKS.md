@@ -17,14 +17,15 @@ Hasil pemeriksaan langsung hari ini:
 | Sehat ✓ | Bermasalah ✗ |
 |---|---|
 | Katalog, 4 halaman legal, landing reseller → 200 | **Musik** dijanjikan di pricing ketiga paket, belum ada *(P0.6)* |
-| Demo ketiga tema → 200, skin terbedakan ✓ *(P0.2)* | **Masa aktif** tertulis di katalog & S&K, belum ada mekanismenya *(P2.1)* |
+| Demo ketiga tema → 200, skin terbedakan ✓ *(P0.2)* | Backup mingguan belum pernah diuji restore *(P1.2)* |
 | Foto stok berlisensi + `og:image` berbrand per tema ✓ *(P0.3)* | Duitku production belum diajukan — belum bisa terima uang *(P0.1)* |
 | `wp-sitemap-users-1.xml` → **404**, username tertutup ✓ *(P0.4)* | Kontras cover: aman untuk foto terang ✓ — tapi belum diuji di HP nyata *(P2.2)* |
 | `/wp-json/wp/v2/undangan` → **401** tanpa auth (meta tidak bocor) | `N8N_ENCRYPTION_KEY` & `vps/.env` belum di password manager *(P1.1)* |
-| Undangan `noindex` ✓ · cache LiteSpeed **hit** pada `?to=` ✓ | Backup mingguan belum pernah diuji restore *(P1.2)* |
+| Undangan `noindex` ✓ · cache LiteSpeed **hit** pada `?to=` ✓ | QA perangkat riil (iPhone/Android) belum dijalankan *(P2.2)* |
 | Kode ter-backup: `github.com/ryanezki/harih` (private) ✓ *(P1.1)* | Monitor n8n hanya hidup **di dalam** n8n — tak ada pengawas eksternal *(P1.3)* |
 | Image Docker terpin: n8n 2.29.10 · WAHA 2026.6.2 ✓ *(P1.4)* | Analytics & Search Console belum ada — funnel tak terukur *(P2.5)* |
 | Judul/description SEO & sitemap bersih ✓ *(P2.4)* | — |
+| Masa aktif ditegakkan otomatis, demo dikecualikan ✓ *(P2.1)* | — |
 | Produksi **nol data uji** ✓ *(P0.5)* — sheet tinggal header | — |
 | `xmlrpc.php` → 403 · port 3000 WAHA tidak terjangkau publik ✓ | — |
 | n8n `/healthz` → 200 · WF aktif · smoke test **21/21 hijau** | — |
@@ -111,10 +112,12 @@ Hasil pemeriksaan langsung hari ini:
 
 ## P2 — Kualitas produk & fondasi pertumbuhan
 
-- [ ] **P2.1** **Masa aktif otomatis** *(eks-T3.13 — keputusan 2026-08-03: terapkan)*
-  **Kenapa:** masa aktif H+7 / H+30 / 1 tahun tertulis di katalog, deskripsi produk WC, **dan S&K §4** ("halaman dinonaktifkan dan media dapat dihapus") — tanpa mekanisme apa pun. Dua akibat: (a) disk & inodes hosting (10 GB / 200rb) tumbuh selamanya, ±6 MB per undangan; (b) "aktif 1 tahun" tidak jadi pembeda Premium karena paket Hemat pun hidup abadi — upsell tergerus.
-  **Langkah:** tambah cabang di WF-05 (titik pasangnya sudah ditandai di node `Susun Pesan Harian`): baca `tgl_acara` + `paket` → lewat masa aktif → `PATCH /wp/v2/undangan/{id}` status `draft`; media milik Hemat & Favorit dihapus pada H+90. Beri pesan WA H-3 sebelum nonaktif ("perpanjang lewat CS") supaya tidak mengagetkan.
-  **Selesai bila:** baris uji dengan tanggal dimundurkan membuat undangan jadi draft tepat sesuai paket, dan media H+90 terhapus.
+- [x] **P2.1** **Masa aktif otomatis** *(eks-T3.13)* → **SELESAI 2026-08-04**
+  Masa aktif H+7 / H+30 / 1 tahun tertulis di katalog, deskripsi produk WC, **dan S&K §4** — tanpa mekanisme apa pun. Akibatnya: disk & inodes tumbuh selamanya, dan "aktif 1 tahun" bukan pembeda Premium karena paket Hemat pun hidup abadi.
+  **Keputusan arsitektur — penegakan di WP, bukan n8n:** sumber kebenaran `paket` + `tanggal_resepsi` ada di meta post itu sendiri, jadi tidak butuh REST/auth/nomor baris sheet yang bisa drift; kueri `post_status=publish` membuatnya idempoten dengan sendirinya; dan bila satu hari terlewat (n8n mati, cron gagal) ia menyusul sendiri besoknya — bukan aksi sekali-jalan yang hilang kalau momennya lewat. WF-05 tetap memegang **peringatan WA 3 hari sebelum nonaktif** (butuh nomor WA dari sheet).
+  **Hasil:** `mu-plugins/undangan-core/masa-aktif.php` + cron WP harian 03:00 WIB. Undangan **demo dikecualikan** (`order_id` kosong/`demo`) — tanpa ini katalog akan menautkan halaman mati. Link kedaluwarsa membalas **410 berpesan** + tautan Kontak, bukan 404 telanjang. Tanggal resepsi tak terbaca → tidak pernah dinonaktifkan (lebih baik menyisakan halaman hidup daripada mematikan undangan customer karena datanya tak terparse). Prosedur aktifkan-kembali masuk runbook §7b.
+  **Verifikasi end-to-end di produksi:** undangan uji hemat kedaluwarsa → jadi `draft`, URL-nya 410 berpesan; undangan favorit yang belum lewat → tetap 200; ketiga demo → tetap 200; jalan kedua kali → nihil (idempoten); cron terjadwal (`undangan_cek_masa_aktif`, harian). Post uji dihapus.
+  **Catatan scope:** penghapusan media H+90 **tidak** termasuk di sini — itu memang sudah tercatat sebagai item backlog v2 ("arsip otomatis undangan kedaluwarsa"), dan tidak mendesak selagi volume masih nol.
 
 - [ ] **P2.2** 👤 **QA perangkat riil** *(eks-T4.6)*
   iPhone Safari & Android Chrome: autoplay musik setelah tap, tombol salin rekening, upload foto HEIC dari galeri, preview share WA (ingat WA meng-cache preview per URL — pakai URL baru saat menguji ulang). Perilaku Safari sering berbeda dari emulator.

@@ -66,6 +66,19 @@ wp-admin → WooCommerce → Settings → Advanced → Webhooks → buka webhook
 - **Payout tiap Senin**: setelah WF-04 mengirim rekap (±09:00 WIB), transfer komisi sesuai rekap → di sheet `komisi`, ubah baris terkait `UNPAID` → `PAID`. Tidak ada rekap masuk padahal ada penjualan → cek eksekusi WF-04 di n8n.
 - **Kode disalahgunakan** (self-deal / spam): hapus kuponnya di WooCommerce → Marketing → Coupons, tandai baris reseller di sheet, informasikan via WA.
 
+## 7b. Masa aktif undangan
+
+Halaman undangan otomatis dinonaktifkan (jadi `draft`) setelah masa aktif paketnya lewat, dihitung **sejak tanggal acara**: Hemat H+7 · Favorit H+30 · Premium 1 tahun. Cron WP harian ±03:00 WIB yang mengerjakannya; undangan **demo dikecualikan** dan tidak pernah mati.
+
+- Customer menerima **peringatan WA 3 hari sebelumnya** (dari WF-05), berisi tanggal berakhir + saran menyimpan screenshot & daftar ucapan.
+- Tamu yang membuka link kedaluwarsa mendapat halaman penjelasan ber-status 410 (bukan 404 telanjang) plus tautan ke Kontak.
+- **Mengaktifkan kembali / memperpanjang:** wp-admin → Undangan → cari judulnya → ubah status `Draft` → **Publish**. Halaman langsung hidup lagi. Kalau ingin permanen aktif (mis. kompensasi), ubah `tanggal_resepsi` ke tanggal lebih baru **atau** ubah meta `paket` ke `premium` — keduanya menggeser tanggal kedaluwarsa.
+- Cek apa yang akan mati hari ini tanpa efek apa pun:
+  ```
+  wp eval 'print_r(undangan_jalankan_masa_aktif(true));'
+  ```
+- Aturan hari ada di `wp-content/mu-plugins/undangan-core/masa-aktif.php` (otoritas). Nilainya juga tersalin di WF-05 hanya untuk menghitung waktu peringatan.
+
 ## 8. Revisi manual (layanan sesuai paket)
 
 - Jatah: Hemat — (berbayar, kebijakan CS) · Favorit 1× · Premium 3× + prioritas. Target pengerjaan ≤ 1×24 jam; Premium didahulukan.
