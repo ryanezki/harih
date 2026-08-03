@@ -58,12 +58,19 @@ else
   kuning "Listing REST balas $kode tanpa meta sensitif — pastikan memang kosong"
 fi
 
-# --- 5. Sitemap tidak memuat undangan (QA T1.10) ---
+# --- 5. Sitemap: bebas undangan (QA T1.10) & tidak membocorkan username (P0.4) ---
 kode=$(ambil "$BODY" "$HDR" "$BASE/wp-sitemap.xml")
 if [ "$kode" = 200 ]; then
   if grep -q '/u/' "$BODY"; then merah "wp-sitemap.xml memuat URL /u/ (undangan terindeks)"; else hijau "Sitemap bersih dari CPT undangan"; fi
+  if grep -q 'wp-sitemap-users' "$BODY"; then merah "Sitemap index memuat provider users (username tersiar)"; else hijau "Sitemap tanpa provider users"; fi
 else
   kuning "wp-sitemap.xml: HTTP $kode"
+fi
+kode=$(curl -sS -m 20 -o "$BODY" -w '%{http_code}' "$BASE/wp-sitemap-users-1.xml" 2>/dev/null)
+if [ "$kode" = 404 ]; then
+  hijau "wp-sitemap-users-1.xml → 404 (enumerasi username tertutup)"
+else
+  merah "wp-sitemap-users-1.xml balas $kode — username bot BOCOR ke publik (P0.4)"
 fi
 
 # --- 6. Form isi data terkunci token ---

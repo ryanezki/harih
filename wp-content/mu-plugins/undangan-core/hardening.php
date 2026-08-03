@@ -35,6 +35,27 @@ add_filter('rest_endpoints', function ($endpoints) {
     return $endpoints;
 });
 
+// Provider `users` di wp-sitemap.xml menyiarkan daftar username apa adanya —
+// jalur enumerasi yang tersisa setelah REST /wp/v2/users & arsip author ditutup
+// (username bot n8n pemegang Application Password = separuh kredensial, gratis).
+// Situs ini tidak punya konten ber-author yang perlu diindeks.
+add_filter('wp_sitemaps_add_provider', function ($provider, $name) {
+    return $name === 'users' ? false : $provider;
+}, 10, 2);
+
+// Rewrite rule `wp-sitemap-users-N.xml` tetap terdaftar meski provider-nya
+// dibuang: tanpa provider, WP jatuh ke query utama dan membalas 200 berisi HTML
+// biasa (soft-404 yang bisa terindeks sebagai duplikat, dan ikut mencetak
+// tautan /author/ dari byline post). 404-kan eksplisit.
+add_action('template_redirect', function () {
+    if (get_query_var('sitemap') === 'users') {
+        global $wp_query;
+        $wp_query->set_404();
+        status_header(404);
+        nocache_headers();
+    }
+}, 0);
+
 // Arsip author tidak dipakai toko ini — 404-kan (mencegah ?author=1 redirect
 // yang membocorkan username di URL).
 add_action('template_redirect', function () {
