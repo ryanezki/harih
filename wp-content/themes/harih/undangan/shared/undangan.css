@@ -139,6 +139,22 @@ img { max-width: 100%; }
     gap: 12px;
 }
 .cover-eyebrow { margin: 0; font-size: 12px; letter-spacing: .28em; text-transform: uppercase; opacity: .85; }
+/* Foto cover customer bisa terang di bagian mana pun — gaun putih, buket, outdoor
+   siang — dan overlay bergradasi saja tidak menjamin teks kecil tetap terbaca.
+   Bayangan halus dipasang HANYA saat ada foto; cover bergradasi fallback sudah
+   terkontrol gelap sehingga tidak perlu (dan tidak boleh terlihat kotor). */
+.cover.has-photo .cover-inner { text-shadow: 0 1px 12px rgba(0, 0, 0, .6); }
+.cover.has-photo .cover-to { opacity: 1; }
+/* Eyebrow: tema-01 & tema-03 mewarnainya emas mid-tone (bagus di atas gradasi
+   gelap, hilang total di atas foto terang). Saat ada foto, pakai tinta cover
+   yang terang — persis yang sudah dilakukan tema-02 by design. Aksen emas tetap
+   hadir lewat ornamen pembatas & garis tombol. Selektor 3 kelas ini menang
+   spesifisitas atas `.cover-eyebrow` di file tema. */
+.cover.has-photo .cover-eyebrow {
+    color: var(--cover-ink, #fff);
+    opacity: 1;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, .75), 0 1px 14px rgba(0, 0, 0, .5);
+}
 .cover-names { margin: 4px 0 0; font: 500 clamp(34px, 9vw, 44px)/1.15 var(--font-display); }
 .cover-names .amp { display: block; font-style: italic; font-size: .55em; opacity: .85; margin: 2px 0; }
 .cover-date { margin: 0; font-size: 14px; letter-spacing: .08em; }

@@ -54,7 +54,10 @@ rsync -avz wp-content/themes/harih/ USER@HOST:~/public_html/wp-content/themes/ha
 wp theme install astra
 wp theme activate harih
 wp rewrite flush   # wajib setelah perubahan CPT/rewrite (slug /u/)
+wp litespeed-purge all
 ```
+
+> ⚠️ **Setiap perubahan CSS/JS: naikkan `HARIH_VERSION` di `functions.php`.** Konstanta itu adalah cache-buster semua aset tema. Tanpa dinaikkan, browser pengunjung dan LiteSpeed tetap menyajikan berkas lama meski file di server sudah baru — perbaikan tampilan akan terlihat "tidak berpengaruh" padahal deploy-nya berhasil.
 
 Alternatif: `git clone` repo di server lalu symlink kedua folder — pilih salah satu dan konsisten.
 

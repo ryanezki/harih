@@ -6,7 +6,13 @@
 
 if (!defined('ABSPATH')) exit;
 
-const HARIH_VERSION = '0.1.0';
+/**
+ * Cache-buster SEMUA aset tema (dipakai di tiap wp_enqueue_*).
+ * WAJIB dinaikkan setiap kali ada perubahan CSS/JS — tanpa itu browser
+ * pengunjung & LiteSpeed tetap menyajikan berkas lama meski file di server
+ * sudah baru, dan perbaikan tampilan terlihat "tidak berpengaruh".
+ */
+const HARIH_VERSION = '0.2.1';
 
 add_action('after_setup_theme', function () {
     add_theme_support('title-tag');
@@ -66,6 +72,24 @@ function harih_musik_library(): array {
     return [
         // 'https://harih.id/wp-content/uploads/musik/contoh.mp3' => 'Contoh — piano lembut',
     ];
+}
+
+/**
+ * Aset og:image default (P0.3) — kartu berbrand 1200×630 per tema, dibangun
+ * oleh `scripts/buat-aset-og.py` dan tinggal di dalam tema (ikut rsync, tidak
+ * bergantung media library yang bisa terhapus tak sengaja).
+ * `$tema` kosong / tidak dikenal → kartu katalog.
+ */
+function harih_og_default(string $tema = ''): string {
+    $file = array_key_exists($tema, function_exists('undangan_get_temas') ? undangan_get_temas() : [])
+        ? "og-{$tema}.jpg"
+        : 'og-katalog.jpg';
+    return get_stylesheet_directory_uri() . '/aset/og/' . $file;
+}
+
+/** Foto demo (P0.2/P0.3) — stok berlisensi, ikut dalam tema. Lihat docs/aset-lisensi.md. */
+function harih_foto_demo(string $nama): string {
+    return get_stylesheet_directory_uri() . '/aset/demo/' . $nama;
 }
 
 /** URL webhook n8n penerima form isi data (WF-02). Set via wp-config saat deploy. */
@@ -187,10 +211,14 @@ add_action('wp_head', function () {
     if ($lok = trim((string) get_post_meta($id, 'lokasi_nama', true))) $potongan[] = $lok;
     $desc = implode(' · ', $potongan);
 
-    // og:image = foto pertama galeri. Bila kosong: tanpa og:image dulu —
-    // aset default per tema menyusul bersama finalisasi tema (T1.13).
+    // og:image = foto pertama galeri; bila kosong → kartu default per tema
+    // (P0.3). Ini bukan kasus pinggiran: WF-02 sengaja mengabaikan galeri untuk
+    // paket Hemat, jadi SELURUH undangan Hemat masuk jalur fallback ini —
+    // tanpa itu paket volume kita di-share ke WhatsApp tanpa gambar sama sekali.
     $galeri = json_decode((string) get_post_meta($id, 'galeri', true) ?: '[]', true);
-    $img    = (is_array($galeri) && !empty($galeri[0]) && is_string($galeri[0])) ? $galeri[0] : '';
+    $img    = (is_array($galeri) && !empty($galeri[0]) && is_string($galeri[0]))
+        ? $galeri[0]
+        : harih_og_default(harih_tema_aktif($id));
 
     echo "\n" . '<meta property="og:type" content="website">' . "\n";
     echo '<meta property="og:site_name" content="hariH">' . "\n";
@@ -198,10 +226,8 @@ add_action('wp_head', function () {
     echo '<meta property="og:title" content="' . esc_attr($title) . '">' . "\n";
     echo '<meta property="og:description" content="' . esc_attr($desc) . '">' . "\n";
     echo '<meta property="og:url" content="' . esc_url(get_permalink($id)) . '">' . "\n";
-    if ($img) {
-        echo '<meta property="og:image" content="' . esc_url($img) . '">' . "\n";
-        echo '<meta name="twitter:card" content="summary_large_image">' . "\n";
-    }
+    echo '<meta property="og:image" content="' . esc_url($img) . '">' . "\n";
+    echo '<meta name="twitter:card" content="summary_large_image">' . "\n";
 }, 5);
 
 /* =========================================================================

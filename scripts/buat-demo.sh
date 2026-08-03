@@ -24,7 +24,11 @@
 set -euo pipefail
 
 BASE_URL="$(wp option get siteurl)"
-GALERI="[\"$BASE_URL/wp-content/uploads/2026/07/demo-cover.jpg\",\"$BASE_URL/wp-content/uploads/2026/07/demo-galeri-2.jpg\",\"$BASE_URL/wp-content/uploads/2026/07/demo-galeri-3.jpg\"]"
+# Foto demo = stok berlisensi komersial, tinggal DI DALAM TEMA (bukan media
+# library) supaya ikut version control + rsync dan tidak bisa terhapus tak
+# sengaja saat membersihkan media. Provenance & lisensi: docs/aset-lisensi.md.
+ASET="$BASE_URL/wp-content/themes/harih/aset/demo"
+GALERI="[\"$ASET/harih-cincin-buket.jpg\",\"$ASET/harih-gaun-detail.jpg\",\"$ASET/harih-cincin-sepatu.jpg\"]"
 QRIS="https://api.qrserver.com/v1/create-qr-code/?size=480x480&data=$(printf '%s' "$BASE_URL" | sed 's|:|%3A|g; s|/|%2F|g')"
 VIDEO="https://www.youtube.com/watch?v=M7lc1UVf-VE"
 
