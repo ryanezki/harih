@@ -15,7 +15,13 @@
 
 services:
   n8n:
-    image: n8nio/n8n:latest   # pin tag setelah stabil
+    # PIN (P1.4) — jangan kembalikan ke `latest`. Versi n8n sudah dua kali
+    # mengubah perilaku secara diam-diam & mematahkan pipeline order (2.29:
+    # penjodohan credential by-name saat import, dan $env diblokir default di
+    # Code node). Update = tindakan sadar: ganti tag di sini → `docker compose
+    # up -d` → `bash scripts/cek-live.sh` → commit tag barunya.
+    # digest saat dipin: sha256:9cb60554716a0ab11a966e79ed65171e1bbf00b6d262ba12aa119bba22eb6000
+    image: n8nio/n8n:2.29.10
     container_name: harih-n8n
     restart: unless-stopped
     environment:
@@ -73,7 +79,11 @@ services:
       - waha
 
   waha:
-    image: devlikeapro/waha:latest   # WAJIB ≥ 2026.6.1 (media gratis di Core)
+    # PIN (P1.4) — WAJIB ≥ 2026.6.1 (fitur kirim media digratiskan ke Core sejak
+    # rilis itu; tag lama = teks saja). Naikkan versi secara sadar, lalu cek
+    # sesi masih `WORKING` sebelum commit tag barunya.
+    # digest saat dipin: sha256:f3c33e8e70a78eb37af4f4e2eb655849d42d8ffdc4b8254f9de38069e906a146
+    image: devlikeapro/waha:2026.6.2
     container_name: harih-waha
     restart: unless-stopped
     ports:

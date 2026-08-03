@@ -22,7 +22,7 @@ services:
       - caddy_config:/config
 
   n8n:
-    image: n8nio/n8n:latest   # pin ke tag spesifik setelah instalasi pertama stabil
+    image: n8nio/n8n:2.29.10   # PIN (P1.4) — samakan dengan varian Traefik; jangan pakai `latest`
     restart: unless-stopped
     ports:
       - "127.0.0.1:5678:5678"   # hanya localhost — akses publik lewat Caddy
@@ -58,7 +58,7 @@ services:
       - waha
 
   waha:
-    image: devlikeapro/waha:latest   # WAJIB ≥ 2026.6.1 — fitur media gratis di Core (T2.1)
+    image: devlikeapro/waha:2026.6.2   # PIN (P1.4) — WAJIB ≥ 2026.6.1, fitur media gratis di Core (T2.1)
     restart: unless-stopped
     ports:
       - "127.0.0.1:3000:3000"   # hanya localhost — JANGAN ganti ke 0.0.0.0 (T1.7)

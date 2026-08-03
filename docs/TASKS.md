@@ -20,7 +20,8 @@ Hasil pemeriksaan langsung hari ini:
 | Demo ketiga tema → 200, skin terbedakan ✓ *(P0.2, 2026-08-03)* | Katalog **tanpa `og:image`**; undangan paket Hemat juga (galeri kosong by design) |
 | `wp-sitemap-users-1.xml` → **404**, username tertutup ✓ *(P0.4)* | `<title>` front page literal **`harih.id`**, tanpa meta description |
 | `/wp-json/wp/v2/undangan` → **401** tanpa auth (meta tidak bocor) | Repo **tanpa remote** — satu-satunya salinan ada di Mac ini |
-| Undangan `noindex` ✓ · cache LiteSpeed **hit** pada `?to=` ✓ | Image Docker masih `:latest`; monitor n8n hanya dari dalam n8n |
+| Undangan `noindex` ✓ · cache LiteSpeed **hit** pada `?to=` ✓ | Monitor n8n hanya hidup di dalam n8n — tak ada pengawas eksternal |
+| Image Docker terpin: n8n 2.29.10 · WAHA 2026.6.2 ✓ *(P1.4)* | `gh` sudah terpasang, menunggu `gh auth login` untuk P1.1 |
 | `xmlrpc.php` → 403 · port 3000 WAHA tidak terjangkau publik ✓ | Artefak uji (#29, #40 + 2 undangan + baris sheet) masih di produksi |
 | n8n `/healthz` → 200 · WF-03 aktif · smoke test **21/21 hijau** | Musik & masa aktif: dijanjikan di pricing, belum ada mekanismenya |
 
@@ -88,15 +89,13 @@ Hasil pemeriksaan langsung hari ini:
   **Langkah:** UptimeRobot (gratis) → 3 monitor: `https://harih.id/` (keyword "paket"), `https://n8n.harih.id/healthz`, dan heartbeat/keyword untuk backup mingguan. Alert ke `hi@harih.id` + WA owner.
   **Selesai bila:** ketiga monitor hijau dan uji matikan-sebentar memicu alert yang benar-benar diterima.
 
-- [ ] **P1.4** **Pin tag image Docker**
-  **Kenapa:** `vps/docker-compose.traefik.yml` masih memakai `n8nio/n8n:latest` dan `devlikeapro/waha:latest` dengan `restart: unless-stopped`. Proyek ini sudah dua kali tertampar perubahan perilaku n8n (penjodohan credential by-name, `$env` diblokir default) — reboot host atau `docker compose pull` bisa menaikkan versi diam-diam dan mematikan pipeline order tanpa perubahan kode apa pun.
-  **Langkah:** catat versi yang sekarang berjalan (`docker compose images`), ganti kedua `latest` dengan tag eksplisit di compose repo **dan** `/opt/harih/docker-compose.yml`. Update jadi tindakan sadar: `pull` → uji `cek-live.sh` → commit tag baru.
-  **Selesai bila:** tidak ada `:latest` di compose mana pun; versi terpasang tercatat di commit.
+- [x] **P1.4** **Pin tag image Docker** → **SELESAI 2026-08-03**
+  `latest` + `restart: unless-stopped` berarti `docker compose pull` berikutnya bisa menaikkan versi diam-diam; proyek ini sudah dua kali tertampar perubahan perilaku n8n (penjodohan credential by-name saat import, `$env` diblokir default di Code node).
+  **Hasil:** dipin ke **n8n 2.29.10** & **WAHA 2026.6.2** (versi yang memang sedang berjalan — jadi tidak ada perubahan perilaku) di kedua varian compose repo **dan** `/opt/harih/docker-compose.yml`; digest image dicatat di komentar untuk reproduksi persis.
+  **Catatan:** container **tidak** di-recreate — tidak ada gunanya karena versinya identik, dan recreate berarti WAHA memuat ulang sesi WhatsApp di sistem produksi. Pin sudah aktif: `docker compose pull/up -d` berikutnya membaca tag yang dipin, dan reboot host hanya menyalakan ulang container yang sudah ada. Verifikasi: `docker compose config` menampilkan kedua tag, sesi WAHA tetap `WORKING`, n8n `/healthz` 200.
 
-- [ ] **P1.5** **Perbaiki drift `scripts/setup-hostinger.sh`**
-  **Kenapa:** script membuat `n8nbot` dengan `--role=editor` (baris 27), padahal produksi memakai **`shop_manager`** — editor tidak boleh mengelola order via WC REST, jadi menjalankan ulang script saat rebuild akan menghasilkan sistem yang gagal di langkah "set order completed". Script pemulihan bencana harus mencerminkan produksi.
-  **Langkah:** ubah role ke `shop_manager`, tambahkan komentar alasannya; sekalian sisir sisa script terhadap kondisi server sekarang (plugin Duitku, langkah LiteSpeed, cron hPanel).
-  **Selesai bila:** menjalankan script di instalasi bersih menghasilkan konfigurasi yang identik dengan produksi.
+- [x] **P1.5** **Perbaiki drift `scripts/setup-hostinger.sh`** → **SELESAI 2026-08-03**
+  Script membuat `n8nbot` dengan `--role=editor`, padahal produksi memakai `shop_manager` (dikonfirmasi di server: user ID 2 = `shop_manager`). Editor tidak boleh mengelola order via WC REST → rebuild dari script menghasilkan sistem yang gagal saat WF-02 menset order `completed`. Sudah diperbaiki + alasannya dikomentari di script.
 
 - [ ] **P1.6** 👤 **Review runbook + finalisasi angka kebijakan** *(sisa eks-T4.9)*
   **Kenapa:** [`docs/runbook.md`](./runbook.md) adalah pegangan owner saat sistem rusak, tapi belum pernah dibaca-ulang oleh owner dan beberapa angka masih default: SLA revisi, tarif revisi berbayar untuk paket Hemat, batas hari pengajuan refund.

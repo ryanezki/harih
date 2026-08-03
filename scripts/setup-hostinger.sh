@@ -22,8 +22,12 @@ echo "== 2. Theme: parent Astra + child harih (T1.12) =="
 wp theme install astra
 wp theme activate harih   # pastikan folder themes/harih sudah ter-upload
 
-echo "== 3. User bot n8n — role editor, bukan administrator (T1.2) =="
-wp user create n8nbot bot@harih.id --role=editor || echo "(user n8nbot sudah ada)"
+echo "== 3. User bot n8n — role shop_manager, bukan administrator (T1.2) =="
+# shop_manager, BUKAN editor (P1.5): editor cukup untuk create post CPT + upload
+# media, tapi TIDAK boleh mengelola order via WC REST — WF-02 gagal saat menset
+# order ke `completed`. Tetap jauh di bawah administrator: bocornya App Password
+# tidak berarti takeover situs.
+wp user create n8nbot bot@harih.id --role=shop_manager || echo "(user n8nbot sudah ada)"
 echo "WP_APP_PASSWORD (salin ke credentials n8n):"
 wp user application-password create n8nbot n8n --porcelain
 
