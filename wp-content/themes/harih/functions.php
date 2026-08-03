@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) exit;
  * pengunjung & LiteSpeed tetap menyajikan berkas lama meski file di server
  * sudah baru, dan perbaikan tampilan terlihat "tidak berpengaruh".
  */
-const HARIH_VERSION = '0.2.1';
+const HARIH_VERSION = '0.3.0';
 
 add_action('after_setup_theme', function () {
     add_theme_support('title-tag');
@@ -54,6 +54,28 @@ function harih_format_tanggal(string $tgl): string {
     if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $tgl)) return $tgl;
     $ts = strtotime($tgl . ' 12:00:00');
     return $ts ? wp_date('l, j F Y', $ts) : $tgl;
+}
+
+/**
+ * Target countdown sebagai ISO ber-offset +07:00 (asumsi acara WIB, T3.7), atau
+ * '' bila tanggal resepsi tidak valid.
+ *
+ * SATU sumber untuk dua konsumen — `window.UNDANGAN.target` (enqueue) DAN
+ * atribut `data-target` di template countdown. Sebelumnya nilai ini hanya
+ * dihitung di enqueue sementara template membaca `$args['target']` yang tidak
+ * pernah ada, sehingga `data-target` selalu kosong dan countdown tidak pernah
+ * berjalan di undangan mana pun (ketahuan saat QA P2.3).
+ */
+function harih_target_countdown(int $post_id): string {
+    $tanggal = (string) get_post_meta($post_id, 'tanggal_resepsi', true);
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $tanggal)) return '';
+
+    $waktu = (string) get_post_meta($post_id, 'waktu_resepsi', true);
+    $jam   = preg_match('/^(\d{1,2})[:.](\d{2})/', $waktu, $m)
+        ? sprintf('%02d:%s', (int) $m[1], $m[2])
+        : '00:00';
+
+    return "{$tanggal}T{$jam}:00+07:00";
 }
 
 function harih_youtube_id(string $url): string {
@@ -164,20 +186,10 @@ add_action('wp_enqueue_scripts', function () {
     wp_enqueue_style('undangan-tema', "{$dir}/undangan/{$tema}/style.css", ['undangan-shared'], HARIH_VERSION);
     wp_enqueue_script('undangan-js', "{$dir}/undangan/shared/undangan.js", [], HARIH_VERSION, true);
 
-    // Countdown: rakit target ISO ber-offset +07:00 di server (asumsi acara WIB
-    // — lihat TASKS T3.7) supaya tamu di zona waktu mana pun melihat hitungan benar.
-    $tanggal = (string) get_post_meta($id, 'tanggal_resepsi', true);
-    $waktu   = (string) get_post_meta($id, 'waktu_resepsi', true);
-    $target  = '';
-    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $tanggal)) {
-        $jam    = preg_match('/^(\d{1,2})[:.](\d{2})/', $waktu, $m) ? sprintf('%02d:%s', (int) $m[1], $m[2]) : '00:00';
-        $target = "{$tanggal}T{$jam}:00+07:00";
-    }
-
     $cfg = [
         'id'      => $id,
         'restUrl' => esc_url_raw(rest_url('undangan/v1')),
-        'target'  => $target,
+        'target'  => harih_target_countdown($id),
         'musik'   => esc_url_raw((string) get_post_meta($id, 'musik_url', true)),
     ];
     wp_add_inline_script('undangan-js', 'window.UNDANGAN = ' . wp_json_encode($cfg) . ';', 'before');

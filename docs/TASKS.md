@@ -122,8 +122,13 @@ Hasil pemeriksaan langsung hari ini:
 - [ ] **P2.2** 👤 **QA perangkat riil** *(eks-T4.6)*
   iPhone Safari & Android Chrome: autoplay musik setelah tap, tombol salin rekening, upload foto HEIC dari galeri, preview share WA (ingat WA meng-cache preview per URL — pakai URL baru saat menguji ulang). Perilaku Safari sering berbeda dari emulator.
 
-- [ ] **P2.3** **QA checklist §13 formal** *(eks-T4.7)*
-  Jalankan `scripts/cek-live.sh` (perluas dulu: check sitemap-users dari P0.4 dan keberadaan `og:image` dari P0.3) + sisa langkah manual di checklist §13 blueprint dan daftar QA tambahan (bagian bawah dokumen ini). Banyak yang sudah de-facto lolos saat uji T1.18 — yang perlu adalah satu putaran formal dan tercatat.
+- [x] **P2.3** **QA checklist §13 formal** *(eks-T4.7)* → **SELESAI 2026-08-04** *(bagian yang bisa diuji tanpa perangkat/akun; sisanya di P2.2 & P0.1)*
+  Putaran formal ini **menemukan 3 cacat live** yang tidak terlihat dari smoke test — dua di antaranya mematikan fitur yang dijual di ketiga paket:
+  1. **Countdown tidak pernah berjalan di undangan mana pun.** `window.UNDANGAN.target` terisi benar, tapi `countdown.php` membaca `$args['target']` yang tidak pernah ada di array `$undangan`, sementara `undangan.js` membaca atribut `data-target` — jadi `data-target` selalu kosong dan hitungan tidak pernah mulai. Diperbaiki dengan satu helper `harih_target_countdown()` yang dipakai kedua konsumen.
+  2. **Atribut `hidden` dikalahkan CSS.** `.countdown-grid { display: grid }` (selektor kelas) mengalahkan `[hidden]` bawaan browser, sehingga state pasca-acara menampilkan "0 0 0 0" berdampingan dengan pesan "acara telah berlangsung". Ditambahkan `[hidden] { display: none !important }` di ketiga stylesheet — ini juga menutup kelas bug yang sama pada panel sukses form, progress bar, dan tombol musik.
+  3. **Daftar ucapan ter-cache browser 7 hari.** Endpoint GET RSVP mengirim `Cache-Control: public, max-age=604800` (setelan Browser Cache LiteSpeed), jadi tamu yang membuka ulang undangan tidak melihat ucapan baru selama seminggu. Header 60 detik kini dikirim eksplisit dari `rest.php`.
+  **Yang diverifikasi lulus:** RSVP end-to-end (kirim → tersimpan → tampil di daftar), rate limit CGNAT (kiriman kedua → 429), honeypot (sukses palsu, tidak masuk DB), cache LiteSpeed endpoint RSVP (`hit`), normalisasi nomor 8 format (`08xx`/`+62 8xx`/`628xx`/spasi/strip → `628…`; nomor rumah & terlalu pendek ditolak), countdown berjalan, state pasca-acara, cover tanpa foto (ornamen khas tema tampil), masa aktif (P2.1), plus 21 check `cek-live.sh`. Artefak QA dibersihkan.
+  **Belum bisa diuji tanpa order riil / perangkat:** enforcement paket via curl ber-token, tolak file ke-11/>2 MB, submit ganda saat WF-02 jalan, ping webhook WC, HEIC iPhone, preview WA sungguhan → tersisa di P2.2 & P0.1.
 
 - [x] **P2.4** **SEO dasar** → **SELESAI 2026-08-03**
   Judul front page sebelumnya literal `harih.id` — tanpa satu pun kata yang dicari calon customer, dan itu juga judul yang muncul saat link disalin ke luar WhatsApp.

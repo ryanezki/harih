@@ -92,6 +92,11 @@ function undangan_rsvp_list(WP_REST_Request $r) {
 
     $res = rest_ensure_response($items);
     $res->header('X-LiteSpeed-Cache-Control', 'public, max-age=60'); // fallback level server
+    // Cache-Control untuk BROWSER tamu. Wajib eksplisit: setelan Browser Cache
+    // LiteSpeed mengirim `public, max-age=604800` ke semua respons, sehingga tanpa
+    // baris ini tamu yang membuka ulang undangan tidak melihat ucapan baru selama
+    // SEMINGGU (ketahuan saat QA P2.3 — nilainya memang 604800 di produksi).
+    $res->header('Cache-Control', 'public, max-age=60');
     return $res;
 }
 

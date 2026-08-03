@@ -5,6 +5,14 @@
    datang dari link WhatsApp di HP.
    ========================================================================== */
 
+/* Atribut `hidden` HARUS menang atas aturan display kita sendiri. Tanpa baris
+   ini, `el.hidden = true` di JS tidak berpengaruh pada elemen yang punya
+   `display:` dari selektor kelas (spesifisitas kelas mengalahkan `[hidden]`
+   bawaan browser) — mis. countdown tetap memperlihatkan "0 0 0 0" berdampingan
+   dengan pesan "acara telah berlangsung" (ketahuan saat QA P2.3). */
+[hidden] { display: none !important; }
+
+
 :root {
     --font-display: 'Playfair Display', Georgia, serif;
     --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;

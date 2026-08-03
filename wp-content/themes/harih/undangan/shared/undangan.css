@@ -4,6 +4,14 @@
    :root + ornamen. File ini berisi layout & komponen, bukan identitas visual.
    ========================================================================= */
 
+/* Atribut `hidden` HARUS menang atas aturan display kita sendiri. Tanpa baris
+   ini, `el.hidden = true` di JS tidak berpengaruh pada elemen yang punya
+   `display:` dari selektor kelas (spesifisitas kelas mengalahkan `[hidden]`
+   bawaan browser) — mis. countdown tetap memperlihatkan "0 0 0 0" berdampingan
+   dengan pesan "acara telah berlangsung" (ketahuan saat QA P2.3). */
+[hidden] { display: none !important; }
+
+
 :root {
     /* Default netral — selalu di-override skin tema */
     --font-display: Georgia, 'Times New Roman', serif;

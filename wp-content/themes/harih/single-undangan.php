@@ -39,6 +39,9 @@ $undangan = [
     'waktu_akad'      => $m('waktu_akad'),
     'tanggal_resepsi' => $m('tanggal_resepsi'),
     'waktu_resepsi'   => $m('waktu_resepsi'),
+    // Dipakai template countdown sebagai `data-target` (dibaca undangan.js).
+    // Sumbernya sama dengan window.UNDANGAN.target — lihat harih_target_countdown().
+    'target'          => harih_target_countdown($id),
     'lokasi_nama'     => $m('lokasi_nama'),
     'lokasi_alamat'   => $m('lokasi_alamat'),
     'gmaps_url'       => $m('gmaps_url'),
