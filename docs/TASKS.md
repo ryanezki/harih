@@ -21,7 +21,8 @@ Hasil pemeriksaan langsung hari ini:
 | `wp-sitemap-users-1.xml` → **404**, username tertutup ✓ *(P0.4)* | `<title>` front page literal **`harih.id`**, tanpa meta description |
 | `/wp-json/wp/v2/undangan` → **401** tanpa auth (meta tidak bocor) | Repo **tanpa remote** — satu-satunya salinan ada di Mac ini |
 | Undangan `noindex` ✓ · cache LiteSpeed **hit** pada `?to=` ✓ | Monitor n8n hanya hidup di dalam n8n — tak ada pengawas eksternal |
-| Image Docker terpin: n8n 2.29.10 · WAHA 2026.6.2 ✓ *(P1.4)* | `gh` sudah terpasang, menunggu `gh auth login` untuk P1.1 |
+| Image Docker terpin: n8n 2.29.10 · WAHA 2026.6.2 ✓ *(P1.4)* | `N8N_ENCRYPTION_KEY` & `vps/.env` belum tersimpan di password manager |
+| Kode ter-backup: `github.com/ryanezki/harih` (private) ✓ *(P1.1)* | Backup mingguan belum pernah diuji restore |
 | `xmlrpc.php` → 403 · port 3000 WAHA tidak terjangkau publik ✓ | Artefak uji (#29, #40 + 2 undangan + baris sheet) masih di produksi |
 | n8n `/healthz` → 200 · WF-03 aktif · smoke test **21/21 hijau** | Musik & masa aktif: dijanjikan di pricing, belum ada mekanismenya |
 
@@ -74,10 +75,10 @@ Hasil pemeriksaan langsung hari ini:
 
 *Kerjakan di minggu pertama setelah launch, idealnya sebelum.*
 
-- [ ] **P1.1** **Backup repo → GitHub private** *(keputusan 2026-08-03)*
-  **Kenapa:** seluruh kode, 8 workflow JSON, script deploy, dan dokumentasi hanya ada di Mac ini — `git remote -v` kosong. Server hanya menyimpan hasil deploy, bukan riwayat git. Disk rusak = mulai dari nol.
-  **Langkah:** `gh repo create harih --private --source . --push`. Verifikasi ulang bahwa `vps/.env` & `vps/google-sa.json` tidak ikut (`git ls-files | grep -E 'env$|sa\.json'` harus kosong — sudah diperiksa bersih hari ini). Lalu **simpan terpisah di password manager**: `N8N_ENCRYPTION_KEY` (tanpa ini arsip backup n8n tidak bisa di-restore — disyaratkan runbook §9) dan seluruh isi `vps/.env`.
-  **Selesai bila:** `git push` berhasil, repo private berisi commit terakhir, tidak ada rahasia di dalamnya, dan kedua rahasia tersimpan di password manager.
+- [ ] **P1.1** **Backup repo & rahasia** *(keputusan 2026-08-03 — kode ✅, rahasia masih sisa)*
+  ✅ **Kode ter-backup**: <https://github.com/ryanezki/harih> — **private**, 36 commit, `origin/main` identik dengan HEAD lokal. Sebelum push, seluruh **riwayat** disisir (bukan cuma kondisi sekarang): `vps/.env` & `vps/google-sa.json` tidak pernah tercatat; scan semua blob untuk pola rahasia (`xkeysib-`, `ck_`/`cs_`, PEM private key, Google API key) → nihil; blok `credentials` di workflow JSON hanya berisi ID + nama referensi. Diverifikasi lagi via API setelah push: kedua berkas rahasia memang tidak ada di remote.
+  **Sisa (👤, tidak bisa saya kerjakan — menyangkut nilai rahasia):** simpan di password manager (1) `N8N_ENCRYPTION_KEY` — tanpa ini arsip backup n8n **tidak bisa di-restore**, dan nilainya sekarang hanya ada di VPS yang sama dengan backupnya (runbook §9 mensyaratkan disimpan terpisah); (2) seluruh isi `vps/.env` — satu-satunya salinan ada di disk Mac ini dan di VPS.
+  **Selesai bila:** kedua rahasia tersimpan di password manager. Rutinitas baru: `git push` setiap selesai sesi.
 
 - [ ] **P1.2** **Uji restore backup 1×** *(sisa eks-T4.2)*
   **Kenapa:** backup mingguan sudah jalan 2× dan memverifikasi integritas (`gunzip -t` + ambang ukuran), tapi **belum pernah di-restore**. Backup yang tak pernah diuji dianggap tidak ada.

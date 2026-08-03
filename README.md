@@ -3,7 +3,10 @@
 Platform undangan digital otomatis (WordPress/WooCommerce + n8n): pelanggan memilih paket → membayar → mengisi data → undangan terbit & terkirim otomatis via email + WhatsApp.
 
 - **Blueprint teknis:** [docs/blueprint-undangan-digital.md](docs/blueprint-undangan-digital.md)
-- **Daftar kerja & progres:** [docs/TASKS.md](docs/TASKS.md)
+- **Daftar kerja & progres:** [docs/TASKS.md](docs/TASKS.md) — titik masuk tiap sesi
+- **Operasional harian:** [docs/runbook.md](docs/runbook.md)
+
+> Repo ini **private**. Rahasia deployment (`vps/.env`, `vps/google-sa.json`) sengaja gitignored — tidak pernah ada di riwayat git, dan tidak punya backup selain disk lokal + server. Simpan salinannya di password manager (TASKS P1.1).
 
 ## Struktur repo
 
