@@ -4,6 +4,7 @@ Platform undangan digital otomatis (WordPress/WooCommerce + n8n): pelanggan memi
 
 - **Blueprint teknis:** [docs/blueprint-undangan-digital.md](docs/blueprint-undangan-digital.md)
 - **Daftar kerja & progres:** [docs/TASKS.md](docs/TASKS.md) — titik masuk tiap sesi
+- **Rencana ekspansi cetak:** [docs/TASKS-hybrid.md](docs/TASKS-hybrid.md) — jalur terpisah, dimulai setelah pendapatan digital pertama
 - **Aksi manual owner:** [docs/panduan-manual.md](docs/panduan-manual.md) — apa yang hanya bisa dikerjakan owner, terurut prioritas
 - **Operasional harian:** [docs/runbook.md](docs/runbook.md)
 

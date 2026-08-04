@@ -2,6 +2,8 @@
 
 **Sumber:** [blueprint-undangan-digital.md](./blueprint-undangan-digital.md) · **Status:** aktif · **Ditulis ulang:** 2026-08-03
 
+> Jalur kerja **platform digital sampai pendapatan pertama**. Rencana ekspansi ke produksi cetak dijalur terpisah: [`TASKS-hybrid.md`](./TASKS-hybrid.md) — sengaja dipisah agar fokus dokumen ini tidak kabur, dan karena jalur itu baru dimulai setelah P0.1 tuntas.
+>
 > Dokumen ini menggantikan daftar sprint 4 minggu (T0–T4) yang sudah selesai. **Riwayat lengkapnya aman di git log** (`git log --follow docs/TASKS.md`, commit 2026-07-07 s/d 2026-08-03) — jangan disalin balik ke sini.
 
 **Cara pakai:** centang `- [x]` saat selesai. ID (`P0.1`, dst.) stabil — pakai di commit & diskusi. Anotasi `(eks-T1.15)` menunjuk ID lama yang masih dirujuk komentar kode dan `n8n/workflows/README.md`. Tanda **👤** = butuh tangan owner, tidak bisa dikerjakan dari CLI.
