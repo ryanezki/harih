@@ -49,3 +49,21 @@ Menambah tema baru → tambahkan entrinya di `TEMA` dalam script, jalankan ulang
 - Foto/ilustrasi hasil pencarian gambar biasa tanpa lisensi jelas.
 - Foto pernikahan customer — kecuali ada izin tertulis dari yang bersangkutan. Data customer diproses hanya untuk membuat undangannya sendiri (lihat Kebijakan Privasi).
 - Lagu populer berhak cipta sebagai musik latar (lihat S&K §7).
+
+---
+
+## Logo hariH — buatan sendiri
+
+`wp-content/themes/harih/aset/logo/logo-harih-*.png`
+
+Dibangun oleh `scripts/buat-logo.py` (Chrome headless, sama seperti kartu OG). Wordmark memakai **Playfair Display** — Google Fonts, **SIL Open Font License 1.1**, bebas dipakai komersial termasuk untuk ditanam pada gambar dan dijadikan logo. Warna diturunkan dari token tema-01: sage `#3f5c4f`, gading `#f7f4ea`, emas `#c9a24d`.
+
+Konsep: nama "hariH" adalah permainan kata *hari H*; huruf H terakhir diberi warna emas agar maknanya terbaca. Tidak memakai ikon cincin/hati stok — jadi tidak ada aset pihak ketiga di dalam logo, dan hak atasnya sepenuhnya milik hariH.
+
+| Berkas | Ukuran | Untuk |
+|---|---|---|
+| `logo-harih-kotak-1000.png` | 1000×1000 | **Unggahan merchant Duitku** (utama) |
+| `logo-harih-kotak-500.png` | 500×500 | Bila ada batas ukuran lebih kecil |
+| `logo-harih-kotak-putih-1000.png` | 1000×1000 | Bila diminta latar terang |
+| `logo-harih-wordmark.png` | 1200×400, transparan | Dokumen & situs, latar terang |
+| `logo-harih-wordmark-putih.png` | 1200×400, transparan | Latar gelap |
