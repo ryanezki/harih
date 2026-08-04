@@ -7,3 +7,9 @@ node_modules/
 # Rahasia deployment — jangan pernah di-commit
 vps/.env
 vps/google-sa.json
+
+# Musik: berkas MP3 tidak masuk git (berat, dan sudah aman di server + mirror
+# backup mingguan; aslinya bisa diunduh ulang lewat URL di sertifikat lisensi).
+# SERTIFIKAT LISENSINYA justru wajib ikut — itu satu-satunya bukti kepemilikan.
+music/*.mp3
+music/siap/

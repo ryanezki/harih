@@ -26,6 +26,7 @@ $harih_paket = [
             'RSVP + ucapan tamu',
             'Nama tamu otomatis di link',
             '3 tema dasar',
+            'Revisi via CS: Rp 25rb per pengajuan',
             'Masa aktif sampai H+7',
         ],
     ],
@@ -40,7 +41,7 @@ $harih_paket = [
             'Galeri sampai 10 foto + kisah cinta',
             'Amplop digital: rekening + QRIS',
             'Semua pilihan tema',
-            'Revisi data 1× via CS',
+            'Revisi data 1× gratis via CS',
             'Masa aktif sampai H+30',
         ],
     ],
@@ -54,7 +55,7 @@ $harih_paket = [
             'Semua fitur paket Favorit',
             'Video / live streaming embed',
             'Akses tema premium (menyusul)',
-            'Revisi data 3× + prioritas CS',
+            'Revisi data 3× gratis + prioritas CS',
             'Masa aktif sampai 1 tahun',
         ],
     ],
@@ -163,7 +164,7 @@ $harih_ada_reseller = (bool) get_page_by_path('jadi-reseller');
         <h2>Pertanyaan umum</h2>
         <details><summary>Berapa lama undangan saya jadi?</summary><p>Setelah kamu mengisi form data (±10 menit), undangan dibuat otomatis dan link-nya dikirim ke WhatsApp &amp; email dalam ±5 menit.</p></details>
         <details><summary>Bagaimana cara membagikan ke tamu?</summary><p>Cukup bagikan satu link via WhatsApp. Nama tamu bisa muncul otomatis di halaman pembuka dengan menambah <code>?to=Nama%20Tamu</code> di belakang link — panduannya dikirim bersama undangan, plus QR code untuk kartu fisik.</p></details>
-        <details><summary>Bisa revisi setelah jadi?</summary><p>Bisa, sesuai paket: Favorit 1× dan Premium 3× dengan prioritas, melalui CS. Paket Hemat dapat menghubungi CS untuk revisi berbayar.</p></details>
+        <details><summary>Bisa revisi setelah jadi?</summary><p>Bisa, lewat CS. Paket Favorit dapat 1× revisi gratis, Premium 3× gratis dan didahulukan. Paket Hemat dan revisi di luar jatah dikenakan Rp 25 ribu per pengajuan. Kalau kesalahannya dari sistem kami, koreksinya selalu gratis. Revisi dikerjakan maksimal 2×24 jam — ajukan paling lambat H-3 sebelum acara.</p></details>
         <details><summary>Pembayarannya bagaimana?</summary><p>QRIS, virtual account bank, dan e-wallet — diproses payment gateway berlisensi resmi. Kamu menerima bukti pembayaran otomatis via email.</p></details>
     </section>
 </main>

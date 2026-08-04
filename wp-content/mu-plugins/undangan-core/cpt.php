@@ -47,6 +47,23 @@ function undangan_sanitize_galeri($value): string {
     return (string) wp_json_encode($urls);
 }
 
+/**
+ * `musik_url` hanya boleh berisi track dari pustaka kita sendiri (P0.6).
+ * Nilainya datang dari form pelanggan dan berakhir sebagai `<audio src>` di
+ * halaman undangan — tanpa whitelist, siapa pun yang memegang token form bisa
+ * menyuntikkan URL audio eksternal ke halaman yang dibagikan ke ratusan tamu.
+ * Pustakanya hidup di tema (`harih_musik_library()`), yang sudah termuat saat
+ * sanitasi berjalan pada request REST dari WF-02.
+ */
+function undangan_sanitize_musik_url($value): string {
+    $url = esc_url_raw((string) $value, ['http', 'https']);
+    if ($url === '') return '';
+    // Tema belum termuat (konteks CLI tertentu): jangan buang data yang sudah ada —
+    // jalur yang perlu dijaga (REST WF-02) selalu punya tema termuat.
+    if (!function_exists('harih_musik_library')) return $url;
+    return array_key_exists($url, harih_musik_library()) ? $url : '';
+}
+
 add_action('init', function () {
     register_post_type('undangan', [
         'labels'              => ['name' => 'Undangan', 'singular_name' => 'Undangan'],
@@ -88,7 +105,7 @@ add_action('init', function () {
         'gmaps_url'       => 'esc_url_raw',
         'love_story'      => 'sanitize_textarea_field',
         'galeri'          => 'undangan_sanitize_galeri',
-        'musik_url'       => 'esc_url_raw',
+        'musik_url'       => 'undangan_sanitize_musik_url',
         'video_url'       => 'esc_url_raw',
         'rekening'        => 'sanitize_textarea_field',
         'qris_media_url'  => 'esc_url_raw',

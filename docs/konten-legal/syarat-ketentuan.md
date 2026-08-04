@@ -2,7 +2,7 @@
 
 > Dipublikasikan sebagai halaman situs pada 22 Juli 2026.
 
-Terakhir diperbarui: 22 Juli 2026
+Terakhir diperbarui: 4 Agustus 2026
 
 ## 1. Tentang Layanan
 
@@ -35,8 +35,9 @@ Setelah masa aktif berakhir, halaman undangan dinonaktifkan dan media (foto) dap
 
 ## 5. Revisi
 
-- Perubahan data dilakukan oleh tim kami melalui CS sesuai jatah paket: **Hemat: tanpa revisi manual · Favorit: 1× · Premium: 3× (prioritas)**.
-- Revisi diproses maksimal 1×24 jam kerja setelah diterima CS. Ajukan revisi selambat-lambatnya H-3 sebelum tanggal acara.
+- Perubahan data dilakukan oleh tim kami melalui CS sesuai jatah paket: **Hemat: berbayar Rp 25.000 per pengajuan · Favorit: 1× gratis · Premium: 3× gratis (prioritas)**. Revisi di luar jatah pada paket Favorit & Premium dikenakan Rp 25.000 per pengajuan.
+- **Koreksi atas kesalahan sistem atau kesalahan kami selalu gratis**, pada semua paket dan tanpa batas jumlah. Biaya di atas hanya berlaku untuk perubahan yang diminta pemesan.
+- Revisi diproses maksimal **2×24 jam** setelah diterima CS; paket Premium didahulukan. Ajukan revisi selambat-lambatnya H-3 sebelum tanggal acara.
 
 ## 6. Konten Anda
 

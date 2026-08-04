@@ -57,15 +57,15 @@ buat_produk() {
 
 buat_produk HARIH-HEMAT 'Undangan Digital — Paket Hemat' 99000 \
   'Undangan digital esensial: cover, countdown, detail acara + Maps, musik, RSVP & ucapan tamu. Masa aktif sampai H+7.' \
-  '<ul><li>Cover, countdown, detail akad &amp; resepsi + tombol Google Maps</li><li>Musik latar instrumental</li><li>RSVP + ucapan tamu</li><li>Nama tamu otomatis di link (?to=Nama)</li><li>3 tema dasar</li><li>Masa aktif sampai H+7</li></ul>'
+  '<ul><li>Cover, countdown, detail akad &amp; resepsi + tombol Google Maps</li><li>Musik latar instrumental</li><li>RSVP + ucapan tamu</li><li>Nama tamu otomatis di link (?to=Nama)</li><li>3 tema dasar</li><li>Revisi via CS: Rp 25.000 per pengajuan</li><li>Masa aktif sampai H+7</li></ul>'
 
 buat_produk HARIH-FAVORIT 'Undangan Digital — Paket Favorit' 179000 \
-  'Paling laris: semua fitur Hemat + galeri 10 foto, kisah cinta, amplop digital (rekening + QRIS), revisi 1x. Masa aktif H+30.' \
-  '<ul><li>Semua fitur paket Hemat</li><li>Galeri sampai 10 foto + kisah cinta</li><li>Amplop digital: rekening (tombol salin) + QRIS</li><li>Semua pilihan tema</li><li>Revisi data 1x via CS</li><li>Masa aktif sampai H+30</li></ul>'
+  'Paling laris: semua fitur Hemat + galeri 10 foto, kisah cinta, amplop digital (rekening + QRIS), revisi 1x gratis. Masa aktif H+30.' \
+  '<ul><li>Semua fitur paket Hemat</li><li>Galeri sampai 10 foto + kisah cinta</li><li>Amplop digital: rekening (tombol salin) + QRIS</li><li>Semua pilihan tema</li><li>Revisi data 1x gratis via CS</li><li>Masa aktif sampai H+30</li></ul>'
 
 buat_produk HARIH-PREMIUM 'Undangan Digital — Paket Premium' 299000 \
-  'Terlengkap: semua fitur Favorit + video/live streaming, revisi 3x prioritas. Masa aktif 1 tahun.' \
-  '<ul><li>Semua fitur paket Favorit</li><li>Video / live streaming embed</li><li>Akses tema premium (menyusul)</li><li>Revisi data 3x + prioritas CS</li><li>Masa aktif sampai 1 tahun setelah acara</li></ul>'
+  'Terlengkap: semua fitur Favorit + video/live streaming, revisi 3x gratis prioritas. Masa aktif 1 tahun.' \
+  '<ul><li>Semua fitur paket Favorit</li><li>Video / live streaming embed</li><li>Akses tema premium (menyusul)</li><li>Revisi data 3x gratis + prioritas CS</li><li>Masa aktif sampai 1 tahun setelah acara</li></ul>'
 
 echo "== 4. Halaman katalog sebagai front page (T1.20) =="
 PAGE_ID="$(wp post list --post_type=page --name=beranda --field=ID | head -n1)"

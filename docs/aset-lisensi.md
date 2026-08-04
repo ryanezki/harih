@@ -38,9 +38,21 @@ Menambah tema baru → tambahkan entrinya di `TEMA` dalam script, jalankan ulang
 
 ---
 
-## Musik latar
+## Musik latar — Pixabay
 
-**Belum ada** — lihat TASKS **P0.6**. Saat library musik dikurasi, catat di sini: judul track, sumber, jenis lisensi, tanggal unduh, dan simpan salinan bukti lisensinya (invoice/screenshot halaman lisensi) di penyimpanan owner, bukan di repo.
+Berkas di server: `wp-content/uploads/musik/*.mp3` (bukan media library — tidak perlu jadi attachment, ikut ter-backup lewat mirror rsync mingguan, dan tidak bisa terhapus tak sengaja saat membersihkan media).
+
+| Berkas di server | Judul asli | ID Pixabay | Artis |
+|---|---|---|---|
+| `harih-klasik-modern.mp3` | Wedding | 485932 | [paulyudin](https://pixabay.com/users/paulyudin-27739282/) |
+| `harih-romantis-hangat.mp3` | Romantic Inspiring | 159847 | paulyudin |
+| `harih-piano-romantis.mp3` | Romantic Piano Inspiring | 155910 | paulyudin |
+
+**Lisensi:** [Pixabay Content License](https://pixabay.com/service/terms/) — bebas komersial, tanpa kewajiban atribusi. Sertifikat unduhan atas nama `ryanezki` tertanggal 2026-08-04 diarsipkan di `music/*-license.txt` (repo) — **jangan dihapus**, itu satu-satunya bukti kalau suatu saat ada klaim.
+
+Diproses ulang dari 256 kbps (3,8–5,0 MB) ke **128 kbps** (1,7–2,2 MB) via ffmpeg: tamu membuka undangan dari kuota seluler, dan berkas aslinya membuat musik baru mulai puluhan detik setelah tombol ditekan. Durasi & isi tidak diubah, metadata lama dibersihkan.
+
+Menambah track: taruh MP3 di `uploads/musik/`, daftarkan di `harih_musik_library()` (`themes/harih/functions.php`) — array itu sekaligus **whitelist** meta `musik_url`, jadi track yang tidak terdaftar akan ditolak saat undangan dibuat.
 
 ---
 

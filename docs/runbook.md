@@ -81,7 +81,8 @@ Halaman undangan otomatis dinonaktifkan (jadi `draft`) setelah masa aktif paketn
 
 ## 8. Revisi manual (layanan sesuai paket)
 
-- Jatah: Hemat — (berbayar, kebijakan CS) · Favorit 1× · Premium 3× + prioritas. Target pengerjaan ≤ 1×24 jam; Premium didahulukan.
+- Jatah: **Hemat berbayar Rp 25.000/pengajuan · Favorit 1× gratis · Premium 3× gratis + prioritas**; di luar jatah, Rp 25.000/pengajuan. Target pengerjaan **≤ 2×24 jam**; Premium didahulukan.
+- **Kesalahan sistem/kesalahan kita selalu digratiskan**, semua paket, tanpa batas — jangan menagih untuk hal yang bukan salah customer. Penagihan hanya untuk perubahan yang customer minta.
 - Kanal: customer membalas WA delivery → dicatat siapa/kapan (cukup di chat).
 - Cara edit: wp-admin → **Undangan** → cari by judul/order_id → ubah field meta (nama, tanggal, lokasi, dst.) → Update. Ganti foto: upload di Media, salin URL barunya ke meta `galeri` (format array JSON). Perubahan tampil setelah cache purge otomatis; kalau belum, LiteSpeed Cache → Purge All.
 - Yang TIDAK dilayani revisi: ganti paket (arahkan order baru), ganti tema setelah terbit > 1× (kebijakan CS).

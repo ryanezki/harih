@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) exit;
  * pengunjung & LiteSpeed tetap menyajikan berkas lama meski file di server
  * sudah baru, dan perbaikan tampilan terlihat "tidak berpengaruh".
  */
-const HARIH_VERSION = '0.3.0';
+const HARIH_VERSION = '0.4.0';
 
 add_action('after_setup_theme', function () {
     add_theme_support('title-tag');
@@ -86,13 +86,26 @@ function harih_youtube_id(string $url): string {
 }
 
 /**
- * Pustaka musik instrumental berlisensi (TASKS T1.15) — URL file => label.
- * Host file di uploads sendiri; arsipkan bukti lisensinya. Form isi data
- * otomatis menampilkan dropdown begitu array ini terisi.
+ * Pustaka musik instrumental berlisensi (TASKS P0.6, eks-T1.15) — URL => label.
+ *
+ * Berkas di-host sendiri di `uploads/musik/` (bukan media library: tidak perlu
+ * jadi attachment, ikut ter-backup lewat mirror rsync mingguan, dan tidak bisa
+ * terhapus tak sengaja saat membersihkan media). Sudah di-encode ulang ke
+ * 128 kbps — aslinya 256 kbps / 4–5 MB, terlalu berat untuk tamu yang membuka
+ * undangan dari kuota seluler.
+ *
+ * Lisensi: Pixabay Content License atas nama owner, bebas komersial tanpa
+ * atribusi. Sertifikatnya diarsipkan — lihat `docs/aset-lisensi.md`.
+ *
+ * Array ini juga menjadi WHITELIST meta `musik_url` (lihat cpt.php) — menambah
+ * track cukup di sini, dan URL di luar daftar ini akan ditolak.
  */
 function harih_musik_library(): array {
+    $dir = 'https://harih.id/wp-content/uploads/musik/';
     return [
-        // 'https://harih.id/wp-content/uploads/musik/contoh.mp3' => 'Contoh — piano lembut',
+        $dir . 'harih-klasik-modern.mp3'  => 'Klasik Modern — orkestra syahdu',
+        $dir . 'harih-romantis-hangat.mp3' => 'Romantis — hangat & mengalun',
+        $dir . 'harih-piano-romantis.mp3'  => 'Piano Romantis — lembut',
     ];
 }
 
