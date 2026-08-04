@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) exit;
  * pengunjung & LiteSpeed tetap menyajikan berkas lama meski file di server
  * sudah baru, dan perbaikan tampilan terlihat "tidak berpengaruh".
  */
-const HARIH_VERSION = '0.5.0';
+const HARIH_VERSION = '0.6.0';
 
 add_action('after_setup_theme', function () {
     add_theme_support('title-tag');
@@ -329,7 +329,7 @@ add_filter('wp_sitemaps_posts_query_args', function ($args, $post_type) {
  */
 add_filter('document_title_parts', function ($parts) {
     if (is_page_template('page-katalog.php')) {
-        $parts['title'] = 'Undangan Digital Otomatis, Mulai Rp 99 Ribu';
+        $parts['title'] = 'Undangan Digital Otomatis, Langsung ke WhatsApp';
         $parts['site']  = 'hariH';
         unset($parts['tagline'], $parts['page']);
     } elseif (is_page_template('page-jadi-reseller.php')) {

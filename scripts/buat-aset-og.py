@@ -33,7 +33,7 @@ TEMA = {
         "eyebrow": "UNDANGAN PERNIKAHAN DIGITAL",
         "judul": "hariH", "judul_size": "150px",
         "sub": "Jadi dalam hitungan menit, langsung terkirim ke WhatsApp",
-        "kaki": "Mulai Rp 99 ribu &nbsp;·&nbsp; harih.id",
+        "kaki": "Undangan pernikahan digital &nbsp;·&nbsp; harih.id",
     },
     "tema-01": {
         "foto": "harih-cincin-buket.jpg",

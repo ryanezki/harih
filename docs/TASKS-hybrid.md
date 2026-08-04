@@ -14,20 +14,29 @@
 
 *Tidak ada baris kode atau pembelian alat sebelum keempat ini dijawab.*
 
-- [ ] **H0.1** 👤 **Selesaikan tabrakan harga pintu masuk**
-  **Masalah:** rencana v2 menetapkan Paket Digital **Rp 299.000** sebagai pintu masuk. harih.id **sudah live** dengan Rp 99rb / 179rb / 299rb; katalog, deskripsi produk WooCommerce, dan kartu share WhatsApp semuanya bertuliskan *"mulai Rp 99 ribu"*. Pembeli paket Rp 99rb sudah menyeleksi dirinya sebagai pembeli hemat — mengupsell ke Rp 2,9 juta adalah lompatan **29×**. Asumsi attach rate 20–40% berdiri atau runtuh di sini.
-  **Tiga jalan, pilih satu:**
-  1. **Naikkan pintu masuk ke Rp 299rb saja** (satu paket digital, sesuai v2). Paling konsisten dengan penjangkaran harga, tapi mematikan segmen volume + program reseller yang sudah jalan.
-  2. **Pertahankan tiga tingkat sekarang, tawarkan cetak hanya ke pembeli Favorit & Premium.** Pembeli Hemat tidak pernah dilihatkan penawaran cetak. Attach rate dihitung dari basis yang lebih kecil tapi jauh lebih realistis.
-  3. **Dua pintu terpisah** — harih.id tetap volume/murah, dan cetak dijual lewat halaman/positioning sendiri dengan pintu masuk Rp 299rb. Paling bersih secara penjangkaran, paling mahal secara pemasaran (dua cerita, dua audiens).
-  **Rekomendasi saya: opsi 2.** Alasannya: tidak membuang aset yang sudah jalan (reseller, SEO, katalog), dan pembeli Favorit/Premium sudah membuktikan kesediaan membayar di atas minimum — itu sinyal terbaik yang Anda punya secara gratis. Opsi 1 membuang program reseller yang baru dibangun; opsi 3 menggandakan beban pemasaran solo.
-  **Selesai bila:** satu opsi dipilih, dan konsekuensinya pada katalog + program reseller tertulis.
+- [x] **H0.1** **Tabrakan harga pintu masuk** → **TERJAWAB 2026-08-05** *(masukan penasihat bisnis owner)*
+  **Keputusan: pertahankan ketiga tingkat. Yang rusak bukan tier Rp 99rb — tapi copy-nya.**
+  Tier Rp 99rb justru bekerja benar sebagai decoy: masa aktif H+7, 3 tema, revisi berbayar. Yang salah: **"Mulai Rp 99 ribu" terpasang di title tag, meta description, og:description, hero — dan ikut ter-render ke dalam gambar kartu OG.** Artinya setiap orang yang melihat link hariH di WhatsApp sudah dijangkar di Rp 99rb sebelum sempat melihat tangga harganya.
+  **Koreksi kerangka berpikir yang lebih tajam dari analisis awal saya:** "lompatan 29×" itu salah ukur, bukan salah harga — satu angka dipakai untuk tiga jenis pembeli yang berbeda. Jalur nyatanya **Premium Rp 299rb → Paket Hormat Rp 1,19 jt = 4×**, bukan 29×. Paket Resepsi datang dari pembeli resepsi gedung, dan itu bisa diketahui **sebelum** mereka bayar.
+  ✅ **Sudah dikerjakan (2026-08-05):** jangkar harga dibuang dari kelima lokasi termasuk gambar OG · FAQ berhenti mengajari pelanggan membuat kartu fisik sendiri dari QR code · pertanyaan "Perkiraan jumlah tamu?" dipasang sebelum tabel harga, di atas 200 tamu paket Hemat disembunyikan berikut alasan jujurnya.
+  **Konsekuensi wajib untuk pengukuran nanti (H1.6):** **attach rate diukur PER TINGKAT, bukan digabung.** Hipotesis awal: Hemat 2–5% · Favorit 10–15% · Premium 30–40%. Angka campuran akan melaporkan "20%" dan menyesatkan setiap keputusan berikutnya.
+  **Belum boleh dipasang:** klaim "kartu fisik" di copy mana pun sampai H0.3 lolos dan ada kapasitas pemenuhan. Menjanjikannya sekarang mengulang persis kesalahan musik — tercantum di halaman harga berbulan-bulan sebelum barangnya ada.
 
-- [ ] **H0.2** 👤 **Selesaikan tabrakan reseller vs vendor**
-  **Masalah:** hariH sudah punya program reseller (pembeli diskon 10%, reseller komisi **30%**). Rencana v2 memperkenalkan program vendor (WO/MUA) dengan langganan bulanan. Keduanya menyasar orang yang sama, dan dokumen tidak menjawab: **apakah reseller mendapat 30% dari order cetak Rp 2,9 juta juga?** Kalau ya, itu Rp 870 ribu per order — sepertiga marjin, untuk penjualan yang pekerjaannya ada di tangan Anda.
-  **Yang perlu diputuskan:** (a) komisi reseller berlaku **hanya untuk paket digital**, tidak untuk cetak — atau komisi cetak dipatok nominal jauh lebih kecil (mis. Rp 150rb/order); (b) apakah satu orang boleh jadi reseller **dan** vendor sekaligus, dan mana yang berlaku bila keduanya melekat pada satu order.
-  **Kenapa penting sekarang:** kupon `RES-` yang sudah beredar mengikat 30% ke seluruh nilai order. Kalau produk cetak nanti masuk sebagai produk WooCommerce biasa, kupon reseller **otomatis berlaku ke sana** kecuali dikecualikan sejak awal. Ini bocor diam-diam, bukan keputusan.
-  **Selesai bila:** aturan tertulis, dan kupon reseller dibatasi ke kategori produk digital di WooCommerce.
+
+- [~] **H0.2** **Tabrakan reseller vs vendor** → **ATURAN DIPUTUSKAN 2026-08-05, implementasi menyusul**
+  **Keputusan: jangan pernah bayar komisi 30% untuk barang fisik.**
+  Sebabnya: 30% itu tarif produk **digital**, tempat COGS-nya nol — 30% hanya membagi marjin yang hampir 100%. Pada barang fisik ada bahan, ongkir, dan jam kerja yang tidak ikut membesar. Rp 870rb dari marjin Rp 2,7 jt = 32%, dan marjin per jam jatuh dari Rp 675rb ke Rp 457rb — menyerahkan sepertiga dari sumber daya paling langka yang dimiliki: jam kerja.
+
+  | Jenis produk | Komisi |
+  |---|---|
+  | Digital | 30% — pertahankan, sudah terlanjur dijanjikan ke reseller yang ada |
+  | Fisik / hybrid | **Rupiah tetap**: Rp 150rb (Hormat) · Rp 300rb (Resepsi) · Rp 500rb (Grand) |
+
+  **Rupiah tetap, bukan persen** — supaya reseller bisa menghitungnya di kepala. Sistem sederhana bisa di-scale.
+  **Satu orang tidak boleh jadi reseller sekaligus vendor.** Tulis di syarat vendor: begitu berlangganan vendor, akun reseller berhenti. Tanpa aturan ini, satu WO akan merujuk sebagai reseller (dapat komisi) **dan** membeli sebagai vendor (dapat diskon) untuk order yang sama.
+  **Angkanya menyortir sendiri:** di bawah ±4 event/bulan reseller lebih menguntungkan bagi mereka, di atas itu vendor. Biarkan matematikanya yang memilih. *(Titik silang ±4 itu masih hipotesis — bergantung pada berapa vendor menjual ke kliennya sendiri, yang belum diketahui. Verifikasi setelah ada vendor pertama.)*
+  **Sisa implementasi — lakukan SEBELUM produk cetak pertama masuk WooCommerce:** batasi kupon `RES-` ke kategori produk digital saja. Kupon yang sudah beredar mengikat 30% ke **seluruh nilai order**; begitu produk cetak jadi produk WooCommerce biasa, kupon itu otomatis berlaku ke sana. Itu kebocoran diam-diam, bukan keputusan.
+
 
 - [ ] **H0.3** 👤 **Uji fisik QR: cetak → laminasi doff → pindai di ruangan remang**
   **Kenapa jadi blocker, bukan QA biasa:** Garansi QR Terbaca (v2 §5.6) tidak boleh dipasang di halaman harga sebelum uji ini lolos. Laminasi doff menurunkan kontras dan bisa membuat QR gagal terbaca — persis skenario yang dijanjikan garansi itu.
@@ -127,7 +136,7 @@
 
 1. **Marjin per jam produksi** — target ≥ Rp 600.000/jam. Setiap keputusan produk & harga diuji ke angka ini.
 2. **Closing rate di harga baru** — menentukan harga dikunci, dinaikkan, atau diturunkan.
-3. **Attach rate** — penting, tapi nomor tiga: attach rate 80% tidak berguna kalau kapasitas hanya 20 order.
+3. **Attach rate — WAJIB dipecah per tingkat**, tidak pernah digabung. Hipotesis: Hemat 2–5% · Favorit 10–15% · Premium 30–40%. Angka campuran akan melaporkan "20%" dan menyesatkan setiap keputusan berikutnya. Penting, tapi tetap nomor tiga: attach rate 80% tidak berguna kalau kapasitas hanya 20 order.
 4. **Distribusi paket** — apakah Paket Resepsi benar-benar paling laku.
 5. **Tingkat reprint** — dan karena kesalahan siapa. Ini biaya langsung dari garansi.
 6. **Pendapatan berulang vendor** — target Rp 10 juta/bulan pada bulan 6.

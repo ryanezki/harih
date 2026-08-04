@@ -91,13 +91,13 @@ $harih_ada_reseller = (bool) get_page_by_path('jadi-reseller');
 <meta charset="<?php bloginfo('charset'); ?>">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <?php /* Deskripsi SERP (P2.4) — ±155 karakter, memuat kata kunci + harga + kanal */ ?>
-<meta name="description" content="Undangan pernikahan digital yang jadi otomatis dalam hitungan menit dan langsung terkirim ke WhatsApp. RSVP, galeri foto, amplop digital. Mulai Rp 99 ribu.">
+<meta name="description" content="Undangan pernikahan digital yang jadi otomatis dalam hitungan menit dan langsung terkirim ke WhatsApp. Satu tema selaras — RSVP, galeri foto, amplop digital.">
 <?php /* Open Graph katalog (T1.14 + P0.3) — reseller membagikan link ini di WA */ ?>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="hariH">
 <meta property="og:locale" content="id_ID">
 <meta property="og:title" content="hariH — Undangan Pernikahan Digital">
-<meta property="og:description" content="Undangan digital mulai Rp 99 ribu — jadi otomatis dalam hitungan menit, langsung terkirim ke WhatsApp. RSVP, galeri foto, amplop digital.">
+<meta property="og:description" content="Undangan pernikahan digital yang jadi otomatis dalam hitungan menit dan langsung terkirim ke WhatsApp. RSVP, galeri foto, amplop digital.">
 <meta property="og:url" content="<?php echo esc_url(home_url('/')); ?>">
 <meta property="og:image" content="<?php echo esc_url(harih_og_default()); ?>">
 <meta property="og:image:width" content="1200">
@@ -110,7 +110,7 @@ $harih_ada_reseller = (bool) get_page_by_path('jadi-reseller');
 <header class="hero">
     <p class="brand">hariH</p>
     <h1>Undangan pernikahan digital,<br>jadi dalam hitungan menit.</h1>
-    <p class="hero-sub">Pilih paket, bayar, isi data — undangan cantikmu langsung terkirim ke WhatsApp &amp; email. Tanpa antre desainer, mulai <strong>Rp 99 ribu</strong>.</p>
+    <p class="hero-sub">Pilih paket, bayar, isi data — undangan cantikmu langsung terkirim ke WhatsApp &amp; email. <strong>Tanpa antre desainer, tanpa menunggu berhari-hari.</strong></p>
     <div class="hero-cta">
         <a class="btn btn-utama" href="#paket">Lihat Paket</a>
         <a class="btn btn-garis" href="#demo">Lihat Contoh Undangan</a>
@@ -129,9 +129,28 @@ $harih_ada_reseller = (bool) get_page_by_path('jadi-reseller');
 
     <section class="paket" id="paket">
         <h2>Pilih paketmu</h2>
+
+        <?php /*
+          Satu pertanyaan sebelum tabel harga. Tujuannya bukan segmentasi
+          canggih — tujuannya berhenti menawarkan paket Hemat kepada resepsi
+          gedung 300 tamu. Itu salah-jual yang merugikan dua pihak: masa aktif
+          H+7 dan tanpa galeri jelas tidak cocok, dan pembelinya kecewa.
+          Penyaringan dilakukan di klien; SEMUA kartu tetap ada di DOM supaya
+          mesin pencari tetap membaca seluruh tangga harga.
+        */ ?>
+        <div class="tamu-tanya" id="tamu-tanya">
+            <p class="tamu-label" id="tamu-label">Perkiraan jumlah tamu?</p>
+            <div class="tamu-opsi" role="group" aria-labelledby="tamu-label">
+                <button type="button" class="tamu-btn" data-tamu="kecil">Di bawah 100</button>
+                <button type="button" class="tamu-btn" data-tamu="sedang">100–200</button>
+                <button type="button" class="tamu-btn" data-tamu="besar">Di atas 200</button>
+            </div>
+            <p class="tamu-catatan" id="tamu-catatan" hidden></p>
+        </div>
+
         <div class="paket-grid">
             <?php foreach ($harih_paket as $p) : $beli = harih_url_beli($p['sku']); ?>
-            <article class="paket-card<?php echo $p['badge'] ? ' unggulan' : ''; ?>">
+            <article class="paket-card<?php echo $p['badge'] ? ' unggulan' : ''; ?>" data-paket="<?php echo esc_attr(strtolower($p['nama'])); ?>">
                 <?php if ($p['badge']) : ?><p class="paket-badge"><?php echo esc_html($p['badge']); ?></p><?php endif; ?>
                 <h3><?php echo esc_html($p['nama']); ?></h3>
                 <p class="paket-harga"><span class="rp">Rp</span><?php echo esc_html($p['harga']); ?><span class="rb">rb</span></p>
@@ -163,7 +182,7 @@ $harih_ada_reseller = (bool) get_page_by_path('jadi-reseller');
     <section class="faq">
         <h2>Pertanyaan umum</h2>
         <details><summary>Berapa lama undangan saya jadi?</summary><p>Setelah kamu mengisi form data (±10 menit), undangan dibuat otomatis dan link-nya dikirim ke WhatsApp &amp; email dalam ±5 menit.</p></details>
-        <details><summary>Bagaimana cara membagikan ke tamu?</summary><p>Cukup bagikan satu link via WhatsApp. Nama tamu bisa muncul otomatis di halaman pembuka dengan menambah <code>?to=Nama%20Tamu</code> di belakang link — panduannya dikirim bersama undangan, plus QR code untuk kartu fisik.</p></details>
+        <details><summary>Bagaimana cara membagikan ke tamu?</summary><p>Cukup bagikan satu link via WhatsApp. Nama tamu bisa muncul otomatis di halaman pembuka dengan menambah <code>?to=Nama%20Tamu</code> di belakang link — panduannya dikirim bersama undangan.</p></details>
         <details><summary>Bisa revisi setelah jadi?</summary><p>Bisa, lewat CS. Paket Favorit dapat 1× revisi gratis, Premium 3× gratis dan didahulukan. Paket Hemat dan revisi di luar jatah dikenakan Rp 25 ribu per pengajuan. Kalau kesalahannya dari sistem kami, koreksinya selalu gratis. Revisi dikerjakan maksimal 2×24 jam — ajukan paling lambat H-3 sebelum acara.</p></details>
         <details><summary>Pembayarannya bagaimana?</summary><p>QRIS, virtual account bank, dan e-wallet — diproses payment gateway berlisensi resmi. Kamu menerima bukti pembayaran otomatis via email.</p></details>
     </section>
@@ -182,6 +201,36 @@ $harih_ada_reseller = (bool) get_page_by_path('jadi-reseller');
     <p class="kaki-cc">© <?php echo esc_html(wp_date('Y')); ?> hariH · harih.id</p>
 </footer>
 
+<script>
+(function () {
+    'use strict';
+    // Resepsi di atas 200 tamu: paket Hemat disembunyikan. Masa aktif H+7 dan
+    // tanpa galeri memang tidak cocok untuk skala itu — menawarkannya hanya
+    // menghasilkan pembeli kecewa. Ini nudge, bukan penegakan: pengunjung tetap
+    // bisa memilih ulang atau memuat ulang halaman.
+    var tombol = document.querySelectorAll('.tamu-btn');
+    var kartu = document.querySelectorAll('.paket-card');
+    var catatan = document.getElementById('tamu-catatan');
+    var SEMBUNYI = { kecil: [], sedang: [], besar: ['hemat'] };
+    var PESAN = {
+        kecil:  'Ketiga paket cocok untuk skala ini.',
+        sedang: 'Galeri foto & amplop digital biasanya mulai terasa perlu di skala ini.',
+        besar:  'Paket Hemat kami sembunyikan — masa aktif H+7 dan tanpa galeri tidak cocok untuk resepsi sebesar ini.'
+    };
+
+    tombol.forEach(function (b) {
+        b.addEventListener('click', function () {
+            var pilihan = b.dataset.tamu;
+            tombol.forEach(function (x) { x.classList.toggle('aktif', x === b); });
+            kartu.forEach(function (k) {
+                k.hidden = SEMBUNYI[pilihan].indexOf(k.dataset.paket) !== -1;
+            });
+            catatan.textContent = PESAN[pilihan];
+            catatan.hidden = false;
+        });
+    });
+})();
+</script>
 <?php wp_footer(); ?>
 </body>
 </html>
