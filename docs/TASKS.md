@@ -19,14 +19,15 @@ Hasil pemeriksaan langsung hari ini:
 | Musik: 3 track berlisensi live + whitelist `musik_url` ✓ *(P0.6)* | **Duitku production diajukan — menunggu approval** *(P0.1)* |
 | Demo ketiga tema → 200, skin terbedakan ✓ *(P0.2)* | Backup mingguan belum pernah diuji restore *(P1.2)* |
 | Angka kebijakan final; tabel halaman legal ter-render ✓ *(P1.6)* | Uptime monitor eksternal ditunda atas keputusan owner *(P1.3)* |
-| Foto stok berlisensi + `og:image` berbrand per tema ✓ *(P0.3)* | GA4 belum terpasang — menunggu Measurement ID *(P2.5)* |
+| Foto stok berlisensi + `og:image` berbrand per tema ✓ *(P0.3)* | QA perangkat riil (iPhone/Android) belum dijalankan *(P2.2)* |
 | `wp-sitemap-users-1.xml` → **404**, username tertutup ✓ *(P0.4)* | Kontras cover: aman untuk foto terang ✓ — tapi belum diuji di HP nyata *(P2.2)* |
 | `/wp-json/wp/v2/undangan` → **401** tanpa auth (meta tidak bocor) | — |
-| Undangan `noindex` ✓ · cache LiteSpeed **hit** pada `?to=` ✓ | QA perangkat riil (iPhone/Android) belum dijalankan *(P2.2)* |
+| Undangan `noindex` ✓ · cache LiteSpeed **hit** pada `?to=` ✓ | Polish katalog & review visual tema belum *(P2.6, P2.7)* |
 | Kode ter-backup: `github.com/ryanezki/harih` (private) ✓ *(P1.1)* | Monitor n8n hanya hidup **di dalam** n8n — tak ada pengawas eksternal *(P1.3)* |
 | Image Docker terpin: n8n 2.29.10 · WAHA 2026.6.2 ✓ *(P1.4)* | Analytics & Search Console belum ada — funnel tak terukur *(P2.5)* |
 | Judul/description SEO & sitemap bersih ✓ *(P2.4)* | — |
 | Masa aktif ditegakkan otomatis, demo dikecualikan ✓ *(P2.1)* | — |
+| GA4 live; `/u/*` & `/isi-data/` sengaja tidak dilacak ✓ *(P2.5)* | — |
 | Produksi **nol data uji** ✓ *(P0.5)* — sheet tinggal header | — |
 | `xmlrpc.php` → 403 · port 3000 WAHA tidak terjangkau publik ✓ | — |
 | n8n `/healthz` → 200 · WF aktif · smoke test **21/21 hijau** | — |
@@ -138,10 +139,15 @@ Hasil pemeriksaan langsung hari ini:
   - halaman utilitas (`isi-data`, cart, checkout, my-account, shop) dikeluarkan dari sitemap **dan** di-`noindex`. `/isi-data/` membalas 403 tanpa token — mendaftarkannya di sitemap hanya melahirkan error Search Console; `/shop/` duplikat katalog front page. Halaman produk tetap terindeks (bisa punya nilai cari sendiri).
   **Verifikasi:** sitemap halaman tinggal 6 URL konten asli (katalog, reseller, 4 legal); index tinggal pages + products + product_cat; smoke test 21/21 hijau.
 
-- [~] **P2.5** **Analytics + Search Console** *(eks-T4.10)* — **sebagian: properti & sitemap sudah, tag menunggu ID**
-  ✅ Owner sudah menambahkan properti Search Console dan mengirim sitemap; pilihan analytics: **GA4**.
-  **Sisa (butuh 1 hal dari owner):** kirimkan **Measurement ID GA4** (format `G-XXXXXXXXXX`) — saya pasang tag-nya di tema, kecualikan halaman undangan bila perlu, lalu verifikasi realtime.
-  **Ikut wajib bersama GA4:** Kebijakan Privasi perlu bagian analytics & cookie (GA4 menaruh cookie dan memproses data pengunjung; kebijakan sekarang belum menyebutnya). Saya siapkan dan publikasikan bersamaan saat tag dipasang.
+- [x] **P2.5** **Analytics + Search Console** *(eks-T4.10)* → **SELESAI 2026-08-04**
+  Owner menambahkan properti Search Console + mengirim sitemap; GA4 dipasang dengan Measurement ID `G-WZ2K77HHY8`.
+  **Dua pengecualian yang disengaja — bukan kelalaian:**
+  - **`/isi-data/` tidak dilacak.** URL-nya memuat token order, sebuah bearer credential. GA4 mengirim URL lengkap sebagai `page_location`, jadi memasangnya di sana berarti menyerahkan token pelanggan ke Google — sekaligus membatalkan `Referrer-Policy: no-referrer` yang dipasang khusus untuk mencegah kebocoran itu (T2.9).
+  - **Halaman undangan `/u/*` tidak dilacak.** Pengunjungnya tamu customer, bukan customer kita — mereka tidak punya hubungan apa pun dengan hariH. Halaman itu juga paling sensitif performanya dan sepenuhnya mengandalkan cache LiteSpeed.
+  Funnel yang memang perlu diukur (katalog → produk → checkout) tetap terlacak penuh.
+  **Kebijakan Privasi ikut diperbarui** — bagian 8 kini "Cookie & Statistik Kunjungan": menyebut GA4 dan data yang dikumpulkan, mencantumkan kedua pengecualian di atas sebagai janji ke pelanggan, dan memberi cara menolak (opt-out add-on, DNT, pemblokir skrip). Google Analytics ditambahkan ke tabel pihak ketiga pemroses.
+  **Verifikasi:** tag hadir di `/`, `/jadi-reseller/`, halaman legal, `/shop/`; **tidak hadir** di `/u/demo-tema-01/` dan `/isi-data/` dengan token sah.
+
 
 
 - [ ] **P2.6** **Polish katalog + FAQ** *(eks-T3.8)* — konversi & pengurangan beban CS; halaman "Cara Pesan" terpisah bila perlu.

@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) exit;
  * pengunjung & LiteSpeed tetap menyajikan berkas lama meski file di server
  * sudah baru, dan perbaikan tampilan terlihat "tidak berpengaruh".
  */
-const HARIH_VERSION = '0.4.0';
+const HARIH_VERSION = '0.5.0';
 
 add_action('after_setup_theme', function () {
     add_theme_support('title-tag');
@@ -254,6 +254,41 @@ add_action('wp_head', function () {
     echo '<meta property="og:image" content="' . esc_url($img) . '">' . "\n";
     echo '<meta name="twitter:card" content="summary_large_image">' . "\n";
 }, 5);
+
+/* =========================================================================
+ * Analytics (P2.5)
+ * ========================================================================= */
+
+/** Measurement ID GA4. Kosongkan untuk mematikan pelacakan sepenuhnya. */
+const HARIH_GA4_ID = 'G-WZ2K77HHY8';
+
+/**
+ * GA4 sengaja TIDAK dimuat di dua tempat:
+ *
+ * 1. `/isi-data/` — URL halaman ini memuat **token order**, sebuah bearer
+ *    credential. GA4 mengirim URL lengkap sebagai `page_location`, jadi
+ *    memasangnya di sana berarti menyerahkan token pelanggan ke Google —
+ *    sekaligus membatalkan `Referrer-Policy: no-referrer` yang dipasang khusus
+ *    untuk mencegah kebocoran token itu (T2.9).
+ *
+ * 2. Halaman undangan `/u/*` — pengunjungnya adalah **tamu customer**, bukan
+ *    customer kita; mereka tidak punya hubungan apa pun dengan hariH dan tidak
+ *    sepatutnya ikut dilacak. Halaman itu juga yang paling sensitif performanya
+ *    (dibuka dari kuota seluler) dan sepenuhnya mengandalkan cache LiteSpeed.
+ *
+ * Funnel yang memang perlu diukur — katalog → halaman produk → checkout —
+ * seluruhnya tetap terlacak.
+ */
+add_action('wp_head', function () {
+    if (HARIH_GA4_ID === '') return;
+    if (is_singular('undangan') || is_page_template('page-isi-data.php')) return;
+
+    $id = esc_js(HARIH_GA4_ID);
+    echo "\n<!-- GA4 (P2.5) -->\n";
+    echo '<script async src="https://www.googletagmanager.com/gtag/js?id=' . esc_attr(HARIH_GA4_ID) . '"></script>' . "\n";
+    echo "<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}"
+       . "gtag('js',new Date());gtag('config','{$id}');</script>\n";
+}, 2);
 
 /* =========================================================================
  * SEO dasar (P2.4)

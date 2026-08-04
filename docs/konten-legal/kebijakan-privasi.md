@@ -2,7 +2,7 @@
 
 > Dipublikasikan sebagai halaman situs pada 22 Juli 2026.
 
-Terakhir diperbarui: 22 Juli 2026
+Terakhir diperbarui: 4 Agustus 2026
 
 hariH (harih.id) menghormati privasi Anda. Kebijakan ini menjelaskan data apa yang kami kumpulkan, untuk apa, dan hak Anda — disusun dengan memperhatikan UU No. 27 Tahun 2022 tentang Pelindungan Data Pribadi.
 
@@ -15,7 +15,7 @@ hariH (harih.id) menghormati privasi Anda. Kebijakan ini menjelaskan data apa ya
 **Dari tamu undangan:**
 - Isian buku ucapan/RSVP: nama, ucapan, dan status kehadiran. Kami tidak meminta kontak tamu.
 
-**Otomatis:** log teknis standar server (alamat IP, waktu akses) untuk keamanan dan pencegahan penyalahgunaan.
+**Otomatis:** log teknis standar server (alamat IP, waktu akses) untuk keamanan dan pencegahan penyalahgunaan, serta data statistik kunjungan melalui Google Analytics — lihat bagian 8.
 
 ## 2. Penggunaan Data
 
@@ -40,6 +40,7 @@ Data dibagikan terbatas sesuai keperluan layanan kepada:
 | WhatsApp | pengiriman pesan transaksional |
 | Google (Workspace/Sheets) | pencatatan operasional pesanan |
 | Hostinger | infrastruktur hosting situs |
+| Google Analytics | statistik kunjungan halaman toko (lihat bagian 8) |
 
 Masing-masing tunduk pada kebijakan privasinya sendiri.
 
@@ -57,9 +58,18 @@ Kami menerapkan langkah wajar: HTTPS di seluruh situs, pembatasan akses data, to
 
 Anda berhak meminta akses, koreksi, atau penghapusan data pribadi Anda (termasuk penghapusan halaman undangan sebelum masa aktif berakhir, dan penghapusan ucapan tamu tertentu). Ajukan melalui halaman [Kontak](/kontak/); kami tanggapi selambatnya 7 hari kerja.
 
-## 8. Cookie
+## 8. Cookie & Statistik Kunjungan
 
-Situs memakai cookie fungsional seperlunya (keranjang belanja & proses checkout). Kami tidak memakai cookie iklan pihak ketiga.
+Situs memakai cookie fungsional seperlunya (keranjang belanja & proses checkout). Kami **tidak** memakai cookie iklan pihak ketiga dan tidak menjalankan iklan bertarget.
+
+Untuk memahami bagaimana calon pemesan menggunakan halaman toko, kami memakai **Google Analytics 4**. Layanan ini menempatkan cookie dan mengumpulkan data penggunaan seperti halaman yang dibuka, durasi kunjungan, perangkat & peramban, sumber rujukan, serta perkiraan lokasi berdasarkan alamat IP. Data ini bersifat statistik dan tidak kami gunakan untuk mengidentifikasi Anda secara pribadi.
+
+**Yang sengaja kami kecualikan dari pelacakan:**
+
+- **Halaman undangan (`/u/…`)** — pengunjungnya adalah tamu Anda, bukan pelanggan kami. Kunjungan tamu ke halaman undangan **tidak dilacak sama sekali**.
+- **Halaman formulir pengisian data** — alamatnya memuat token pribadi pesanan Anda, sehingga tidak boleh dikirim ke pihak ketiga mana pun.
+
+Anda dapat menolak pelacakan ini kapan saja melalui pengaturan cookie/Do Not Track di peramban, mode penyamaran, pemblokir skrip, atau [Google Analytics Opt-out Browser Add-on](https://tools.google.com/dlpage/gaoptout).
 
 ## 9. Perubahan Kebijakan
 
