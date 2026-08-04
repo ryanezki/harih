@@ -16,11 +16,12 @@ Hasil pemeriksaan langsung hari ini:
 
 | Sehat ✓ | Bermasalah ✗ |
 |---|---|
-| Katalog, 4 halaman legal, landing reseller → 200 | **Musik** dijanjikan di pricing ketiga paket, belum ada *(P0.6)* |
+| Musik: 3 track berlisensi live + whitelist `musik_url` ✓ *(P0.6)* | **Duitku production diajukan — menunggu approval** *(P0.1)* |
 | Demo ketiga tema → 200, skin terbedakan ✓ *(P0.2)* | Backup mingguan belum pernah diuji restore *(P1.2)* |
-| Foto stok berlisensi + `og:image` berbrand per tema ✓ *(P0.3)* | Duitku production belum diajukan — belum bisa terima uang *(P0.1)* |
+| Angka kebijakan final; tabel halaman legal ter-render ✓ *(P1.6)* | Uptime monitor eksternal ditunda atas keputusan owner *(P1.3)* |
+| Foto stok berlisensi + `og:image` berbrand per tema ✓ *(P0.3)* | GA4 belum terpasang — menunggu Measurement ID *(P2.5)* |
 | `wp-sitemap-users-1.xml` → **404**, username tertutup ✓ *(P0.4)* | Kontras cover: aman untuk foto terang ✓ — tapi belum diuji di HP nyata *(P2.2)* |
-| `/wp-json/wp/v2/undangan` → **401** tanpa auth (meta tidak bocor) | `N8N_ENCRYPTION_KEY` & `vps/.env` belum di password manager *(P1.1)* |
+| `/wp-json/wp/v2/undangan` → **401** tanpa auth (meta tidak bocor) | — |
 | Undangan `noindex` ✓ · cache LiteSpeed **hit** pada `?to=` ✓ | QA perangkat riil (iPhone/Android) belum dijalankan *(P2.2)* |
 | Kode ter-backup: `github.com/ryanezki/harih` (private) ✓ *(P1.1)* | Monitor n8n hanya hidup **di dalam** n8n — tak ada pengawas eksternal *(P1.3)* |
 | Image Docker terpin: n8n 2.29.10 · WAHA 2026.6.2 ✓ *(P1.4)* | Analytics & Search Console belum ada — funnel tak terukur *(P2.5)* |
@@ -40,10 +41,13 @@ Hasil pemeriksaan langsung hari ini:
 
 *Selesaikan sebelum order riil pertama masuk.*
 
-- [ ] **P0.1** 👤 **Duitku production** *(eks-T0.11 → T4.8 → T4.12)*
-  **Kenapa:** blocker **satu-satunya** untuk menerima uang riil. Selama ini tidak beres, semua item lain hanya persiapan.
-  **Langkah:** (1) isi formulir aplikasi merchant personal di dashboard Duitku — situs live + 4 halaman legal + katalog sudah siap direview; (2) pantau approval (butuh berhari-hari); (3) setelah approve: WooCommerce → Settings → Payments → Duitku → ganti mode **Production** + Merchant Code & API Key production; (4) buat produk uji tersembunyi Rp 10.000 (`catalog_visibility=hidden`), pesan dari HP, verifikasi undangan sampai di WA < 15 menit, lalu hapus produknya.
-  **Selesai bila:** 1 order riil Rp 10.000 lolos end-to-end dari HP dan dana masuk ke rekening merchant.
+- [~] **P0.1** 👤 **Duitku production** *(eks-T0.11 → T4.8 → T4.12)* — **DIAJUKAN 2026-08-04, menunggu approval**
+  Blocker **satu-satunya** untuk menerima uang riil.
+  **Sudah:** formulir merchant perorangan dikirim. Keputusan yang dicatat: akun tetap di email pribadi owner (bukan `hi@harih.id`) — Duitku memakai struktur 1 akun → banyak project, dan akun perorangan secara hukum memang milik orangnya; email ber-domain produk justru berbahaya saat akun ini nanti menaungi SaaS lain. Nama Usaha diisi `hariH`, URL `https://harih.id`.
+  **Sisa setelah approval:** ganti kredensial plugin ke mode Production → beri tahu saya → produk uji tersembunyi Rp 10.000, pesan dari HP, verifikasi undangan sampai di WA < 15 menit, lalu produk ujinya dihapus.
+  **Perlu diperhatikan saat uji:** lihat nama merchant yang **benar-benar tampil ke pembayar** di layar kanal pembayaran. Sebagian kanal menampilkan nama pemilik rekening, bukan nama usaha — lebih baik ketahuan saat uji daripada saat order pertama.
+  **Selesai bila:** 1 order riil Rp 10.000 lolos end-to-end dan dananya masuk ke rekening merchant.
+
 
 - [x] **P0.2** **Demo tema-02 & tema-03** *(eks-T3.6)* → **SELESAI 2026-08-03**
   Bug live tertutup: `page-isi-data.php:92` menautkan `/u/demo-{tema}/` untuk ketiga tema, tapi tema-02 & tema-03 masih 404 — customer yang sudah bayar dapat halaman error tepat saat memilih tema.
@@ -70,31 +74,27 @@ Hasil pemeriksaan langsung hari ini:
   **Tersisa di produksi: nol data uji** — 3 undangan demo, 3 foto demo + placeholder WC, `wp_wc_orders` kosong, tab `orders`/`komisi`/`resellers` tinggal header. Tidak ada file yatim di uploads. Demo tetap 200 dengan galeri & `og:image` utuh; smoke test 21/21.
   **Catatan alat:** tab sheet bisa dibaca/diedit dari CLI tanpa n8n — service account `vps/google-sa.json` + JWT RS256 yang ditandatangani `openssl` (tanpa library Google). Berguna untuk skenario pemulihan di runbook §4.
 
-- [ ] **P0.6** **Kurasi library musik** *(eks-T1.15 — keputusan 2026-08-03: kurasi, bukan hapus klaim)*
-  **Kenapa:** "musik latar instrumental" dijual di **ketiga** paket (katalog, deskripsi produk WC) dan diatur di S&K §7, tapi `harih_musik_library()` (`functions.php:65`) masih kosong — form isi data hanya menulis "akan ditambahkan tim kami". Fitur terjual tapi belum ada = beban CS tiap order + risiko klaim.
-  **Langkah:** pilih 5–10 track instrumental berlisensi komersial (Pixabay Music / Uppbeat / pembelian sekali bayar), **arsipkan bukti lisensinya** di folder terpisah (bukan di repo publik), host file di `wp-content/uploads/musik/`, isi array `harih_musik_library()`. Dropdown di form muncul otomatis begitu array terisi.
-  **Selesai bila:** form isi data menampilkan dropdown musik, 1 undangan uji memutar musik pilihan di HP, bukti lisensi tersimpan.
+- [x] **P0.6** **Kurasi library musik** *(eks-T1.15)* → **SELESAI 2026-08-04**
+  Fitur yang tercantum di **ketiga** paket sejak hari pertama tapi belum pernah ada — tiap order jadi kerja manual CS.
+  **Hasil:** 3 track instrumental dari Pixabay (Pixabay Content License atas nama owner, bebas komersial tanpa atribusi; sertifikat unduhan diarsipkan di `music/*-license.txt`). Di-encode ulang 256 kbps → **128 kbps** (13 MB → 6,3 MB) — berkas asli membuat musik baru mulai puluhan detik setelah tombol ditekan di kuota seluler. Di-host di `uploads/musik/`, bukan media library.
+  **Bonus pengamanan:** `harih_musik_library()` sekaligus jadi **whitelist** meta `musik_url` — nilainya datang dari form pelanggan dan berakhir sebagai `<audio src>` di halaman yang dibagikan ke ratusan tamu. Diuji: track sah diterima, URL eksternal ditolak.
+  **Verifikasi:** dropdown muncul di form (diuji dengan token sah), audio terpasang di ketiga demo dengan track berbeda, berkas tersaji `audio/mpeg`.
 
----
 
-## P1 — Risiko yang bisa mematikan bisnis
-
-*Kerjakan di minggu pertama setelah launch, idealnya sebelum.*
-
-- [ ] **P1.1** **Backup repo & rahasia** *(keputusan 2026-08-03 — kode ✅, rahasia masih sisa)*
+- [x] **P1.1** **Backup repo & rahasia** → **SELESAI 2026-08-04** *(kode 2026-08-03, rahasia 2026-08-04)*
   ✅ **Kode ter-backup**: <https://github.com/ryanezki/harih> — **private**, 36 commit, `origin/main` identik dengan HEAD lokal. Sebelum push, seluruh **riwayat** disisir (bukan cuma kondisi sekarang): `vps/.env` & `vps/google-sa.json` tidak pernah tercatat; scan semua blob untuk pola rahasia (`xkeysib-`, `ck_`/`cs_`, PEM private key, Google API key) → nihil; blok `credentials` di workflow JSON hanya berisi ID + nama referensi. Diverifikasi lagi via API setelah push: kedua berkas rahasia memang tidak ada di remote.
-  **Sisa (👤, tidak bisa saya kerjakan — menyangkut nilai rahasia):** simpan di password manager (1) `N8N_ENCRYPTION_KEY` — tanpa ini arsip backup n8n **tidak bisa di-restore**, dan nilainya sekarang hanya ada di VPS yang sama dengan backupnya (runbook §9 mensyaratkan disimpan terpisah); (2) seluruh isi `vps/.env` — satu-satunya salinan ada di disk Mac ini dan di VPS.
-  **Selesai bila:** kedua rahasia tersimpan di password manager. Rutinitas baru: `git push` setiap selesai sesi.
+  ✅ **Rahasia tersimpan di password manager** oleh owner (2026-08-04): `N8N_ENCRYPTION_KEY` + isi `vps/.env`. Tanpa encryption key itu arsip backup n8n tidak bisa di-restore, dan sebelumnya nilainya hanya ada di VPS yang sama dengan backupnya.
+  Rutinitas baru: `git push` setiap selesai sesi.
 
 - [ ] **P1.2** **Uji restore backup 1×** *(sisa eks-T4.2)*
   **Kenapa:** backup mingguan sudah jalan 2× dan memverifikasi integritas (`gunzip -t` + ambang ukuran), tapi **belum pernah di-restore**. Backup yang tak pernah diuji dianggap tidak ada.
   **Langkah:** ambil dump terbaru dari `/opt/harih/backups/db/`, restore ke database kosong (lokal/staging, **bukan** produksi), pastikan tabel `wp_posts` berisi undangan; `tar -tzf` arsip WAHA & n8n untuk memastikan isinya utuh.
   **Selesai bila:** restore DB sukses & terverifikasi isinya; langkahnya dicatat di runbook §9 sebagai "sudah diuji <tanggal>".
 
-- [ ] **P1.3** **Uptime monitoring eksternal** *(eks-T4.3)*
-  **Kenapa:** **blind spot nyata** — WF-07 (monitor sesi WAHA) dan WF-08 (monitor webhook WC) berjalan sebagai cron **di dalam n8n**. Kalau n8n sendiri mati, kedua monitor mati bersamanya dan tidak ada yang memberi tahu siapa pun. Satu-satunya pemeriksaan eksternal saat ini adalah `cek-live.sh` yang dijalankan manual.
-  **Langkah:** UptimeRobot (gratis) → 3 monitor: `https://harih.id/` (keyword "paket"), `https://n8n.harih.id/healthz`, dan heartbeat/keyword untuk backup mingguan. Alert ke `hi@harih.id` + WA owner.
-  **Selesai bila:** ketiga monitor hijau dan uji matikan-sebentar memicu alert yang benar-benar diterima.
+- [ ] **P1.3** 👤 **Uptime monitoring eksternal** *(eks-T4.3)* — **DITUNDA atas keputusan owner (2026-08-04)**
+  **Risiko yang diterima sementara:** WF-07 (sesi WAHA) & WF-08 (webhook WC) berjalan **di dalam** n8n. Kalau n8n sendiri mati, kedua monitor mati bersamanya dan tidak ada yang memberi tahu — order masuk tetap tertangkap rekonsiliasi setelah n8n hidup lagi, tapi tidak ada yang tahu n8n mati.
+  Spesifikasi 3 monitor sudah siap di `docs/panduan-manual.md` langkah 4 — tinggal daftar dan tempel saat mau dikerjakan.
+
 
 - [x] **P1.4** **Pin tag image Docker** → **SELESAI 2026-08-03**
   `latest` + `restart: unless-stopped` berarti `docker compose pull` berikutnya bisa menaikkan versi diam-diam; proyek ini sudah dua kali tertampar perubahan perilaku n8n (penjodohan credential by-name saat import, `$env` diblokir default di Code node).
@@ -104,13 +104,12 @@ Hasil pemeriksaan langsung hari ini:
 - [x] **P1.5** **Perbaiki drift `scripts/setup-hostinger.sh`** → **SELESAI 2026-08-03**
   Script membuat `n8nbot` dengan `--role=editor`, padahal produksi memakai `shop_manager` (dikonfirmasi di server: user ID 2 = `shop_manager`). Editor tidak boleh mengelola order via WC REST → rebuild dari script menghasilkan sistem yang gagal saat WF-02 menset order `completed`. Sudah diperbaiki + alasannya dikomentari di script.
 
-- [ ] **P1.6** 👤 **Review runbook + finalisasi angka kebijakan** *(sisa eks-T4.9)*
-  **Kenapa:** [`docs/runbook.md`](./runbook.md) adalah pegangan owner saat sistem rusak, tapi belum pernah dibaca-ulang oleh owner dan beberapa angka masih default: SLA revisi, tarif revisi berbayar untuk paket Hemat, batas hari pengajuan refund.
-  **Selesai bila:** runbook dibaca dari atas ke bawah, angka kebijakan final, dan angka yang sama muncul konsisten di S&K + Kebijakan Refund.
+- [x] **P1.6** 👤 **Review runbook + finalisasi angka kebijakan** *(sisa eks-T4.9)* → **SELESAI 2026-08-04**
+  **Keputusan owner:** SLA revisi **2×24 jam** (sebelumnya 1×24 jam kerja — "jam kerja" berisiko melewati akhir pekan tepat sebelum acara), batas pengajuan refund tetap **7 hari**, dan harga revisi Hemat diserahkan ke saya atas dasar kewajaran → **Rp 25.000 per pengajuan**.
+  **Dasar angka Rp 25.000:** menutup waktu CS tanpa terasa menghukum pada produk Rp 99.000; dua kali revisi (Rp 50.000) tetap di bawah selisih upgrade ke Favorit (Rp 80.000), jadi tangga harganya mendorong upgrade alih-alih menghukum. Berlaku juga untuk revisi di luar jatah pada Favorit/Premium.
+  **Aturan yang lebih penting dari angkanya:** koreksi atas **kesalahan sistem/kesalahan kami selalu gratis**, semua paket, tanpa batas — penagihan hanya untuk perubahan yang diminta pemesan.
+  Diselaraskan di S&K §5, runbook §8, FAQ katalog, dan deskripsi produk WooCommerce.
 
----
-
-## P2 — Kualitas produk & fondasi pertumbuhan
 
 - [x] **P2.1** **Masa aktif otomatis** *(eks-T3.13)* → **SELESAI 2026-08-04**
   Masa aktif H+7 / H+30 / 1 tahun tertulis di katalog, deskripsi produk WC, **dan S&K §4** — tanpa mekanisme apa pun. Akibatnya: disk & inodes tumbuh selamanya, dan "aktif 1 tahun" bukan pembeda Premium karena paket Hemat pun hidup abadi.
@@ -139,8 +138,11 @@ Hasil pemeriksaan langsung hari ini:
   - halaman utilitas (`isi-data`, cart, checkout, my-account, shop) dikeluarkan dari sitemap **dan** di-`noindex`. `/isi-data/` membalas 403 tanpa token — mendaftarkannya di sitemap hanya melahirkan error Search Console; `/shop/` duplikat katalog front page. Halaman produk tetap terindeks (bisa punya nilai cari sendiri).
   **Verifikasi:** sitemap halaman tinggal 6 URL konten asli (katalog, reseller, 4 legal); index tinggal pages + products + product_cat; smoke test 21/21 hijau.
 
-- [ ] **P2.5** **Analytics + Search Console** *(eks-T4.10)*
-  Tanpa data, kebocoran funnel (katalog → checkout → isi data → terbit) hanya bisa ditebak, dan keputusan v2 §15 jadi tebakan. Plausible/GA4 + verifikasi Search Console (pastikan katalog terindeks & undangan tetap `noindex`).
+- [~] **P2.5** **Analytics + Search Console** *(eks-T4.10)* — **sebagian: properti & sitemap sudah, tag menunggu ID**
+  ✅ Owner sudah menambahkan properti Search Console dan mengirim sitemap; pilihan analytics: **GA4**.
+  **Sisa (butuh 1 hal dari owner):** kirimkan **Measurement ID GA4** (format `G-XXXXXXXXXX`) — saya pasang tag-nya di tema, kecualikan halaman undangan bila perlu, lalu verifikasi realtime.
+  **Ikut wajib bersama GA4:** Kebijakan Privasi perlu bagian analytics & cookie (GA4 menaruh cookie dan memproses data pengunjung; kebijakan sekarang belum menyebutnya). Saya siapkan dan publikasikan bersamaan saat tag dipasang.
+
 
 - [ ] **P2.6** **Polish katalog + FAQ** *(eks-T3.8)* — konversi & pengurangan beban CS; halaman "Cara Pesan" terpisah bila perlu.
 
