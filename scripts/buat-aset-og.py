@@ -3,7 +3,9 @@
 
 Preview share WhatsApp adalah etalase produk: reseller membagikan katalog, tamu
 membagikan undangan. Kartu dirender dari HTML memakai tipografi & token warna
-ASLI tiap tema (disalin dari undangan/{tema}/style.css), lalu di-screenshot
+ASLI tiap tema (disalin dari undangan/{tema}/style.css) — termasuk KONSEP
+tipografinya: tema-01 satu keluarga serif, tema-02 satu keluarga sans,
+tema-03 kontras didone+sans ringan — lalu di-screenshot
 Chrome headless — jadi aset OG selalu konsisten dengan skin yang dijual.
 
 Jalankan dari root repo:
@@ -37,21 +39,21 @@ TEMA = {
     },
     "tema-01": {
         "foto": "harih-cincin-buket.jpg",
-        "font_display": "Playfair Display", "font_body": "Plus Jakarta Sans",
+        "font_display": "Cormorant Garamond", "font_body": "Cormorant Garamond",
         # Foto buket sangat terang di area atas — overlay lebih pekat daripada
         # cover tema aslinya supaya eyebrow emas tetap terbaca (uji kontras P0.3).
         "overlay": "linear-gradient(180deg, rgba(28,42,35,.52) 0%, rgba(28,42,35,.80) 100%)",
         "ink": "#f7f4ea", "gold": "#d0ac5c", "garis": "rgba(247,244,234,.45)",
-        "eyebrow": "TEMA 01", "judul": "Botanical Elegan", "judul_size": "92px",
+        "eyebrow": "TEMA 01", "judul": "Botanical Elegan", "judul_size": "104px",
         "sub": "Sage &amp; gading, ornamen botani lembut",
         "kaki": "hariH &nbsp;·&nbsp; harih.id",
     },
     "tema-02": {
         "foto": "harih-cincin-sepatu.jpg",
-        "font_display": "Cormorant Garamond", "font_body": "Karla",
+        "font_display": "Karla", "font_body": "Karla",
         "overlay": "linear-gradient(180deg, rgba(90,42,24,.40) 0%, rgba(59,30,18,.78) 100%)",
         "ink": "#faf1e6", "gold": "#d79a68", "garis": "rgba(250,241,230,.45)",
-        "eyebrow": "TEMA 02", "judul": "Senja Terakota", "judul_size": "104px",
+        "eyebrow": "TEMA 02", "judul": "Senja Terakota", "judul_size": "82px",
         "sub": "Terakota &amp; tembaga, bingkai lengkung khas senja",
         "kaki": "hariH &nbsp;·&nbsp; harih.id",
     },

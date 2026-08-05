@@ -7,8 +7,13 @@
    ========================================================================= */
 
 :root {
-    --font-display: 'Cormorant Garamond', Georgia, serif;
+    /* KONSEP: modern hangat — SATU keluarga sans untuk seluruh halaman.
+       Sengaja tanpa serif sama sekali: ini tema untuk pasangan yang menginginkan
+       undangan kontemporer & bersih, bukan klasik. Kehangatannya datang dari
+       terakota, lengkung arch, dan ruang napas — bukan dari huruf berkait. */
+    --font-display: 'Karla', system-ui, -apple-system, sans-serif;
     --font-body: 'Karla', system-ui, -apple-system, sans-serif;
+    --font-label: 'Karla', system-ui, -apple-system, sans-serif;
 
     --c-page: #ecdfd2;
     --c-bg: #fbf6f0;
@@ -19,7 +24,8 @@
     --c-accent: #a15436;      /* terakota */
     --c-accent-ink: #faf3ea;  /* krem */
     --c-gold: #be7a4a;        /* tembaga */
-    --radius: 20px;
+    --radius: 18px;       /* lembut & membulat, seirama motif arch */
+    --radius-btn: 10px;   /* modern, tapi bukan pil aplikasi */
     --shadow: 0 12px 32px rgba(161, 84, 54, .10);
 
     /* Cover tanpa foto: gradasi langit senja */
@@ -31,9 +37,22 @@
     --ornament: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20160%2040'%20fill='none'%3E%3Cpath%20d='M6%2020h42'%20stroke='%23be7a4a'%20stroke-width='1'/%3E%3Cpath%20d='M112%2020h42'%20stroke='%23be7a4a'%20stroke-width='1'/%3E%3Ccircle%20cx='56'%20cy='20'%20r='1.5'%20fill='%23be7a4a'/%3E%3Ccircle%20cx='104'%20cy='20'%20r='1.5'%20fill='%23be7a4a'/%3E%3Cpath%20d='M68%2023a12%2012%200%200%201%2024%200'%20stroke='%23be7a4a'%20stroke-width='1'/%3E%3Cpath%20d='M64%2023h32'%20stroke='%23be7a4a'%20stroke-width='1'/%3E%3Cpath%20d='M80%206v5'%20stroke='%23be7a4a'%20stroke-width='1'/%3E%3Cpath%20d='M69%209l3%204'%20stroke='%23be7a4a'%20stroke-width='1'/%3E%3Cpath%20d='M91%209l-3%204'%20stroke='%23be7a4a'%20stroke-width='1'/%3E%3C/svg%3E");
 }
 
-/* Cormorant lebih ramping dari Playfair — sedikit dibesarkan agar setara */
-.cover-names { font-size: clamp(38px, 10vw, 50px); }
-.section-title { font-size: 32px; }
+/* Sans terbaca lebih besar pada ukuran px yang sama — dikecilkan sedikit,
+   lalu diberi tracking negatif tipis supaya nama terasa padat & modern. */
+.cover-names { font-size: clamp(34px, 9.2vw, 45px); font-weight: 500; letter-spacing: -.02em; }
+
+/* Judul section: KAPITAL ber-tracking lebar — perlakuan editorial modern yang
+   membedakan tema ini dari serif klasik tema-01 dan didone dramatis tema-03. */
+.section-title {
+    font-size: clamp(19px, 5vw, 22px);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .2em;
+    text-indent: .2em;
+}
+.mempelai-nama, .penutup-nama { font-weight: 500; letter-spacing: -.015em; }
+.mempelai-amp { font-style: normal; font-weight: 300; }
+.cd-num { font-weight: 500; }
 
 /* Tekstur titik hangat di latar luar kolom (terlihat di desktop) */
 body.undangan-body {

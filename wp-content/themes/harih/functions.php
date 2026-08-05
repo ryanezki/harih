@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) exit;
  * pengunjung & LiteSpeed tetap menyajikan berkas lama meski file di server
  * sudah baru, dan perbaikan tampilan terlihat "tidak berpengaruh".
  */
-const HARIH_VERSION = '0.7.1';
+const HARIH_VERSION = '0.8.0';
 
 add_action('after_setup_theme', function () {
     add_theme_support('title-tag');
@@ -37,14 +37,19 @@ function harih_paket_aktif(int $post_id): string {
 }
 
 /**
- * Google Fonts per tema. Pertimbangkan self-host / fitur "Localize Resources"
- * LiteSpeed setelah launch (performa + privasi).
+ * Google Fonts per tema. Tiap tema punya KONSEP tipografi sendiri, bukan sekadar
+ * font berbeda dengan struktur sama:
+ *   tema-01 — satu keluarga serif (Cormorant) untuk display, teks, DAN label
+ *   tema-02 — satu keluarga sans (Karla) untuk semuanya; kontemporer
+ *   tema-03 — kontras tinggi disengaja: didone Prata + Manrope 300
+ * Karena itu tema-01 & tema-02 kini hanya memuat SATU keluarga — lebih sedikit
+ * yang diunduh sekaligus lebih menyatu.
  */
 function harih_tema_fonts(string $tema): string {
     $map = [
-        'tema-01' => 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap',
-        'tema-02' => 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Karla:wght@400;500;600&display=swap',
-        'tema-03' => 'https://fonts.googleapis.com/css2?family=Prata&family=Manrope:wght@400;500;600&display=swap',
+        'tema-01' => 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap',
+        'tema-02' => 'https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap',
+        'tema-03' => 'https://fonts.googleapis.com/css2?family=Prata&family=Manrope:wght@300;400;500&display=swap',
     ];
     return $map[$tema] ?? '';
 }

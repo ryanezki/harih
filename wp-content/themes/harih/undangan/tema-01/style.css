@@ -8,8 +8,14 @@
    ========================================================================= */
 
 :root {
-    --font-display: 'Playfair Display', Georgia, serif;
-    --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    /* KONSEP: klasik formal — SATU keluarga serif untuk seluruh halaman.
+       Tidak ada sans sama sekali. Micro-label memakai serif kapital
+       ber-tracking lebar, yang di dunia cetak justru bacaan paling "terukir".
+       Ini yang membuat tema-01 terbaca sebagai undangan cetak tradisional,
+       bukan halaman web ber-heading serif. */
+    --font-display: 'Cormorant Garamond', Georgia, serif;
+    --font-body: 'Cormorant Garamond', Georgia, serif;
+    --font-label: 'Cormorant Garamond', Georgia, serif;
 
     --c-page: #e7e2d6;
     --c-bg: #faf7f0;
@@ -20,7 +26,8 @@
     --c-accent: #3f5c4f;      /* sage tua */
     --c-accent-ink: #f4f1e7;  /* gading */
     --c-gold: #b4923f;
-    --radius: 18px;
+    --radius: 3px;        /* sudut tegas — kartu cetak, bukan kartu aplikasi */
+    --radius-btn: 2px;
     --shadow: 0 12px 32px rgba(63, 92, 79, .10);
 
     /* Cover tanpa foto: gradasi sage dalam */
@@ -31,6 +38,18 @@
     /* Ornamen pembatas: garis — daun — belah ketupat — daun — garis (emas) */
     --ornament: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20160%2040'%20fill='none'%3E%3Cpath%20d='M6%2020h44'%20stroke='%23b4923f'%20stroke-width='1'/%3E%3Cpath%20d='M110%2020h44'%20stroke='%23b4923f'%20stroke-width='1'/%3E%3Cpath%20d='M80%2011l7%209-7%209-7-9z'%20stroke='%23b4923f'%20stroke-width='1'/%3E%3Cpath%20d='M58%2020c4-7%2010-9%2010-9s-1%208-6%2011'%20stroke='%23b4923f'%20stroke-width='1'/%3E%3Cpath%20d='M102%2020c-4-7-10-9-10-9s1%208%206%2011'%20stroke='%23b4923f'%20stroke-width='1'/%3E%3C/svg%3E");
 }
+
+/* Cormorant bertubuh kecil & ramping: ukuran teks dinaikkan dan weight
+   sedikit ditebalkan supaya tetap nyaman dibaca di HP. */
+.section-intro, .prose, .lokasi-alamat, .mempelai-ortu, .penutup-teks {
+    font-size: 17px;
+}
+.section-intro, .prose { line-height: 1.9; }
+.acara-tanggal, .lokasi-nama, .ucapan-nama { font-weight: 600; }
+.field input, .field select, .field textarea { font-size: 16px; }
+/* Label serif kapital: tracking lebih lebar dari sans agar tidak terlihat rapat */
+.cover-eyebrow { letter-spacing: .4em; text-indent: .4em; }
+.btn { letter-spacing: .24em; text-indent: .24em; font-size: 13px; }
 
 /* Tekstur halus latar luar kolom (terlihat di desktop) */
 body.undangan-body {

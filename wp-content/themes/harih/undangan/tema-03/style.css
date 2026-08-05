@@ -8,8 +8,14 @@
    ========================================================================= */
 
 :root {
+    /* KONSEP: dramatis mewah — kontras TINGGI yang disengaja antara didone
+       tebal (Prata) dan sans sangat ringan (Manrope 300). Pasangan ini kosakata
+       majalah mode: huruf display berat sebagai bintang, teks tipis sebagai
+       latar yang menepi. Berbeda dari tema-01 (satu serif) dan tema-02 (satu
+       sans) — di sini campurannya justru inti konsepnya, bukan kelalaian. */
     --font-display: 'Prata', Georgia, serif;
     --font-body: 'Manrope', system-ui, -apple-system, sans-serif;
+    --font-label: 'Manrope', system-ui, -apple-system, sans-serif;
 
     --c-page: #0c1220;
     --c-bg: #131b2e;
@@ -20,7 +26,8 @@
     --c-accent: #c9a45c;      /* emas — tombol berlatar emas, teks navy */
     --c-accent-ink: #171f33;
     --c-gold: #c9a45c;
-    --radius: 16px;
+    --radius: 4px;        /* tegas & tenang, memberi panggung ke tipografi */
+    --radius-btn: 2px;
     --shadow: 0 14px 34px rgba(0, 0, 0, .35);
 
     /* Cover tanpa foto: langit malam bertabur bintang */
@@ -39,7 +46,13 @@
     --ornament: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20160%2040'%20fill='none'%3E%3Cpath%20d='M6%2020h40'%20stroke='%23c9a45c'%20stroke-width='1'/%3E%3Cpath%20d='M114%2020h40'%20stroke='%23c9a45c'%20stroke-width='1'/%3E%3Ccircle%20cx='52'%20cy='20'%20r='1.5'%20fill='%23c9a45c'/%3E%3Ccircle%20cx='108'%20cy='20'%20r='1.5'%20fill='%23c9a45c'/%3E%3Cpath%20d='M80%208l3%209%209%203-9%203-3%209-3-9-9-3%209-3z'%20fill='%23c9a45c'/%3E%3Cpath%20d='M64%2014l2%203-2%203-2-3z'%20fill='%23c9a45c'/%3E%3Cpath%20d='M96%2014l2%203-2%203-2-3z'%20fill='%23c9a45c'/%3E%3C/svg%3E");
 }
 
-/* Prata hanya punya weight 400 — browser mensintesis 500/600; aman */
+/* Prata hanya punya weight 400 — jangan minta weight lain; sintesis browser
+   merusak ketebalan didone-nya. Teks memakai Manrope 300 supaya kontras
+   terhadap display tetap tajam. */
+.section-title, .cover-names, .mempelai-nama, .penutup-nama, .cd-num, .acara-jenis { font-weight: 400; }
+.section-intro, .prose, .penutup-teks, .lokasi-alamat, .mempelai-ortu { font-weight: 300; }
+.btn, .cover-eyebrow, .cd-label, .field span { font-weight: 300; letter-spacing: .24em; }
+.btn { text-indent: .24em; }
 
 /* Di latar gelap, tint section harus LEBIH TERANG (bukan lebih gelap seperti
    default shared), dan butiran kertas diperhalus supaya tidak terbaca sebagai
