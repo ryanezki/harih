@@ -15,14 +15,18 @@ $u = $args;
             <input type="text" name="nama" id="rsvp-nama" maxlength="100" required>
         </label>
 
-        <label class="field">
-            <span>Kehadiran</span>
-            <select name="hadir" id="rsvp-hadir">
-                <option value="hadir">Hadir</option>
-                <option value="tidak">Berhalangan</option>
-                <option value="ragu">Belum Pasti</option>
-            </select>
-        </label>
+        <div class="field">
+            <span id="rsvp-hadir-label">Kehadiran</span>
+            <?php /* Tiga pill sejajar (acuan) — nilai disimpan di input hidden
+                     ber-id sama dengan select lama, jadi kontrak undangan.js
+                     tidak berubah. */ ?>
+            <input type="hidden" name="hadir" id="rsvp-hadir" value="hadir">
+            <div class="hadir-opsi" role="group" aria-labelledby="rsvp-hadir-label">
+                <button type="button" class="hadir-btn aktif" data-hadir="hadir">Hadir</button>
+                <button type="button" class="hadir-btn" data-hadir="tidak">Berhalangan</button>
+                <button type="button" class="hadir-btn" data-hadir="ragu">Belum Pasti</button>
+            </div>
+        </div>
 
         <label class="field">
             <span>Ucapan &amp; doa</span>

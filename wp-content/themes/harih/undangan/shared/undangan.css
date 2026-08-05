@@ -649,6 +649,27 @@ img { max-width: 100%; }
     outline-offset: 1px;
     border-color: transparent;
 }
+.hadir-opsi { display: flex; gap: 8px; }
+.hadir-btn {
+    flex: 1;
+    padding: 13px 4px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--c-gold) 26%, transparent);
+    background: transparent;
+    color: var(--c-ink-soft);
+    font: 400 10px/1.35 var(--font-label);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: border-color .35s ease, background .35s ease, color .35s ease;
+}
+.hadir-btn.aktif {
+    border-color: var(--c-gold);
+    background: color-mix(in srgb, var(--c-gold) 14%, transparent);
+    color: color-mix(in srgb, var(--c-gold) 70%, var(--c-ink));
+}
+.hadir-btn:focus-visible { outline: 2px solid var(--c-gold); outline-offset: 2px; }
+
 .hp-field { position: absolute !important; left: -9999px; opacity: 0; height: 0; width: 0; pointer-events: none; }
 .rsvp-msg { min-height: 1.2em; font-size: 13px; margin: 0; color: var(--c-ink-soft); }
 .rsvp-msg.error { color: #a4442f; }

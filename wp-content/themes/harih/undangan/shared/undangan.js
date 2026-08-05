@@ -314,6 +314,19 @@
         });
     }
 
+    /* ---- Pill kehadiran RSVP (menggantikan dropdown) ---- */
+    (function () {
+        var hidden = $('#rsvp-hadir');
+        var pills = document.querySelectorAll('.hadir-btn');
+        if (!hidden || !pills.length) return;
+        pills.forEach(function (b) {
+            b.addEventListener('click', function () {
+                hidden.value = b.getAttribute('data-hadir');
+                pills.forEach(function (x) { x.classList.toggle('aktif', x === b); });
+            });
+        });
+    })();
+
     /* ---- Salin rekening ---- */
     document.querySelectorAll('.btn-copy').forEach(function (btn) {
         btn.addEventListener('click', function () {
