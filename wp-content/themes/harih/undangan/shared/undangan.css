@@ -88,7 +88,7 @@ img { max-width: 100%; }
     overflow: clip;
 }
 
-.section { padding: 76px 28px; text-align: center; position: relative; }
+.section { padding: 76px 28px 88px; text-align: center; position: relative; }
 
 /* Irama: dua section selalu-ada diberi tint supaya kolom tidak terbaca
    sebagai satu blok krem tanpa ujung. Keduanya tidak pernah berdempetan
@@ -143,7 +143,9 @@ img { max-width: 100%; }
    undangan. Sekarang: huruf display miring + tanda kutip besar sebagai
    ornamen pembuka. */
 .love-story .prose {
-    font: italic 400 clamp(16px, 4.3vw, 18px)/1.9 var(--font-display);
+    /* Evaluasi: paragraf panjang ber-italic serif melelahkan di layar kecil —
+       italic disimpan untuk kutipan pendek; narasi memakai huruf teks tegak. */
+    font: 400 16.5px/1.95 var(--font-body);
     color: var(--c-ink);
     position: relative;
     padding-top: 10px;
@@ -228,7 +230,10 @@ img { max-width: 100%; }
     position: absolute;
     inset: 0;
     z-index: -1;
+    /* Scrim tiga lapis (evaluasi: nama krem hilang di foto terang) — lapis
+       bawah pekat menjamin nama & panel tamu selalu terbaca. */
     background:
+        linear-gradient(180deg, transparent 42%, rgba(0, 0, 0, .48) 74%, rgba(0, 0, 0, .78) 100%),
         radial-gradient(120% 88% at 50% 38%, transparent 36%, rgba(0, 0, 0, .38) 100%),
         var(--cover-overlay, linear-gradient(180deg, rgba(0, 0, 0, .3), rgba(0, 0, 0, .62)));
 }
@@ -262,7 +267,7 @@ img { max-width: 100%; }
     margin-top: 12px;
     padding: 20px 32px;
     border: 1px solid color-mix(in srgb, var(--c-gold) 42%, transparent);
-    background: rgba(0, 0, 0, .3);
+    background: rgba(0, 0, 0, .44);
     -webkit-backdrop-filter: blur(6px);
     backdrop-filter: blur(6px);
 }
@@ -304,8 +309,12 @@ img { max-width: 100%; }
    tinta — saat animasi mati (reduced motion) tampil normal, bukan belang. */
 .cover-names {
     margin: 4px 0 0;
-    font: 500 clamp(38px, 10.5vw, 52px)/1.12 var(--font-display);
+    /* Evaluasi: "Kirana Maheswari" menyentuh tepi — clamp dikecilkan, beri
+       ruang samping, dan balance supaya pemenggalan barisnya rapi. */
+    font: 500 clamp(31px, 8.6vw, 46px)/1.16 var(--font-display);
     letter-spacing: -.015em;
+    padding: 0 10px;
+    text-wrap: balance;
 }
 .gate .cover-names, .hero-names {
     background: linear-gradient(110deg, currentColor 38%, var(--c-gold) 50%, currentColor 62%);
@@ -323,7 +332,7 @@ img { max-width: 100%; }
 /* ---- 1b. Hero — bagian pertama di aliran halaman ---- */
 .hero { padding-top: 60px; color: var(--c-ink); }
 .hero .cover-eyebrow { color: var(--c-gold); opacity: 1; }
-.hero-names { color: var(--c-ink); font-size: clamp(34px, 9.4vw, 46px); margin-top: 14px; }
+.hero-names { color: var(--c-ink); font-size: clamp(30px, 8.4vw, 42px); margin-top: 14px; }
 .hero-arch {
     margin: 0 18px;
     border: 1px solid color-mix(in srgb, var(--c-gold) 34%, transparent);
@@ -344,7 +353,88 @@ img { max-width: 100%; }
 /* ---- Salam pembuka (sebelum countdown, urutan acuan) ---- */
 .salam { padding-bottom: 40px; }
 .salam .acara-diamond { margin-bottom: 26px; }
-.salam-teks { margin: 0; font: italic 400 clamp(17px, 4.6vw, 19px)/1.9 var(--font-display); color: var(--c-ink); }
+.salam-assalam { margin: 0 0 22px; font: 500 clamp(18px, 5vw, 21px)/1.5 var(--font-display); color: var(--c-ink); text-wrap: balance; }
+.salam-ayat { margin: 0 0 30px; padding: 0; }
+.salam-ayat p { margin: 0; font: italic 400 15.5px/1.9 var(--font-display); color: var(--c-ink-soft); }
+.salam-ayat cite { display: block; margin-top: 14px; font: 400 10px/1 var(--font-label); letter-spacing: .26em; text-transform: uppercase; font-style: normal; color: var(--c-gold); }
+.salam-teks { margin: 0; font: italic 400 clamp(16px, 4.4vw, 18px)/1.85 var(--font-display); color: var(--c-ink); }
+
+.tgl-hijriah { margin: 6px 0 0; font: 400 10px/1.4 var(--font-label); letter-spacing: .2em; text-transform: uppercase; color: var(--c-gold); }
+.tgl-hijriah:empty { display: none; }
+.hero-hijriah { margin-top: 10px; }
+
+.turut-daftar { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.turut-daftar li { font: 400 16px/1.6 var(--font-display); color: var(--c-ink); }
+
+.dresscode { margin-top: 34px; }
+.dresscode-label::after, .rundown-label::after { display: none; }
+.dresscode-teks { margin: 0; font: 400 17px/1.5 var(--font-display); color: var(--c-ink); }
+.dresscode-swatch { display: flex; justify-content: center; gap: 12px; margin-top: 14px; }
+.dresscode-swatch i {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .18), 0 0 0 1px color-mix(in srgb, var(--c-gold) 34%, transparent);
+}
+
+.rundown { margin-top: 34px; }
+.rundown-daftar { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.rundown-daftar li {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    text-align: left;
+    padding: 12px 4px;
+    border-bottom: 1px solid color-mix(in srgb, var(--c-gold) 14%, transparent);
+}
+.rundown-daftar li:last-child { border-bottom: 0; }
+.rd-waktu { flex: none; width: 52px; font: 400 12px/1.5 var(--font-label); letter-spacing: .12em; color: var(--c-gold); font-variant-numeric: tabular-nums; }
+.rd-nama { font-size: 15px; color: var(--c-ink); }
+
+.kado-kartu {
+    margin-top: 22px;
+    border: 1px solid color-mix(in srgb, var(--c-gold) 26%, transparent);
+    background: var(--c-surface);
+    padding: 30px 26px;
+    text-align: center;
+}
+.kado-alamat { margin: 16px 0 0; font-size: 15px; line-height: 1.7; color: var(--c-ink); }
+.kado-kartu .btn-copy { margin-top: 18px; }
+
+/* Facade video: thumbnail + tombol putar; iframe dimuat saat klik */
+.video-frame-dalam { cursor: pointer; }
+.video-frame-dalam > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.video-play {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, .45);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c-gold) 70%, transparent);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+}
+.video-play::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 0;
+    height: 0;
+    border-left: 16px solid var(--c-gold);
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    transform: translateX(3px);
+}
+
+.row-rsvp { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.ucapan-info { font: 400 10px/1.6 var(--font-label); letter-spacing: .08em; color: var(--c-ink-soft); }
+
+.penutup-wassalam { margin: 24px 0 0; font: 500 clamp(16px, 4.4vw, 18px)/1.5 var(--font-display); color: var(--c-ink); }
+.penutup-maaf { margin: 12px 0 22px; font-size: 13px; color: var(--c-ink-soft); font-style: italic; }
+.penutup-musik { margin: 22px 0 0; font: 400 10px/1.6 var(--font-label); letter-spacing: .16em; text-transform: uppercase; color: var(--c-ink-soft); }
 
 /* ---- Kisah Kami: foto full-bleed bergradasi atas-bawah (acuan) ---- */
 .love-story { padding-left: 0; padding-right: 0; }
@@ -674,7 +764,19 @@ img { max-width: 100%; }
 .rsvp-msg { min-height: 1.2em; font-size: 13px; margin: 0; color: var(--c-ink-soft); }
 .rsvp-msg.error { color: #a4442f; }
 
-.ucapan-list { margin-top: 26px; display: flex; flex-direction: column; gap: 10px; text-align: left; }
+.ucapan-list {
+    margin-top: 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-align: left;
+    max-height: 460px;
+    overflow-y: auto;
+    padding: 14px 2px;
+    -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 18px, #000 calc(100% - 26px), transparent 100%);
+    mask-image: linear-gradient(180deg, transparent 0, #000 18px, #000 calc(100% - 26px), transparent 100%);
+    scrollbar-width: thin;
+}
 .ucapan-item { background: var(--c-surface); border-radius: var(--radius); box-shadow: var(--shadow), inset 0 0 0 1px var(--c-line); padding: 14px 16px; }
 .ucapan-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .ucapan-nama { font-weight: 600; font-size: 14px; }
@@ -789,7 +891,11 @@ img { max-width: 100%; }
     border-radius: 50%;
     border: 0;
     cursor: pointer;
-    background: var(--c-bg);
+    /* Evaluasi: tombol solid menutupi konten — kaca blur membiarkan teks di
+       belakangnya tetap terbaca. */
+    background: color-mix(in srgb, var(--c-bg) 62%, transparent);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
     color: var(--c-accent);
     font-size: 16px;
     box-shadow: inset 0 0 0 1px var(--c-accent), 0 4px 14px rgba(0, 0, 0, .12);

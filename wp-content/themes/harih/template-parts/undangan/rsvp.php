@@ -28,6 +28,29 @@ $u = $args;
             </div>
         </div>
 
+        <div class="row-rsvp">
+            <div class="field">
+                <span>Jumlah Tamu</span>
+                <select name="jumlah" id="rsvp-jumlah">
+                    <?php for ($n = 1; $n <= 6; $n++) : ?><option value="<?php echo $n; ?>"><?php echo $n; ?> orang</option><?php endfor; ?>
+                </select>
+            </div>
+            <label class="field">
+                <span>No. WhatsApp <em class="opsional">(opsional)</em></span>
+                <input type="tel" name="wa" id="rsvp-wa" maxlength="20" inputmode="tel" placeholder="08xx">
+            </label>
+        </div>
+
+        <div class="field">
+            <span id="rsvp-sesi-label">Hadir Pada</span>
+            <input type="hidden" name="sesi" id="rsvp-sesi" value="keduanya">
+            <div class="hadir-opsi" role="group" aria-labelledby="rsvp-sesi-label">
+                <button type="button" class="hadir-btn sesi-btn" data-sesi="akad">Akad</button>
+                <button type="button" class="hadir-btn sesi-btn" data-sesi="resepsi">Resepsi</button>
+                <button type="button" class="hadir-btn sesi-btn aktif" data-sesi="keduanya">Keduanya</button>
+            </div>
+        </div>
+
         <label class="field">
             <span>Ucapan &amp; doa</span>
             <textarea name="pesan" id="rsvp-pesan" rows="3" maxlength="1500"></textarea>

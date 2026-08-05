@@ -32,7 +32,31 @@ if (preg_match('/^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})/', $u['target'], $m)) {
         <div class="cd-col"><span class="cd-num" data-cd="detik">0</span><span class="cd-label">Detik</span></div>
     </div>
     <p class="countdown-done" id="countdown-done" hidden>Acara telah berlangsung — terima kasih atas doa &amp; restu Anda.</p>
+    <?php
+    /* .ics untuk Apple Calendar / Outlook — data URI, tanpa backend. */
+    $ics = '';
+    if (preg_match('/^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})/', $u['target'], $mi)) {
+        $mulai  = strtotime("{$mi[1]} {$mi[2]}:{$mi[3]}:00") - 7 * 3600;
+        $judul  = trim(($u['nama_pria'] ?: 'Pernikahan') . ' & ' . $u['nama_wanita'], ' &');
+        $lokasi = trim($u['lokasi_nama'] . ', ' . $u['lokasi_alamat'], ', ');
+        $baris_ics = implode("\r\n", [
+            'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//hariH//ID',
+            'BEGIN:VEVENT',
+            'UID:' . $u['id'] . '@harih.id',
+            'DTSTART:' . gmdate('Ymd\THis\Z', $mulai),
+            'DTEND:' . gmdate('Ymd\THis\Z', $mulai + 3 * 3600),
+            'SUMMARY:Pernikahan ' . str_replace([',', ';'], ' ', $judul),
+            'LOCATION:' . str_replace([',', ';'], '\\,', $lokasi),
+            'DESCRIPTION:Undangan: ' . $u['permalink'],
+            'END:VEVENT', 'END:VCALENDAR',
+        ]);
+        $ics = 'data:text/calendar;charset=utf-8,' . rawurlencode($baris_ics);
+    }
+    ?>
     <?php if ($cal !== '') : ?>
-        <a class="btn btn-ghost cd-cal" data-reveal data-delay="260" href="<?php echo esc_url($cal); ?>" target="_blank" rel="noopener">Simpan ke Google Calendar</a>
+    <div class="cd-cal-baris" data-reveal data-delay="260">
+        <a class="btn btn-ghost" href="<?php echo esc_url($cal); ?>" target="_blank" rel="noopener">Google Calendar</a>
+        <?php if ($ics !== '') : ?><a class="btn btn-ghost" href="<?php echo $ics; // data URI, sudah rawurlencode ?>" download="pernikahan.ics">Apple / .ics</a><?php endif; ?>
+    </div>
     <?php endif; ?>
 </section>

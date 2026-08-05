@@ -19,6 +19,21 @@
         document.querySelectorAll('.guest-name').forEach(function (el) { el.textContent = nama; });
     }
 
+    /* ---- Tanggal Hijriah (Intl bawaan browser — kalender islamic-umalqura) ---- */
+    (function () {
+        var els = document.querySelectorAll('[data-hijriah]');
+        if (!els.length) return;
+        try {
+            var fmt = new Intl.DateTimeFormat('id-ID-u-ca-islamic-umalqura', { day: 'numeric', month: 'long', year: 'numeric' });
+            els.forEach(function (el) {
+                var t = new Date(el.getAttribute('data-hijriah') + 'T12:00:00+07:00');
+                if (isNaN(t)) return;
+                var teks = fmt.format(t);
+                el.textContent = /H$/.test(teks) ? teks : teks + ' H';
+            });
+        } catch (e) { /* browser tanpa kalender islamic → elemen tetap kosong & tersembunyi */ }
+    })();
+
     /* ---- Musik ---- */
     var audio = $('#undangan-audio');
     var musicBtn = $('#music-toggle');
@@ -314,17 +329,42 @@
         });
     }
 
+    /* ---- Facade live streaming: iframe berat dimuat saat DIKLIK ---- */
+    (function () {
+        var f = document.querySelector('.video-frame-dalam[data-yt]');
+        if (!f) return;
+        function muat() {
+            var id = f.getAttribute('data-yt');
+            var ifr = document.createElement('iframe');
+            ifr.src = 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1';
+            ifr.title = 'Live streaming';
+            ifr.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+            ifr.allowFullscreen = true;
+            f.textContent = '';
+            f.appendChild(ifr);
+            f.style.cursor = 'default';
+        }
+        f.addEventListener('click', muat, { once: true });
+        f.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); muat(); }
+        }, { once: true });
+    })();
+
     /* ---- Pill kehadiran RSVP (menggantikan dropdown) ---- */
     (function () {
-        var hidden = $('#rsvp-hadir');
-        var pills = document.querySelectorAll('.hadir-btn');
-        if (!hidden || !pills.length) return;
-        pills.forEach(function (b) {
-            b.addEventListener('click', function () {
-                hidden.value = b.getAttribute('data-hadir');
-                pills.forEach(function (x) { x.classList.toggle('aktif', x === b); });
+        function grupPill(hiddenSel, btnSel, attr) {
+            var hidden = $(hiddenSel);
+            var pills = document.querySelectorAll(btnSel);
+            if (!hidden || !pills.length) return;
+            pills.forEach(function (b) {
+                b.addEventListener('click', function () {
+                    hidden.value = b.getAttribute(attr);
+                    pills.forEach(function (x) { x.classList.toggle('aktif', x === b); });
+                });
             });
-        });
+        }
+        grupPill('#rsvp-hadir', '.hadir-btn[data-hadir]', 'data-hadir');
+        grupPill('#rsvp-sesi', '.sesi-btn', 'data-sesi');
     })();
 
     /* ---- Salin rekening ---- */
@@ -374,6 +414,16 @@
         badge.textContent = HADIR_LABEL[jenis];
         head.appendChild(nm);
         head.appendChild(badge);
+        var SESI_LABEL = { akad: 'Akad', resepsi: 'Resepsi', keduanya: 'Akad & Resepsi' };
+        var info = [];
+        if (u.jumlah > 1) info.push(u.jumlah + ' tamu');
+        if (u.hadir === 'hadir' && SESI_LABEL[u.sesi]) info.push(SESI_LABEL[u.sesi]);
+        if (info.length) {
+            var inf = document.createElement('span');
+            inf.className = 'ucapan-info';
+            inf.textContent = '· ' + info.join(' · ');
+            head.appendChild(inf);
+        }
         wrap.appendChild(head);
 
         if (u.pesan) {
@@ -412,6 +462,9 @@
                 undangan_id: cfg.id,
                 nama: ($('#rsvp-nama').value || '').trim(),
                 hadir: $('#rsvp-hadir').value,
+                jumlah: parseInt(($('#rsvp-jumlah') || {}).value || '1', 10),
+                sesi: ($('#rsvp-sesi') || {}).value || 'keduanya',
+                wa: (($('#rsvp-wa') || {}).value || '').trim(),
                 pesan: ($('#rsvp-pesan').value || '').trim(),
                 website: form.website.value // honeypot — manusia selalu kosong
             };
@@ -433,7 +486,7 @@
                 msg.textContent = 'Terima kasih, ucapan Anda terkirim ✓';
                 // Daftar di server ter-cache 60 dtk — tampilkan kiriman sendiri langsung.
                 if (list) {
-                    list.prepend(itemUcapan({ nama: data.nama, pesan: data.pesan, hadir: data.hadir, waktu: '' }));
+                    list.prepend(itemUcapan({ nama: data.nama, pesan: data.pesan, hadir: data.hadir, jumlah: data.jumlah, sesi: data.sesi, waktu: '' }));
                 }
                 form.reset();
             }).catch(function (err) {

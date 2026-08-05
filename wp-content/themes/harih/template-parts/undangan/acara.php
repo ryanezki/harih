@@ -39,6 +39,7 @@ if (!$kartu) return;
         <span class="acara-diamond" aria-hidden="true"></span>
         <h3 class="acara-jenis"><?php echo esc_html($k['jenis']); ?></h3>
         <p class="acara-tanggal"><?php echo esc_html(harih_format_tanggal($k['tanggal'])); ?></p>
+        <?php if ($u['salam_islami']) : ?><p class="tgl-hijriah" data-hijriah="<?php echo esc_attr($k['tanggal']); ?>"></p><?php endif; ?>
         <?php if ($k['waktu'] !== '') : ?>
             <p class="acara-waktu"><?php echo esc_html($k['waktu']); ?> WIB</p>
         <?php endif; ?>
@@ -57,4 +58,47 @@ if (!$kartu) return;
         <?php endif; ?>
     </div>
     <?php endforeach; ?>
+
+    <?php
+    /* Dress code + swatch warna (evaluasi: "hampir wajib sekarang"). Warna =
+       hex dipisah koma, divalidasi ketat di sini. */
+    $warna = [];
+    foreach (array_filter(array_map('trim', explode(',', $u['dresscode_warna']))) as $w) {
+        if (preg_match('/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i', $w, $m)) $warna[] = '#' . $m[1];
+        if (count($warna) >= 4) break;
+    }
+    ?>
+    <?php if ($u['dresscode'] !== '' || $warna) : ?>
+    <div class="dresscode" data-reveal>
+        <p class="label-atas dresscode-label">Dress Code</p>
+        <?php if ($u['dresscode'] !== '') : ?><p class="dresscode-teks"><?php echo esc_html($u['dresscode']); ?></p><?php endif; ?>
+        <?php if ($warna) : ?>
+        <div class="dresscode-swatch" aria-hidden="true">
+            <?php foreach ($warna as $w) : ?><i style="background: <?php echo esc_attr($w); ?>"></i><?php endforeach; ?>
+        </div>
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>
+
+    <?php
+    /* Susunan acara: "18.00 Pembukaan" per baris → waktu emas · judul. */
+    $acara_rundown = [];
+    foreach (array_filter(array_map('trim', explode("\n", $u['rundown']))) as $r) {
+        if (preg_match('/^(\d{1,2}[.:]\d{2})\s*[-–·]?\s*(.+)$/u', $r, $m)) {
+            $acara_rundown[] = [$m[1], $m[2]];
+        } else {
+            $acara_rundown[] = ['', $r];
+        }
+    }
+    ?>
+    <?php if ($acara_rundown) : ?>
+    <div class="rundown" data-reveal>
+        <p class="label-atas rundown-label">Susunan Acara</p>
+        <ul class="rundown-daftar">
+            <?php foreach ($acara_rundown as $r) : ?>
+            <li><?php if ($r[0] !== '') : ?><span class="rd-waktu"><?php echo esc_html($r[0]); ?></span><?php endif; ?><span class="rd-nama"><?php echo esc_html($r[1]); ?></span></li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+    <?php endif; ?>
 </section>

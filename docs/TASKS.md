@@ -24,6 +24,8 @@
 
 **Sudah selesai** *(ringkas — rinciannya di git log)*: infrastruktur & hardening · 3 tema + demo per tema · form isi data + kompresi foto · 8 workflow otomasi · halaman legal · masa aktif otomatis · aset visual berlisensi + kartu OG per tema · logo · pustaka musik 3 track · SEO dasar · GA4 · backup repo ke GitHub private · QA formal yang menemukan 3 cacat live (countdown tidak pernah jalan, atribut `hidden` dikalahkan CSS, daftar ucapan ter-cache 7 hari).
 
+**2026-08-06 — evaluasi desain eksternal diterapkan penuh** *(HARIH_VERSION 1.2.0)*: salam islami + QS. Ar-Rum 21 + tanggal Hijriah (Intl, sisi klien) · RSVP diperluas (jumlah tamu, sesi akad/resepsi/keduanya, WA opsional — **WA disimpan untuk mempelai, tidak pernah keluar di API publik**) · dinding ucapan scrollable · alamat kado + salin · urutan anak + tautan Instagram · dress code ber-swatch · turut mengundang · rundown per jam · tombol Apple/.ics · judul lagu di penutup & tombol musik · catatan maaf nama/gelar · embed YouTube → facade thumbnail (klik baru memuat iframe) · kontras gate + overflow nama panjang + WCAG `--c-ink-soft` tema-03 dibereskan. Semua toggle-able per undangan (`salam_islami`, field opsional). Terverifikasi visual + fungsional live, smoke 21/21.
+
 **2026-08-05 — perbaikan positioning:** jangkar "Mulai Rp 99 ribu" dibuang dari **lima** lokasi (title, meta description, og:description, hero, **dan kartu OG** — yang terakhir ter-render ke dalam gambar yang muncul di preview WhatsApp) · FAQ berhenti mengajari pelanggan membuat kartu QR sendiri · pertanyaan "Perkiraan jumlah tamu?" dipasang sebelum tabel harga, di atas 200 tamu paket Hemat disembunyikan.
 
 | Sehat ✓ | Bermasalah / belum ✗ |
@@ -271,6 +273,9 @@
 - [ ] Tema premium eksklusif Premium *(sudah dijanjikan "menyusul" di deskripsi produk)*
 - [ ] Arsip otomatis undangan kedaluwarsa: hapus media H+90 untuk Hemat/Favorit
 - [ ] Custom domain per undangan · multi-bahasa · tema builder drag-and-drop
+- [ ] *(evaluasi 2026-08-06)* **Link personal per tamu + QR check-in** — `?tamu=` sudah ada; tinggal generator massal (CSV/Sheets → daftar link) + halaman scan panitia. Satu paket dengan produk Tier B hybrid
+- [ ] *(evaluasi 2026-08-06)* **Template broadcast WA** per tamu (nama tersapa otomatis) — menyusul generator link personal
+- [ ] *(evaluasi 2026-08-06)* **Dashboard rekap RSVP untuk mempelai** — hitung total tamu per sesi + ekspor; nomor WA tamu hanya tampil di sini (bukan publik). *Catatan: OG image per undangan, state countdown habis, dan dinding ucapan sudah ada — pengevaluasi melihat versi lama.*
 
 ---
 

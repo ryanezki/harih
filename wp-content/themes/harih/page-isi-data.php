@@ -101,10 +101,24 @@ $webhook = harih_form_webhook_url();
                     <input type="text" name="nama_pria" maxlength="100" required placeholder="mis. Raka Pratama"></label>
                 <label class="field"><span>Orang tua mempelai pria</span>
                     <input type="text" name="ortu_pria" maxlength="150" placeholder="mis. Bapak Hendra & Ibu Sari"></label>
+                <div class="row-2">
+                    <label class="field"><span>Anak ke- <em class="opsional">(mis. kedua)</em></span>
+                        <input type="text" name="anak_ke_pria" maxlength="20" placeholder="kedua"></label>
+                    <label class="field"><span>Instagram <em class="opsional">(tanpa @)</em></span>
+                        <input type="text" name="ig_pria" maxlength="40" placeholder="username"></label>
+                </div>
                 <label class="field"><span>Nama mempelai wanita *</span>
                     <input type="text" name="nama_wanita" maxlength="100" required placeholder="mis. Sela Ananda"></label>
                 <label class="field"><span>Orang tua mempelai wanita</span>
                     <input type="text" name="ortu_wanita" maxlength="150" placeholder="mis. Bapak Budi & Ibu Rina"></label>
+                <div class="row-2">
+                    <label class="field"><span>Anak ke- <em class="opsional">(mis. pertama)</em></span>
+                        <input type="text" name="anak_ke_wanita" maxlength="20" placeholder="pertama"></label>
+                    <label class="field"><span>Instagram <em class="opsional">(tanpa @)</em></span>
+                        <input type="text" name="ig_wanita" maxlength="40" placeholder="username"></label>
+                </div>
+                <label class="field"><span>Turut mengundang <em class="opsional">(satu nama per baris)</em></span>
+                    <textarea name="turut_mengundang" rows="3" maxlength="1200" placeholder="Keluarga Besar …&#10;Bapak/Ibu …"></textarea></label>
             </section>
 
             <section class="kartu">
@@ -120,6 +134,14 @@ $webhook = harih_form_webhook_url();
                     <textarea name="lokasi_akad_alamat" rows="2" maxlength="300" placeholder="alamat lokasi akad (bila beda)"></textarea></label>
                 <label class="field"><span>Link Google Maps akad</span>
                     <input type="url" name="gmaps_akad_url" maxlength="300" inputmode="url" placeholder="https://maps.app.goo.gl/…"></label>
+                <div class="row-2">
+                    <label class="field"><span>Dress code <em class="opsional">(opsional)</em></span>
+                        <input type="text" name="dresscode" maxlength="120" placeholder="mis. Sage & Krem"></label>
+                    <label class="field"><span>Warna dress code <em class="opsional">(hex, koma)</em></span>
+                        <input type="text" name="dresscode_warna" maxlength="60" placeholder="#3f5c4f, #f4f1e7"></label>
+                </div>
+                <label class="field"><span>Susunan acara <em class="opsional">(per baris: 18.00 Pembukaan)</em></span>
+                    <textarea name="rundown" rows="3" maxlength="1200" placeholder="18.00 Pembukaan&#10;19.00 Resepsi"></textarea></label>
                 <div class="row-2">
                     <label class="field"><span>Tanggal resepsi *</span><input type="date" name="tanggal_resepsi" required></label>
                     <label class="field"><span>Waktu resepsi *</span><input type="time" name="waktu_resepsi" required></label>
@@ -170,6 +192,8 @@ $webhook = harih_form_webhook_url();
                 <h2>7. Amplop Digital <span class="paket-badge">Favorit+</span></h2>
                 <label class="field"><span>Rekening (satu per baris, opsional)</span>
                     <textarea name="rekening" rows="3" maxlength="300" placeholder="BCA 1234567890 a.n. Nama&#10;Mandiri 9876543210 a.n. Nama"></textarea></label>
+                <label class="field"><span>Alamat kirim kado/hampers <em class="opsional">(opsional)</em></span>
+                    <textarea name="alamat_kado" rows="2" maxlength="400" placeholder="Nama penerima, alamat lengkap, no. HP"></textarea></label>
                 <div class="field">
                     <span>Gambar QRIS (opsional)</span>
                     <div class="foto-grid" id="qris-grid"></div>

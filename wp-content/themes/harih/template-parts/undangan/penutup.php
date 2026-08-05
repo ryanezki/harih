@@ -16,10 +16,21 @@ if ($u['wa_cp'] !== '') {
     <p class="penutup-salam">Hormat kami,</p>
     <p class="penutup-nama"><?php echo esc_html(trim($u['nama_pria'] . ' & ' . $u['nama_wanita'], ' &')); ?></p>
 
+    <?php if (!empty($u['salam_islami'])) : ?>
+        <p class="penutup-wassalam">Wassalamu&rsquo;alaikum Warahmatullahi Wabarakatuh</p>
+    <?php endif; ?>
+    <p class="penutup-maaf">Mohon maaf apabila terdapat kesalahan penulisan nama dan gelar.</p>
+
     <a class="btn btn-ghost" href="<?php echo esc_url($share_url); ?>" target="_blank" rel="noopener">Bagikan via WhatsApp</a>
     <?php if ($cp !== '') : ?>
         <p class="penutup-cp"><a href="<?php echo esc_url('https://wa.me/' . $cp); ?>" target="_blank" rel="noopener">Hubungi kami</a></p>
     <?php endif; ?>
 
+    <?php
+    $judul_musik = function_exists('harih_musik_library') ? (harih_musik_library()[$u['musik_url']] ?? '') : '';
+    ?>
+    <?php if ($judul_musik !== '') : ?>
+        <p class="penutup-musik">&#9834;&nbsp;<?php echo esc_html($judul_musik); ?></p>
+    <?php endif; ?>
     <p class="credit">Undangan digital oleh <a href="<?php echo esc_url(home_url('/?utm_source=undangan&utm_medium=footer')); ?>">hariH</a></p>
 </section>

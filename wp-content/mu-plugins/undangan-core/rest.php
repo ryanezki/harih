@@ -31,6 +31,12 @@ function undangan_rsvp_create(WP_REST_Request $r) {
     $nama  = mb_substr(sanitize_text_field((string) ($r['nama'] ?? '')), 0, 100);
     $pesan = mb_substr(sanitize_textarea_field((string) ($r['pesan'] ?? '')), 0, 1500);
     $hadir = in_array($r['hadir'] ?? '', ['hadir', 'tidak', 'ragu'], true) ? $r['hadir'] : 'ragu';
+    // Kelengkapan RSVP (evaluasi 2026-08-06): jumlah tamu, sesi, nomor WA.
+    // WA disimpan untuk mempelai TAPI TIDAK PERNAH dikembalikan endpoint publik.
+    $jumlah = min(9, max(1, absint($r['jumlah'] ?? 1)));
+    $sesi   = in_array($r['sesi'] ?? '', ['akad', 'resepsi', 'keduanya'], true) ? $r['sesi'] : 'keduanya';
+    $wa     = preg_replace('/\D+/', '', (string) ($r['wa'] ?? ''));
+    $wa     = $wa !== '' ? mb_substr($wa, 0, 16) : '';
 
     if (!$uid || get_post_type($uid) !== 'undangan' || $nama === '') {
         return new WP_Error('bad_request', 'Data tidak lengkap.', ['status' => 400]);
@@ -49,7 +55,7 @@ function undangan_rsvp_create(WP_REST_Request $r) {
         'post_status'  => 'publish',
         'post_title'   => $nama,
         'post_content' => $pesan,
-        'meta_input'   => ['undangan_id' => $uid, 'hadir' => $hadir],
+        'meta_input'   => ['undangan_id' => $uid, 'hadir' => $hadir, 'jumlah' => $jumlah, 'sesi' => $sesi, 'wa_rsvp' => $wa],
     ]);
 
     if (!$id || is_wp_error($id)) {
@@ -75,11 +81,17 @@ function undangan_rsvp_list(WP_REST_Request $r) {
         'meta_value'  => $uid,
     ]);
 
+    // wp_insert_post meng-escape '&' dkk. di title/content (wptexturize/kses).
+    // Frontend me-render via textContent (XSS-safe), jadi entity harus di-decode
+    // DI SINI — tanpa ini pesan tamu tampil literal "jumlah &amp; sesi".
     $items = array_map(fn($p) => [
-        'nama'  => $p->post_title,
-        'pesan' => $p->post_content,
-        'hadir' => get_post_meta($p->ID, 'hadir', true),
-        'waktu' => get_the_date('d M Y H:i', $p),
+        'nama'   => wp_specialchars_decode($p->post_title, ENT_QUOTES),
+        'pesan'  => wp_specialchars_decode($p->post_content, ENT_QUOTES),
+        'hadir'  => get_post_meta($p->ID, 'hadir', true),
+        'jumlah' => (int) get_post_meta($p->ID, 'jumlah', true),
+        'sesi'   => get_post_meta($p->ID, 'sesi', true),
+        // 'wa_rsvp' SENGAJA tidak diikutkan — data kontak tamu bukan konsumsi publik
+        'waktu'  => get_the_date('d M Y H:i', $p),
     ], $posts);
 
     // Cache 60 dtk di LiteSpeed (T3.2). Tanpa ini SETIAP pageview undangan

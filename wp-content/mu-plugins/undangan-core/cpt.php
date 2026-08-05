@@ -115,6 +115,17 @@ add_action('init', function () {
         'rekening'        => 'sanitize_textarea_field',
         'qris_media_url'  => 'esc_url_raw',
         'wa_cp'           => 'sanitize_text_field',
+        // Konvensi undangan Indonesia (evaluasi 2026-08-06):
+        'anak_ke_pria'    => 'sanitize_text_field',   // "kedua" → "Putra kedua dari…"
+        'anak_ke_wanita'  => 'sanitize_text_field',
+        'ig_pria'         => 'sanitize_user',          // username Instagram tanpa @
+        'ig_wanita'       => 'sanitize_user',
+        'dresscode'       => 'sanitize_text_field',
+        'dresscode_warna' => 'sanitize_text_field',    // hex dipisah koma; divalidasi saat render
+        'turut_mengundang'=> 'sanitize_textarea_field',// satu nama per baris
+        'alamat_kado'     => 'sanitize_textarea_field',// alamat kirim hampers
+        'rundown'         => 'sanitize_textarea_field',// "18.00 Pembukaan" per baris
+        'salam_islami'    => 'sanitize_text_field',    // '' / '1' (default tampil) · '0' = sembunyikan (toggle CS)
     ];
 
     foreach ($fields as $field => $sanitize) {

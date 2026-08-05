@@ -57,6 +57,15 @@ $baris = array_values(array_filter(array_map('trim', explode("\n", $u['rekening'
                 <figcaption class="qris-cap">Scan QRIS dari aplikasi pembayaran apa pun</figcaption>
             </div>
             <?php endif; ?>
+
+            <?php if (trim($u['alamat_kado']) !== '') : ?>
+            <div class="kado-kartu">
+                <p class="qris-label">Kirim Hadiah</p>
+                <p class="qris-sub">Bagi yang ingin mengirim kado atau hampers:</p>
+                <p class="kado-alamat"><?php echo nl2br(esc_html($u['alamat_kado'])); ?></p>
+                <button type="button" class="btn-copy" data-copy="<?php echo esc_attr(preg_replace('/\s+/', ' ', $u['alamat_kado'])); ?>">Salin Alamat</button>
+            </div>
+            <?php endif; ?>
         </div>
     </div>
 </section>

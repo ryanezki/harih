@@ -21,7 +21,7 @@
     --c-bg: #131b2e;
     --c-surface: #1b2540;
     --c-ink: #e8e4d8;
-    --c-ink-soft: #a2a7b8;
+    --c-ink-soft: #c2bcaa;  /* krem redup — evaluasi WCAG: abu kebiruan lama gagal AA di navy */
     --c-line: #2a3452;
     --c-accent: #c9a45c;      /* emas — tombol berlatar emas, teks navy */
     --c-accent-ink: #171f33;

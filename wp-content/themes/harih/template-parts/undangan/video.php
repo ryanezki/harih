@@ -1,8 +1,8 @@
 <?php
 /**
- * Section — Live Streaming (acuan: bukan "Video" — fungsinya menyiarkan
- * prosesi bagi yang berhalangan hadir; embed YouTube live memakai URL embed
- * yang sama). Bingkai hairline, iframe lazy.
+ * Section — Live Streaming. Facade: thumbnail YouTube + tombol putar;
+ * iframe (berat) baru dimuat saat DIKLIK (undangan.js) — evaluasi 2026-08-06:
+ * "embed YouTube berat, ganti thumbnail + lazy load".
  */
 if (!defined('ABSPATH')) exit;
 $u  = $args;
@@ -13,10 +13,9 @@ $yt = harih_youtube_id($u['video_url']);
     <p class="section-intro" data-reveal data-delay="100">Bagi Bapak/Ibu/Saudara/i yang berhalangan hadir, prosesi dapat diikuti secara langsung:</p>
     <?php if ($yt !== '') : ?>
         <div class="video-frame" data-reveal data-delay="180">
-            <div class="video-frame-dalam">
-                <iframe src="<?php echo esc_url('https://www.youtube-nocookie.com/embed/' . $yt); ?>"
-                    title="Live streaming" loading="lazy" allowfullscreen
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+            <div class="video-frame-dalam" data-yt="<?php echo esc_attr($yt); ?>" role="button" tabindex="0" aria-label="Putar live streaming">
+                <img src="<?php echo esc_url('https://i.ytimg.com/vi/' . $yt . '/hqdefault.jpg'); ?>" alt="" loading="lazy" decoding="async">
+                <span class="video-play" aria-hidden="true"></span>
             </div>
         </div>
     <?php else : ?>

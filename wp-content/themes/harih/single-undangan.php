@@ -56,6 +56,16 @@ $undangan = [
     'rekening'        => $m('rekening'),
     'qris_media_url'  => $m('qris_media_url'),
     'wa_cp'           => $m('wa_cp'),
+    'anak_ke_pria'    => $m('anak_ke_pria'),
+    'anak_ke_wanita'  => $m('anak_ke_wanita'),
+    'ig_pria'         => $m('ig_pria'),
+    'ig_wanita'       => $m('ig_wanita'),
+    'dresscode'       => $m('dresscode'),
+    'dresscode_warna' => $m('dresscode_warna'),
+    'turut_mengundang'=> $m('turut_mengundang'),
+    'alamat_kado'     => $m('alamat_kado'),
+    'rundown'         => $m('rundown'),
+    'salam_islami'    => $m('salam_islami') !== '0',
 ];
 ?><!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -71,6 +81,9 @@ get_template_part('template-parts/undangan/cover', null, $undangan);
 get_template_part('template-parts/undangan/salam', null, $undangan);
 get_template_part('template-parts/undangan/countdown', null, $undangan);
 get_template_part('template-parts/undangan/mempelai', null, $undangan);
+if (trim($undangan['turut_mengundang']) !== '') {
+    get_template_part('template-parts/undangan/turut', null, $undangan);
+}
 get_template_part('template-parts/undangan/acara', null, $undangan);
 
 if ($plus && $undangan['love_story'] !== '') {
@@ -92,7 +105,8 @@ get_template_part('template-parts/undangan/penutup', null, $undangan);
 </main>
 <?php if ($undangan['musik_url'] !== '') : ?>
 <audio id="undangan-audio" src="<?php echo esc_url($undangan['musik_url']); ?>" loop preload="none"></audio>
-<button type="button" id="music-toggle" class="music-toggle" aria-label="Putar / jeda musik" hidden><span aria-hidden="true">♪</span></button>
+<?php $harih_musik_judul = harih_musik_library()[$undangan['musik_url']] ?? ''; ?>
+<button type="button" id="music-toggle" class="music-toggle" aria-label="Putar / jeda musik"<?php echo $harih_musik_judul !== '' ? ' title="' . esc_attr($harih_musik_judul) . '"' : ''; ?> hidden><span aria-hidden="true">♪</span></button>
 <?php endif; ?>
 <?php wp_footer(); ?>
 </body>
