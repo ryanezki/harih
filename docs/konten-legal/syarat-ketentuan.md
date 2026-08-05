@@ -2,11 +2,13 @@
 
 > Dipublikasikan sebagai halaman situs pada 22 Juli 2026.
 
-Terakhir diperbarui: 4 Agustus 2026
+Terakhir diperbarui: 5 Agustus 2026
 
 ## 1. Tentang Layanan
 
-hariH (harih.id) adalah layanan pembuatan undangan digital berbasis web. Undangan dibuat secara otomatis berdasarkan data yang Anda isi dan dikirimkan melalui email serta WhatsApp. Dengan melakukan pemesanan, Anda menyetujui Syarat & Ketentuan ini.
+hariH (harih.id) adalah layanan pembuatan undangan digital berbasis web, serta — untuk paket tertentu — **produk cetak fisik pendukung acara** (misalnya kartu QR akses, label souvenir, kartu terima kasih, stiker segel). Undangan digital dibuat otomatis berdasarkan data yang Anda isi dan dikirimkan melalui email serta WhatsApp; produk cetak diproduksi berdasarkan data yang sama setelah Anda menyetujui pratinjau (proof). Dengan melakukan pemesanan, Anda menyetujui Syarat & Ketentuan ini.
+
+Ketentuan ini berlaku untuk semua pesanan; **§12 (Produk Cetak Fisik) hanya berlaku bila pesanan Anda memuat produk cetak.**
 
 ## 2. Pemesanan & Proses
 
@@ -64,22 +66,64 @@ Kami berupaya menjaga layanan tersedia 24 jam. Namun kami tidak menjamin layanan
 
 Sepanjang diizinkan hukum, total tanggung jawab hariH atas segala klaim terkait layanan dibatasi maksimal sebesar nilai pesanan yang Anda bayarkan.
 
-## 12. Refund
+## 12. Produk Cetak Fisik
+
+Bagian ini berlaku untuk pesanan yang memuat produk cetak fisik.
+
+### 12.1 Proses & Pratinjau (Proof)
+
+1. Desain produk cetak dibuat dari data undangan yang sudah Anda isi — Anda tidak mengisi ulang.
+2. Sebelum produksi, kami mengirimkan **pratinjau (proof) digital** ke WhatsApp/email Anda untuk disetujui. Produksi baru berjalan setelah persetujuan Anda.
+3. **Setelah proof Anda setujui, kebenaran seluruh teks (nama, gelar, tanggal, alamat) menjadi tanggung jawab Anda.** Cetak ulang karena kesalahan yang sudah tampak di proof yang disetujui dikenakan biaya.
+4. Kesalahan yang dilakukan pihak kami (hasil cetak berbeda dari proof yang disetujui) diganti sesuai Garansi Cetak Benar (§12.4).
+
+### 12.2 Batas Waktu Pemesanan & Kuota
+
+- Pesanan produk cetak diterima paling lambat **21 hari (H-21) sebelum tanggal acara**. Sistem/CS kami berhak menolak pesanan yang melewati batas ini — justru demi Garansi Tepat Waktu.
+- Kapasitas produksi per bulan **berkuota**. Bila kuota bulan berjalan penuh, pesanan masuk jadwal berikutnya atau dapat dibatalkan penuh sebelum produksi.
+
+### 12.3 Pengiriman & Resi
+
+- Ongkos kirim **gratis ke seluruh Indonesia** (satu alamat per pesanan) menggunakan jasa kurir ber-SLA.
+- Setiap pengiriman memiliki **nomor resi** yang kami catat dan kirimkan ke Anda.
+- Pastikan alamat kirim lengkap dan benar. Kegagalan/keterlambatan karena alamat yang keliru atau paket tak kunjung diambil bukan tanggung jawab kami; pengiriman ulang karena alamat keliru dikenakan ongkir.
+- Risiko kerusakan/kehilangan **selama pengiriman** ditanggung kami — lihat §12.5.
+
+### 12.4 Tiga Garansi Produk Cetak
+
+Ketiganya adalah kewajiban kontraktual kami, bukan sekadar materi pemasaran:
+
+| Garansi | Janji kami |
+|---|---|
+| **Garansi QR Terbaca** | Setiap batch kartu QR diuji pindai sebelum dikirim. Bila ada QR yang gagal terbaca (bukan karena kerusakan fisik setelah diterima), **seluruh batch kami ganti tanpa biaya**. |
+| **Garansi Tepat Waktu** | Produk cetak tiba paling lambat **H-14 sebelum tanggal acara** (dengan pemesanan ≤ H-21). Bila lewat karena kesalahan kami, **uang produk cetak kembali 100% dan barang tetap dikirim**. |
+| **Garansi Cetak Benar** | Kesalahan dari pihak kami — hasil cetak berbeda dari proof yang Anda setujui — **dicetak ulang gratis dan dikirim ekspres, tanpa pertanyaan**. |
+
+Garansi tidak berlaku atas: kesalahan pada proof yang telah disetujui (§12.1), kerusakan akibat pemakaian/penyimpanan setelah diterima, dan keadaan kahar (bencana, gangguan logistik nasional) — untuk keadaan kahar kami tetap mengupayakan solusi tercepat bersama Anda.
+
+### 12.5 Barang Rusak atau Hilang dalam Pengiriman
+
+- Laporkan barang yang tiba rusak maksimal **2×24 jam** setelah paket diterima, disertai foto/video kondisi paket dan barang.
+- Barang rusak dalam pengiriman atau paket hilang oleh kurir **diganti baru tanpa biaya**, dikirim ekspres.
+- Karena seluruh produk dicetak khusus per pesanan (nama & data Anda), **retur karena berubah pikiran tidak tersedia** — ini sejalan dengan sifat barang pesanan khusus.
+
+## 13. Refund
 
 Diatur terpisah dalam [Kebijakan Refund](/kebijakan-refund/).
 
-## 13. Privasi
+## 14. Privasi
 
 Pemrosesan data pribadi diatur dalam [Kebijakan Privasi](/kebijakan-privasi/).
 
-## 14. Perubahan Syarat & Ketentuan
+## 15. Perubahan Syarat & Ketentuan
 
 Kami dapat memperbarui S&K ini; versi terbaru selalu tersedia di halaman ini beserta tanggal pembaruannya.
 
-## 15. Hukum yang Berlaku
+
+## 16. Hukum yang Berlaku
 
 S&K ini tunduk pada hukum Republik Indonesia.
 
-## 16. Kontak
+## 17. Kontak
 
 Pertanyaan mengenai S&K ini: lihat halaman [Kontak](/kontak/) — email hi@harih.id · WhatsApp +62 822-5197-5575.

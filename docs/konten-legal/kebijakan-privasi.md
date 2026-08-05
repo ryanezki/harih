@@ -10,6 +10,7 @@ hariH (harih.id) menghormati privasi Anda. Kebijakan ini menjelaskan data apa ya
 
 **Dari pemesan:**
 - Data pemesanan: nama, alamat email, nomor WhatsApp.
+- Untuk pesanan yang memuat produk cetak fisik: **alamat pengiriman** dan nomor telepon penerima.
 - Data undangan yang Anda isi: nama mempelai & orang tua, tanggal/waktu/lokasi acara, kisah, foto, pilihan musik, nomor rekening & gambar QRIS (bila memakai fitur amplop digital), nomor WhatsApp narahubung.
 
 **Dari tamu undangan:**
@@ -41,6 +42,7 @@ Data dibagikan terbatas sesuai keperluan layanan kepada:
 | Google (Workspace/Sheets) | pencatatan operasional pesanan |
 | Hostinger | infrastruktur hosting situs |
 | Google Analytics | statistik kunjungan halaman toko (lihat bagian 8) |
+| Jasa kurir/ekspedisi | pengiriman produk cetak fisik — nama, alamat & telepon penerima dibagikan sebatas keperluan kirim; nomor resi disimpan sebagai bukti |
 
 Masing-masing tunduk pada kebijakan privasinya sendiri.
 

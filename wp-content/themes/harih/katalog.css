@@ -298,3 +298,53 @@ h2 { font-size: 1.7rem; text-align: center; margin-bottom: 1.4rem; }
     .paket-card.unggulan { transform: translateY(-8px); }
     .row-2 { grid-template-columns: 1fr 1fr; }
 }
+
+
+/* =========================================================================
+ * Halaman harga hybrid (F1.5) — dipakai page-harga-hybrid.php.
+ * Memakai token & komponen katalog yang sama; hanya blok khususnya di sini.
+ * ========================================================================= */
+
+.garansi { padding: 40px 20px 8px; max-width: 1040px; margin: 0 auto; }
+.garansi h2 { text-align: center; margin-bottom: 22px; }
+.garansi h2 a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+.garansi-grid { display: grid; gap: 14px; grid-template-columns: 1fr; }
+.garansi-card {
+    border: 1px solid var(--c-line);
+    border-left: 3px solid var(--c-gold);
+    border-radius: var(--radius);
+    background: var(--c-surface);
+    padding: 18px 20px;
+}
+.garansi-card h3 { font-size: 1.02rem; margin-bottom: 6px; }
+.garansi-card p { font-size: .92rem; color: var(--c-ink-2); line-height: 1.65; }
+
+.paket-harga-full { text-align: center; font-size: 1.06rem; color: var(--c-ink-2); margin: 2px 0 8px; }
+.paket-harga-full strong { font-size: 1.5rem; color: var(--c-ink); letter-spacing: .01em; }
+.paket-hemat {
+    text-align: center; font-size: .82rem; color: var(--c-accent);
+    background: color-mix(in srgb, var(--c-accent) 9%, transparent);
+    border-radius: 999px; padding: 5px 12px; margin: 0 auto 10px; width: fit-content;
+}
+.paket-spek { font-size: .78rem; color: var(--c-ink-3, var(--c-ink-2)); text-align: center; margin: 10px 0 12px; letter-spacing: .02em; }
+.paket-digital { background: color-mix(in srgb, var(--c-surface) 55%, transparent); }
+
+.proses { padding: 46px 20px 12px; max-width: 1040px; margin: 0 auto; }
+.proses h2 { text-align: center; margin-bottom: 22px; }
+.proses-catatan { text-align: center; font-size: .9rem; color: var(--c-ink-2); margin-top: 16px; }
+
+.satuan { padding: 46px 20px 12px; max-width: 760px; margin: 0 auto; }
+.satuan h2 { text-align: center; margin-bottom: 10px; }
+.satuan > p { text-align: center; font-size: .95rem; color: var(--c-ink-2); margin-bottom: 20px; }
+.satuan-tabel-wrap { overflow-x: auto; border: 1px solid var(--c-line); border-radius: var(--radius); background: var(--c-surface); }
+.satuan-tabel { width: 100%; border-collapse: collapse; font-size: .92rem; }
+.satuan-tabel th, .satuan-tabel td { padding: 10px 16px; text-align: left; }
+.satuan-tabel th { font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--c-ink-2); border-bottom: 1px solid var(--c-line); }
+.satuan-tabel td { border-bottom: 1px solid color-mix(in srgb, var(--c-line) 55%, transparent); font-variant-numeric: tabular-nums; }
+.satuan-tabel tr:last-child td { border-bottom: 0; }
+.satuan-cta { text-align: center; margin-top: 20px; }
+
+@media (min-width: 760px) {
+    .garansi-grid { grid-template-columns: repeat(3, 1fr); }
+    .paket-grid-hybrid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+}

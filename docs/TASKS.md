@@ -112,12 +112,14 @@
   Katalog menjual paket penuh; halaman upsell menjual **tiga SKU upgrade berharga tetap** untuk yang sudah membeli digital.
   **Yang perlu diputuskan:** besaran kredit digital. Cara paling sederhana — kredit tetap Rp 299.000 untuk semua tier, sehingga harga upgrade = harga paket − 299rb, satu angka per SKU tanpa matriks. Konsekuensinya pembeli Hemat (bayar 99rb) mendapat kredit Rp 200rb lebih besar dari yang ia bayar; pada paket Rp 2,9 juta itu derau, dan justru mendorong pembeli Hemat naik kelas. **Perlu keputusan sadar, bukan diasumsikan.**
 
-- [ ] **F1.4** **S&K + Refund + Privasi untuk barang fisik** — *prasyarat hukum, sebelum menjual meski manual*
+- [x] **F1.4** **S&K + Refund + Privasi untuk barang fisik** → **SELESAI & LIVE 2026-08-05**
+  S&K §12 (proses & proof · batas H-21 + kuota · pengiriman gratis + resi · **tiga garansi sebagai klausul** · rusak/hilang di jalan) · Refund §4 produk cetak (refund 100% sebelum proof / kuota penuh / Garansi Tepat Waktu; penggantian barang; pengecualian) · Privasi (alamat kirim di data, kurir masuk tabel pemroses). Terbit via `publish-legal.py`, terverifikasi live.
   S&K sekarang ditulis khusus produk digital (*"produk digital yang diproses otomatis"*, *"refund tidak tersedia setelah undangan diterbitkan"*). Tidak ada satu kata pun soal pengiriman, kerusakan di jalan, ongkir, atau retur salah cetak — sementara **Garansi Tepat Waktu menciptakan kewajiban refund 100% yang belum punya payung sama sekali**.
   **Yang ditambahkan:** ruang lingkup produk fisik · pengiriman gratis se-Indonesia + tanggung jawab & resi · aturan proof (setelah disetujui pelanggan, salah ketik jadi tanggung jawab pelanggan) · **ketiga garansi sebagai klausul**, bukan sekadar copy pemasaran · retur/penggantian barang rusak · kuota bulanan sebagai pembatasan ketersediaan.
   Terbit lewat `scripts/publish-legal.py` (repo = sumber kebenaran halaman legal).
 
-- [ ] **F1.5** **Halaman harga hybrid — statis, CTA WhatsApp**
+- [x] **F1.5** **Halaman harga hybrid — statis, CTA WhatsApp** → **artefak SELESAI 2026-08-05; sisa: publish (gerbang F1.1+F1.2)**
+  `page-harga-hybrid.php` + blok `katalog.css` (v1.2.1) ter-deploy & teruji render via halaman pratinjau sementara (sudah dihapus): hero "satu desain dua wujud" · **tiga garansi di atas** · 4 kartu (Digital mulai 99rb → beranda · Hormat 1,19jt · Resepsi 2,9jt ⭐ + pill "hemat Rp 625.000" · Grand 5,9jt jangkar) · proses 4 langkah + H-21 · tabel satuan (8 item, min Rp 1jt/transaksi) · FAQ · CTA `wa.me` prefill per paket. **Halaman WP sengaja BELUM dibuat** — perintah publish ada di header template; jalankan hanya setelah F1.1 lolos + percetakan F1.2 terpilih.
   Empat paket · **tiga garansi tampil di halaman harga**, bukan disembunyikan di FAQ (Rencana Bisnis §11.2 menempatkan ini sebagai penyebab nomor satu closing rate rendah) · Paket Grand sebagai jangkar · **angka penghematan paket vs à la carte ditampilkan eksplisit**.
   Bahasa mengikuti §5.9: jual hasil, bukan gramatur. Spesifikasi teknis di bawah sebagai bukti.
   **Belum ada produk WooCommerce di fase ini** — tombolnya mengarah ke WhatsApp. Pola sudah ada: `page-katalog.php` + `katalog.css`, token tema-01.

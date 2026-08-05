@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) exit;
  * pengunjung & LiteSpeed tetap menyajikan berkas lama meski file di server
  * sudah baru, dan perbaikan tampilan terlihat "tidak berpengaruh".
  */
-const HARIH_VERSION = '1.2.0';
+const HARIH_VERSION = '1.2.1';
 
 add_action('after_setup_theme', function () {
     add_theme_support('title-tag');
@@ -155,7 +155,7 @@ function harih_reseller_webhook_url(): string {
 
 // Halaman toko: style child di atas Astra.
 add_action('wp_enqueue_scripts', function () {
-    if (is_singular('undangan') || is_page_template('page-isi-data.php') || is_page_template('page-katalog.php') || is_page_template('page-jadi-reseller.php')) return;
+    if (is_singular('undangan') || is_page_template('page-isi-data.php') || is_page_template('page-katalog.php') || is_page_template('page-jadi-reseller.php') || is_page_template('page-harga-hybrid.php')) return;
     wp_enqueue_style('harih-child', get_stylesheet_uri(), [], HARIH_VERSION);
 }, 20);
 
@@ -167,7 +167,8 @@ add_action('wp_enqueue_scripts', function () {
     $is_isidata  = is_page_template('page-isi-data.php');
     $is_katalog  = is_page_template('page-katalog.php');
     $is_reseller = is_page_template('page-jadi-reseller.php');
-    if (!$is_undangan && !$is_isidata && !$is_katalog && !$is_reseller) return;
+    $is_hybrid   = is_page_template('page-harga-hybrid.php');
+    if (!$is_undangan && !$is_isidata && !$is_katalog && !$is_reseller && !$is_hybrid) return;
 
     global $wp_styles, $wp_scripts;
     foreach ((array) $wp_styles->queue as $handle) {
@@ -177,7 +178,7 @@ add_action('wp_enqueue_scripts', function () {
         if (strpos($handle, 'undangan-') !== 0) wp_dequeue_script($handle);
     }
 
-    if ($is_katalog || $is_reseller) {
+    if ($is_katalog || $is_reseller || $is_hybrid) {
         wp_enqueue_style('undangan-fonts', harih_tema_fonts('tema-01'), [], null);
         wp_enqueue_style('undangan-katalog', get_stylesheet_directory_uri() . '/katalog.css', [], HARIH_VERSION);
         if ($is_reseller) {
@@ -215,7 +216,7 @@ add_action('wp_enqueue_scripts', function () {
 
 // Preconnect Google Fonts hanya di halaman standalone kita.
 add_filter('wp_resource_hints', function ($urls, $relation) {
-    if ($relation === 'preconnect' && (is_singular('undangan') || is_page_template('page-isi-data.php') || is_page_template('page-katalog.php') || is_page_template('page-jadi-reseller.php'))) {
+    if ($relation === 'preconnect' && (is_singular('undangan') || is_page_template('page-isi-data.php') || is_page_template('page-katalog.php') || is_page_template('page-jadi-reseller.php') || is_page_template('page-harga-hybrid.php'))) {
         $urls[] = 'https://fonts.googleapis.com';
         $urls[] = ['href' => 'https://fonts.gstatic.com', 'crossorigin'];
     }
@@ -335,6 +336,10 @@ add_filter('wp_sitemaps_posts_query_args', function ($args, $post_type) {
 add_filter('document_title_parts', function ($parts) {
     if (is_page_template('page-katalog.php')) {
         $parts['title'] = 'Undangan Digital Otomatis, Langsung ke WhatsApp';
+        $parts['site']  = 'hariH';
+        unset($parts['tagline'], $parts['page']);
+    } elseif (is_page_template('page-harga-hybrid.php')) {
+        $parts['title'] = 'Undangan Digital + Kartu Fisik Ber-QR';
         $parts['site']  = 'hariH';
         unset($parts['tagline'], $parts['page']);
     } elseif (is_page_template('page-jadi-reseller.php')) {

@@ -2,9 +2,9 @@
 
 > Dipublikasikan sebagai halaman situs pada 22 Juli 2026.
 
-Terakhir diperbarui: 22 Juli 2026
+Terakhir diperbarui: 5 Agustus 2026
 
-Undangan digital hariH adalah **produk digital yang diproses otomatis**. Kebijakan refund berikut berlaku untuk semua pesanan.
+Undangan digital hariH adalah **produk digital yang diproses otomatis**; sebagian paket juga memuat **produk cetak fisik** yang diproduksi khusus per pesanan. Bagian 1–4 mengatur produk digital; **bagian 5 mengatur produk cetak fisik**.
 
 ## 1. Sebelum Data Diisi (Undangan Belum Dibuat)
 
@@ -28,6 +28,27 @@ Karena undangan telah dibuat dan diserahkan, **refund tidak tersedia**, kecuali 
 - Salah memilih paket — selisih dapat dibayarkan untuk upgrade paket (hubungi CS); downgrade tidak tersedia.
 - Perbedaan tampilan minor antar perangkat/browser yang tidak menghilangkan fungsi.
 
-## 4. Cara Mengajukan
+## 4. Produk Cetak Fisik
+
+Produk cetak (kartu QR akses, label souvenir, kartu terima kasih, dsb.) dicetak khusus memuat nama dan data acara Anda, sehingga aturannya berbeda dari produk digital:
+
+**Refund 100% tersedia bila:**
+- Anda membatalkan **sebelum menyetujui proof** (produksi belum berjalan). Biaya kanal pembayaran dapat mengurangi jumlah yang dikembalikan.
+- Kuota produksi bulan berjalan penuh dan Anda memilih tidak menunggu jadwal berikutnya.
+- **Garansi Tepat Waktu** terpicu: barang tiba lewat dari H-14 sebelum tanggal acara karena kesalahan kami — uang produk cetak kembali 100% **dan barang tetap dikirim**.
+
+**Penggantian barang (bukan refund uang):**
+- QR pada kartu gagal terbaca (Garansi QR Terbaca) → seluruh batch diganti gratis.
+- Hasil cetak berbeda dari proof yang disetujui (Garansi Cetak Benar) → cetak ulang gratis, kirim ekspres.
+- Barang tiba rusak atau paket hilang oleh kurir → diganti baru gratis. Laporkan maksimal 2×24 jam setelah paket diterima disertai foto/video.
+
+**Yang bukan dasar refund produk cetak:**
+- Kesalahan teks yang sudah tampak pada proof yang Anda setujui (cetak ulang tersedia, berbayar).
+- Berubah pikiran / pembatalan acara setelah produksi berjalan.
+- Kerusakan karena pemakaian atau penyimpanan setelah barang diterima.
+
+Rincian ketiga garansi ada di [Syarat & Ketentuan §12](/syarat-ketentuan/).
+
+## 5. Cara Mengajukan
 
 Hubungi CS (lihat halaman [Kontak](/kontak/)) dengan menyertakan **nomor pesanan** dan alasan pengajuan. Refund yang disetujui diproses maksimal **7 hari kerja** ke metode pembayaran asal atau transfer bank atas nama pemesan.
