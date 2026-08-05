@@ -1,16 +1,19 @@
 /**
  * hariH — perilaku bersama halaman undangan (semua tema).
  * Konfigurasi dari PHP (functions.php): window.UNDANGAN = { id, restUrl, target, musik }.
- * Tanpa dependensi — halaman undangan tidak memuat jQuery/aset lain.
+ * Tanpa dependensi. Standar kualitas: gate pembuka sinematik, reveal ber-stagger,
+ * countdown hidup, amplop tertutup, lightbox galeri, progress bar, partikel —
+ * semuanya hormat pada prefers-reduced-motion.
  */
 (function () {
     'use strict';
 
     var cfg = window.UNDANGAN || {};
     var $ = function (sel) { return document.querySelector(sel); };
+    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    /* ---- Nama tamu dari ?to= — dirender client-side supaya semua tamu
-       memakai 1 cache halaman yang sama (keputusan A2 blueprint) ---- */
+    /* ---- Nama tamu dari ?to= — client-side supaya semua tamu memakai satu
+       cache halaman yang sama (keputusan A2 blueprint) ---- */
     var nama = new URLSearchParams(location.search).get('to');
     if (nama) {
         document.querySelectorAll('.guest-name').forEach(function (el) { el.textContent = nama; });
@@ -22,10 +25,10 @@
 
     function playMusic() {
         if (!audio) return;
+        audio.volume = .6;
         audio.play().then(function () {
             if (musicBtn) { musicBtn.hidden = false; musicBtn.classList.add('playing'); }
         }).catch(function () {
-            // Autoplay ditolak browser — tampilkan tombol dalam keadaan jeda.
             if (musicBtn) { musicBtn.hidden = false; musicBtn.classList.add('paused'); }
         });
     }
@@ -45,64 +48,192 @@
         });
     }
 
-    /* ---- Buka undangan: lepas kunci scroll + putar musik (autoplay audio
-       diblokir browser tanpa gestur — tap tombol ini adalah gesturnya, §7.1) ---- */
+    /* ---- Gate pembuka (standar acuan §2.3): menekan tombol = gesture yang
+       membuat autoplay musik legal; gate naik dan tidak kembali ---- */
+    var gate = $('#gate');
     var openBtn = $('#buka-undangan');
     if (openBtn) {
         openBtn.addEventListener('click', function () {
+            if (gate) gate.classList.add('terbuka');
             document.body.classList.remove('is-locked');
             playMusic();
-            var next = $('#countdown') || $('#mempelai');
-            if (next) next.scrollIntoView({ behavior: 'smooth' });
+            initProgress();
         });
     }
 
-    /* ---- Countdown + state pasca-acara (target ISO ber-offset +07:00 dari server) ---- */
+    /* ---- Progress scroll 2px emas (acuan §2.6) ---- */
+    var progressInner = null;
+    function initProgress() {
+        if (progressInner) return;
+        var bar = document.createElement('div');
+        bar.className = 'scroll-progress';
+        bar.setAttribute('aria-hidden', 'true');
+        progressInner = document.createElement('i');
+        bar.appendChild(progressInner);
+        document.body.appendChild(bar);
+        onScroll();
+    }
+    var rafPending = false;
+    function onScroll() {
+        if (rafPending) return;
+        rafPending = true;
+        requestAnimationFrame(function () {
+            rafPending = false;
+            if (!progressInner) return;
+            var max = document.documentElement.scrollHeight - window.innerHeight;
+            progressInner.style.transform = 'scaleX(' + (max > 0 ? Math.min(1, window.scrollY / max) : 0) + ')';
+        });
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    /* ---- Partikel emas melayang — hanya tema ber---particles:1 (tema
+       sinematik); tema terang tetap tenang ---- */
+    (function () {
+        if (reduced) return;
+        var on = getComputedStyle(document.documentElement).getPropertyValue('--particles').trim();
+        if (on !== '1') return;
+        var wrap = document.createElement('div');
+        wrap.className = 'partikel';
+        wrap.setAttribute('aria-hidden', 'true');
+        var kiri = [8, 17, 28, 41, 55, 67, 79, 90];
+        for (var i = 0; i < kiri.length; i++) {
+            var sp = document.createElement('span');
+            var uk = 2 + (i % 3);
+            sp.style.left = kiri[i] + '%';
+            sp.style.width = uk + 'px';
+            sp.style.height = uk + 'px';
+            sp.style.setProperty('--durasi', (21 + (i * 7) % 14) + 's');
+            sp.style.setProperty('--tunda', '-' + ((i * 5) % 24) + 's');
+            wrap.appendChild(sp);
+        }
+        document.body.appendChild(wrap);
+    })();
+
+    /* ---- Reveal ber-stagger + hairline tumbuh (acuan §2.1, §2.6) ---- */
+    function tumbuhkan(el) {
+        el.querySelectorAll('[data-grow]').forEach(function (g) {
+            g.style.width = g.getAttribute('data-grow') + 'px';
+        });
+        if (el.hasAttribute('data-grow')) el.style.width = el.getAttribute('data-grow') + 'px';
+    }
+    var revealEls = document.querySelectorAll('[data-reveal]');
+    if (reduced || !('IntersectionObserver' in window)) {
+        revealEls.forEach(function (el) { el.classList.add('in-view'); tumbuhkan(el); });
+    } else {
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                e.target.style.transitionDelay = (e.target.getAttribute('data-delay') || '0') + 'ms';
+                e.target.classList.add('in-view');
+                tumbuhkan(e.target);
+                io.unobserve(e.target);
+            });
+        }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+        revealEls.forEach(function (el) { io.observe(el); });
+    }
+
+    /* ---- Countdown hidup (acuan §2.4): tiap pergantian angka dianimasikan ---- */
     var grid = $('#countdown-grid');
     if (grid && grid.dataset.target) {
         var targetMs = Date.parse(grid.dataset.target);
         var doneEl = $('#countdown-done');
+        var calBtn = $('.cd-cal');
         var num = {
             hari: grid.querySelector('[data-cd="hari"]'),
             jam: grid.querySelector('[data-cd="jam"]'),
             menit: grid.querySelector('[data-cd="menit"]'),
             detik: grid.querySelector('[data-cd="detik"]')
         };
+        var pad = function (v) { return String(v).padStart(2, '0'); };
+        var setNum = function (el, str) {
+            if (!el || el.textContent === str) return;
+            el.textContent = str;
+            if (!reduced && el.animate) {
+                el.animate(
+                    [{ opacity: .15, transform: 'translateY(-7px)' }, { opacity: 1, transform: 'none' }],
+                    { duration: 450, easing: 'cubic-bezier(.2,.6,.2,1)' }
+                );
+            }
+        };
         var timer = null;
-
         var tick = function () {
             if (isNaN(targetMs)) { grid.hidden = true; if (timer) clearInterval(timer); return; }
             var diff = targetMs - Date.now();
             if (diff <= 0) {
                 grid.hidden = true;
+                if (calBtn) calBtn.hidden = true;
                 if (doneEl) doneEl.hidden = false;
                 if (timer) clearInterval(timer);
                 return;
             }
             var s = Math.floor(diff / 1000);
-            num.hari.textContent = Math.floor(s / 86400);
-            num.jam.textContent = Math.floor((s % 86400) / 3600);
-            num.menit.textContent = Math.floor((s % 3600) / 60);
-            num.detik.textContent = s % 60;
+            setNum(num.hari, String(Math.floor(s / 86400)));
+            setNum(num.jam, pad(Math.floor((s % 86400) / 3600)));
+            setNum(num.menit, pad(Math.floor((s % 3600) / 60)));
+            setNum(num.detik, pad(s % 60));
         };
         timer = setInterval(tick, 1000);
         tick();
     }
 
-    /* ---- Reveal saat scroll ---- */
-    if ('IntersectionObserver' in window) {
-        var io = new IntersectionObserver(function (entries) {
-            entries.forEach(function (e) {
-                if (e.isIntersecting) {
-                    e.target.classList.add('in-view');
-                    io.unobserve(e.target);
-                }
-            });
-        }, { threshold: 0.12 });
-        document.querySelectorAll('[data-reveal]').forEach(function (el) { io.observe(el); });
-    } else {
-        document.querySelectorAll('[data-reveal]').forEach(function (el) { el.classList.add('in-view'); });
+    /* ---- Amplop tertutup default (acuan §3): grid-rows 0fr→1fr ---- */
+    var ampBtn = $('#amplop-toggle');
+    var ampWrap = $('#amplop-wrap');
+    if (ampBtn && ampWrap) {
+        ampBtn.addEventListener('click', function () {
+            var buka = ampWrap.classList.toggle('terbuka');
+            ampBtn.setAttribute('aria-expanded', buka ? 'true' : 'false');
+            ampBtn.textContent = buka ? 'Tutup Amplop' : 'Buka Amplop Digital';
+        });
     }
+
+    /* ---- Lightbox galeri ---- */
+    (function () {
+        var imgs = Array.prototype.slice.call(document.querySelectorAll('.galeri-grid img'));
+        if (!imgs.length) return;
+        var idx = 0, lb = null, lbImg = null, lbNum = null;
+        function bangun() {
+            lb = document.createElement('div');
+            lb.className = 'lightbox';
+            lb.hidden = true;
+            lbImg = document.createElement('img');
+            lbImg.alt = 'Foto diperbesar';
+            var nav = document.createElement('div');
+            nav.className = 'lightbox-nav';
+            var prev = document.createElement('button');
+            prev.type = 'button'; prev.textContent = '‹'; prev.setAttribute('aria-label', 'Sebelumnya');
+            var next = document.createElement('button');
+            next.type = 'button'; next.textContent = '›'; next.setAttribute('aria-label', 'Berikutnya');
+            lbNum = document.createElement('span');
+            nav.appendChild(prev); nav.appendChild(lbNum); nav.appendChild(next);
+            var hint = document.createElement('p');
+            hint.className = 'lightbox-hint';
+            hint.textContent = 'Ketuk di mana saja untuk menutup';
+            lb.appendChild(lbImg); lb.appendChild(nav); lb.appendChild(hint);
+            lb.addEventListener('click', function () { lb.hidden = true; });
+            prev.addEventListener('click', function (e) { e.stopPropagation(); tampil(idx - 1); });
+            next.addEventListener('click', function (e) { e.stopPropagation(); tampil(idx + 1); });
+            document.addEventListener('keydown', function (e) {
+                if (lb.hidden) return;
+                if (e.key === 'Escape') lb.hidden = true;
+                if (e.key === 'ArrowLeft') tampil(idx - 1);
+                if (e.key === 'ArrowRight') tampil(idx + 1);
+            });
+            document.body.appendChild(lb);
+        }
+        function tampil(i) {
+            idx = (i + imgs.length) % imgs.length;
+            lbImg.src = imgs[idx].src;
+            lbNum.textContent = (idx + 1) + ' / ' + imgs.length;
+            lb.hidden = false;
+        }
+        imgs.forEach(function (img, i) {
+            img.addEventListener('click', function () {
+                if (!lb) bangun();
+                tampil(i);
+            });
+        });
+    })();
 
     /* ---- Salin rekening ---- */
     document.querySelectorAll('.btn-copy').forEach(function (btn) {

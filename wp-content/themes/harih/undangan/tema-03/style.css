@@ -59,6 +59,8 @@
    noise/derau pada navy pekat. */
 :root {
     --tint-alt: rgba(255, 255, 255, .035);
+    /* Konsep dramatis-sinematik: hanya tema ini yang menyalakan partikel emas */
+    --particles: 1;
     --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.10'/%3E%3C/svg%3E");
 }
 
@@ -68,26 +70,18 @@ body.undangan-body {
     background-size: 26px 26px;
 }
 
-/* Cover tanpa foto: bingkai emas tipis */
-.cover:not(.has-photo) .cover-inner {
-    position: relative;
-    padding: 52px 30px;
-    border-radius: 10px;
-    box-shadow: inset 0 0 0 1px rgba(201, 164, 92, .55);
-}
-.cover:not(.has-photo) .cover-inner::after {
+/* Gate tanpa foto: bingkai emas tipis layar penuh */
+.gate:not(.has-photo) .gate-inner { margin: 14px; box-shadow: inset 0 0 0 1px rgba(201, 164, 92, .5); }
+.gate:not(.has-photo) .gate-inner::before {
     content: '';
     position: absolute;
     inset: 7px;
-    border-radius: 6px;
-    box-shadow: inset 0 0 0 1px rgba(201, 164, 92, .25);
+    box-shadow: inset 0 0 0 1px rgba(201, 164, 92, .22);
     pointer-events: none;
 }
 
-.cover-eyebrow { color: var(--c-gold); opacity: 1; }
-
 /* Tombol buka di atas foto/langit malam: emas transparan */
-.cover .btn-open {
+.gate .btn-open {
     background: rgba(201, 164, 92, .14);
     box-shadow: inset 0 0 0 1.5px rgba(201, 164, 92, .85);
     color: var(--cover-ink);
@@ -95,7 +89,7 @@ body.undangan-body {
     backdrop-filter: blur(4px);
 }
 
-.monogram { background: #232e4e; color: var(--c-gold); }
+.arch-inisial { background: linear-gradient(180deg, #1d2946, #151f38); }
 
 .section-intro, .prose { line-height: 1.85; }
 

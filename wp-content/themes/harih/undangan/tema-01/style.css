@@ -56,26 +56,19 @@ body.undangan-body {
     background-image: repeating-linear-gradient(45deg, rgba(63, 92, 79, .035) 0 2px, transparent 2px 14px);
 }
 
-/* Cover tanpa foto: bingkai ganda emas ala kartu undangan cetak */
-.cover:not(.has-photo) .cover-inner {
-    position: relative;
-    padding: 52px 30px;
-    border-radius: 8px;
-    box-shadow: inset 0 0 0 1px rgba(180, 146, 63, .60);
-}
-.cover:not(.has-photo) .cover-inner::after {
+/* Gate tanpa foto: bingkai ganda emas ala kartu undangan cetak — bingkai
+   layar penuh, bukan kotak kecil di tengah. */
+.gate:not(.has-photo) .gate-inner { margin: 14px; box-shadow: inset 0 0 0 1px rgba(180, 146, 63, .55); }
+.gate:not(.has-photo) .gate-inner::before {
     content: '';
     position: absolute;
     inset: 7px;
-    border-radius: 5px;
-    box-shadow: inset 0 0 0 1px rgba(180, 146, 63, .32);
+    box-shadow: inset 0 0 0 1px rgba(180, 146, 63, .28);
     pointer-events: none;
 }
 
-.cover-eyebrow { color: var(--c-gold); opacity: 1; }
-
 /* Tombol buka di atas foto/gradasi gelap: gading transparan */
-.cover .btn-open {
+.gate .btn-open {
     background: rgba(244, 241, 231, .14);
     box-shadow: inset 0 0 0 1.5px rgba(244, 241, 231, .9);
     color: var(--cover-ink);
@@ -83,7 +76,7 @@ body.undangan-body {
     backdrop-filter: blur(4px);
 }
 
-.monogram { background: #f3efe2; }
+.arch-inisial { background: linear-gradient(180deg, #f0ebdc, #f7f4ea); }
 
 .section-intro, .prose { line-height: 1.85; }
 
