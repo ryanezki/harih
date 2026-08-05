@@ -521,6 +521,85 @@ img { max-width: 100%; }
     margin: 0 auto 20px;
 }
 .acara-garis { margin: 22px auto; }
+/* Kisah Kami sebagai timeline (FU.3) — garis rambut vertikal dengan titik
+   emas per babak. Paragraf panjang di HP dilewati; daftar bertanggal dibaca. */
+.kisah-timeline {
+    list-style: none;
+    margin: 26px auto 0;
+    padding: 0 22px 0 48px;
+    max-width: 30rem;
+    position: relative;
+    text-align: left;
+}
+.kisah-timeline::before {
+    content: '';
+    position: absolute;
+    left: 26px; top: 6px; bottom: 6px;
+    width: 1px;
+    background: linear-gradient(180deg, transparent, var(--c-line) 12%, var(--c-line) 88%, transparent);
+}
+.kisah-timeline li { position: relative; padding-bottom: 26px; }
+.kisah-timeline li:last-child { padding-bottom: 0; }
+.kt-titik {
+    position: absolute;
+    left: -26px; top: 7px;
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--c-gold);
+    box-shadow: 0 0 0 4px var(--c-bg);
+}
+.kt-waktu {
+    display: block;
+    font: 400 11px/1 var(--font-label, var(--font-body));
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--c-gold);
+    margin-bottom: 6px;
+}
+.kt-teks {
+    display: block;
+    font: 400 16px/1.8 var(--font-body);
+    color: var(--c-ink-soft);
+}
+
+/* Peta tersemat — facade dulu, iframe menyusul saat diklik (FU.2). Rasio
+   dikunci supaya tata letak tidak melompat saat iframe menggantikan facade. */
+.peta-facade {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    margin: 18px 0 14px;
+    border: 1px solid var(--c-line);
+    border-radius: var(--radius);
+    background:
+        radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--c-accent) 12%, transparent), transparent 62%),
+        color-mix(in srgb, var(--c-ink) 5%, transparent);
+    color: var(--c-ink-soft);
+    cursor: pointer;
+    overflow: hidden;
+    transition: border-color .3s ease, color .3s ease;
+}
+.peta-facade:hover, .peta-facade:focus-visible { border-color: var(--c-gold); color: var(--c-ink); }
+.peta-pin { color: var(--c-gold); line-height: 0; }
+.peta-teks {
+    font: 400 11px/1 var(--font-label, var(--font-body));
+    letter-spacing: .18em;
+    text-transform: uppercase;
+}
+.peta-facade.peta-aktif { cursor: default; border-color: var(--c-line); background: none; }
+.peta-facade iframe { width: 100%; height: 100%; border: 0; display: block; }
+
+.lokasi-catatan {
+    margin-top: 12px;
+    font: 400 13.5px/1.7 var(--font-body);
+    color: var(--c-ink-soft);
+}
+
 .acara-maps { margin-top: 20px; }
 .acara-jenis { font: italic 500 25px/1.2 var(--font-display); margin: 0 0 12px; color: var(--c-accent); }
 .acara-tanggal { margin: 0; font-weight: 500; }

@@ -89,6 +89,10 @@ Jl. Kenanga No. 5, Kebayoran Baru, Jakarta Selatan 12120
 18.30 Penyambutan tamu
 19.00 Resepsi & jamuan
 21.00 Penutupan" > /dev/null
+  wp post meta update "$id" catatan_lokasi "Valet tersedia di lobi utama · parkir basement P1-P2" > /dev/null
+  if [ -n "$lokasi_akad" ]; then
+    wp post meta update "$id" catatan_lokasi_akad "Parkir di halaman masjid · masuk lewat pintu utama" > /dev/null
+  fi
   wp post meta update "$id" dresscode       "$dresscode"       > /dev/null
   wp post meta update "$id" dresscode_warna "$dresscode_warna" > /dev/null
 
@@ -102,7 +106,10 @@ buat_demo demo-tema-01 tema-01 'Raka & Sela' \
   'Bapak Hendra Pratama & Ibu Sari Wulandari' 'Bapak Budi Santoso & Ibu Rina Melati' \
   2026-09-12 08:00 11:00 \
   'Graha Kencana' 'Jl. Melati No. 12, Bandung' \
-  'Kami pertama kali bertemu di sebuah kedai kopi kecil di Bandung, dipertemukan oleh teman yang sama. Empat tahun kemudian, di tempat yang sama, Raka mengajukan pertanyaan paling penting dalam hidupnya — dan Sela menjawab iya.' \
+  '2021 — Pertama bertemu di kedai kopi kecil di Bandung, dipertemukan teman yang sama
+2023 — Perjalanan pertama berdua ke Ciwidey, obrolan yang tak pernah selesai
+2025 — Lamaran di kedai kopi yang sama, di meja yang sama
+2026 — Hari yang kami tunggu bersama keluarga' \
   'BCA 1234567890 a.n. Raka Pratama' \
   'Masjid Al-Ukhuwwah' 'Jl. Wastukencana No. 27, Bandung' \
   'Sage & Krem' '#3f5c4f, #f4f1e7'
@@ -112,7 +119,10 @@ buat_demo demo-tema-02 tema-02 'Bima & Ayu' \
   'Bapak Slamet Saputra & Ibu Endang Puspita' 'Bapak Harjono & Ibu Retno Wulandari' \
   2026-10-17 09:00 13:00 \
   'Pendopo Senja' 'Jl. Cendana No. 8, Yogyakarta' \
-  'Berawal dari satu perjalanan sore ke arah pantai selatan, obrolan kami tidak pernah benar-benar selesai sejak hari itu. Tiga tahun kemudian, di bawah langit senja yang sama, kami memutuskan untuk melanjutkannya seumur hidup.' \
+  '2021 — Perjalanan sore pertama ke arah pantai selatan
+2023 — Memutuskan menjalani semuanya berdua
+2025 — Lamaran di bawah langit senja yang sama
+2026 — Hari yang kami tunggu bersama keluarga' \
   'BNI 0987654321 a.n. Bima Saputra' \
   'Masjid Gedhe Kauman' 'Jl. Kauman, Ngupasan, Yogyakarta' \
   'Terakota & Krem' '#a15436, #faf3ea'
@@ -122,7 +132,10 @@ buat_demo demo-tema-03 tema-03 'Damar & Kirana' \
   'Bapak Sutrisno Wicaksono & Ibu Lastri Handayani' 'Bapak Agung Maheswara & Ibu Dewi Anggraini' \
   2026-11-21 08:30 19:00 \
   'Balai Kartini' 'Jl. Gatot Subroto No. 37, Jakarta Selatan' \
-  'Kami bertemu saat sama-sama bertahan di kantor sampai larut. Dari obrolan tentang langit malam Jakarta yang nyaris tak berbintang, tumbuh kebiasaan pulang bersama — lalu rencana yang jauh lebih panjang dari sekadar perjalanan pulang.' \
+  '2021 — Bertemu saat sama-sama bertahan di kantor sampai larut
+2023 — Kebiasaan pulang bersama menjadi rencana yang lebih panjang
+2025 — Lamaran di rooftop tempat kami biasa menunggu hujan reda
+2026 — Hari yang kami tunggu bersama keluarga' \
   'Mandiri 1122334455 a.n. Damar Wicaksono' \
   'Masjid Agung Al-Azhar' 'Jl. Sisingamangaraja, Kebayoran Baru, Jakarta Selatan' \
   'Navy & Emas' '#131b2e, #c9a45c'

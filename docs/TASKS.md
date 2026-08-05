@@ -110,17 +110,17 @@
   **Invalidasi tanpa hook:** nama berkas memuat hash isi kartu (`{id}-{hash}.jpg`) — data berubah, berkas baru; berkas versi lama undangan itu dihapus otomatis. Ini disengaja karena WF-02 menulis meta lewat REST, jalur yang tidak lewat hook wp-admin.
   **Terverifikasi:** ketiga tema + jalur tanpa galeri (paket Hemat → kartu berwarna tema, blok teks ditengahkan, bingkai rambut emas) menghasilkan 1200×630 (~45–90 KB, ±55 ms sekali per versi), `og:image:width/height/alt` kini dikirim dan benar, halaman live memuat URL kartu. Undangan uji tanpa foto sudah dihapus kembali.
 
-- [ ] **FU.2** **Embed peta + info parkir/valet** *(poin 10)*
+- [x] **FU.2** **Peta tersemat + info parkir/valet** *(poin 10)* → **SELESAI & LIVE 2026-08-05** *(v1.3.0)*
   **Apa:** sekarang hanya tombol yang melempar tamu keluar ke aplikasi Maps. Tambahkan peta tersemat per lokasi (akad & resepsi bisa beda) + kolom catatan bebas untuk parkir/valet/pintu masuk.
   **Kenapa:** tamu yang belum kenal gedung memutuskan berangkat berdasar dua hal — jauhnya dan parkirnya. Keluar aplikasi = keluar undangan.
-  **Langkah:** ikuti pola facade yang sudah terbukti di `video.php` — **jangan `iframe` peta dimuat saat load** (itu persis keluhan "embed YouTube berat" yang baru kita selesaikan). Tampilkan gambar statis/placeholder + tombol; `iframe` `google.com/maps/embed` disuntik saat diklik. Field baru `catatan_lokasi` (+ akad) di `cpt.php` → form → WF-02, sama seperti sembilan field kemarin.
-  **Selesai bila:** peta muncul hanya setelah diklik, tidak menambah request saat load pertama, dan catatan parkir tampil di kartu acara yang tepat.
+  **Yang dibangun:** facade peta per kartu acara (akad & resepsi punya petanya masing-masing) dengan pola yang sama seperti live streaming — `iframe` Google baru disuntik saat **diklik/Enter**; kueri dirakit dari nama+alamat venue (embed tanpa API key). Rasio dikunci 16/10 supaya tata letak tidak melompat saat iframe menggantikan facade. Field baru `catatan_lokasi` + `catatan_lokasi_akad` (cpt → form → WF-02 → demo).
+  **Terverifikasi:** muat segar = **nol permintaan ke Google** (dua kemunculan `maps.google.com` di HTML hanyalah `href` tombol, bukan request); klik → iframe muncul. Tombol luar diganti namanya jadi "Petunjuk Arah" karena tugasnya sekarang navigasi, bukan "lihat peta" — label lama membungkus dua baris di HP.
 
-- [ ] **FU.3** **Kisah Kami sebagai timeline bertanggal** *(poin 9)*
+- [x] **FU.3** **Kisah Kami sebagai lini masa bertanggal** *(poin 9)* → **SELESAI & LIVE 2026-08-05** *(v1.3.2)*
   **Apa:** `love_story` sekarang satu blok teks (`love-story.php` merender `nl2br` apa adanya). Ubah jadi daftar bertanggal: "2019 — Pertama bertemu", "2023 — Lamaran".
   **Kenapa:** timeline dibaca; paragraf panjang di HP dilewati — persis alasan italic panjang tadi dikeluhkan.
-  **Langkah:** parser baris seperti `rundown` (`YYYY[ — ]judul` → item), sehingga **data lama tetap tampil** sebagai satu blok bila tidak berformat tanggal. Tanpa migrasi, tanpa field baru.
-  **Selesai bila:** undangan lama tetap tampil normal; yang berformat tanggal tampil sebagai timeline bergaris di ketiga tema.
+  **Yang dibangun:** parser baris (`2019 — Pertama bertemu`, juga menerima `Mei 2019 · …`) → lini masa bergaris dengan titik emas per babak; **satu baris saja tanpa tahun → seluruhnya kembali jadi prosa**, jadi undangan lama tidak berubah tampilan tanpa diminta. Tanpa migrasi, tanpa field baru. Form mengajarkan formatnya lewat placeholder + catatan.
+  **Terverifikasi** dengan undangan uji terpisah (bukan demo): prosa → prosa · berformat tahun → 4 item lini masa · campur → prosa. Gutter diperbaiki setelah verifikasi visual: section ini tanpa padding samping (foto full-bleed) sehingga titik emas sempat terpotong tepi layar.
 
 - [ ] **FU.4** **Sesi kedatangan tamu (shift)** *(poin 8b)*
   **Apa:** berbeda dari pilihan sesi di RSVP (yang sudah ada — tamu memilih akad/resepsi). Ini **mempelai membagi tamu ke jam kedatangan** ("Sesi 1: 11.00–13.00") supaya gedung tidak menumpuk.

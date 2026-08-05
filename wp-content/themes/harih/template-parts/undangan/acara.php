@@ -17,6 +17,7 @@ if ($u['tanggal_akad'] !== '') {
         'lokasi'  => $u['lokasi_akad_nama'],
         'alamat'  => $u['lokasi_akad_alamat'],
         'gmaps'   => $u['gmaps_akad_url'],
+        'catatan' => $u['catatan_lokasi_akad'],
     ];
 }
 if ($u['tanggal_resepsi'] !== '') {
@@ -27,6 +28,7 @@ if ($u['tanggal_resepsi'] !== '') {
         'lokasi'  => $u['lokasi_nama'],
         'alamat'  => $u['lokasi_alamat'],
         'gmaps'   => $u['gmaps_url'],
+        'catatan' => $u['catatan_lokasi'],
     ];
 }
 if (!$kartu) return;
@@ -52,8 +54,30 @@ if (!$kartu) return;
             <?php if ($k['alamat'] !== '') : ?>
                 <p class="lokasi-alamat"><?php echo nl2br(esc_html($k['alamat'])); ?></p>
             <?php endif; ?>
+            <?php
+            /* Peta TERSEMAT dengan pola facade — sama seperti live streaming:
+               iframe Google baru dimuat saat DIKLIK. Kalau dimuat saat load,
+               tiap undangan menyeret ±1 MB skrip peta dan satu permintaan ke
+               pihak ketiga sebelum tamu meminta apa pun. Kueri peta dirakit
+               dari nama+alamat venue (embed tanpa API key). */
+            $peta_q = trim($k['lokasi'] . ($k['alamat'] !== '' ? ', ' . $k['alamat'] : ''));
+            ?>
+            <?php if ($peta_q !== '') : ?>
+                <div class="peta-facade" data-peta="<?php echo esc_attr($peta_q); ?>" role="button" tabindex="0"
+                     aria-label="Tampilkan peta <?php echo esc_attr($k['lokasi'] !== '' ? $k['lokasi'] : $k['jenis']); ?>">
+                    <span class="peta-pin" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.3">
+                            <path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/>
+                        </svg>
+                    </span>
+                    <span class="peta-teks">Tampilkan Peta</span>
+                </div>
+            <?php endif; ?>
             <?php if ($k['gmaps'] !== '') : ?>
-                <a class="btn btn-ghost acara-maps" href="<?php echo esc_url($k['gmaps']); ?>" target="_blank" rel="noopener">Buka Google Maps</a>
+                <a class="btn btn-ghost acara-maps" href="<?php echo esc_url($k['gmaps']); ?>" target="_blank" rel="noopener">Petunjuk Arah</a>
+            <?php endif; ?>
+            <?php if (trim($k['catatan']) !== '') : ?>
+                <p class="lokasi-catatan"><?php echo nl2br(esc_html($k['catatan'])); ?></p>
             <?php endif; ?>
         <?php endif; ?>
     </div>

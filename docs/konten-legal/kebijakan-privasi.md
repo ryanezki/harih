@@ -46,6 +46,8 @@ Data dibagikan terbatas sesuai keperluan layanan kepada:
 
 Masing-masing tunduk pada kebijakan privasinya sendiri.
 
+**Peta & video pada halaman undangan** dimuat dari Google (Maps / YouTube) **hanya setelah tamu menekannya**. Selama tidak ditekan, halaman undangan tidak mengirim permintaan apa pun ke pihak ketiga tersebut, sehingga tamu yang sekadar membaca undangan tidak terlacak oleh mereka. Setelah ditekan, kebijakan privasi Google yang berlaku.
+
 ## 5. Penyimpanan & Retensi
 
 - Data undangan dan foto disimpan selama masa aktif paket, dan dihapus/diarsipkan setelahnya (paling lambat 90 hari setelah masa aktif berakhir, kecuali diwajibkan lain oleh hukum).

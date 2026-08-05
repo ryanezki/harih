@@ -350,6 +350,31 @@
         }, { once: true });
     })();
 
+    /* ---- Facade peta: iframe Google dimuat saat DIKLIK, bukan saat load ---- */
+    (function () {
+        var petas = document.querySelectorAll('.peta-facade[data-peta]');
+        if (!petas.length) return;
+        petas.forEach(function (f) {
+            var muat = function () {
+                var q = f.getAttribute('data-peta');
+                var ifr = document.createElement('iframe');
+                ifr.src = 'https://maps.google.com/maps?q=' + encodeURIComponent(q) + '&z=16&output=embed';
+                ifr.title = 'Peta ' + q;
+                ifr.loading = 'lazy';
+                ifr.referrerPolicy = 'no-referrer-when-downgrade';
+                f.textContent = '';
+                f.classList.add('peta-aktif');
+                f.removeAttribute('role');
+                f.removeAttribute('tabindex');
+                f.appendChild(ifr);
+            };
+            f.addEventListener('click', muat, { once: true });
+            f.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); muat(); }
+            }, { once: true });
+        });
+    })();
+
     /* ---- Pill kehadiran RSVP (menggantikan dropdown) ---- */
     (function () {
         function grupPill(hiddenSel, btnSel, attr) {

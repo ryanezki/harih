@@ -125,7 +125,9 @@ add_action('init', function () {
         'turut_mengundang'=> 'sanitize_textarea_field',// satu nama per baris
         'alamat_kado'     => 'sanitize_textarea_field',// alamat kirim hampers
         'rundown'         => 'sanitize_textarea_field',// "18.00 Pembukaan" per baris
-        'salam_islami'    => 'sanitize_text_field',    // '' / '1' (default tampil) · '0' = sembunyikan (toggle CS)
+        'catatan_lokasi'      => 'sanitize_textarea_field', // parkir/valet/pintu masuk — resepsi
+    'catatan_lokasi_akad' => 'sanitize_textarea_field', // idem — venue akad
+    'salam_islami'    => 'sanitize_text_field',    // '' / '1' (default tampil) · '0' = sembunyikan (toggle CS)
     ];
 
     foreach ($fields as $field => $sanitize) {

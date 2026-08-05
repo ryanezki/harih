@@ -65,6 +65,8 @@ $undangan = [
     'turut_mengundang'=> $m('turut_mengundang'),
     'alamat_kado'     => $m('alamat_kado'),
     'rundown'         => $m('rundown'),
+    'catatan_lokasi'      => $m('catatan_lokasi'),
+    'catatan_lokasi_akad' => $m('catatan_lokasi_akad'),
     'salam_islami'    => $m('salam_islami') !== '0',
 ];
 ?><!DOCTYPE html>

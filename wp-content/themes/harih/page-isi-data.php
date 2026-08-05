@@ -134,6 +134,8 @@ $webhook = harih_form_webhook_url();
                     <textarea name="lokasi_akad_alamat" rows="2" maxlength="300" placeholder="alamat lokasi akad (bila beda)"></textarea></label>
                 <label class="field"><span>Link Google Maps akad</span>
                     <input type="url" name="gmaps_akad_url" maxlength="300" inputmode="url" placeholder="https://maps.app.goo.gl/…"></label>
+                <label class="field"><span>Catatan lokasi akad <em class="opsional">(parkir, pintu masuk)</em></span>
+                    <textarea name="catatan_lokasi_akad" rows="2" maxlength="400" placeholder="Parkir di halaman masjid, masuk lewat pintu timur"></textarea></label>
                 <div class="row-2">
                     <label class="field"><span>Dress code <em class="opsional">(opsional)</em></span>
                         <input type="text" name="dresscode" maxlength="120" placeholder="mis. Sage & Krem"></label>
@@ -152,13 +154,16 @@ $webhook = harih_form_webhook_url();
                     <textarea name="lokasi_alamat" rows="2" maxlength="300" required placeholder="mis. Jl. Melati No. 12, Bandung"></textarea></label>
                 <label class="field"><span>Link Google Maps</span>
                     <input type="url" name="gmaps_url" maxlength="300" inputmode="url" placeholder="https://maps.app.goo.gl/…"></label>
+                <label class="field"><span>Catatan lokasi resepsi <em class="opsional">(parkir, valet, pintu masuk)</em></span>
+                    <textarea name="catatan_lokasi" rows="2" maxlength="400" placeholder="Valet tersedia di lobi utama · parkir basement P2"></textarea></label>
             </section>
 
             <?php if ($plus) : ?>
             <section class="kartu">
                 <h2>4. Kisah Cinta <span class="paket-badge">Favorit+</span></h2>
                 <label class="field"><span>Ceritakan singkat kisah kalian (opsional)</span>
-                    <textarea name="love_story" id="love-story" rows="5" maxlength="2000" placeholder="Kami pertama kali bertemu…"></textarea></label>
+                    <textarea name="love_story" id="love-story" rows="5" maxlength="2000" placeholder="2019 — Pertama bertemu di sebuah kedai kopi&#10;2023 — Lamaran di tempat yang sama&#10;2026 — Hari yang kami tunggu"></textarea></label>
+                <p class="kartu-note">Awali tiap baris dengan tahun (mis. <strong>2019 — Pertama bertemu</strong>) untuk tampil sebagai lini masa. Tanpa itu, ceritamu tampil sebagai satu paragraf.</p>
                 <p class="counter"><span id="ls-count">0</span>/2000</p>
             </section>
 
