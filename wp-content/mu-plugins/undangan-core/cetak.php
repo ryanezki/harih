@@ -273,6 +273,134 @@ add_filter('woocommerce_available_payment_gateways', function ($gateways) {
 }, 20);
 
 /* =========================================================================
+ * F4.6 — GERBANG PRODUKSI: tenggat H-21 & kuota bulanan.
+ *
+ * Dua janji di halaman harga sudah jadi klausul S&K §12: barang tiba H-14
+ * atau uang kembali 100%, dan kuota produksi per bulan terbatas. Keduanya
+ * hanya bisa ditepati kalau order yang MUSTAHIL dikerjakan ditolak SEBELUM
+ * uang berpindah — menolak setelah dibayar berarti refund, dan refund atas
+ * order Rp 2,9 juta bukan kerugian kecil.
+ *
+ * Tanggal acara ditanyakan DI CHECKOUT khusus pesanan cetak. Untuk pesanan
+ * digital tanggal tetap diisi belakangan di /isi-data/ — di sana tidak ada
+ * tenggat produksi yang perlu dijaga.
+ * ========================================================================= */
+const UNDANGAN_TENGGAT_HARI = 21;
+const UNDANGAN_KUOTA_BULAN  = 8;
+
+add_action('woocommerce_init', function () {
+    if (!function_exists('woocommerce_register_additional_checkout_field')) return;
+    woocommerce_register_additional_checkout_field([
+        'id'         => 'harih/tanggal-acara',
+        'label'      => 'Tanggal acara (untuk pesanan cetak)',
+        'location'   => 'order',
+        'type'       => 'text',
+        'required'   => false, // kewajibannya bersyarat — divalidasi di bawah
+        'attributes' => [
+            'placeholder' => 'YYYY-MM-DD, mis. 2026-11-21',
+            'inputmode'   => 'numeric',
+            'autocomplete'=> 'off',
+        ],
+    ]);
+});
+
+/** Jumlah pesanan cetak yang sudah masuk pada bulan berjalan. */
+function undangan_kuota_terpakai(): int {
+    $orders = wc_get_orders([
+        'limit'        => 50,
+        'status'       => ['processing', 'on-hold', 'completed'],
+        'date_created' => '>=' . gmdate('Y-m-01'),
+        'return'       => 'objects',
+    ]);
+    $n = 0;
+    foreach ($orders as $o) {
+        foreach ($o->get_items() as $item) {
+            if (in_array(undangan_jenis_produk($item->get_product()), ['hybrid', 'satuan'], true)) { $n++; break; }
+        }
+    }
+    return $n;
+}
+
+/**
+ * Galat yang menghalangi checkout pesanan cetak. $tanggal boleh kosong saat
+ * dipanggil dari keranjang (field-nya baru ada di checkout).
+ */
+function undangan_cek_gerbang_cetak(string $tanggal = '', bool $wajib_tanggal = false): array {
+    if (!undangan_cart_ada_fisik()) return [];
+    $galat = [];
+
+    if (undangan_kuota_terpakai() >= UNDANGAN_KUOTA_BULAN) {
+        $galat[] = sprintf(
+            'Kuota produksi cetak bulan ini (%d pesanan) sudah penuh. Hubungi kami lewat WhatsApp untuk jadwal bulan berikutnya — kami tidak menerima pesanan yang tidak bisa kami penuhi tepat waktu.',
+            UNDANGAN_KUOTA_BULAN
+        );
+    }
+
+    $tanggal = trim($tanggal);
+    if ($tanggal === '') {
+        if ($wajib_tanggal) $galat[] = 'Isi tanggal acara (format YYYY-MM-DD) — kami memakainya untuk memastikan pesanan bisa tiba tepat waktu.';
+        return $galat;
+    }
+
+    $t = DateTime::createFromFormat('Y-m-d', $tanggal);
+    if (!$t || $t->format('Y-m-d') !== $tanggal) {
+        $galat[] = 'Format tanggal acara belum benar — tulis seperti 2026-11-21.';
+        return $galat;
+    }
+
+    $selisih = (int) floor((strtotime($tanggal) - strtotime(gmdate('Y-m-d'))) / 86400);
+    if ($selisih < UNDANGAN_TENGGAT_HARI) {
+        $galat[] = sprintf(
+            'Acara Anda %d hari lagi, sementara pesanan cetak diterima paling lambat H-%d. Batas ini yang membuat kami bisa menjamin barang tiba H-14 — pesanan yang lebih mepet tidak kami terima. Hubungi WhatsApp kami untuk mencari jalan keluar tercepat.',
+            max(0, $selisih), UNDANGAN_TENGGAT_HARI
+        );
+    }
+    return $galat;
+}
+
+// Peringatan dini di keranjang: kuota penuh diberitahukan sebelum pembeli
+// mengisi alamat, bukan setelahnya.
+add_action('woocommerce_store_api_cart_errors', function ($errors) {
+    if (!undangan_cart_ada_fisik()) return;
+    if (undangan_kuota_terpakai() < UNDANGAN_KUOTA_BULAN) return;
+    $errors->add('undangan_kuota', sprintf(
+        'Kuota produksi cetak bulan ini (%d pesanan) sudah penuh — hubungi WhatsApp kami untuk jadwal bulan berikutnya.',
+        UNDANGAN_KUOTA_BULAN
+    ));
+}, 20, 1);
+
+// Gerbang sesungguhnya: checkout blok (Store API).
+add_action('woocommerce_store_api_checkout_update_order_from_request', function ($order, $request) {
+    $fields  = (array) ($request['additional_fields'] ?? []);
+    $tanggal = (string) ($fields['harih/tanggal-acara'] ?? '');
+    $galat   = undangan_cek_gerbang_cetak($tanggal, true);
+    if (!$galat) {
+        if ($tanggal !== '') $order->update_meta_data('_tanggal_acara', $tanggal);
+        return;
+    }
+    if (class_exists('\Automattic\WooCommerce\StoreApi\Exceptions\RouteException')) {
+        throw new \Automattic\WooCommerce\StoreApi\Exceptions\RouteException(
+            'undangan_gerbang_cetak', implode(' ', $galat), 400
+        );
+    }
+}, 10, 2);
+
+// Jalur klasik (bila checkout dikembalikan ke shortcode suatu saat).
+add_action('woocommerce_after_checkout_validation', function ($data, $errors) {
+    foreach (undangan_cek_gerbang_cetak((string) ($_POST['harih-tanggal-acara'] ?? ''), true) as $pesan) {
+        $errors->add('undangan_gerbang_cetak', $pesan);
+    }
+}, 20, 2);
+
+// Tanggal acara tampil di halaman order, bersebelahan dengan resi.
+add_action('woocommerce_admin_order_data_after_shipping_address', function ($order) {
+    if ($t = $order->get_meta('_tanggal_acara')) {
+        $sisa = (int) floor((strtotime($t) - time()) / 86400);
+        printf('<p><strong>Tanggal acara:</strong> %s <em>(%d hari lagi)</em></p>', esc_html($t), $sisa);
+    }
+}, 5);
+
+/* =========================================================================
  * F3.8 — nomor resi pengiriman: field order + kolom daftar pesanan.
  * Disimpan sebagai meta `_resi` (HPOS-aman lewat API CRUD order).
  * ========================================================================= */
