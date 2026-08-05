@@ -157,13 +157,13 @@
 
 *Target fase ini: **5 order cetak nyata, disubkontrakkan, dengan biaya & waktu tercatat.*** Yang dicari bukan efisiensi — yang dicari angka pengganti tebakan.
 
-- [ ] **F1.1** 👤 **Uji fisik QR: cetak → laminasi doff → pindai di ruangan remang**
+- [ ] **F1.1** 🔒 👤 **Uji fisik QR: cetak → laminasi doff → pindai di ruangan remang** — *sejak halaman harga tayang (2026-08-05), ini gerbang untuk **menyanggupi order**, bukan lagi untuk menayangkan halaman*
   **Gerbang untuk Garansi QR Terbaca** — garansi itu tidak boleh dipasang di halaman harga sebelum uji ini lolos. Laminasi doff menurunkan kontras dan bisa membuat QR gagal terbaca, persis skenario yang dijanjikan garansi.
   **Langkah:** cetak QR di beberapa ukuran (15/20/25 mm), laminasi doff, pindai dengan 3 HP berbeda di ruangan remang seperti gedung resepsi.
   **Catatan:** ujinya memakai **hasil percetakan subkontrak** (F1.2), bukan mesin sendiri — itu yang akan benar-benar dikirim ke pelanggan di fase ini.
   **Selesai bila:** ada ukuran QR minimum yang terbukti dan jadi aturan tetap.
 
-- [ ] **F1.2** 👤 **Cari & uji 2–3 percetakan subkontrak**
+- [ ] **F1.2** 🔒 👤 **Cari & uji 2–3 percetakan subkontrak** — *gerbang yang sama: harga sudah tayang, jadi ini yang menentukan boleh-tidaknya menerima order pertama*
   **Kenapa subkontrak dulu:** lima order pertama tidak butuh mesin. Marjin turun (perkiraan Rp 1,6–1,8 juta vs Rp 2,6 juta produksi sendiri) tapi **masih di atas marjin rencana v1 yang Rp 1,12 juta** — dan modal Rp 9–10 juta tidak keluar sebelum ada yang membayar.
   **Langkah:** minta kuotasi untuk isi Paket Resepsi (150 kartu QR art carton 260gsm laminasi doff · 200 label souvenir · 100 kartu terima kasih · 100 stiker segel), minta **sample fisik**, cek SLA & konsistensi warna.
   ⚠️ **Angka marjin Rp 1,6–1,8 juta itu estimasi saya, bukan kuotasi.** Wajib dikonfirmasi dengan angka nyata sebelum harga dikunci.
@@ -179,8 +179,9 @@
   **Yang ditambahkan:** ruang lingkup produk fisik · pengiriman gratis se-Indonesia + tanggung jawab & resi · aturan proof (setelah disetujui pelanggan, salah ketik jadi tanggung jawab pelanggan) · **ketiga garansi sebagai klausul**, bukan sekadar copy pemasaran · retur/penggantian barang rusak · kuota bulanan sebagai pembatasan ketersediaan.
   Terbit lewat `scripts/publish-legal.py` (repo = sumber kebenaran halaman legal).
 
-- [x] **F1.5** **Halaman harga hybrid — statis, CTA WhatsApp** → **artefak SELESAI 2026-08-05; sisa: publish (gerbang F1.1+F1.2)**
-  `page-harga-hybrid.php` + blok `katalog.css` (v1.2.1) ter-deploy & teruji render via halaman pratinjau sementara (sudah dihapus): hero "satu desain dua wujud" · **tiga garansi di atas** · 4 kartu (Digital mulai 99rb → beranda · Hormat 1,19jt · Resepsi 2,9jt ⭐ + pill "hemat Rp 625.000" · Grand 5,9jt jangkar) · proses 4 langkah + H-21 · tabel satuan (8 item, min Rp 1jt/transaksi) · FAQ · CTA `wa.me` prefill per paket. **Halaman WP sengaja BELUM dibuat** — perintah publish ada di header template; jalankan hanya setelah F1.1 lolos + percetakan F1.2 terpilih.
+- [x] **F1.5** **Halaman harga hybrid — statis, CTA WhatsApp** → **TERBIT & LIVE di `/harga/` 2026-08-05**
+  `page-harga-hybrid.php` + blok `katalog.css` (v1.2.1) ter-deploy & teruji render via halaman pratinjau sementara (sudah dihapus): hero "satu desain dua wujud" · **tiga garansi di atas** · 4 kartu (Digital mulai 99rb → beranda · Hormat 1,19jt · Resepsi 2,9jt ⭐ + pill "hemat Rp 625.000" · Grand 5,9jt jangkar) · proses 4 langkah + H-21 · tabel satuan (8 item, min Rp 1jt/transaksi) · FAQ · CTA `wa.me` prefill per paket. **Diterbitkan atas keputusan owner 2026-08-05, mendahului gerbang F1.1/F1.2** ("alat cetak pasti akan tersedia"). Konsekuensinya tidak diabaikan tapi **dipindahkan ke alur pemesanan**: halaman ini tidak punya tombol bayar sama sekali — semua CTA ke WhatsApp, dan slot produksi + tanggal dikonfirmasi manual **sebelum ada uang berpindah**. Itu yang menjaga ketiga garansi (sudah jadi klausul S&K §12) tetap bisa ditepati selagi F1.1 & F1.2 diselesaikan. Beranda menautkannya lewat band "Undangan Cetak" setelah tangga harga digital + tautan footer; masuk sitemap.
+  ⚠️ **Yang berubah maknanya:** F1.1 & F1.2 tidak lagi menggerbang *penayangan halaman*, tapi kini menggerbang **penerimaan order pertama** — jangan menyanggupi tanggal ke pemesan sebelum ada percetakan terpilih dan ukuran QR yang terbukti terpindai.
   Empat paket · **tiga garansi tampil di halaman harga**, bukan disembunyikan di FAQ (Rencana Bisnis §11.2 menempatkan ini sebagai penyebab nomor satu closing rate rendah) · Paket Grand sebagai jangkar · **angka penghematan paket vs à la carte ditampilkan eksplisit**.
   Bahasa mengikuti §5.9: jual hasil, bukan gramatur. Spesifikasi teknis di bawah sebagai bukti.
   **Belum ada produk WooCommerce di fase ini** — tombolnya mengarah ke WhatsApp. Pola sudah ada: `page-katalog.php` + `katalog.css`, token tema-01.

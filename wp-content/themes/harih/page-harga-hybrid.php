@@ -6,16 +6,13 @@
  * WooCommerce: semua CTA cetak mengarah ke WhatsApp. Lima order pertama
  * ditutup manual (invoice WA + transfer), sesuai urutan uang F1.
  *
- * ⚠️ GERBANG PUBLIKASI (jangan dilewati): file ini boleh ada di server,
- * tapi HALAMAN WordPress-nya baru dibuat setelah:
- *   1. F1.1 lolos — QR tercetak+laminasi doff terbukti terpindai di ruangan
- *      remang (dasar Garansi QR Terbaca), dan
- *   2. F1.2 selesai — ada percetakan subkontrak terpilih dengan harga tertulis.
- * Menerbitkan janji kartu fisik sebelum barangnya bisa dibuat mengulang
- * kesalahan musik (tercantum berbulan-bulan sebelum ada). Cara publish:
- *   wp post create --post_type=page --post_title='Harga Cetak & Digital' \
- *     --post_name=harga --post_status=publish \
- *     --meta_input='{"_wp_page_template":"page-harga-hybrid.php"}'
+ * DITERBITKAN 2026-08-05 atas keputusan owner (alat cetak dipastikan tersedia),
+ * mendahului gerbang F1.1/F1.2 di rencana. Konsekuensinya dipindahkan ke alur
+ * pemesanan, bukan diabaikan: halaman ini TIDAK punya tombol bayar. Semua CTA
+ * mengarah ke WhatsApp, dan slot produksi + tanggal dikonfirmasi manual
+ * sebelum ada uang berpindah — itu yang menjaga ketiga garansi (yang sudah
+ * jadi klausul S&K §12) tetap bisa ditepati sementara F1.1 (uji pindai QR) &
+ * F1.2 (percetakan terpilih) diselesaikan.
  *
  * Copy mengikuti Rencana Bisnis §5.9: jual HASIL, bukan gramatur — spesifikasi
  * teknis tampil kecil sebagai bukti. Tiga garansi tampil DI HALAMAN INI
@@ -171,7 +168,8 @@ $harih_satuan = [
             <?php endforeach; ?>
 
         </div>
-        <p class="paket-catatan">Harga sudah termasuk desain dari data undangan Anda, proof sebelum cetak, dan <strong>gratis ongkir ke seluruh Indonesia</strong>. Kapasitas produksi terbatas per bulan — tanyakan slot bulan Anda.</p>
+        <p class="paket-catatan">Harga sudah termasuk desain dari data undangan Anda, proof sebelum cetak, dan <strong>gratis ongkir ke seluruh Indonesia</strong>.</p>
+        <p class="paket-catatan paket-slot"><strong>Pemesanan cetak dikonfirmasi lebih dulu lewat WhatsApp.</strong> Kapasitas produksi per bulan terbatas dan pesanan diterima paling lambat H-21 sebelum acara — kami pastikan slot &amp; tanggal Anda aman sebelum ada pembayaran. Itulah yang membuat Garansi Tepat Waktu bisa kami tanda tangani.</p>
     </section>
 
     <section class="proses">

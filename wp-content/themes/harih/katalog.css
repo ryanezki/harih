@@ -348,3 +348,22 @@ h2 { font-size: 1.7rem; text-align: center; margin-bottom: 1.4rem; }
     .garansi-grid { grid-template-columns: repeat(3, 1fr); }
     .paket-grid-hybrid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
 }
+
+/* Jembatan katalog digital → paket cetak (F1.5). Dibedakan latarnya supaya
+   terbaca sebagai penawaran lain, bukan sambungan tangga harga digital. */
+.jembatan-cetak {
+    max-width: 760px;
+    margin: 8px auto 0;
+    padding: 40px 24px 44px;
+    text-align: center;
+    border-top: 1px solid var(--c-line);
+}
+.jembatan-label {
+    font-size: .74rem;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--c-gold);
+    margin-bottom: 10px;
+}
+.jembatan-cetak h2 { margin-bottom: 12px; text-wrap: balance; }
+.jembatan-cetak p { color: var(--c-ink-2); margin-bottom: 22px; }

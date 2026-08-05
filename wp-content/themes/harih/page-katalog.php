@@ -91,7 +91,7 @@ $harih_ada_reseller = (bool) get_page_by_path('jadi-reseller');
 <meta charset="<?php bloginfo('charset'); ?>">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <?php /* Deskripsi SERP (P2.4) — ±155 karakter, memuat kata kunci + harga + kanal */ ?>
-<meta name="description" content="Undangan pernikahan digital yang jadi otomatis dalam hitungan menit dan langsung terkirim ke WhatsApp. Satu tema selaras — RSVP, galeri foto, amplop digital.">
+<meta name="description" content="Undangan pernikahan digital yang jadi otomatis dalam hitungan menit dan langsung terkirim ke WhatsApp — plus kartu undangan fisik ber-QR untuk yang paling Anda hormati.">
 <?php /* Open Graph katalog (T1.14 + P0.3) — reseller membagikan link ini di WA */ ?>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="hariH">
@@ -169,6 +169,16 @@ $harih_ada_reseller = (bool) get_page_by_path('jadi-reseller');
         <p class="paket-catatan">Harga sekali bayar — tanpa biaya tersembunyi. Undangan tetap jadi <strong>instan &amp; otomatis</strong> di semua paket.</p>
     </section>
 
+    <?php /* Jembatan ke paket cetak (F1.5). Sengaja SETELAH tangga digital:
+             pembeli yang datang untuk undangan digital menemukannya sebagai
+             peningkatan, bukan sebagai penghalang di depan pintu. */ ?>
+    <section class="jembatan-cetak">
+        <p class="jembatan-label">Undangan Cetak</p>
+        <h2>Ingin juga kartu fisik untuk orang tua &amp; sesepuh?</h2>
+        <p>Kartu undangan ber-QR: tamu memindainya, undangan digital kalian terbuka. Satu desain, dua wujud — dikerjakan dari data undangan yang sama, gratis ongkir ke seluruh Indonesia.</p>
+        <a class="btn btn-utama" href="<?php echo esc_url(home_url('/harga/')); ?>">Lihat Paket Cetak &amp; Digital</a>
+    </section>
+
     <section class="demo" id="demo">
         <h2>Lihat dulu hasilnya</h2>
         <p>Buka contoh undangan dari HP-mu — persis seperti yang akan diterima tamu. Isi ketiganya sengaja dibuat sama, supaya kamu bisa membandingkan tampilan tiap tema.</p>
@@ -196,6 +206,7 @@ $harih_ada_reseller = (bool) get_page_by_path('jadi-reseller');
         <a href="<?php echo esc_url(home_url('/syarat-ketentuan/')); ?>">Syarat &amp; Ketentuan</a>
         <a href="<?php echo esc_url(home_url('/kebijakan-privasi/')); ?>">Kebijakan Privasi</a>
         <a href="<?php echo esc_url(home_url('/kebijakan-refund/')); ?>">Kebijakan Refund</a>
+        <a href="<?php echo esc_url(home_url('/harga/')); ?>">Paket Cetak</a>
         <?php if ($harih_ada_reseller) : ?><a href="<?php echo esc_url(home_url('/jadi-reseller/')); ?>">Jadi Reseller</a><?php endif; ?>
     </nav>
     <p class="kaki-cc">© <?php echo esc_html(wp_date('Y')); ?> hariH · harih.id</p>
