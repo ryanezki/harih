@@ -73,15 +73,27 @@
         document.body.appendChild(bar);
         onScroll();
     }
+    var heroFoto = document.querySelector('.hero-arch-foto img');
     var rafPending = false;
     function onScroll() {
         if (rafPending) return;
         rafPending = true;
         requestAnimationFrame(function () {
             rafPending = false;
-            if (!progressInner) return;
-            var max = document.documentElement.scrollHeight - window.innerHeight;
-            progressInner.style.transform = 'scaleX(' + (max > 0 ? Math.min(1, window.scrollY / max) : 0) + ')';
+            if (progressInner) {
+                var max = document.documentElement.scrollHeight - window.innerHeight;
+                progressInner.style.transform = 'scaleX(' + (max > 0 ? Math.min(1, window.scrollY / max) : 0) + ')';
+            }
+            // Parallax sangat halus pada foto hero — ken-burns tetap jalan di
+            // dalam wrapper; translate diberikan pada wrapper-nya.
+            if (!reduced && heroFoto) {
+                var wrap = heroFoto.parentElement;
+                var r = wrap.getBoundingClientRect();
+                if (r.bottom > 0 && r.top < window.innerHeight) {
+                    var prog = (window.innerHeight - r.top) / (window.innerHeight + r.height);
+                    heroFoto.style.translate = '0 ' + ((prog - .5) * 30).toFixed(1) + 'px';
+                }
+            }
         });
     }
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -234,6 +246,23 @@
             });
         });
     })();
+
+    /* ---- Tilt 3D kartu rekening & QRIS mengikuti sentuhan (acuan §2.6) ---- */
+    if (!reduced) {
+        document.querySelectorAll('.rekening-item, .qris-kartu').forEach(function (kartu) {
+            kartu.addEventListener('pointermove', function (e) {
+                var r = kartu.getBoundingClientRect();
+                var rx = ((e.clientY - r.top) / r.height - .5) * -7;
+                var ry = ((e.clientX - r.left) / r.width - .5) * 9;
+                kartu.style.transition = 'transform .18s ease';
+                kartu.style.transform = 'perspective(700px) rotateX(' + rx.toFixed(2) + 'deg) rotateY(' + ry.toFixed(2) + 'deg)';
+            });
+            kartu.addEventListener('pointerleave', function () {
+                kartu.style.transition = 'transform .7s cubic-bezier(.2,.6,.2,1)';
+                kartu.style.transform = 'none';
+            });
+        });
+    }
 
     /* ---- Salin rekening ---- */
     document.querySelectorAll('.btn-copy').forEach(function (btn) {

@@ -17,6 +17,8 @@
 @keyframes undangan-shimmer { 0% { background-position: 130% 0; } 100% { background-position: -130% 0; } }
 @keyframes undangan-pulse { 0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--c-gold) 34%, transparent); } 55% { box-shadow: 0 0 0 14px transparent; } }
 @keyframes undangan-spin-pelan { to { transform: rotate(360deg); } }
+@keyframes undangan-shine { 0%, 58% { transform: skewX(-18deg) translateX(-180%); } 88%, 100% { transform: skewX(-18deg) translateX(420%); } }
+@keyframes undangan-fadeup { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
 
 
 :root {
@@ -183,13 +185,17 @@ img { max-width: 100%; }
     text-decoration: none;
     transition: opacity .18s ease, transform .18s ease;
 }
-.btn:hover { opacity: .88; }
+.btn { transition: opacity .18s ease, transform .18s ease, background .4s ease, color .4s ease; }
+.btn:hover { opacity: .92; }
 .btn:active { transform: translateY(1px); }
 .btn-ghost {
     background: transparent;
     color: var(--c-accent);
     box-shadow: inset 0 0 0 1px var(--c-accent);
 }
+.btn-ghost:hover { background: var(--c-accent); color: var(--c-accent-ink); opacity: 1; }
+.btn-copy { transition: background .35s ease, color .35s ease; }
+.btn-copy:hover { background: var(--c-accent); color: var(--c-accent-ink); }
 
 /* ---- 1a. Gate pembuka (standar acuan §2.3) ----
    Overlay layar penuh; scroll terkunci sampai dibuka (body.is-locked sudah
@@ -241,6 +247,14 @@ img { max-width: 100%; }
 }
 .gate.has-photo .gate-inner { text-shadow: 0 1px 12px rgba(0, 0, 0, .55); }
 .gate-bawah { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+/* Entrance gate: tiap elemen naik bergiliran saat halaman dimuat — kesan
+   pertama yang diarahkan, bukan semuanya muncul serentak. */
+.gate-inner > .seal { animation: undangan-fadeup 1.1s .15s both; }
+.gate-bawah > .cover-eyebrow { animation: undangan-fadeup 1.1s .25s both; }
+.gate-bawah > .cover-names { animation: undangan-fadeup 1.1s .45s both; }
+.gate-bawah > .cover-date { animation: undangan-fadeup 1.1s .62s both; }
+.gate-bawah > .gate-tamu { animation: undangan-fadeup 1.1s .8s both; }
+.gate-bawah > .btn-open { animation: undangan-fadeup 1.1s 1s both, undangan-pulse 3.4s 2.6s infinite; }
 .gate .cover-eyebrow { color: var(--cover-ink); opacity: .92; text-shadow: 0 1px 8px rgba(0, 0, 0, .45); }
 
 /* Panel nama tamu — kaca tipis berbingkai hairline (acuan: gate "Kepada Yth.") */
@@ -317,7 +331,7 @@ img { max-width: 100%; }
     padding: 9px 9px 0;
 }
 .hero-arch-foto { border-radius: 999px 999px 0 0; overflow: hidden; height: clamp(300px, 92vw, 400px); }
-.hero-arch-foto img { width: 100%; height: 100%; object-fit: cover; animation: undangan-kenburns2 14s ease-in-out infinite alternate; }
+.hero-arch-foto img { width: 100%; height: calc(100% + 60px); margin-top: -30px; object-fit: cover; animation: undangan-kenburns2 14s ease-in-out infinite alternate; }
 .seal-hero { margin: 26px auto 0; }
 .seal-hero.naik { margin-top: -38px; }
 .seal-hero .seal-teks { background: var(--c-bg); color: var(--c-gold); }
@@ -378,14 +392,23 @@ img { max-width: 100%; }
     background: var(--c-surface);
     border-radius: var(--radius);
     box-shadow: var(--shadow), inset 0 0 0 1px var(--c-line);
-    padding: 26px 24px;
-    margin: 0 0 14px;
+    padding: 34px 26px 30px;
+    margin: 0 0 18px;
 }
-.acara-jenis { font: 500 22px/1.2 var(--font-display); margin: 0 0 12px; color: var(--c-accent); }
+.acara-diamond {
+    display: block;
+    width: 7px;
+    height: 7px;
+    background: var(--c-gold);
+    transform: rotate(45deg);
+    margin: 0 auto 20px;
+}
+.acara-garis { margin: 22px auto; }
+.acara-maps { margin-top: 20px; }
+.acara-jenis { font: italic 500 25px/1.2 var(--font-display); margin: 0 0 12px; color: var(--c-accent); }
 .acara-tanggal { margin: 0; font-weight: 500; }
 .acara-waktu { margin: 4px 0 0; color: var(--c-ink-soft); font-size: 14px; }
-.acara-lokasi { margin: 20px 0 22px; }
-.lokasi-nama { font-weight: 600; margin: 0 0 4px; }
+.lokasi-nama { font: 500 19px/1.4 var(--font-display); margin: 0 0 4px; color: var(--c-ink); }
 .lokasi-alamat { margin: 0; color: var(--c-ink-soft); font-size: 14px; }
 
 /* ---- 6. Galeri ---- */
@@ -447,26 +470,65 @@ img { max-width: 100%; }
 .qris-kartu .t4 { bottom: 10px; right: 10px; border-bottom-width: 1px; border-right-width: 1px; }
 .qris-label { margin: 0; font: 400 11px/1 var(--font-label); letter-spacing: .3em; text-indent: .3em; text-transform: uppercase; color: var(--c-gold); }
 .qris-sub { margin: 10px 0 0; font: italic 400 16px/1.4 var(--font-display); color: var(--c-ink-soft); }
-.qris { position: relative; width: 224px; margin: 26px auto 0; }
+.qris { position: relative; width: 224px; margin: 30px auto 0; }
+.qris::before {
+    content: '';
+    position: absolute;
+    inset: -26px;
+    border: 1px dashed color-mix(in srgb, var(--c-gold) 22%, transparent);
+    border-radius: 50%;
+    animation: undangan-spin-pelan 70s linear infinite;
+    pointer-events: none;
+}
 .qris-diamond { position: absolute; top: -5px; left: 50%; transform: translateX(-50%) rotate(45deg); width: 9px; height: 9px; background: var(--c-gold); z-index: 2; }
 .qris-panel { display: block; background: #f5f1e8; padding: 11px; }
 .qris-panel img { display: block; width: 100%; border: 1px solid rgba(20, 35, 28, .3); padding: 10px; box-sizing: border-box; background: #fff; }
 .qris-cap { margin: 24px 0 0; font: 400 10px/1.6 var(--font-label); letter-spacing: .2em; text-transform: uppercase; color: var(--c-ink-soft); }
 
 
+/* Kartu rekening (acuan: bank card) — permukaan bergradasi halus, cincin
+   hias berputar sangat pelan di sudut, shine sweep periodik, dan tilt 3D
+   mengikuti sentuhan (undangan.js). */
 .rekening-item {
+    position: relative;
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    background: var(--c-surface);
+    gap: 14px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--c-accent) 8%, var(--c-surface)) 0%, var(--c-surface) 55%, color-mix(in srgb, var(--c-gold) 7%, var(--c-surface)) 100%);
     border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 14px 16px;
-    margin-bottom: 10px;
+    box-shadow: var(--shadow), inset 0 0 0 1px color-mix(in srgb, var(--c-gold) 34%, transparent);
+    padding: 24px 20px;
+    margin-bottom: 12px;
     text-align: left;
+    will-change: transform;
 }
-.rekening-teks { font-size: 14px; overflow-wrap: anywhere; }
+.rekening-item::before {
+    content: '';
+    position: absolute;
+    top: -60px;
+    right: -60px;
+    width: 150px;
+    height: 150px;
+    border: 1px dashed color-mix(in srgb, var(--c-gold) 26%, transparent);
+    border-radius: 50%;
+    animation: undangan-spin-pelan 60s linear infinite;
+    pointer-events: none;
+}
+.rekening-item::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 45%;
+    background: linear-gradient(100deg, transparent, color-mix(in srgb, var(--c-gold) 12%, transparent), transparent);
+    transform: skewX(-18deg) translateX(-180%);
+    animation: undangan-shine 5.5s ease-in-out infinite;
+    pointer-events: none;
+}
+.rekening-teks { font: 400 16px/1.6 var(--font-display); letter-spacing: .02em; overflow-wrap: anywhere; position: relative; }
 .btn-copy {
     flex: none;
     border: 0;
@@ -532,7 +594,17 @@ img { max-width: 100%; }
 .penutup { padding-bottom: 96px; }
 .penutup-teks { color: var(--c-ink-soft); font-size: 15px; }
 .penutup-salam { margin: 26px 0 4px; font-size: 14px; color: var(--c-ink-soft); }
-.penutup-nama { font: 500 clamp(28px, 7.4vw, 33px)/1.28 var(--font-display); margin: 0 0 26px; letter-spacing: -.01em; }
+.penutup-nama {
+    font: 500 clamp(28px, 7.4vw, 33px)/1.28 var(--font-display);
+    margin: 0 0 26px;
+    letter-spacing: -.01em;
+    background: linear-gradient(110deg, currentColor 38%, var(--c-gold) 50%, currentColor 62%);
+    background-size: 230% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: undangan-shimmer 7.5s ease-in-out infinite;
+}
 .penutup-cp { margin: 14px 0 0; font-size: 13px; }
 .penutup-cp a { color: var(--c-accent); }
 .credit { margin-top: 56px; font-size: 12px; color: var(--c-ink-soft); }
@@ -646,4 +718,6 @@ img { max-width: 100%; }
     .seal-ring,
     .partikel span { animation: none; }
     .amplop-wrap, .amplop-isi > * { transition: none; }
+    .gate-inner > .seal, .gate-bawah > * { animation: none; opacity: 1; transform: none; }
+    .rekening-item::before, .rekening-item::after, .qris::before, .penutup-nama { animation: none; }
 }

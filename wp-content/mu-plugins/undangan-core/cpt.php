@@ -103,6 +103,11 @@ add_action('init', function () {
         'lokasi_nama'     => 'sanitize_text_field',
         'lokasi_alamat'   => 'sanitize_textarea_field',
         'gmaps_url'       => 'esc_url_raw',
+        // Lokasi AKAD terpisah — di Indonesia akad & resepsi lazim beda tempat.
+        // Kosong = kartu akad tampil tanpa blok lokasi (tidak menebak-nebak).
+        'lokasi_akad_nama'   => 'sanitize_text_field',
+        'lokasi_akad_alamat' => 'sanitize_textarea_field',
+        'gmaps_akad_url'     => 'esc_url_raw',
         'love_story'      => 'sanitize_textarea_field',
         'galeri'          => 'undangan_sanitize_galeri',
         'musik_url'       => 'undangan_sanitize_musik_url',

@@ -35,7 +35,7 @@ VIDEO="https://www.youtube.com/watch?v=M7lc1UVf-VE"
 buat_demo() {
   local slug="$1" tema="$2" judul="$3" pria="$4" wanita="$5" ortu_p="$6" ortu_w="$7" \
         tgl="$8" jam_akad="$9" jam_resepsi="${10}" lokasi="${11}" alamat="${12}" \
-        kisah="${13}" rekening="${14}"
+        kisah="${13}" rekening="${14}" lokasi_akad="${15:-}" alamat_akad="${16:-}"
 
   local id
   id="$(wp post list --post_type=undangan --name="$slug" --post_status=any --field=ID | head -n1)"
@@ -60,6 +60,11 @@ buat_demo() {
   wp post meta update "$id" waktu_resepsi "$jam_resepsi" > /dev/null
   wp post meta update "$id" lokasi_nama "$lokasi"   > /dev/null
   wp post meta update "$id" lokasi_alamat "$alamat" > /dev/null
+  if [ -n "$lokasi_akad" ]; then
+    wp post meta update "$id" lokasi_akad_nama "$lokasi_akad"     > /dev/null
+    wp post meta update "$id" lokasi_akad_alamat "$alamat_akad"   > /dev/null
+    wp post meta update "$id" gmaps_akad_url "https://maps.google.com/?q=$(printf '%s' "$lokasi_akad" | tr ' ' '+')" > /dev/null
+  fi
   wp post meta update "$id" gmaps_url "https://maps.google.com/?q=$(printf '%s' "$lokasi" | tr ' ' '+')" > /dev/null
   wp post meta update "$id" love_story "$kisah"     > /dev/null
   wp post meta update "$id" galeri "$GALERI"        > /dev/null
@@ -79,7 +84,8 @@ buat_demo demo-tema-01 tema-01 'Raka & Sela' \
   2026-09-12 08:00 11:00 \
   'Graha Kencana' 'Jl. Melati No. 12, Bandung' \
   'Kami pertama kali bertemu di sebuah kedai kopi kecil di Bandung, dipertemukan oleh teman yang sama. Empat tahun kemudian, di tempat yang sama, Raka mengajukan pertanyaan paling penting dalam hidupnya — dan Sela menjawab iya.' \
-  'BCA 1234567890 a.n. Raka Pratama'
+  'BCA 1234567890 a.n. Raka Pratama' \
+  'Masjid Al-Ukhuwwah' 'Jl. Wastukencana No. 27, Bandung'
 
 buat_demo demo-tema-02 tema-02 'Bima & Ayu' \
   'Bima Saputra' 'Ayu Lestari' \
@@ -87,7 +93,8 @@ buat_demo demo-tema-02 tema-02 'Bima & Ayu' \
   2026-10-17 09:00 13:00 \
   'Pendopo Senja' 'Jl. Cendana No. 8, Yogyakarta' \
   'Berawal dari satu perjalanan sore ke arah pantai selatan, obrolan kami tidak pernah benar-benar selesai sejak hari itu. Tiga tahun kemudian, di bawah langit senja yang sama, kami memutuskan untuk melanjutkannya seumur hidup.' \
-  'BNI 0987654321 a.n. Bima Saputra'
+  'BNI 0987654321 a.n. Bima Saputra' \
+  'Masjid Gedhe Kauman' 'Jl. Kauman, Ngupasan, Yogyakarta'
 
 buat_demo demo-tema-03 tema-03 'Damar & Kirana' \
   'Damar Wicaksono' 'Kirana Maheswari' \
@@ -95,7 +102,8 @@ buat_demo demo-tema-03 tema-03 'Damar & Kirana' \
   2026-11-21 08:30 19:00 \
   'Balai Kartini' 'Jl. Gatot Subroto No. 37, Jakarta Selatan' \
   'Kami bertemu saat sama-sama bertahan di kantor sampai larut. Dari obrolan tentang langit malam Jakarta yang nyaris tak berbintang, tumbuh kebiasaan pulang bersama — lalu rencana yang jauh lebih panjang dari sekadar perjalanan pulang.' \
-  'Mandiri 1122334455 a.n. Damar Wicaksono'
+  'Mandiri 1122334455 a.n. Damar Wicaksono' \
+  'Masjid Agung Al-Azhar' 'Jl. Sisingamangaraja, Kebayoran Baru, Jakarta Selatan'
 
 wp litespeed-purge all > /dev/null 2>&1 || true
 

@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) exit;
  * pengunjung & LiteSpeed tetap menyajikan berkas lama meski file di server
  * sudah baru, dan perbaikan tampilan terlihat "tidak berpengaruh".
  */
-const HARIH_VERSION = '0.9.0';
+const HARIH_VERSION = '1.0.1';
 
 add_action('after_setup_theme', function () {
     add_theme_support('title-tag');

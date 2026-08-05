@@ -114,6 +114,12 @@ $webhook = harih_form_webhook_url();
                     <label class="field"><span>Tanggal akad</span><input type="date" name="tanggal_akad"></label>
                     <label class="field"><span>Waktu akad</span><input type="time" name="waktu_akad"></label>
                 </div>
+                <label class="field"><span>Nama lokasi akad <em class="opsional">(kosongkan bila sama dengan resepsi)</em></span>
+                    <input type="text" name="lokasi_akad_nama" maxlength="150" placeholder="mis. Masjid Agung"></label>
+                <label class="field"><span>Alamat lokasi akad</span>
+                    <textarea name="lokasi_akad_alamat" rows="2" maxlength="300" placeholder="alamat lokasi akad (bila beda)"></textarea></label>
+                <label class="field"><span>Link Google Maps akad</span>
+                    <input type="url" name="gmaps_akad_url" maxlength="300" inputmode="url" placeholder="https://maps.app.goo.gl/…"></label>
                 <div class="row-2">
                     <label class="field"><span>Tanggal resepsi *</span><input type="date" name="tanggal_resepsi" required></label>
                     <label class="field"><span>Waktu resepsi *</span><input type="time" name="waktu_resepsi" required></label>

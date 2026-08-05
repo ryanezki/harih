@@ -15,6 +15,8 @@
 
 **Alur WF-01:** verifikasi signature HMAC + handle ping WC → ambil detail order via WC REST (topic *Action* hanya mengirim `order_id`) → terima status `processing`/`completed` → generate token form (identik `page-isi-data.php`) → append tab `orders` lalu **baca ulang untuk verifikasi idempotency** (baris duplikat dihapus otomatis) → catat komisi 30% bila kupon `RES-` → email Brevo → cek nomor via WAHA `check-exists` → kirim WA → catat `wa_status`.
 
+**Field lokasi akad (2026-08-06):** WF-02 meneruskan `lokasi_akad_nama`, `lokasi_akad_alamat`, `gmaps_akad_url` dari form ke meta post — akad & resepsi lazim beda tempat. JSON repo kini membawa **id workflow live** (`XLtEUPxG3aeI48IP`) supaya `import:workflow` menimpa, bukan menduplikasi; setelah import: `publish:workflow --id=…` lalu **restart container** (import menonaktifkan workflow dan butuh restart agar aktif kembali).
+
 **Alur WF-02:** verifikasi token → lookup status di sheet (`MENUNGGU_DATA` lanjut; `DIPROSES` → 409; `SUDAH_JADI` → 200 + link lama; tak ada → 404) → **validasi file server-side** (max 10, mime jpeg/png/webp, ≤ 2 MB — T2.19) → **respond 200 lebih dulu** lalu set `DIPROSES` (T2.17) → upload foto+QRIS ke `wp/v2/media` → publish post `undangan` (paket & tema di-enforce dari **sheet**, bukan form — T2.18; paket hemat: file & field galeri/amplop/video diabaikan) → QR qrserver (gagal ≠ fatal) → email delivery + lampiran QR → WA teks+link (T2.21) → update baris `SUDAH_JADI` + `link_undangan` + `tgl_acara` + `mempelai` → order WC `completed`.
 
 **Alur WF-03 (dua webhook dalam satu workflow):**
