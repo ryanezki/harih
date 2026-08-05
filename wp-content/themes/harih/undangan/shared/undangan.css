@@ -619,9 +619,23 @@ img { max-width: 100%; }
 }
 
 .acara-maps { margin-top: 20px; }
-.acara-jenis { font: italic 500 25px/1.2 var(--font-display); margin: 0 0 12px; color: var(--c-accent); }
-.acara-tanggal { margin: 0; font-weight: 500; }
-.acara-waktu { margin: 4px 0 0; color: var(--c-ink-soft); font-size: 14px; }
+/* Hierarki kartu acara. Sebelumnya tanggal memakai ukuran teks biasa dan jam
+   hanya 14px — lebih kecil dari nama gedung (19px), padahal pertanyaan pertama
+   penerima undangan setelah "siapa" adalah "kapan": itu yang menentukan ia bisa
+   hadir atau tidak (temuan owner 2026-08-05). Tanggal kini memimpin kartu. */
+.acara-jenis { font: italic 500 22px/1.2 var(--font-display); margin: 0 0 14px; color: var(--c-accent); }
+.acara-tanggal {
+    margin: 0;
+    font: 500 clamp(20px, 5.4vw, 25px)/1.3 var(--font-display);
+    color: var(--c-ink);
+    text-wrap: balance;
+}
+.acara-waktu {
+    margin: 10px 0 0;
+    font: 400 17px/1.3 var(--font-label, var(--font-body));
+    letter-spacing: .1em;
+    color: var(--c-ink);
+}
 .lokasi-nama { font: 500 19px/1.4 var(--font-display); margin: 0 0 4px; color: var(--c-ink); }
 .lokasi-alamat { margin: 0; color: var(--c-ink-soft); font-size: 14px; }
 

@@ -110,12 +110,16 @@ $undangan = [
 <?php
 get_template_part('template-parts/undangan/cover', null, $undangan);
 get_template_part('template-parts/undangan/salam', null, $undangan);
-get_template_part('template-parts/undangan/countdown', null, $undangan);
 get_template_part('template-parts/undangan/mempelai', null, $undangan);
 if (trim($undangan['turut_mengundang']) !== '') {
     get_template_part('template-parts/undangan/turut', null, $undangan);
 }
 get_template_part('template-parts/undangan/acara', null, $undangan);
+// Countdown SESUDAH acara (temuan owner 2026-08-05): salam ditutup kalimat
+// "…mengundang Bapak/Ibu/Saudara/i pada pernikahan kami:" — titik dua itu
+// menjanjikan nama mempelai, bukan angka hitung mundur. Urutan yang nyambung:
+// salam → siapa (mempelai) → kapan & di mana (acara) → tinggal berapa hari.
+get_template_part('template-parts/undangan/countdown', null, $undangan);
 
 if ($plus && $undangan['love_story'] !== '') {
     get_template_part('template-parts/undangan/love-story', null, $undangan);
