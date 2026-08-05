@@ -297,7 +297,11 @@
 
 - [ ] **F4.5** **Proof + persetujuan ber-hash** — render preview, wajib disetujui sebelum masuk antrean, **simpan timestamp + hash file yang disetujui**. Tanpa tahap ini setiap typo jadi biaya perusahaan; dengan tahap ini, pembagian tanggung jawab di S&K punya bukti.
 
-- [ ] **F4.6** **Deadline H-21 + kuota musiman di checkout** — order yang tidak mungkin dikejar **ditolak otomatis**, bukan dinegosiasikan belakangan. Buffer 7 hari antara deadline internal (H-21) dan janji ke pelanggan (H-14) itulah yang membiayai Garansi Tepat Waktu. Tampilkan sisa slot jujur.
+- [x] **F4.6** **Deadline H-21 + kuota bulanan di checkout** → **SELESAI & LIVE 2026-08-06** *(dikerjakan mendahului urutan F4)*
+  **Kenapa didahulukan:** dua janji di S&K §12 sudah mengikat sejak halaman harga tayang. Order yang mustahil dikerjakan harus ditolak **sebelum uang berpindah** — menolak sesudah dibayar berarti refund, dan refund atas order Rp 2,9 juta bukan kerugian kecil.
+  **Yang dibangun:** field **tanggal acara di checkout** khusus keranjang berisi cetak (Additional Checkout Fields API, WooCommerce 10.9) — pesanan digital tidak terpengaruh, tanggalnya tetap diisi belakangan di `/isi-data/` karena di sana tidak ada tenggat produksi · **tenggat H-21** ditegakkan di **Store API** (jalur yang benar-benar dipakai checkout blok) + jalur klasik sebagai cadangan · **kuota 8 pesanan cetak/bulan** dihitung dari order berjalan, dan kuota penuh diberitahukan **sejak di keranjang** — bukan setelah pembeli mengisi alamat dan memilih pembayaran · tanggal acara + sisa hari tampil di halaman order bersebelahan dengan resi.
+  **Diuji end-to-end lewat Store API sungguhan:** acara 10 hari lagi → ditolak (pesannya menyebut Garansi H-14 secara eksplisit) · tanggal kosong → ditolak · format salah → ditolak · tanggal sah → lolos gerbang. Order draft sisa uji dibersihkan.
+  *Sisa yang belum:* menampilkan **sisa slot** secara jujur di halaman harga (sekarang hanya disebut "kuota terbatas") — menunggu F1.7a memastikan angka 8 memang realistis.
   ⚠️ **Kuota per bulan musim, bukan rata.** Pernikahan Indonesia menumpuk di bulan tertentu; kapasitas 20/bulan yang laku hanya 5 bulan setahun = **±100 order setahun, bukan 240**. Proyeksi 20×12 akan meleset jauh.
 
 - [ ] **F4.7** **Antrean produksi** — diurutkan berdasarkan **deadline, bukan tanggal order**; batch dikelompokkan berdasarkan **bahan & finishing, bukan per pelanggan**.
