@@ -31,22 +31,23 @@ function undangan_is_valid_wa(string $normalized): bool {
 // mematikan pipeline order; jaring pengaman lain: WF rekonsiliasi (T3.12).
 add_filter('woocommerce_max_webhook_delivery_failures', fn() => 25);
 
-// T1.16 — semua produk toko ini adalah paket undangan: selalu dijual satuan
-// (qty 2 = bayar 2× tapi hanya dapat 1 token/undangan).
+// T1.16 — paket undangan dijual satuan (qty 2 = bayar 2× tapi hanya dapat 1
+// token/undangan). SEJAK F3.4 aturan ini DIPERLONGGAR di `cetak.php` untuk SKU
+// `SATUAN-*` (à la carte memang dijual per pcs) — jangan menghapus filter ini,
+// pengecualiannya dipasang di sana dengan prioritas lebih tinggi.
 add_filter('woocommerce_is_sold_individually', '__return_true');
 
-// T1.17 — 1 order = 1 paket: menambah paket lain MENGGANTI isi cart, bukan menumpuk.
-add_filter('woocommerce_add_to_cart_validation', function ($passed) {
-    if ($passed && function_exists('WC') && WC()->cart && !WC()->cart->is_empty()) {
-        WC()->cart->empty_cart();
-    }
-    return $passed;
-});
+// T1.17 — 1 order = 1 paket. SEJAK F3.5 pengosongan cart dipindah ke
+// `cetak.php` supaya selektif: paket saling menggantikan, item satuan
+// menumpuk. Tanpa itu cetak + digital tidak mungkin satu keranjang.
 
 // T1.17 — checkout ramping untuk produk virtual: nama + email + WhatsApp saja.
 // Checkout default meminta alamat lengkap dan menjatuhkan konversi mobile.
 // CATATAN: bila plugin Duitku ternyata membutuhkan field tertentu, kembalikan
 // field itu di sini (verifikasi saat uji sandbox T1.18).
+// SEJAK F3.6: `cetak.php` MENGEMBALIKAN field alamat (prioritas 20, jalan
+// sesudah filter ini) bila keranjang memuat barang fisik. Checkout ramping
+// tetap jadi jalur default produk digital.
 add_filter('woocommerce_checkout_fields', function ($fields) {
     unset(
         $fields['billing']['billing_company'],

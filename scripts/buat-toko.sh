@@ -121,3 +121,98 @@ echo "   checkout end-to-end dari HP."
 echo "4) Ajukan review merchant production Duitku (T0.11) setelah katalog"
 echo "   + halaman legal live."
 echo "================================================================"
+
+# =============================================================================
+# F3.1 · F3.7 · F3.9 — produk CETAK (fisik) + kategori + pengiriman.
+# Dijalankan ulang aman: semuanya dicek by slug/SKU lebih dulu.
+#
+# Konvensi SKU adalah sumber kebenaran jenis produk (dipakai mu-plugin cetak.php
+# DAN WF-01 yang hanya melihat payload REST):
+#   HARIH-*  digital · CETAK-* paket hybrid · SATUAN-* à la carte · UPG-* upgrade
+# =============================================================================
+
+echo "== F3.1. Kategori produk =="
+buat_kategori() {
+  local slug="$1" nama="$2" ada
+  ada="$(wp term list product_cat --slug="$slug" --field=term_id | head -n1)"
+  if [ -n "$ada" ]; then echo "  - kategori $slug sudah ada (ID $ada)"; return; fi
+  wp term create product_cat "$nama" --slug="$slug" --porcelain > /dev/null
+  echo "  - kategori $slug dibuat"
+}
+buat_kategori digital 'Undangan Digital'
+buat_kategori cetak   'Cetak & Hybrid'
+
+# Produk digital lama masuk kategori `digital` — dasar pembatasan kupon RES-.
+# `--categories` HANYA menerima ID (slug memicu "Undefined array key id").
+TERM_DIGITAL="$(wp term list product_cat --slug=digital --field=term_id | head -n1)"
+TERM_CETAK="$(wp term list product_cat --slug=cetak --field=term_id | head -n1)"
+for sku in HARIH-HEMAT HARIH-FAVORIT HARIH-PREMIUM; do
+  pid="$(wp wc product list --user="$ADMIN" --sku="$sku" --field=id | head -n1)"
+  [ -n "$pid" ] && wp wc product update "$pid" --user="$ADMIN" --categories="[{\"id\":$TERM_DIGITAL}]" > /dev/null 2>&1 && echo "  - $sku → kategori digital"
+done
+
+echo "== F3.9. Paket hybrid (fisik, butuh pengiriman) =="
+# WAJIB non-virtual: `virtual=true` membuat WooCommerce menganggap order tidak
+# perlu dikirim, sehingga field alamat & metode pengiriman tidak pernah muncul.
+buat_produk_cetak() {
+  local sku="$1" nama="$2" harga="$3" berat="$4" singkat="$5" deskripsi="$6"
+  local ada
+  ada="$(wp wc product list --user="$ADMIN" --sku="$sku" --field=id | head -n1)"
+  if [ -n "$ada" ]; then echo "  - $sku sudah ada (ID $ada) — lewati"; return; fi
+  local id
+  id="$(wp wc product create --user="$ADMIN" --porcelain \
+    --name="$nama" --type=simple --sku="$sku" --regular_price="$harga" \
+    --virtual=false --sold_individually=true --catalog_visibility=visible \
+    --weight="$berat" --categories="[{\"id\":$TERM_CETAK}]" \
+    --short_description="$singkat" --description="$deskripsi")"
+  echo "  - $sku dibuat (ID $id) — $nama @ Rp $harga"
+}
+
+buat_produk_cetak CETAK-HORMAT 'Paket Hormat — Digital + 150 Kartu QR' 1190000 2 \
+  'Undangan digital lengkap + 150 kartu undangan fisik ber-QR + 100 stiker segel. Gratis ongkir se-Indonesia.' \
+  '<ul><li>Undangan digital lengkap (setara paket Premium)</li><li>150 kartu undangan fisik ber-QR — tamu memindai, undangan digital terbuka</li><li>100 stiker segel amplop</li><li>Art carton 260gsm, laminasi doff, uji pindai per batch</li><li>Proof disetujui dulu, baru dicetak</li><li>Gratis ongkir ke seluruh Indonesia</li></ul><p>Pesanan diterima paling lambat H-21 sebelum acara.</p>'
+
+buat_produk_cetak CETAK-RESEPSI 'Paket Resepsi — Digital + Kartu QR + Souvenir' 2900000 5 \
+  'Undangan digital custom + 150 kartu QR + 200 label souvenir + 100 kartu terima kasih + 100 stiker segel.' \
+  '<ul><li>Undangan digital custom</li><li>150 kartu undangan fisik ber-QR</li><li>200 label souvenir bernama &amp; bertanggal</li><li>100 kartu terima kasih</li><li>100 stiker segel amplop</li><li>Proof disetujui dulu, baru dicetak</li><li>Gratis ongkir ke seluruh Indonesia</li></ul><p>Pesanan diterima paling lambat H-21 sebelum acara.</p>'
+
+buat_produk_cetak CETAK-GRAND 'Paket Grand — Digital + Set Lengkap Resepsi Besar' 5900000 9 \
+  'Untuk resepsi besar berpanitia: 200 kartu QR holographic, 300 label souvenir, 300 kupon, hangtag, label seserahan, 15 ID card panitia.' \
+  '<ul><li>Undangan digital custom</li><li>200 kartu undangan ber-QR holographic</li><li>300 label souvenir + 300 kupon souvenir</li><li>150 hangtag + tali</li><li>Set label seserahan</li><li>15 ID card PVC panitia</li><li>Proof disetujui dulu, baru dicetak</li><li>Gratis ongkir ke seluruh Indonesia</li></ul><p>Pesanan diterima paling lambat H-21 sebelum acara.</p>'
+
+echo "== F3.7. Pengiriman: satu metode gratis se-Indonesia =="
+# Keputusan terkunci: TIDAK ada zona per wilayah. Ongkir sudah dialokasikan
+# Rp 150rb di dalam harga paket; menambah zona hanya menambah gesekan checkout.
+# Alamat DASAR toko. Sampai F3 nilainya masih bawaan instalasi (US:CA) dan itu
+# tidak pernah terasa selama semua produk virtual — tanpa pengiriman, negara
+# basis tidak dipakai. Begitu ada barang fisik, akibatnya fatal: zona kirim
+# Indonesia tidak pernah cocok dan checkout menjawab "No shipping options are
+# available for this address", bahkan metode pembayaran ikut hilang.
+wp option update woocommerce_default_country 'ID:JK' > /dev/null
+wp option update woocommerce_store_city 'Jakarta Selatan' > /dev/null
+wp option update woocommerce_currency IDR > /dev/null
+# Pengunjung dimulai dari alamat basis (Indonesia), bukan geolokasi: toko ini
+# hanya mengirim ke Indonesia, dan geolokasi keliru = pembeli melihat "tidak
+# ada metode pengiriman" sebelum sempat mengisi alamatnya.
+wp option update woocommerce_default_customer_address base > /dev/null
+
+wp option update woocommerce_ship_to_countries specific > /dev/null
+wp option update woocommerce_specific_ship_to_countries '["ID"]' --format=json > /dev/null
+wp option update woocommerce_default_customer_address geolocation > /dev/null
+
+ZONA_ID="$(wp wc shipping_zone list --user="$ADMIN" --fields=id,name --format=csv 2>/dev/null | awk -F, '$2 ~ /Indonesia/ {print $1; exit}')"
+if [ -z "$ZONA_ID" ]; then
+  ZONA_ID="$(wp wc shipping_zone create --user="$ADMIN" --name=Indonesia --order=1 --porcelain)"
+  wp wc shipping_zone_method create "$ZONA_ID" --user="$ADMIN" --method_id=free_shipping \
+    --settings='{"title":"Gratis ongkir ke seluruh Indonesia"}' > /dev/null
+  echo "  - zona Indonesia + metode gratis ongkir dibuat (zona $ZONA_ID)"
+else
+  echo "  - zona Indonesia sudah ada (zona $ZONA_ID)"
+fi
+# `wp wc shipping_zone_location` hanya punya subcommand `list` — lokasi zona
+# harus di-set lewat API kelas WC, bukan CLI.
+wp eval "
+\$z = new WC_Shipping_Zone($ZONA_ID);
+if (!\$z->get_zone_locations()) { \$z->set_locations([['code' => 'ID', 'type' => 'country']]); \$z->save(); }
+" > /dev/null
+echo "  - lokasi zona: Indonesia (country=ID)"

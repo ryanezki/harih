@@ -221,35 +221,48 @@
 
 ## F3 — Masukkan ke WooCommerce *baru setelah harga terbukti laku*
 
+**Dikerjakan 2026-08-06.** Ringkasan hasil + tiga temuan yang tidak terduga:
+
+- **F3.1** kategori `digital`/`cetak` dibuat & dipasang ke 6 produk; kupon `RES-` dijaga **di kode** (`cetak.php`), bukan hanya di pengaturan kupon — guard berlaku otomatis untuk semua kupon berawalan `RES-`, jadi kebocoran Rp 870rb/order tidak bisa terjadi karena lupa mencentang kategori.
+- **F3.4/F3.5** `sold_individually` & pengosongan cart jadi kondisional lewat **konvensi SKU** (`HARIH-` digital · `CETAK-` hybrid · `SATUAN-` à la carte · `UPG-` upgrade). Paket saling menggantikan (1 order = 1 undangan), item satuan menumpuk & bebas kuantitas.
+- **F3.6** ⚠️ **Temuan besar:** halaman checkout memakai **blok `woocommerce/checkout`**, bukan shortcode klasik — sehingga filter `woocommerce_checkout_fields` (T1.17) **tidak pernah berlaku**: pembeli undangan Rp 99rb selama ini tetap dimintai alamat lengkap dari HP. Diperbaiki lewat jalur yang dihormati Blocks (`woocommerce_get_country_locale`, `hidden`+`required=false` saat keranjang tanpa barang fisik). Terverifikasi di browser: cart digital = email, nama, WA saja; cart cetak = alamat lengkap + pilihan pengiriman.
+- **F3.7** ⚠️ **Temuan kedua:** alamat dasar toko masih `US:CA` bawaan instalasi. Tidak pernah terasa selama produk virtual, tapi untuk barang fisik zona Indonesia tidak pernah cocok → *"No shipping options are available"* dan metode pembayaran ikut hilang. Diperbaiki jadi `ID:JK`, `default_customer_address=base`, zona Indonesia + gratis ongkir.
+- **F3.2/F3.3** WF-01 kini membaca **SKU**, bukan nama line item. Paket hybrid → tier **premium** (menutup bug pembeli Rp 2,9 jt menerima undangan Hemat), order à la carte murni → `jenis_order=cetak_saja` sehingga **tidak dikirimi link isi data** (pesan WA/email diganti "tim akan menghubungi untuk proof & jadwal"), komisi dihitung **per jenis**: digital 30%, hybrid rupiah tetap 150/300/500rb, satuan 0. Diuji 7 skenario di dalam container n8n sebelum dipasang.
+  *Catatan penyimpangan:* baris di sheet `orders` **tetap dibuat** untuk order cetak murni (rencana awal: tidak dibuat) — barisnya berguna sebagai catatan operasional dan menjaga logika dedup tetap utuh; kolom `paket` ditandai `cetak` supaya tidak pernah disalahartikan sebagai undangan yang menunggu data.
+- **F3.8** field kurir + nomor resi di halaman order (HPOS-aman) + kolom Resi di daftar pesanan.
+- **F3.9** 3 paket hybrid dibuat sebagai produk fisik (CETAK-HORMAT/RESEPSI/GRAND, non-virtual, berbobot, kategori `cetak`). **Sisa:** 3 SKU `UPG-*` menunggu keputusan harga & kredit di **F1.3**.
+- ⚠️ **Temuan ketiga (dicatat, bukan bug baru):** `id` workflow tidak ada di JSON WF-01 sehingga `n8n import` gagal `SQLITE_CONSTRAINT`. Kini di-bake seperti WF-02.
+
+
 *Semua penghalang arsitektur yang ditemukan pada audit 2026-08-05 ditangani di fase ini.*
 
 - [ ] **F3.1** **Kategori produk `digital` & `cetak` + batasi kupon `RES-` ke digital**
   **Wajib sebelum produk cetak pertama masuk WooCommerce.** Kupon `RES-` yang sudah beredar mengikat 30% ke **seluruh nilai order**; begitu produk cetak jadi produk biasa, kupon itu otomatis berlaku ke sana — Rp 870.000 pada order Rp 2,9 juta, bocor tanpa pernah diputuskan.
   Saat ini di server hanya ada satu kategori (`Uncategorized`, 3 produk), jadi tidak ada tempat menggantungkan pembatasan. Kategori dibuat lebih dulu.
 
-- [ ] **F3.2** **WF-01: kenali jenis order** — *menutup bug tier*
+- [x] **F3.2** **WF-01: kenali jenis order** — *menutup bug tier*
   WF-01 mendeteksi paket dengan `['hemat','favorit','premium'].find(p => namaItem.includes(p))`. Nama paket hybrid — *Hormat, Resepsi, Grand* — tidak memuat satu pun kata itu, jadi `paket` = `''` dan WF-02 jatuh ke fallback teraman **`hemat`**. Akibatnya **pembeli Paket Resepsi Rp 2,9 juta menerima undangan paket Hemat**: tanpa galeri, tanpa amplop, masa aktif H+7.
   Sekaligus: order cetak murni (à la carte) tidak boleh dikirimi link form isi data dan tidak boleh membuat baris `orders` baru — pelanggannya sudah punya undangan.
 
-- [ ] **F3.3** **WF-01: komisi per jenis produk**
+- [x] **F3.3** **WF-01: komisi per jenis produk**
   Sekarang `dasarKomisi × 0.3` tanpa syarat. Ubah: 30% hanya untuk line item **digital**; produk fisik memakai tabel rupiah tetap (150/300/500rb).
 
-- [ ] **F3.4** **`sold_individually` jadi kondisional per produk**
+- [x] **F3.4** **`sold_individually` jadi kondisional per produk**
   Sekarang `add_filter('woocommerce_is_sold_individually', '__return_true')` berlaku **global**. Kuantitas terkunci di 1 — à la carte 100 pcs tidak mungkin dipesan. Digital tetap satuan; produk cetak bebas kuantitas.
 
-- [ ] **F3.5** **Pengosongan cart jadi kondisional**
+- [x] **F3.5** **Pengosongan cart jadi kondisional**
   `woocommerce_add_to_cart_validation` sekarang **mengosongkan cart** setiap penambahan produk. Aturan "1 order = 1 paket" hanya boleh berlaku antar produk digital, supaya digital + cetak bisa berada di satu keranjang.
 
-- [ ] **F3.6** **Alamat + `shipping_*` muncul hanya bila cart memuat produk fisik**
+- [x] **F3.6** **Alamat + `shipping_*` muncul hanya bila cart memuat produk fisik**
   `billing_address_1/2`, `city`, `state`, `postcode`, `country` semuanya di-`unset` sekarang — **tidak ada alamat kirim di mana pun**. Kembalikan **hanya** saat ada barang fisik di keranjang, supaya checkout digital tetap seramping sekarang (itu yang menjaga konversi mobile).
 
-- [ ] **F3.7** **Satu metode pengiriman: gratis se-Indonesia**
+- [x] **F3.7** **Satu metode pengiriman: gratis se-Indonesia**
   Di server sekarang hanya ada zona fallback dan `ship_to_countries` kosong. Rencana zona **dibatalkan** — satu metode free shipping, dan "gratis ongkir se-Indonesia" dipakai sebagai nilai jual di halaman harga.
 
-- [ ] **F3.8** **Field & pencatatan nomor resi**
+- [x] **F3.8** **Field & pencatatan nomor resi**
   Wajib per keputusan owner. Disimpan di order + ikut ke sheet, dan dikirimkan ke pelanggan saat paket berangkat.
 
-- [ ] **F3.9** **Produk cetak + 3 SKU upgrade di WooCommerce** — harga dari F1.3
+- [~] **F3.9** **Produk cetak + 3 SKU upgrade di WooCommerce** — harga dari F1.3
 
 - [ ] **F3.10** **Halaman upsell pasca-bayar**
   Bertoken seperti `/isi-data/` · **hitung mundur kredit 14 hari tampil** — tanpa batas waktu tidak ada alasan memutuskan hari ini · **à la carte dilarang muncul di halaman ini**.
