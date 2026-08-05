@@ -185,3 +185,15 @@ Sudah otomatis, jangan dikerjakan manual:
 - Menangkap order yang lolos dari webhook → WF-08 rekonsiliasi, maksimal tertunda 15 menit
 
 Kalau salah satu di atas ternyata **tidak** jalan, itu insiden — lihat runbook, jangan dikerjakan manual diam-diam.
+
+## Menunjukkan pilihan agama ke calon pemesan
+
+Nuansa keagamaan (**Islam · Kristen · Katolik · Hindu · Buddha · Konghucu · tanpa unsur agama**) **tidak melekat pada tema** — keduanya dua setelan terpisah, jadi tema mana pun bisa dipasangkan dengan nuansa mana pun. Undangan demo sengaja memakai nuansa yang sama supaya yang terbandingkan hanyalah temanya.
+
+Untuk memperlihatkan nuansa lain pada tema mana pun, tambahkan `?nuansa=` di belakang link demo:
+
+- `https://harih.id/u/demo-tema-01/?nuansa=kristen`
+- `https://harih.id/u/demo-tema-03/?nuansa=hindu`
+- `https://harih.id/u/demo-tema-02/?nuansa=umum` (tanpa unsur agama)
+
+Nilai yang tersedia: `islam`, `kristen`, `katolik`, `hindu`, `buddha`, `konghucu`, `umum`. Parameter ini **hanya bekerja pada undangan demo** — undangan pelanggan tidak bisa diubah lewat URL.

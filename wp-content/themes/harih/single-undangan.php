@@ -27,6 +27,14 @@ $nuansa = $m('nuansa');
 if ($nuansa === '' || !array_key_exists($nuansa, harih_nuansa_daftar())) {
     $nuansa = $m('salam_islami') === '0' ? 'umum' : 'islam';
 }
+// Pratinjau silang tema × nuansa pada undangan DEMO saja: `?nuansa=kristen`
+// dst. Nuansa dan tema memang dua meta terpisah — ini membuat kemandiriannya
+// bisa dilihat sendiri oleh calon pemesan, tanpa perlu membuat 21 demo.
+// Dibatasi ke demo supaya undangan pelanggan tidak bisa diubah lewat URL.
+if (isset($_GET['nuansa']) && $m('order_id') === 'demo') {
+    $pratinjau = sanitize_key(wp_unslash($_GET['nuansa']));
+    if (array_key_exists($pratinjau, harih_nuansa_daftar())) $nuansa = $pratinjau;
+}
 $nuansa_teks = harih_nuansa_teks($nuansa);
 // Penimpa per undangan (CS) — kosong = pakai bawaan nuansa.
 if ($m('salam_teks')  !== '') $nuansa_teks['salam']  = esc_html($m('salam_teks'));

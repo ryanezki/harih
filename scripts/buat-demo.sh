@@ -93,6 +93,12 @@ Jl. Kenanga No. 5, Kebayoran Baru, Jakarta Selatan 12120
 18.30 Penyambutan tamu
 19.00 Resepsi & jamuan
 21.00 Penutupan" > /dev/null
+  # Nuansa keagamaan SENGAJA sama di ketiga demo — sama seperti isi lainnya.
+  # Demo dipakai membandingkan TEMA; kalau tiap demo beda agama, pengunjung
+  # menyangka pilihan agama melekat pada tema tertentu (padahal `nuansa` dan
+  # `template_id` dua meta yang saling bebas). Untuk memperlihatkan nuansa
+  # lain pada tema mana pun: tambahkan `?nuansa=kristen` (dst.) di URL demo.
+  wp post meta update "$id" nuansa islam > /dev/null
   wp post meta update "$id" catatan_lokasi "Valet tersedia di lobi utama · parkir basement P1-P2" > /dev/null
   if [ -n "$lokasi_akad" ]; then
     wp post meta update "$id" catatan_lokasi_akad "Parkir di halaman masjid · masuk lewat pintu utama" > /dev/null
