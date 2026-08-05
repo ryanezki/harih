@@ -68,6 +68,7 @@ $undangan = [
 <main class="undangan" id="top">
 <?php
 get_template_part('template-parts/undangan/cover', null, $undangan);
+get_template_part('template-parts/undangan/salam', null, $undangan);
 get_template_part('template-parts/undangan/countdown', null, $undangan);
 get_template_part('template-parts/undangan/mempelai', null, $undangan);
 get_template_part('template-parts/undangan/acara', null, $undangan);

@@ -73,7 +73,8 @@
         document.body.appendChild(bar);
         onScroll();
     }
-    var heroFoto = document.querySelector('.hero-arch-foto img');
+    var parallaxEls = [];
+    document.querySelectorAll('.hero-arch-foto img, [data-parallax]').forEach(function (el) { parallaxEls.push(el); });
     var rafPending = false;
     function onScroll() {
         if (rafPending) return;
@@ -84,15 +85,16 @@
                 var max = document.documentElement.scrollHeight - window.innerHeight;
                 progressInner.style.transform = 'scaleX(' + (max > 0 ? Math.min(1, window.scrollY / max) : 0) + ')';
             }
-            // Parallax sangat halus pada foto hero — ken-burns tetap jalan di
-            // dalam wrapper; translate diberikan pada wrapper-nya.
-            if (!reduced && heroFoto) {
-                var wrap = heroFoto.parentElement;
-                var r = wrap.getBoundingClientRect();
-                if (r.bottom > 0 && r.top < window.innerHeight) {
+            // Parallax halus: hero arch + foto kisah ([data-parallax=px]).
+            if (!reduced) {
+                parallaxEls.forEach(function (el) {
+                    var wrap = el.parentElement;
+                    var r = wrap.getBoundingClientRect();
+                    if (r.bottom < 0 || r.top > window.innerHeight) return;
+                    var kuat = parseFloat(el.getAttribute('data-parallax')) || 30;
                     var prog = (window.innerHeight - r.top) / (window.innerHeight + r.height);
-                    heroFoto.style.translate = '0 ' + ((prog - .5) * 30).toFixed(1) + 'px';
-                }
+                    el.style.translate = '0 ' + ((prog - .5) * kuat).toFixed(1) + 'px';
+                });
             }
         });
     }
@@ -199,9 +201,57 @@
         });
     }
 
+    /* ---- Slider galeri: dots tersinkron dengan posisi geser ---- */
+    (function () {
+        var slider = $('#galeri-slider');
+        var dotsWrap = $('#galeri-dots');
+        if (!slider || !dotsWrap) return;
+        var slides = slider.querySelectorAll('.galeri-slide');
+        if (slides.length < 2) { dotsWrap.hidden = true; return; }
+        var dots = [];
+        slides.forEach(function (_, i) {
+            var b = document.createElement('button');
+            b.type = 'button';
+            b.setAttribute('aria-label', 'Foto ' + (i + 1));
+            if (i === 0) b.classList.add('aktif');
+            b.addEventListener('click', function () {
+                slider.scrollTo({ left: i * slider.clientWidth, behavior: reduced ? 'auto' : 'smooth' });
+                setAktif(i);
+            });
+            dotsWrap.appendChild(b);
+            dots.push(b);
+        });
+        // Sinkron dot via IntersectionObserver pada tiap slide (root = slider):
+        // tidak bergantung event scroll — andal untuk swipe jari, klik dot,
+        // maupun scroll programatik.
+        function setAktif(idx) {
+            dots.forEach(function (d, i) { d.classList.toggle('aktif', i === idx); });
+        }
+        if ('IntersectionObserver' in window) {
+            var sio = new IntersectionObserver(function (entries) {
+                entries.forEach(function (en) {
+                    if (en.isIntersecting) setAktif(Array.prototype.indexOf.call(slides, en.target));
+                });
+            }, { root: slider, threshold: .6 });
+            slides.forEach(function (sl) { sio.observe(sl); });
+        }
+        // Fallback di luar IO: setelah jari lepas (swipe) atau scroll berhenti,
+        // hitung indeks dari scrollLeft. Menjamin dot sinkron di engine mana pun.
+        function sinkronDariScroll() {
+            setTimeout(function () {
+                setAktif(Math.round(slider.scrollLeft / slider.clientWidth));
+            }, 380); // tunggu snap menetap
+        }
+        slider.addEventListener('touchend', sinkronDariScroll, { passive: true });
+        slider.addEventListener('pointerup', sinkronDariScroll, { passive: true });
+        if ('onscrollend' in slider) slider.addEventListener('scrollend', function () {
+            setAktif(Math.round(slider.scrollLeft / slider.clientWidth));
+        });
+    })();
+
     /* ---- Lightbox galeri ---- */
     (function () {
-        var imgs = Array.prototype.slice.call(document.querySelectorAll('.galeri-grid img'));
+        var imgs = Array.prototype.slice.call(document.querySelectorAll('.galeri-slide img, .galeri-grid img'));
         if (!imgs.length) return;
         var idx = 0, lb = null, lbImg = null, lbNum = null;
         function bangun() {

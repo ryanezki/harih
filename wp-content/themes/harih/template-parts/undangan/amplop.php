@@ -20,15 +20,28 @@ $baris = array_values(array_filter(array_map('trim', explode("\n", $u['rekening'
     <div class="amplop-wrap" id="amplop-wrap">
         <div class="amplop-isi">
             <?php foreach ($baris as $line) :
-                $salin = $line;
-                if (preg_match('/\d(?:[\d\s.-]*\d)?/', $line, $m)) {
-                    $digits = preg_replace('/\D+/', '', $m[0]);
-                    if (strlen($digits) >= 6) $salin = $digits;
+                /* Urai "BANK 1234567890 a.n. Nama" → kartu bank bertumpuk ala
+                   acuan. Baris yang tak terurai jatuh ke tampilan satu baris. */
+                $bank = $nomor = $anama = '';
+                if (preg_match('/^([^0-9]*?)\s*([0-9][0-9 .\-]{4,})\s*(?:a\.?\s?n\.?\s*(.+))?$/iu', $line, $m)) {
+                    $bank  = trim($m[1]);
+                    $nomor = preg_replace('/\D+/', '', $m[2]);
+                    $anama = trim($m[3] ?? '');
                 }
+                $salin = $nomor !== '' && strlen($nomor) >= 6 ? $nomor : $line;
+                // tampilkan nomor berkelompok 4 digit supaya terbaca sebagai kartu
+                $tampil = $nomor !== '' ? trim(chunk_split($nomor, 4, ' ')) : '';
             ?>
-            <div class="rekening-item">
-                <span class="rekening-teks"><?php echo esc_html($line); ?></span>
-                <button type="button" class="btn-copy" data-copy="<?php echo esc_attr($salin); ?>">Salin</button>
+            <div class="rekening-item<?php echo $nomor !== '' ? ' kartu-bank' : ''; ?>">
+                <?php if ($nomor !== '') : ?>
+                    <?php if ($bank !== '') : ?><p class="bank-label"><?php echo esc_html($bank); ?></p><?php endif; ?>
+                    <p class="bank-nomor"><?php echo esc_html($tampil); ?></p>
+                    <?php if ($anama !== '') : ?><p class="bank-nama">a.n. <?php echo esc_html($anama); ?></p><?php endif; ?>
+                    <button type="button" class="btn-copy" data-copy="<?php echo esc_attr($salin); ?>">Salin Nomor</button>
+                <?php else : ?>
+                    <span class="rekening-teks"><?php echo esc_html($line); ?></span>
+                    <button type="button" class="btn-copy" data-copy="<?php echo esc_attr($salin); ?>">Salin</button>
+                <?php endif; ?>
             </div>
             <?php endforeach; ?>
 

@@ -109,5 +109,3 @@ body.undangan-body {
 /* QRIS wajib berlatar terang agar bisa dipindai dari layar gelap */
 .qris img { background: #ffffff; padding: 10px; }
 
-/* Galeri: bingkai tipis supaya foto tidak "mengambang" di latar gelap */
-.galeri-grid img { outline: 1px solid var(--c-line); outline-offset: -1px; }

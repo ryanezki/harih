@@ -10,7 +10,7 @@ $u = $args;
 $inisial = static fn(string $nama): string => $nama !== '' ? mb_strtoupper(mb_substr($nama, 0, 1)) : '♥';
 ?>
 <section class="section mempelai" id="mempelai">
-    <p class="section-intro" data-reveal>Dengan memohon rahmat Tuhan Yang Maha Esa, dengan penuh sukacita kami mengundang Bapak/Ibu/Saudara/i pada pernikahan kami:</p>
+    <p class="section-title" data-reveal>Kedua Mempelai</p>
 
     <div class="mempelai-card" data-reveal data-delay="120">
         <div class="arch-inisial" aria-hidden="true"><?php echo esc_html($inisial($u['nama_pria'])); ?></div>
