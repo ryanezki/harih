@@ -231,6 +231,9 @@
   *Catatan penyimpangan:* baris di sheet `orders` **tetap dibuat** untuk order cetak murni (rencana awal: tidak dibuat) — barisnya berguna sebagai catatan operasional dan menjaga logika dedup tetap utuh; kolom `paket` ditandai `cetak` supaya tidak pernah disalahartikan sebagai undangan yang menunggu data.
 - **F3.8** field kurir + nomor resi di halaman order (HPOS-aman) + kolom Resi di daftar pesanan.
 - **F3.9** 3 paket hybrid dibuat sebagai produk fisik (CETAK-HORMAT/RESEPSI/GRAND, non-virtual, berbobot, kategori `cetak`). **Sisa:** 3 SKU `UPG-*` menunggu keputusan harga & kredit di **F1.3**.
+- **F3.10** halaman upsell bertoken `/upsell/?order=&key=` (HMAC yang sama dengan `/isi-data/`, `noindex`, `no-referrer`, 403 tanpa token). Hitung mundur kredit **14 hari** tampil sebagai angka berjalan; à la carte **tidak muncul sama sekali** di halaman ini. Tiga status diuji dengan order sungguhan lalu dihapus: aktif (kredit Rp 179.000, "13 hari 23 jam lagi", 3 kartu paket), kedaluwarsa (>14 hari → tawaran hilang, diarahkan ke harga normal), dan order yang sudah memuat cetak (tidak ditawari lagi). Selama SKU `UPG-*` belum ada (menunggu F1.3), harga = harga paket − yang sudah dibayar dan penutupan lewat WhatsApp; begitu `UPG-*` dibuat, halaman otomatis memakainya tanpa perubahan kode.
+- **F3.11** 8 produk `SATUAN-*` + halaman `/satuan/` yang membaca harga & minimum **langsung dari WooCommerce** (harga di halaman tidak mungkin berbeda dari yang ditagihkan). Minimum ditegakkan dua lapis: per produk (`_min_qty`, kuantitas awal ikut menyesuaikan) dan **Rp 1.000.000 per transaksi** bila keranjang hanya berisi item satuan. Ditegakkan di jalur klasik **dan Store API** — pelajaran F3.6. Terbukti live: keranjang Rp 150.000 ditolak dengan pesan "kurang Rp 850.000 lagi", setelah ditambah jadi Rp 1.100.000 galat hilang.
+
 - ⚠️ **Temuan ketiga (dicatat, bukan bug baru):** `id` workflow tidak ada di JSON WF-01 sehingga `n8n import` gagal `SQLITE_CONSTRAINT`. Kini di-bake seperti WF-02.
 
 
@@ -264,11 +267,11 @@
 
 - [~] **F3.9** **Produk cetak + 3 SKU upgrade di WooCommerce** — harga dari F1.3
 
-- [ ] **F3.10** **Halaman upsell pasca-bayar**
+- [x] **F3.10** **Halaman upsell pasca-bayar**
   Bertoken seperti `/isi-data/` · **hitung mundur kredit 14 hari tampil** — tanpa batas waktu tidak ada alasan memutuskan hari ini · **à la carte dilarang muncul di halaman ini**.
   Kedaluwarsa ditegakkan server-side, bukan hanya disembunyikan di tampilan.
 
-- [ ] **F3.11** **Katalog produk satuan (à la carte)** — minimum **Rp 1.000.000/transaksi**, minimum per produk tetap berlaku di atasnya. Harga per unit sengaja tinggi: fungsinya pembanding yang membuat paket terlihat murah.
+- [x] **F3.11** **Katalog produk satuan (à la carte)** — minimum **Rp 1.000.000/transaksi**, minimum per produk tetap berlaku di atasnya. Harga per unit sengaja tinggi: fungsinya pembanding yang membuat paket terlihat murah.
 
 > **Gerbang keluar F3:** order uji berisi produk fisik lolos checkout dengan alamat · WF-01 tidak salah kirim link form · komisi terhitung benar · kupon `RES-` tidak menyentuh produk cetak.
 

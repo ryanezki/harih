@@ -216,3 +216,30 @@ wp eval "
 if (!\$z->get_zone_locations()) { \$z->set_locations([['code' => 'ID', 'type' => 'country']]); \$z->save(); }
 " > /dev/null
 echo "  - lokasi zona: Indonesia (country=ID)"
+
+echo "== F3.11. Produk satuan (à la carte) =="
+# Harga & minimum mengikuti tabel di halaman /harga/. Minimum PER PRODUK
+# disimpan sebagai meta `_min_qty` (dibaca mu-plugin cetak.php); minimum
+# Rp 1.000.000 PER TRANSAKSI ditegakkan terpisah di keranjang.
+buat_satuan() {
+  local sku="$1" nama="$2" harga="$3" minqty="$4" singkat="$5"
+  local ada
+  ada="$(wp wc product list --user="$ADMIN" --sku="$sku" --field=id | head -n1)"
+  if [ -n "$ada" ]; then echo "  - $sku sudah ada (ID $ada) — lewati"; return; fi
+  local id
+  id="$(wp wc product create --user="$ADMIN" --porcelain \
+    --name="$nama" --type=simple --sku="$sku" --regular_price="$harga" \
+    --virtual=false --sold_individually=false --catalog_visibility=visible \
+    --categories="[{\"id\":$TERM_CETAK}]" --short_description="$singkat")"
+  wp post meta update "$id" _min_qty "$minqty" > /dev/null
+  echo "  - $sku dibuat (ID $id) — $nama @ Rp $harga (min $minqty)"
+}
+
+buat_satuan SATUAN-KARTU-QR      'Kartu Undangan Ber-QR'          9500  100 'Art carton 260gsm, laminasi doff, uji pindai per batch. Minimum 100 pcs.'
+buat_satuan SATUAN-KARTU-HOLO    'Kartu Ber-QR Holographic'      14000  100 'Holographic foil + art carton 260gsm. Minimum 100 pcs.'
+buat_satuan SATUAN-LABEL-SOUV    'Label Souvenir'                 2000  200 'Label bernama & bertanggal untuk souvenir. Minimum 200 pcs.'
+buat_satuan SATUAN-HANGTAG       'Hangtag + Tali'                 3500  100 'Hangtag souvenir lengkap dengan tali. Minimum 100 pcs.'
+buat_satuan SATUAN-TERIMA-KASIH  'Kartu Terima Kasih'             3500  100 'Kartu terima kasih untuk tamu. Minimum 100 pcs.'
+buat_satuan SATUAN-STIKER-SEGEL  'Stiker Segel Undangan'          1500  100 'Stiker segel amplop undangan. Minimum 100 pcs.'
+buat_satuan SATUAN-SESERAHAN     'Set Label Seserahan (12 pcs)' 249000    1 'Satu set 12 label seserahan, desain selaras undangan.'
+buat_satuan SATUAN-IDCARD        'ID Card PVC Panitia'           25000   10 'ID card PVC untuk panitia acara. Minimum 10 pcs.'

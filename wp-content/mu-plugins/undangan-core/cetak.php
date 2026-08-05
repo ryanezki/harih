@@ -167,6 +167,88 @@ add_filter('woocommerce_coupon_is_valid', function ($valid, $coupon) {
 }, 10, 2);
 
 /* =========================================================================
+ * F3.11 — aturan minimum item satuan (à la carte).
+ *
+ * Dua lapis, keduanya wajib:
+ *   1. minimum PER PRODUK (meta `_min_qty`) — order 20 pcs memakan waktu
+ *      setup yang hampir sama dengan 200 pcs, jadi minimum itu yang menjaga
+ *      pekerjaan tetap layak dikerjakan;
+ *   2. minimum Rp 1.000.000 PER TRANSAKSI (keputusan terkunci) — berlaku bila
+ *      keranjang HANYA berisi item satuan. Begitu ada paket di keranjang,
+ *      nilai transaksinya sudah jauh di atas itu.
+ *
+ * Ditegakkan untuk checkout klasik DAN Store API (checkout blok memakai Store
+ * API — pelajaran F3.6: memasang hook klasik saja berarti aturan tidak pernah
+ * benar-benar berlaku).
+ * ========================================================================= */
+const UNDANGAN_MIN_TRANSAKSI_SATUAN = 1000000;
+
+function undangan_min_qty($product): int {
+    if (is_numeric($product)) $product = wc_get_product($product);
+    if (!$product instanceof WC_Product) return 1;
+    return max(1, (int) $product->get_meta('_min_qty'));
+}
+
+/** Daftar pelanggaran minimum pada keranjang saat ini. */
+function undangan_cek_minimum(): array {
+    $galat = [];
+    if (!function_exists('WC') || !WC()->cart || WC()->cart->is_empty()) return $galat;
+
+    $subtotal_satuan = 0;
+    $ada_paket = false;
+
+    foreach (WC()->cart->get_cart() as $item) {
+        $p = $item['data'] ?? null;
+        if (!$p instanceof WC_Product) continue;
+        if (undangan_jenis_produk($p) !== 'satuan') { $ada_paket = true; continue; }
+
+        $min = undangan_min_qty($p);
+        if ((int) $item['quantity'] < $min) {
+            $galat[] = sprintf('%s: minimum %d pcs per pesanan (sekarang %d).', $p->get_name(), $min, (int) $item['quantity']);
+        }
+        $subtotal_satuan += (float) $item['line_subtotal'];
+    }
+
+    if (!$ada_paket && $subtotal_satuan > 0 && $subtotal_satuan < UNDANGAN_MIN_TRANSAKSI_SATUAN) {
+        $galat[] = sprintf(
+            'Pembelian item satuan minimum %s per transaksi — kurang %s lagi. Tambahkan item, atau pilih paket yang sudah termasuk undangan digital.',
+            strip_tags(wc_price(UNDANGAN_MIN_TRANSAKSI_SATUAN)),
+            strip_tags(wc_price(UNDANGAN_MIN_TRANSAKSI_SATUAN - $subtotal_satuan))
+        );
+    }
+    return $galat;
+}
+
+// Checkout klasik & halaman keranjang.
+add_action('woocommerce_check_cart_items', function () {
+    foreach (undangan_cek_minimum() as $pesan) wc_add_notice($pesan, 'error');
+});
+
+// Checkout blok (Store API) — jalur yang benar-benar dipakai pembeli.
+add_action('woocommerce_store_api_cart_errors', function ($errors) {
+    foreach (undangan_cek_minimum() as $i => $pesan) {
+        $errors->add('undangan_minimum_' . $i, $pesan);
+    }
+}, 10, 1);
+
+// Kuantitas awal di tombol beli mengikuti minimum produk — pembeli tidak perlu
+// menebak, dan tidak terlanjur menaruh 1 pcs lalu ditolak di checkout.
+add_filter('woocommerce_quantity_input_args', function ($args, $product) {
+    if (undangan_jenis_produk($product) !== 'satuan') return $args;
+    $min = undangan_min_qty($product);
+    $args['min_value'] = $min;
+    $args['step'] = 1;
+    if (($args['input_value'] ?? 1) < $min) $args['input_value'] = $min;
+    return $args;
+}, 10, 2);
+
+// Menambah item satuan dari link `?add-to-cart=` tanpa qty → langsung minimum.
+add_filter('woocommerce_add_to_cart_quantity', function ($qty, $product_id) {
+    if (undangan_jenis_produk($product_id) !== 'satuan') return $qty;
+    return max((int) $qty, undangan_min_qty($product_id));
+}, 10, 2);
+
+/* =========================================================================
  * F3.8 — nomor resi pengiriman: field order + kolom daftar pesanan.
  * Disimpan sebagai meta `_resi` (HPOS-aman lewat API CRUD order).
  * ========================================================================= */
