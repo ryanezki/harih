@@ -24,7 +24,7 @@
 
 **Sudah selesai** *(ringkas — rinciannya di git log)*: infrastruktur & hardening · 3 tema + demo per tema · form isi data + kompresi foto · 8 workflow otomasi · halaman legal · masa aktif otomatis · aset visual berlisensi + kartu OG per tema · logo · pustaka musik 3 track · SEO dasar · GA4 · backup repo ke GitHub private · QA formal yang menemukan 3 cacat live (countdown tidak pernah jalan, atribut `hidden` dikalahkan CSS, daftar ucapan ter-cache 7 hari).
 
-**2026-08-06 — evaluasi desain eksternal diterapkan penuh** *(HARIH_VERSION 1.2.0)*: salam islami + QS. Ar-Rum 21 + tanggal Hijriah (Intl, sisi klien) · RSVP diperluas (jumlah tamu, sesi akad/resepsi/keduanya, WA opsional — **WA disimpan untuk mempelai, tidak pernah keluar di API publik**) · dinding ucapan scrollable · alamat kado + salin · urutan anak + tautan Instagram · dress code ber-swatch · turut mengundang · rundown per jam · tombol Apple/.ics · judul lagu di penutup & tombol musik · catatan maaf nama/gelar · embed YouTube → facade thumbnail (klik baru memuat iframe) · kontras gate + overflow nama panjang + WCAG `--c-ink-soft` tema-03 dibereskan. Semua toggle-able per undangan (`salam_islami`, field opsional). Terverifikasi visual + fungsional live, smoke 21/21.
+**2026-08-06 — evaluasi desain eksternal diterapkan penuh** *(HARIH_VERSION 1.2.0)*: salam islami + QS. Ar-Rum 21 + tanggal Hijriah (Intl, sisi klien) · RSVP diperluas (jumlah tamu, sesi akad/resepsi/keduanya, WA opsional — **WA disimpan untuk mempelai, tidak pernah keluar di API publik**) · dinding ucapan scrollable · alamat kado + salin · urutan anak + tautan Instagram · dress code ber-swatch · turut mengundang · rundown per jam · tombol Apple/.ics · judul lagu di penutup & tombol musik · catatan maaf nama/gelar · embed YouTube → facade thumbnail (klik baru memuat iframe) · kontras gate + overflow nama panjang + WCAG `--c-ink-soft` tema-03 dibereskan. Sisa 4 poin evaluasi + cacat `og:image` (rasio salah → preview WA terpotong) dirinci di **FU**. Semua toggle-able per undangan (`salam_islami`, field opsional). Terverifikasi visual + fungsional live, smoke 21/21.
 
 **2026-08-05 — perbaikan positioning:** jangkar "Mulai Rp 99 ribu" dibuang dari **lima** lokasi (title, meta description, og:description, hero, **dan kartu OG** — yang terakhir ter-render ke dalam gambar yang muncul di preview WhatsApp) · FAQ berhenti mengajari pelanggan membuat kartu QR sendiri · pertanyaan "Perkiraan jumlah tamu?" dipasang sebelum tabel harga, di atas 200 tamu paket Hemat disembunyikan.
 
@@ -89,6 +89,60 @@
   **Hasil dump 2026-08-01:** 56 tabel · `siteurl` = `https://harih.id` · 39 post · 3 undangan publish · 3 produk · 2 order HPOS · 2 user — persis kondisi produksi tanggal itu. Arsip WAHA terbaca (1.659 entri, `webjs/default/` utuh) · arsip n8n terbaca (`database.sqlite` ada) · export workflow JSON valid, 8 workflow lengkap dengan jumlah node benar.
   **Temuan sampingan yang menenangkan:** backup mingguan meninggalkan jendela sampai 7 hari, tapi hampir semua isi yang hilang **bisa dibangun ulang dari repo** (halaman legal, undangan demo, produk, aset — semuanya punya generator). Yang benar-benar hanya ada di backup: data order & undangan pelanggan riil. Disiplin "semua reproducible dari repo" terbayar persis di sini.
   Prosedur mengulang uji dicatat di [`runbook.md`](./runbook.md) §9.
+
+---
+
+## FU — Undangan: sisa evaluasi & preview WhatsApp *(produk digital, tanpa modal)*
+
+*Sumber: evaluasi eksternal. Seluruh 17 poinnya diverifikasi baris-per-baris ke situs live pada 2026-08-05 — bukan diasumsikan.*
+
+**Sudah live, 13 dari 17 poin** *(v1.2.0, dideploy 2026-08-05; bukti = HTML live demo tema-03)*: salam Assalamu'alaikum · ayat QS. Ar-Rum 21 · Wassalamu'alaikum penutup · tanggal Hijriah · RSVP jumlah tamu + sesi + WhatsApp · dinding ucapan yang bisa di-scroll · alamat kirim kado + tombol salin · "Putra kedua dari…" + ikon Instagram · dress code ber-swatch · turut mengundang · rundown per jam · tombol Apple/.ics · judul lagu · catatan maaf nama & gelar · state setelah countdown habis (`#countdown-done`, sudah ada sejak awal).
+> **Kenapa pengevaluasi tidak melihatnya:** WhatsApp meng-cache preview per URL dan LiteSpeed mengirim header cache panjang ke browser tamu. Saat menunjukkan ulang, **selalu tambahkan `?v=2`** di belakang link. Ini bukan kasus sekali ini saja — sudah dua kali terjadi (evaluasi harga "Rp 99 ribu" juga sudah diperbaiki saat dilaporkan).
+
+**Ditemukan saat verifikasi & langsung diperbaiki** *(v1.2.2)*: JS menyembunyikan tombol kalender lewat selektor `.cd-cal` yang sudah berganti nama jadi `.cd-cal-baris` saat tombol `.ics` ditambahkan — akibatnya setelah acara lewat, countdown hilang tapi tombol kalender tetap tampil. Regresi dari perubahan hari yang sama.
+
+**Kenapa empat sisanya belum:** bukan terlewat, tapi beda kelas pekerjaan. Tiga belas yang selesai adalah *section template* — data sudah ada, tinggal dirender. Sisanya butuh hal yang belum ada: pembangkit gambar, halaman berautentikasi untuk mempelai/panitia, atau keputusan model data baru. Urutannya di bawah mengikuti disiplin uang dokumen ini: yang murah & langsung menaikkan konversi dikerjakan sekarang (justru itu yang dibutuhkan gerbang F0.3), yang berupa fitur jualan digerbang.
+
+- [ ] **FU.1** 🔴 **`og:image` undangan salah rasio — preview WhatsApp terpotong** *(poin 14)*
+  **Apa:** undangan yang punya galeri memakai **foto pertama apa adanya** sebagai `og:image` (`functions.php:250`). Foto demo berukuran **1073×1600 (potret, rasio 0,67)** sementara meta tetap mengklaim `og:image:width 1200` / `height 630` (rasio 1,91). WhatsApp memotong tengah secara paksa — dan angka yang kita kirim ke crawler memang salah.
+  **Kenapa nomor satu:** ini gambar yang muncul **setiap kali pemesan menyebar undangannya** — pengganda paling langsung untuk klik, dan biayanya nol. Kartu berbrand 1200×630 yang sudah kita punya hanya dipakai bila galeri kosong, jadi justru undangan berbayar-berfoto yang tampil paling buruk.
+  **Langkah:** GD + Imagick + FreeType **tersedia di Hostinger (sudah dicek)**, jadi kartu bisa dibangun di server: komposit 1200×630 = foto galeri di-`cover`-crop + gradasi + nama mempelai & tanggal dengan font tema, disimpan sekali ke `uploads/og/{id}.jpg` (regenerasi bila meta berubah), fallback ke kartu tema saat foto gagal dimuat. Pola generator sudah ada di `scripts/buat-aset-og.py`; yang baru adalah pemicunya saat undangan terbit/di-update (`mu-plugins/undangan-core/`), plus `harih_og_*()` di `functions.php`.
+  **Selesai bila:** debugger sharing WhatsApp/Facebook menampilkan kartu 1200×630 utuh dengan nama pasangan terbaca untuk undangan bergaleri **dan** tanpa galeri; ukuran yang diklaim = ukuran sebenarnya.
+
+- [ ] **FU.2** **Embed peta + info parkir/valet** *(poin 10)*
+  **Apa:** sekarang hanya tombol yang melempar tamu keluar ke aplikasi Maps. Tambahkan peta tersemat per lokasi (akad & resepsi bisa beda) + kolom catatan bebas untuk parkir/valet/pintu masuk.
+  **Kenapa:** tamu yang belum kenal gedung memutuskan berangkat berdasar dua hal — jauhnya dan parkirnya. Keluar aplikasi = keluar undangan.
+  **Langkah:** ikuti pola facade yang sudah terbukti di `video.php` — **jangan `iframe` peta dimuat saat load** (itu persis keluhan "embed YouTube berat" yang baru kita selesaikan). Tampilkan gambar statis/placeholder + tombol; `iframe` `google.com/maps/embed` disuntik saat diklik. Field baru `catatan_lokasi` (+ akad) di `cpt.php` → form → WF-02, sama seperti sembilan field kemarin.
+  **Selesai bila:** peta muncul hanya setelah diklik, tidak menambah request saat load pertama, dan catatan parkir tampil di kartu acara yang tepat.
+
+- [ ] **FU.3** **Kisah Kami sebagai timeline bertanggal** *(poin 9)*
+  **Apa:** `love_story` sekarang satu blok teks (`love-story.php` merender `nl2br` apa adanya). Ubah jadi daftar bertanggal: "2019 — Pertama bertemu", "2023 — Lamaran".
+  **Kenapa:** timeline dibaca; paragraf panjang di HP dilewati — persis alasan italic panjang tadi dikeluhkan.
+  **Langkah:** parser baris seperti `rundown` (`YYYY[ — ]judul` → item), sehingga **data lama tetap tampil** sebagai satu blok bila tidak berformat tanggal. Tanpa migrasi, tanpa field baru.
+  **Selesai bila:** undangan lama tetap tampil normal; yang berformat tanggal tampil sebagai timeline bergaris di ketiga tema.
+
+- [ ] **FU.4** **Sesi kedatangan tamu (shift)** *(poin 8b)*
+  **Apa:** berbeda dari pilihan sesi di RSVP (yang sudah ada — tamu memilih akad/resepsi). Ini **mempelai membagi tamu ke jam kedatangan** ("Sesi 1: 11.00–13.00") supaya gedung tidak menumpuk.
+  **Kenapa ditunda di bawah FU.1–FU.3:** hanya relevan untuk resepsi besar, dan baru benar-benar berguna kalau link personal per tamu sudah bisa dibuat massal (FU.6) — tanpa itu mempelai harus menyalin link satu per satu.
+  **Langkah:** parameter link personal (`?sesi=1`) menimpa tampilan jam di kartu acara; daftar sesi disimpan sebagai field baru.
+  **Selesai bila:** satu link personal menampilkan jam kedatangan tamu tersebut, sementara halaman tanpa parameter tetap menampilkan jam umum.
+
+> **Gerbang: tiga di bawah dikerjakan setelah F0.3 (10 pembeli asing).** Ketiganya fitur yang *dijual*, bukan perbaikan tampilan — membangunnya sebelum ada yang membayar mengulang kesalahan urutan uang yang sudah dikoreksi penasihat bisnis. Ketiganya juga bahan Tier B rencana hybrid, jadi biayanya terbayar dua kali.
+
+- [ ] **FU.5** 🔒 **Dashboard rekap RSVP + ekspor** *(poin 16)*
+  **Apa:** halaman bertoken untuk mempelai: total tamu per sesi, daftar hadir/tidak/ragu, unduh CSV. **Satu-satunya tempat nomor WhatsApp tamu (`wa_rsvp`) boleh tampil** — endpoint publik sengaja tidak pernah mengembalikannya.
+  **Langkah:** pola `/isi-data/` (token HMAC di URL, `noindex`, tanpa GA4) — sudah terbukti; tinggal template + endpoint baca berautentikasi.
+  **Selesai bila:** mempelai membuka satu link, melihat rekap benar, mengunduh CSV; tanpa token → 403.
+
+- [ ] **FU.6** 🔒 **Generator link personal massal + template broadcast WA** *(poin 15)*
+  **Apa:** mempelai menempel daftar nama → dapat tabel link `?to=Nama` siap kirim + teks broadcast yang sudah tersapa nama. Parameter `?to=` **sudah bekerja**; yang belum ada pembuat massalnya.
+  **Kenapa bernilai jual:** ini pekerjaan paling menjemukan bagi pemesan (300 tamu = 300 salin-tempel), dan pembeda paling terasa dibanding undangan digital murah.
+  **Selesai bila:** 300 nama → 300 link + teks siap salin, dalam satu halaman, tanpa spreadsheet.
+
+- [ ] **FU.7** 🔒 **QR check-in tamu di venue** *(poin 7)*
+  **Apa:** tiap link personal membawa QR; panitia memindai di pintu → tercatat hadir. Pasangan alami kartu QR fisik di paket cetak (F1) — QR yang sama, dua wujud.
+  **Langkah:** halaman pemindai untuk panitia (berperan, bukan publik) + endpoint check-in + tampilan rekap di FU.5.
+  **Selesai bila:** satu tamu dipindai dua kali tidak terhitung dua; rekap kehadiran tampil di dashboard mempelai.
 
 ---
 
@@ -275,9 +329,6 @@
 - [ ] Tema premium eksklusif Premium *(sudah dijanjikan "menyusul" di deskripsi produk)*
 - [ ] Arsip otomatis undangan kedaluwarsa: hapus media H+90 untuk Hemat/Favorit
 - [ ] Custom domain per undangan · multi-bahasa · tema builder drag-and-drop
-- [ ] *(evaluasi 2026-08-06)* **Link personal per tamu + QR check-in** — `?tamu=` sudah ada; tinggal generator massal (CSV/Sheets → daftar link) + halaman scan panitia. Satu paket dengan produk Tier B hybrid
-- [ ] *(evaluasi 2026-08-06)* **Template broadcast WA** per tamu (nama tersapa otomatis) — menyusul generator link personal
-- [ ] *(evaluasi 2026-08-06)* **Dashboard rekap RSVP untuk mempelai** — hitung total tamu per sesi + ekspor; nomor WA tamu hanya tampil di sini (bukan publik). *Catatan: OG image per undangan, state countdown habis, dan dinding ucapan sudah ada — pengevaluasi melihat versi lama.*
 
 ---
 

@@ -166,7 +166,7 @@
     if (grid && grid.dataset.target) {
         var targetMs = Date.parse(grid.dataset.target);
         var doneEl = $('#countdown-done');
-        var calBtn = $('.cd-cal');
+        var calBtn = $('.cd-cal-baris'); // baris berisi tombol Google + .ics
         var num = {
             hari: grid.querySelector('[data-cd="hari"]'),
             jam: grid.querySelector('[data-cd="jam"]'),
