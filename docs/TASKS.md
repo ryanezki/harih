@@ -44,6 +44,8 @@
 | Docker terpin · rahasia di password manager | Monitor n8n hanya hidup di dalam n8n *(ditunda)* |
 | `xmlrpc` 403 · port WAHA tertutup · REST 401 | QA perangkat riil belum dijalankan *(F0.4)* |
 
+**Menunggu keputusan owner:** daftar lengkap + saran per poin ada di [`konfirmasi-owner.md`](./konfirmasi-owner.md) — dibuat 2026-08-06 setelah F3, dipimpin satu celah mendesak (paket cetak sudah bisa dibeli langsung tanpa konfirmasi slot).
+
 **Akses:** Hostinger `ssh -p 65002 u803921702@147.93.80.20` (`domains/harih.id/public_html`) · VPS `ssh root@31.97.50.197` (`/opt/harih`) · rahasia: `vps/.env` + `vps/google-sa.json` (lokal, gitignored) = cermin server · aksi owner: [`panduan-manual.md`](./panduan-manual.md) · operasional: [`runbook.md`](./runbook.md) · import n8n: [`../n8n/workflows/README.md`](../n8n/workflows/README.md).
 
 ---
