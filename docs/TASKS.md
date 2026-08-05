@@ -32,7 +32,7 @@
 | Musik 3 track + whitelist `musik_url` | Duitku production menunggu approval *(F0.1)* |
 | Masa aktif otomatis, demo dikecualikan | Checkout **menolak barang fisik** secara arsitektur *(F3.4–F3.6)* |
 | GA4 live; `/u/*` & `/isi-data/` sengaja tidak dilacak | WF-01 salah deteksi paket hybrid → bug tier *(F3.2)* |
-| Kode ter-backup: `github.com/ryanezki/harih` (private) | Backup mingguan belum pernah diuji restore *(F0.5)* |
+| Kode ter-backup + **restore backup terbukti berhasil** ✓ *(F0.5)* | — |
 | Docker terpin · rahasia di password manager | Monitor n8n hanya hidup di dalam n8n *(ditunda)* |
 | `xmlrpc` 403 · port WAHA tertutup · REST 401 | QA perangkat riil belum dijalankan *(F0.4)* |
 
@@ -81,8 +81,12 @@
   iPhone Safari & Android Chrome: musik mulai setelah tap · countdown berjalan (baru diperbaiki) · tombol salin rekening · upload foto HEIC · preview share WA. Checklist lengkap di [`panduan-manual.md`](./panduan-manual.md) langkah 5.
   ⚠️ WA meng-cache preview per URL — uji dengan `?x=1` supaya dianggap URL baru.
 
-- [ ] **F0.5** **Uji restore backup 1×** *(eks-P1.2)*
-  Backup mingguan jalan & terverifikasi integritasnya, tapi belum pernah di-restore. Restore dump ke database kosong + `tar -tzf` arsip WAHA/n8n. Backup yang tak pernah diuji dianggap tidak ada.
+- [x] **F0.5** **Uji restore backup 1×** *(eks-P1.2)* → **SELESAI 2026-08-05**
+  Backup sudah jalan 3× dan integritasnya terverifikasi, tapi belum pernah dibuktikan bisa dipulihkan — backup yang tak pernah diuji dianggap tidak ada.
+  **Cara uji:** MySQL container sementara di VPS, **produksi tidak tersentuh** sama sekali (container dihapus setelahnya, image ikut dibersihkan).
+  **Hasil dump 2026-08-01:** 56 tabel · `siteurl` = `https://harih.id` · 39 post · 3 undangan publish · 3 produk · 2 order HPOS · 2 user — persis kondisi produksi tanggal itu. Arsip WAHA terbaca (1.659 entri, `webjs/default/` utuh) · arsip n8n terbaca (`database.sqlite` ada) · export workflow JSON valid, 8 workflow lengkap dengan jumlah node benar.
+  **Temuan sampingan yang menenangkan:** backup mingguan meninggalkan jendela sampai 7 hari, tapi hampir semua isi yang hilang **bisa dibangun ulang dari repo** (halaman legal, undangan demo, produk, aset — semuanya punya generator). Yang benar-benar hanya ada di backup: data order & undangan pelanggan riil. Disiplin "semua reproducible dari repo" terbayar persis di sini.
+  Prosedur mengulang uji dicatat di [`runbook.md`](./runbook.md) §9.
 
 ---
 
@@ -197,7 +201,7 @@
 
 - [ ] **F4.1** **Snapshot beku bernomor versi** — fondasi semua yang lain. Saat order cetak dikonfirmasi, data dibekukan; seluruh produksi membaca snapshot, bukan data live. Pelanggan yang mengedit setelahnya diberi peringatan bahwa perubahan tidak berlaku untuk cetakan yang sudah diproses. Meta undangan sudah terstruktur rapi — snapshot cukup JSON beku + hash sebagai meta order.
 
-- [ ] **F4.2** **Validasi wajib di FORM, bukan di proof** — hari vs tanggal harus cocok (kesalahan paling sering & paling memalukan di undangan Indonesia; **layak dipasang di form digital sekarang juga**) · batas panjang field · resolusi foto minimum ±650×1000px ditolak di titik upload · QR error correction H + quiet zone + short URL sendiri agar slug bisa diubah tanpa cetak ulang · pembulatan kuantitas ("tambah 9 pcs gratis" saat 90→99 sama-sama 11 lembar).
+- [ ] **F4.2** **Validasi wajib di FORM, bukan di proof** — hari vs tanggal harus cocok — **hanya relevan untuk template cetak**. Diperiksa 2026-08-05: di sisi digital ini mustahil terjadi, karena nama hari **diturunkan** dari tanggal lewat `wp_date('l, j F Y')` dan formnya memakai `<input type="date">`, bukan teks bebas. Baru jadi risiko bila template cetak menerima tanggal yang diketik manual · batas panjang field · resolusi foto minimum ±650×1000px ditolak di titik upload · QR error correction H + quiet zone + short URL sendiri agar slug bisa diubah tanpa cetak ulang · pembulatan kuantitas ("tambah 9 pcs gratis" saat 90→99 sama-sama 11 lembar).
 
 - [ ] **F4.3** **Engine render SVG → PDF** — template diisi data snapshot, dirender via Inkscape/librsvg CLI, teks tetap vektor.
   ⚠️ **Wajib di VPS.** Hostinger shared hosting tidak bisa memasang Inkscape/librsvg. Konsekuensi: PDF siap cetak berisi data pribadi pelanggan → butuh aturan retensi & akses, sejajar dengan Kebijakan Privasi.

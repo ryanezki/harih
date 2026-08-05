@@ -92,7 +92,16 @@ Halaman undangan otomatis dinonaktifkan (jadi `draft`) setelah masa aktif paketn
 - Otomatis tiap Minggu ±02:00 WIB di VPS: `/opt/harih/backups/` (db, uploads mirror, sesi WAHA, data+workflow n8n; retensi 4 minggu). Gagal → alert email.
 - **Restore DB WP**: `gunzip -c db-YYYY-MM-DD.sql.gz | ssh -p 65002 u803921702@147.93.80.20 "cd domains/harih.id/public_html && wp db import -"`.
 - **Restore n8n/WAHA**: stop container → extract tar ke volume terkait → start. Butuh `N8N_ENCRYPTION_KEY` yang sama (simpan nilainya di password manager, jangan hanya di VPS).
-- Uji restore minimal 1× sebelum launch (T4.2) — backup yang tak pernah diuji dianggap tidak ada.
+- ✅ **Restore sudah diuji 2026-08-05** memakai dump 2026-08-01: 56 tabel, `siteurl` benar, 3 undangan + 3 produk + 2 order pulih utuh; arsip WAHA (1.659 entri, `webjs/default/` ada) & n8n (`database.sqlite` ada) terbaca; export 8 workflow JSON valid. Diuji di MySQL container sementara di VPS — **produksi tidak tersentuh**.
+- **Cara mengulang uji restore** (aman, tidak menyentuh produksi):
+  ```
+  ssh root@31.97.50.197
+  docker run -d --name uji-restore -e MYSQL_ROOT_PASSWORD=x -e MYSQL_DATABASE=ujiwp mysql:8
+  gunzip -c /opt/harih/backups/db/db-YYYY-MM-DD.sql.gz | docker exec -i uji-restore mysql -uroot -px ujiwp
+  docker exec uji-restore mysql -uroot -px -N -B ujiwp -e 'SELECT COUNT(*) FROM wp_posts;'
+  docker rm -f uji-restore
+  ```
+- ⚠️ **Backup berjalan mingguan (Minggu ±02:00 WIB), jadi selalu ada jendela sampai 7 hari yang belum tercakup.** Yang menyelamatkan: hampir semua bisa dibangun ulang dari repo — halaman legal via `scripts/publish-legal.py`, undangan demo via `scripts/buat-demo.sh`, produk & kategori via `scripts/buat-toko.sh`, aset via generator. Yang TIDAK bisa dibangun ulang: data order & undangan pelanggan riil. Itulah yang sesungguhnya dilindungi backup ini.
 
 ## 10. Kapan menghubungi developer
 
