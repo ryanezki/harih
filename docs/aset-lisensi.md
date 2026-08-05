@@ -79,3 +79,16 @@ Konsep: nama "hariH" adalah permainan kata *hari H*; huruf H terakhir diberi war
 | `logo-harih-kotak-putih-1000.png` | 1000×1000 | Bila diminta latar terang |
 | `logo-harih-wordmark.png` | 1200×400, transparan | Dokumen & situs, latar terang |
 | `logo-harih-wordmark-putih.png` | 1200×400, transparan | Latar gelap |
+
+## Font (kartu og:image server-side, FU.1)
+
+Kartu `og:image` per undangan dirender di server dengan GD + FreeType, jadi berkas font harus **ikut di dalam tema** (bukan diambil dari Google Fonts saat runtime — tidak ada koneksi keluar saat render, dan preview WhatsApp tidak boleh bergantung pihak ketiga).
+
+| Berkas | Keluarga | Lisensi | Sumber |
+|---|---|---|---|
+| `aset/font/CormorantGaramond.ttf` | Cormorant Garamond (variable) | SIL OFL 1.1 | github.com/google/fonts `ofl/cormorantgaramond` |
+| `aset/font/Karla.ttf` | Karla (variable) | SIL OFL 1.1 | github.com/google/fonts `ofl/karla` |
+| `aset/font/Prata.ttf` | Prata Regular | SIL OFL 1.1 | github.com/google/fonts `ofl/prata` |
+| `aset/font/Manrope.ttf` | Manrope (variable) | SIL OFL 1.1 | github.com/google/fonts `ofl/manrope` |
+
+Teks lisensi keempatnya digabung di `aset/font/OFL.txt` (OFL mensyaratkan lisensi ikut disertakan saat font didistribusikan ulang). Keempatnya **font yang memang dipakai skin undangan**, jadi kartu preview memakai tipografi yang sama dengan produk yang dijual: tema-01 Cormorant · tema-02 Karla · tema-03 Prata + Manrope.

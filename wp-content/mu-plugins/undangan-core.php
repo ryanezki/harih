@@ -15,3 +15,4 @@ require UNDANGAN_CORE_DIR . '/rest.php';
 require UNDANGAN_CORE_DIR . '/woocommerce.php';
 require UNDANGAN_CORE_DIR . '/hardening.php';
 require UNDANGAN_CORE_DIR . '/masa-aktif.php';
+require UNDANGAN_CORE_DIR . '/og.php';

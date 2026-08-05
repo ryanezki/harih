@@ -246,10 +246,11 @@ add_action('wp_head', function () {
     // (P0.3). Ini bukan kasus pinggiran: WF-02 sengaja mengabaikan galeri untuk
     // paket Hemat, jadi SELURUH undangan Hemat masuk jalur fallback ini —
     // tanpa itu paket volume kita di-share ke WhatsApp tanpa gambar sama sekali.
-    $galeri = json_decode((string) get_post_meta($id, 'galeri', true) ?: '[]', true);
-    $img    = (is_array($galeri) && !empty($galeri[0]) && is_string($galeri[0]))
-        ? $galeri[0]
-        : harih_og_default(harih_tema_aktif($id));
+    // Kartu komposit 1200×630 per undangan (FU.1): foto pasangan + nama + tanggal.
+    // Foto galeri MENTAH tidak boleh dipakai langsung — hampir selalu potret,
+    // dan WhatsApp memotongnya jadi pita tengah tanpa konteks apa pun.
+    $img = function_exists('undangan_og_kartu') ? undangan_og_kartu($id) : '';
+    if ($img === '') $img = harih_og_default(harih_tema_aktif($id));
 
     echo "\n" . '<meta property="og:type" content="website">' . "\n";
     echo '<meta property="og:site_name" content="hariH">' . "\n";
@@ -258,6 +259,11 @@ add_action('wp_head', function () {
     echo '<meta property="og:description" content="' . esc_attr($desc) . '">' . "\n";
     echo '<meta property="og:url" content="' . esc_url(get_permalink($id)) . '">' . "\n";
     echo '<meta property="og:image" content="' . esc_url($img) . '">' . "\n";
+    // Dimensi WAJIB dinyatakan & harus BENAR: crawler memakainya untuk memesan
+    // ruang preview. Semua jalur di atas kini menghasilkan 1200×630.
+    echo '<meta property="og:image:width" content="1200">' . "\n";
+    echo '<meta property="og:image:height" content="630">' . "\n";
+    echo '<meta property="og:image:alt" content="' . esc_attr($title) . '">' . "\n";
     echo '<meta name="twitter:card" content="summary_large_image">' . "\n";
 }, 5);
 
