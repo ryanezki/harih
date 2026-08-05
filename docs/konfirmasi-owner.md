@@ -1,5 +1,9 @@
 # Yang perlu dikonfirmasi owner — per 6 Agustus 2026
 
+> **SUDAH DIJAWAB 6 Agustus 2026.** Seluruh poin A–E terjawab dan sudah diterapkan; rinciannya di git log dan `TASKS.md`. Dokumen ini disimpan sebagai catatan keputusan, bukan daftar tugas aktif.
+>
+> Perubahan terbesar dari jawaban itu: **percetakan & alat milik sendiri** (fase subkontrak gugur), dan **produk cetak berubah jadi undangan lipat + amplop bernama** dengan jumlah per paket turun jadi 50/100/150. Tiga hal yang masih menunggu owner: **hitung marjin per jam percetakan yang sekarang**, **cetak satu sampel lengkap** (menjawab bobot, waktu lipat, uji QR, dan pertanyaan mesin creasing sekaligus), dan **cek mekanisme refund Duitku**.
+
 Daftar ini dibuat setelah F3 (bedah WooCommerce untuk barang fisik) selesai. Isinya **hanya hal yang tidak bisa saya putuskan sendiri**: keputusan bisnis, angka nyata, dan hal yang perlu dicek ke pihak ketiga. Tiap poin sudah disertai saran saya — kalau setuju, cukup jawab "ikuti saran" untuk nomor itu.
 
 Urutannya menurut seberapa cepat ia menghambat uang masuk.

@@ -44,6 +44,10 @@
 | Docker terpin · rahasia di password manager | Monitor n8n hanya hidup di dalam n8n *(ditunda)* |
 | `xmlrpc` 403 · port WAHA tertutup · REST 401 | QA perangkat riil belum dijalankan *(F0.4)* |
 
+**2026-08-06 — PERUBAHAN BESAR: percetakan & alat milik sendiri, produk cetak jadi undangan lipat.** Owner ternyata sudah punya bisnis percetakan dengan peralatan lengkap, jadi **fase subkontrak (F1.2) gugur** — tidak ada modal alat yang perlu dikeluarkan dan tidak ada pihak ketiga yang perlu dicari. Produk cetak juga berubah dari kartu QR 55×85mm menjadi **undangan lipat dua (A4→A5) beserta amplop bernama tamu**: penerima undangan cetak umumnya orang tua & sesepuh, dan kartu yang isinya hanya QR menuntut mereka membuka HP dulu. Jumlah per paket **turun** (150/150/200 → 50/100/150) sementara harga paket tetap — mutu naik, jam mesin turun.
+
+> ⚠️ **Metrik pengendali berubah total.** Patokan lama "≥ Rp 600rb/jam" tidak lagi relevan; kapasitas bukan tak terbatas melainkan **jam mesin yang selama ini dipakai order percetakan reguler**. Undangan wajib **mengalahkan marjin per jam bisnis cetak yang sekarang** — kalau tidak, ini hanya memindahkan uang dari kantong kiri ke kanan sambil menambah risiko deadline pernikahan. **Angka itu belum ada dan harus dihitung lebih dulu** (F1.7a).
+
 **Menunggu keputusan owner:** daftar lengkap + saran per poin ada di [`konfirmasi-owner.md`](./konfirmasi-owner.md) — dibuat 2026-08-06 setelah F3, dipimpin satu celah mendesak (paket cetak sudah bisa dibeli langsung tanpa konfirmasi slot).
 
 **Akses:** Hostinger `ssh -p 65002 u803921702@147.93.80.20` (`domains/harih.id/public_html`) · VPS `ssh root@31.97.50.197` (`/opt/harih`) · rahasia: `vps/.env` + `vps/google-sa.json` (lokal, gitignored) = cermin server · aksi owner: [`panduan-manual.md`](./panduan-manual.md) · operasional: [`runbook.md`](./runbook.md) · import n8n: [`../n8n/workflows/README.md`](../n8n/workflows/README.md).
@@ -159,17 +163,14 @@
 
 *Target fase ini: **5 order cetak nyata, disubkontrakkan, dengan biaya & waktu tercatat.*** Yang dicari bukan efisiensi — yang dicari angka pengganti tebakan.
 
-- [ ] **F1.1** 🔒 👤 **Uji fisik QR: cetak → laminasi doff → pindai di ruangan remang** — *sejak halaman harga tayang (2026-08-05), ini gerbang untuk **menyanggupi order**, bukan lagi untuk menayangkan halaman*
-  **Gerbang untuk Garansi QR Terbaca** — garansi itu tidak boleh dipasang di halaman harga sebelum uji ini lolos. Laminasi doff menurunkan kontras dan bisa membuat QR gagal terbaca, persis skenario yang dijanjikan garansi.
-  **Langkah:** cetak QR di beberapa ukuran (15/20/25 mm), laminasi doff, pindai dengan 3 HP berbeda di ruangan remang seperti gedung resepsi.
-  **Catatan:** ujinya memakai **hasil percetakan subkontrak** (F1.2), bukan mesin sendiri — itu yang akan benar-benar dikirim ke pelanggan di fase ini.
-  **Selesai bila:** ada ukuran QR minimum yang terbukti dan jadi aturan tetap.
+- [ ] **F1.7a** 🔴 👤 **Hitung marjin per jam bisnis cetak yang sekarang**
+  **Angka penentu tunggal.** Semua keputusan lain menggantung padanya: bila order reguler menghasilkan Rp 400rb/jam, undangan wajib di atas itu. Tanpa angka ini kita tidak tahu apakah lini undangan layak dikerjakan sama sekali — bukan "apakah untung", tapi "apakah lebih untung dari pekerjaan yang jamnya ia rebut".
 
-- [ ] **F1.2** 🔒 👤 **Cari & uji 2–3 percetakan subkontrak** — *gerbang yang sama: harga sudah tayang, jadi ini yang menentukan boleh-tidaknya menerima order pertama*
-  **Kenapa subkontrak dulu:** lima order pertama tidak butuh mesin. Marjin turun (perkiraan Rp 1,6–1,8 juta vs Rp 2,6 juta produksi sendiri) tapi **masih di atas marjin rencana v1 yang Rp 1,12 juta** — dan modal Rp 9–10 juta tidak keluar sebelum ada yang membayar.
-  **Langkah:** minta kuotasi untuk isi Paket Resepsi (150 kartu QR art carton 260gsm laminasi doff · 200 label souvenir · 100 kartu terima kasih · 100 stiker segel), minta **sample fisik**, cek SLA & konsistensi warna.
-  ⚠️ **Angka marjin Rp 1,6–1,8 juta itu estimasi saya, bukan kuotasi.** Wajib dikonfirmasi dengan angka nyata sebelum harga dikunci.
-  **Selesai bila:** ada 1 percetakan terpilih dengan harga tertulis, sample yang lolos F1.1, dan kesepakatan waktu kerja.
+- [ ] **F1.1** 🔴 👤 **Cetak satu undangan lipat + amplop lengkap — hari ini**
+  Satu sampel menjawab empat hal sekaligus: **bobot nyata** (untuk ongkir yang kita tanggung), **waktu lipat per unit**, **uji pindai QR** (di A5 lipat, QR bisa dicetak jauh lebih besar dan tanpa laminasi doff — hampir pasti lolos), dan mutu amplop bernama.
+  ⚠️ **Yang paling menentukan: mesin creasing.** 100 lipatan × 8 order = 800 lipatan/bulan. Bila harus dilipat tangan, seluruh hitungan marjin per jam batal — periksa ini sebelum harga dikunci.
+
+- [x] ~~**F1.2** Cari & uji 2–3 percetakan subkontrak~~ → **GUGUR 2026-08-06** — owner punya percetakan & alat sendiri. Estimasi marjin subkontrak Rp 1,6–1,8 jt tidak lagi relevan; yang menggantikannya adalah F1.7a (marjin per jam pekerjaan yang jamnya direbut).
 
 - [ ] **F1.3** 👤 **Tetapkan tiga harga SKU upgrade + besaran kredit**
   Katalog menjual paket penuh; halaman upsell menjual **tiga SKU upgrade berharga tetap** untuk yang sudah membeli digital.
@@ -182,7 +183,7 @@
   Terbit lewat `scripts/publish-legal.py` (repo = sumber kebenaran halaman legal).
 
 - [x] **F1.5** **Halaman harga hybrid — statis, CTA WhatsApp** → **TERBIT & LIVE di `/harga/` 2026-08-05**
-  `page-harga-hybrid.php` + blok `katalog.css` (v1.2.1) ter-deploy & teruji render via halaman pratinjau sementara (sudah dihapus): hero "satu desain dua wujud" · **tiga garansi di atas** · 4 kartu (Digital mulai 99rb → beranda · Hormat 1,19jt · Resepsi 2,9jt ⭐ + pill "hemat Rp 625.000" · Grand 5,9jt jangkar) · proses 4 langkah + H-21 · tabel satuan (8 item, min Rp 1jt/transaksi) · FAQ · CTA `wa.me` prefill per paket. **Diterbitkan atas keputusan owner 2026-08-05, mendahului gerbang F1.1/F1.2** ("alat cetak pasti akan tersedia"). Konsekuensinya tidak diabaikan tapi **dipindahkan ke alur pemesanan**: halaman ini tidak punya tombol bayar sama sekali — semua CTA ke WhatsApp, dan slot produksi + tanggal dikonfirmasi manual **sebelum ada uang berpindah**. Itu yang menjaga ketiga garansi (sudah jadi klausul S&K §12) tetap bisa ditepati selagi F1.1 & F1.2 diselesaikan. Beranda menautkannya lewat band "Undangan Cetak" setelah tangga harga digital + tautan footer; masuk sitemap.
+  `page-harga-hybrid.php` + blok `katalog.css` (v1.2.1) ter-deploy & teruji render via halaman pratinjau sementara (sudah dihapus): hero "satu desain dua wujud" · **tiga garansi di atas** · 4 kartu (Digital mulai 99rb → beranda · Hormat 1,19jt · Resepsi 2,9jt ⭐ + pill "hemat Rp 625.000" · Grand 5,9jt jangkar) · proses 4 langkah + H-21 · tabel satuan (8 item, min Rp 1jt/transaksi) · FAQ · CTA `wa.me` prefill per paket. **Diterbitkan atas keputusan owner 2026-08-05, mendahului gerbang F1.1/F1.2** ("alat cetak pasti akan tersedia"). Konsekuensinya tidak diabaikan tapi **dipindahkan ke alur pemesanan**: halaman ini tidak punya tombol bayar sama sekali — semua CTA ke WhatsApp, dan slot produksi + tanggal dikonfirmasi manual **sebelum ada uang berpindah**. Itu yang menjaga ketiga garansi (sudah jadi klausul S&K §12) tetap bisa ditepati. **Per 2026-08-06** produk cetak juga disembunyikan dari `/shop/` sampai **satu order uji internal tuntas penuh** — bukan lagi menunggu F1.2 (yang gugur), melainkan menunggu bukti bahwa kita sanggup memenuhi satu order dari ujung ke ujung. **Kuota produksi: 8 order/bulan** — cukup untuk mendapat data dalam satu bulan, cukup kecil untuk menyerap kesalahan. Beranda menautkannya lewat band "Undangan Cetak" setelah tangga harga digital + tautan footer; masuk sitemap.
   ⚠️ **Yang berubah maknanya:** F1.1 & F1.2 tidak lagi menggerbang *penayangan halaman*, tapi kini menggerbang **penerimaan order pertama** — jangan menyanggupi tanggal ke pemesan sebelum ada percetakan terpilih dan ukuran QR yang terbukti terpindai.
   Empat paket · **tiga garansi tampil di halaman harga**, bukan disembunyikan di FAQ (Rencana Bisnis §11.2 menempatkan ini sebagai penyebab nomor satu closing rate rendah) · Paket Grand sebagai jangkar · **angka penghematan paket vs à la carte ditampilkan eksplisit**.
   Bahasa mengikuti §5.9: jual hasil, bukan gramatur. Spesifikasi teknis di bawah sebagai bukti.

@@ -30,41 +30,42 @@ $harih_paket_cetak = [
     [
         'nama'  => 'Hormat',
         'harga' => '1.190.000',
-        'sub'   => 'Untuk orang tua, sesepuh, dan atasan — yang pantas menerima kartu di tangan, bukan sekadar link.',
+        'sub'   => 'Untuk orang tua, sesepuh, dan atasan — yang pantas menerima undangan di tangan, bukan sekadar link.',
         'fitur' => [
             'Undangan digital lengkap (setara paket Premium)',
-            '150 kartu undangan fisik ber-QR — tamu memindai, undangan digital terbuka',
-            '100 stiker segel amplop',
+            '50 undangan cetak lipat dua — detail acara terbaca tanpa HP',
+            '50 amplop dengan nama tamu tercetak, bukan tulis tangan',
+            'QR menuju undangan digital, dicetak besar di halaman dalam',
             'Pratinjau (proof) disetujui dulu, baru dicetak',
             'Gratis ongkir ke seluruh Indonesia',
         ],
-        'spek'  => 'Art carton 260gsm · laminasi doff · uji pindai per batch',
+        'spek'  => 'A4 dilipat jadi A5 · desain seragam dengan undangan digital',
         'badge' => '',
     ],
     [
         'nama'  => 'Resepsi',
         'harga' => '2.900.000',
-        'sub'   => 'Resepsi gedung: undangan di layar tamu, kartu di meja penerima tamu, souvenir bernama Anda.',
+        'sub'   => 'Resepsi gedung: undangan di layar semua tamu, undangan cetak untuk yang dihormati, souvenir bernama Anda.',
         'fitur' => [
             'Undangan digital custom',
-            '150 kartu undangan fisik ber-QR',
+            '100 undangan cetak lipat dua + 100 amplop bernama tamu',
             '200 label souvenir dengan nama & tanggal Anda',
             '100 kartu terima kasih',
             '100 stiker segel amplop',
             'Pratinjau (proof) disetujui dulu, baru dicetak',
             'Gratis ongkir ke seluruh Indonesia',
         ],
-        'spek'  => 'Art carton 260gsm · laminasi doff · uji pindai per batch',
+        'spek'  => 'A4 dilipat jadi A5 · desain seragam dengan undangan digital',
         'badge' => 'Paling Populer',
-        'hemat' => 'Dibeli satuan: Rp 3.525.000 — Anda hemat Rp 625.000',
+        'hemat' => 'Dibeli satuan: Rp 3.600.000 — Anda hemat Rp 700.000',
     ],
     [
         'nama'  => 'Grand',
         'harga' => '5.900.000',
-        'sub'   => 'Resepsi besar dengan panitia: dari kartu akses tamu sampai ID panitia, semua satu desain.',
+        'sub'   => 'Resepsi besar dengan panitia: dari undangan cetak premium sampai ID panitia, semua satu desain.',
         'fitur' => [
             'Undangan digital custom',
-            '200 kartu undangan fisik ber-QR holographic',
+            '150 undangan cetak lipat premium + 150 amplop bernama tamu',
             '300 label souvenir + 300 kupon souvenir',
             '150 hangtag + tali',
             'Set label seserahan',
@@ -72,32 +73,34 @@ $harih_paket_cetak = [
             'Pratinjau (proof) disetujui dulu, baru dicetak',
             'Gratis ongkir ke seluruh Indonesia',
         ],
-        'spek'  => 'Holographic foil · art carton 260gsm · uji pindai per batch',
+        'spek'  => 'Kertas lebih tebal · finishing khusus · amplop premium',
         'badge' => '',
     ],
 ];
 
 $harih_satuan = [
-    ['Kartu undangan fisik ber-QR',        'Rp 9.500/pcs',  'min. 100'],
-    ['Kartu ber-QR holographic',           'Rp 14.000/pcs', 'min. 100'],
-    ['Label souvenir',                     'Rp 2.000/pcs',  'min. 200'],
-    ['Hangtag + tali',                     'Rp 3.500/pcs',  'min. 100'],
-    ['Kartu terima kasih',                 'Rp 3.500/pcs',  'min. 100'],
-    ['Stiker segel undangan',              'Rp 1.500/pcs',  'min. 100'],
-    ['Set label seserahan (12 pcs)',       'Rp 249.000',    'per set'],
-    ['ID card PVC panitia',                'Rp 25.000/pcs', 'min. 10'],
+    ['Undangan cetak lipat + amplop bernama', 'Rp 15.000/pcs', 'min. 50'],
+    ['Kartu undangan ber-QR (bagi luas)',     'Rp 9.500/pcs',  'min. 100'],
+    ['Kartu ber-QR holographic',              'Rp 14.000/pcs', 'min. 100'],
+    ['Label souvenir',                        'Rp 2.000/pcs',  'min. 200'],
+    ['Hangtag + tali',                        'Rp 3.500/pcs',  'min. 100'],
+    ['Kartu terima kasih',                    'Rp 3.500/pcs',  'min. 100'],
+    ['Stiker segel undangan',                 'Rp 1.500/pcs',  'min. 100'],
+    ['Set label seserahan (12 pcs)',          'Rp 249.000',    'per set'],
+    ['ID card PVC panitia',                   'Rp 25.000/pcs', 'min. 10'],
 ];
+
 ?><!DOCTYPE html>
 <html <?php language_attributes(); ?>>
 <head>
 <meta charset="<?php bloginfo('charset'); ?>">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Undangan digital + kartu undangan fisik ber-QR dalam satu desain. Kartu untuk yang paling dihormati, link untuk semua tamu. Garansi tepat waktu — tiba H-14 atau uang kembali.">
+<meta name="description" content="Undangan digital + undangan cetak lipat dengan amplop bernama tamu, satu desain. Untuk yang paling dihormati. Garansi tepat waktu — tiba H-14 atau uang kembali.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="hariH">
 <meta property="og:locale" content="id_ID">
-<meta property="og:title" content="hariH — Undangan Digital + Kartu Fisik Ber-QR">
-<meta property="og:description" content="Satu desain, dua wujud: undangan digital untuk semua tamu, kartu fisik untuk yang paling Anda hormati. Garansi tiba H-14 atau uang kembali 100%.">
+<meta property="og:title" content="hariH — Undangan Digital + Undangan Cetak Bernama">
+<meta property="og:description" content="Satu desain, dua wujud: undangan digital untuk semua tamu, undangan cetak beramplop nama untuk yang paling Anda hormati. Garansi tiba H-14 atau uang kembali 100%.">
 <meta property="og:url" content="<?php echo esc_url(get_permalink()); ?>">
 <meta property="og:image" content="<?php echo esc_url(harih_og_default()); ?>">
 <meta property="og:image:width" content="1200">
@@ -110,7 +113,7 @@ $harih_satuan = [
 <header class="hero">
     <p class="brand">hariH</p>
     <h1>Satu desain, dua wujud:<br>di layar semua tamu, di tangan yang terhormat.</h1>
-    <p class="hero-sub">Undangan digital untuk 300 tamu Anda — dan <strong>kartu fisik ber-QR</strong> untuk orang tua, sesepuh, dan atasan yang pantas menerima lebih dari sekadar link. Satu kali isi data, keduanya jadi.</p>
+    <p class="hero-sub">Undangan digital untuk semua tamu — dan <strong>undangan cetak lipat beserta amplop bernama</strong> untuk orang tua, sesepuh, dan atasan. Satu kali isi data, keduanya jadi, dengan desain yang sama.</p>
     <div class="hero-cta">
         <a class="btn btn-utama" href="#paket">Lihat Paket</a>
         <a class="btn btn-garis" href="<?php echo esc_url($harih_cta('paket cetak + digital hariH')); ?>" target="_blank" rel="noopener">Tanya via WhatsApp</a>
@@ -123,7 +126,7 @@ $harih_satuan = [
         <div class="garansi-grid">
             <article class="garansi-card">
                 <h3>Garansi QR Terbaca</h3>
-                <p>Setiap batch diuji pindai sebelum dikirim. Kalau ada QR yang gagal terbaca, <strong>seluruh batch kami ganti.</strong></p>
+                <p>QR di undangan cetak diuji pindai sebelum dikirim. Kalau ada yang gagal terbaca, <strong>seluruh batch kami ganti.</strong> Detail acara tetap tercetak lengkap — tamu tanpa HP pun bisa membacanya.</p>
             </article>
             <article class="garansi-card">
                 <h3>Garansi Tepat Waktu</h3>
@@ -196,12 +199,16 @@ $harih_satuan = [
                 </tbody>
             </table>
         </div>
-        <p class="satuan-cta"><a class="btn btn-garis" href="<?php echo esc_url($harih_cta('pembelian item satuan')); ?>" target="_blank" rel="noopener">Tanya Item Satuan via WhatsApp</a></p>
+        <p class="satuan-cta">
+            <a class="btn btn-garis" href="<?php echo esc_url(home_url('/satuan/')); ?>">Buka Katalog Satuan</a>
+            <span class="satuan-cta-min">minimum Rp 1.000.000 per transaksi</span>
+        </p>
     </section>
 
     <section class="faq">
         <h2>Pertanyaan umum</h2>
         <details><summary>Kenapa harus pesan paling lambat H-21?</summary><p>Karena kartu Anda kami jamin tiba H-14 — buffer 7 hari itulah yang membuat garansinya bisa kami tepati, termasuk waktu proof, produksi, dan pengiriman ke luar pulau.</p></details>
+        <details><summary>Kenapa undangan cetak lipat, bukan kartu QR kecil?</summary><p>Karena yang menerima undangan cetak biasanya orang tua dan sesepuh — kartu yang isinya hanya kode QR menuntut mereka membuka HP dulu. Undangan lipat memuat nama, tanggal, jam, dan alamat lengkap yang bisa langsung dibaca, dengan QR besar di halaman dalam bagi yang ingin membuka versi digitalnya. Kartu QR kecil tetap tersedia sebagai item satuan untuk yang ingin membagikannya secara luas.</p></details>
         <details><summary>Bagaimana kalau ada salah ketik?</summary><p>Sebelum produksi Anda menerima proof untuk disetujui. Salah cetak dari pihak kami (hasil beda dari proof): cetak ulang gratis dan dikirim ekspres. Kesalahan yang sudah tampak di proof yang disetujui menjadi tanggung jawab pemesan — karena itu periksa proof baik-baik, kami bantu checklist-nya.</p></details>
         <details><summary>Ongkirnya benar gratis ke mana saja?</summary><p>Ya, ke seluruh Indonesia, satu alamat per pesanan, dikirim dengan kurir ber-SLA dan nomor resi yang kami kirimkan ke Anda.</p></details>
         <details><summary>Barang tiba rusak, bagaimana?</summary><p>Laporkan maksimal 2×24 jam setelah paket diterima dengan foto/video — barang rusak dalam pengiriman diganti baru tanpa biaya. Lengkapnya di <a href="<?php echo esc_url(home_url('/kebijakan-refund/')); ?>">Kebijakan Refund</a>.</p></details>

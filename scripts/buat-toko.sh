@@ -168,17 +168,17 @@ buat_produk_cetak() {
   echo "  - $sku dibuat (ID $id) — $nama @ Rp $harga"
 }
 
-buat_produk_cetak CETAK-HORMAT 'Paket Hormat — Digital + 150 Kartu QR' 1190000 2 \
-  'Undangan digital lengkap + 150 kartu undangan fisik ber-QR + 100 stiker segel. Gratis ongkir se-Indonesia.' \
-  '<ul><li>Undangan digital lengkap (setara paket Premium)</li><li>150 kartu undangan fisik ber-QR — tamu memindai, undangan digital terbuka</li><li>100 stiker segel amplop</li><li>Art carton 260gsm, laminasi doff, uji pindai per batch</li><li>Proof disetujui dulu, baru dicetak</li><li>Gratis ongkir ke seluruh Indonesia</li></ul><p>Pesanan diterima paling lambat H-21 sebelum acara.</p>'
+buat_produk_cetak CETAK-HORMAT 'Paket Hormat — Digital + 50 Undangan Cetak' 1190000 2 \
+  'Undangan digital lengkap + 50 undangan cetak lipat dua (A5) beserta amplop bernama tamu. Gratis ongkir se-Indonesia.' \
+  '<ul><li>Undangan digital lengkap (setara paket Premium)</li><li><strong>50 undangan cetak lipat dua</strong> (A4 dilipat jadi A5) — detail acara terbaca tanpa HP</li><li><strong>50 amplop dengan nama tamu tercetak</strong> — bukan tulis tangan</li><li>QR menuju undangan digital, dicetak besar di halaman dalam</li><li>Desain seragam dengan undangan digital Anda</li><li>Proof disetujui dulu, baru dicetak</li><li>Gratis ongkir ke seluruh Indonesia</li></ul><p>Untuk orang tua, sesepuh, dan atasan — yang pantas menerima undangan di tangan. Pesanan diterima paling lambat H-21 sebelum acara.</p>'
 
-buat_produk_cetak CETAK-RESEPSI 'Paket Resepsi — Digital + Kartu QR + Souvenir' 2900000 5 \
-  'Undangan digital custom + 150 kartu QR + 200 label souvenir + 100 kartu terima kasih + 100 stiker segel.' \
-  '<ul><li>Undangan digital custom</li><li>150 kartu undangan fisik ber-QR</li><li>200 label souvenir bernama &amp; bertanggal</li><li>100 kartu terima kasih</li><li>100 stiker segel amplop</li><li>Proof disetujui dulu, baru dicetak</li><li>Gratis ongkir ke seluruh Indonesia</li></ul><p>Pesanan diterima paling lambat H-21 sebelum acara.</p>'
+buat_produk_cetak CETAK-RESEPSI 'Paket Resepsi — Digital + 100 Undangan Cetak + Souvenir' 2900000 4 \
+  'Undangan digital custom + 100 undangan cetak lipat & amplop bernama + 200 label souvenir + 100 kartu terima kasih.' \
+  '<ul><li>Undangan digital custom</li><li><strong>100 undangan cetak lipat dua</strong> (A4 dilipat jadi A5)</li><li><strong>100 amplop dengan nama tamu tercetak</strong></li><li>200 label souvenir bernama &amp; bertanggal</li><li>100 kartu terima kasih</li><li>100 stiker segel amplop</li><li>Proof disetujui dulu, baru dicetak</li><li>Gratis ongkir ke seluruh Indonesia</li></ul><p>Untuk resepsi gedung: undangan di layar semua tamu, undangan cetak untuk yang dihormati. Pesanan diterima paling lambat H-21 sebelum acara.</p>'
 
-buat_produk_cetak CETAK-GRAND 'Paket Grand — Digital + Set Lengkap Resepsi Besar' 5900000 9 \
-  'Untuk resepsi besar berpanitia: 200 kartu QR holographic, 300 label souvenir, 300 kupon, hangtag, label seserahan, 15 ID card panitia.' \
-  '<ul><li>Undangan digital custom</li><li>200 kartu undangan ber-QR holographic</li><li>300 label souvenir + 300 kupon souvenir</li><li>150 hangtag + tali</li><li>Set label seserahan</li><li>15 ID card PVC panitia</li><li>Proof disetujui dulu, baru dicetak</li><li>Gratis ongkir ke seluruh Indonesia</li></ul><p>Pesanan diterima paling lambat H-21 sebelum acara.</p>'
+buat_produk_cetak CETAK-GRAND 'Paket Grand — Digital + 150 Undangan Cetak Premium' 5900000 7 \
+  'Untuk resepsi besar berpanitia: 150 undangan cetak premium + amplop bernama, 300 label souvenir, 300 kupon, hangtag, label seserahan, 15 ID card panitia.' \
+  '<ul><li>Undangan digital custom</li><li><strong>150 undangan cetak lipat dua premium</strong> (kertas lebih tebal, finishing khusus)</li><li><strong>150 amplop premium dengan nama tamu tercetak</strong></li><li>300 label souvenir + 300 kupon souvenir</li><li>150 hangtag + tali</li><li>Set label seserahan</li><li>15 ID card PVC panitia</li><li>Proof disetujui dulu, baru dicetak</li><li>Gratis ongkir ke seluruh Indonesia</li></ul><p>Untuk resepsi besar dengan panitia. Pesanan diterima paling lambat H-21 sebelum acara.</p>'
 
 echo "== F3.7. Pengiriman: satu metode gratis se-Indonesia =="
 # Keputusan terkunci: TIDAK ada zona per wilayah. Ongkir sudah dialokasikan
@@ -235,7 +235,8 @@ buat_satuan() {
   echo "  - $sku dibuat (ID $id) — $nama @ Rp $harga (min $minqty)"
 }
 
-buat_satuan SATUAN-KARTU-QR      'Kartu Undangan Ber-QR'          9500  100 'Art carton 260gsm, laminasi doff, uji pindai per batch. Minimum 100 pcs.'
+buat_satuan SATUAN-UNDANGAN-LIPAT 'Undangan Cetak Lipat + Amplop'  15000   50 'A4 dilipat jadi A5, beserta amplop dengan nama tamu tercetak. Desain seragam dengan undangan digital. Minimum 50 pcs.'
+buat_satuan SATUAN-KARTU-QR      'Kartu Undangan Ber-QR'          9500  100 'Kartu kecil ber-QR untuk dibagikan luas (bukan pengganti undangan cetak). Art carton 260gsm, laminasi doff. Minimum 100 pcs.'
 buat_satuan SATUAN-KARTU-HOLO    'Kartu Ber-QR Holographic'      14000  100 'Holographic foil + art carton 260gsm. Minimum 100 pcs.'
 buat_satuan SATUAN-LABEL-SOUV    'Label Souvenir'                 2000  200 'Label bernama & bertanggal untuk souvenir. Minimum 200 pcs.'
 buat_satuan SATUAN-HANGTAG       'Hangtag + Tali'                 3500  100 'Hangtag souvenir lengkap dengan tali. Minimum 100 pcs.'
@@ -243,3 +244,35 @@ buat_satuan SATUAN-TERIMA-KASIH  'Kartu Terima Kasih'             3500  100 'Kar
 buat_satuan SATUAN-STIKER-SEGEL  'Stiker Segel Undangan'          1500  100 'Stiker segel amplop undangan. Minimum 100 pcs.'
 buat_satuan SATUAN-SESERAHAN     'Set Label Seserahan (12 pcs)' 249000    1 'Satu set 12 label seserahan, desain selaras undangan.'
 buat_satuan SATUAN-IDCARD        'ID Card PVC Panitia'           25000   10 'ID card PVC untuk panitia acara. Minimum 10 pcs.'
+
+echo "== B1/A1 (keputusan owner 2026-08-06) — SKU upgrade & visibilitas =="
+# SKU upgrade dipakai halaman /upsell/. Harga dibulatkan (kredit efektif
+# Rp 300.000 flat): harga berakhiran 1.000 terbaca sebagai sisa pengurangan,
+# bukan harga yang ditetapkan.
+buat_upgrade() {
+  local sku="$1" nama="$2" harga="$3" ada
+  ada="$(wp wc product list --user="$ADMIN" --sku="$sku" --field=id | head -n1)"
+  if [ -n "$ada" ]; then echo "  - $sku sudah ada (ID $ada) — lewati"; return; fi
+  local id
+  id="$(wp wc product create --user="$ADMIN" --porcelain \
+    --name="$nama" --type=simple --sku="$sku" --regular_price="$harga" \
+    --virtual=false --sold_individually=true --catalog_visibility=hidden \
+    --categories="[{\"id\":$TERM_CETAK}]" \
+    --short_description='Upgrade dari undangan digital ke paket cetak. Kredit pembelian digital sudah dipotong.')"
+  echo "  - $sku dibuat (ID $id) @ Rp $harga"
+}
+buat_upgrade UPG-HORMAT  'Upgrade ke Paket Hormat'   890000
+buat_upgrade UPG-RESEPSI 'Upgrade ke Paket Resepsi' 2600000
+buat_upgrade UPG-GRAND   'Upgrade ke Paket Grand'   5600000
+
+# A1 — paket cetak & item satuan DISEMBUNYIKAN dari katalog/pencarian toko
+# sampai satu order uji internal tuntas. Halaman /harga/ & /satuan/ tetap
+# menampilkannya (keduanya membaca produk langsung), dan link add-to-cart tetap
+# berfungsi — yang ditutup hanya penemuan tak sengaja lewat /shop/.
+for sku in CETAK-HORMAT CETAK-RESEPSI CETAK-GRAND \
+           SATUAN-UNDANGAN-LIPAT SATUAN-KARTU-QR SATUAN-KARTU-HOLO SATUAN-LABEL-SOUV \
+           SATUAN-HANGTAG SATUAN-TERIMA-KASIH SATUAN-STIKER-SEGEL SATUAN-SESERAHAN SATUAN-IDCARD; do
+  pid="$(wp wc product list --user="$ADMIN" --sku="$sku" --field=id | head -n1)"
+  [ -n "$pid" ] && wp wc product update "$pid" --user="$ADMIN" --catalog_visibility=hidden > /dev/null 2>&1
+done
+echo "  - produk cetak & satuan disembunyikan dari /shop/ (A1)"

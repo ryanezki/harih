@@ -249,6 +249,30 @@ add_filter('woocommerce_add_to_cart_quantity', function ($qty, $product_id) {
 }, 10, 2);
 
 /* =========================================================================
+ * C1 (keputusan owner 2026-08-06) — order bernilai besar hanya lewat VA.
+ *
+ * Paket cetak berkisar Rp 1,19–5,9 juta. E-wallet & QRIS punya batas nominal
+ * per transaksi yang lebih rendah dan lebih sering gagal di angka sebesar itu;
+ * gagal bayar di langkah terakhir = order hilang setelah semua gesekan
+ * dilewati. Untuk keranjang di atas ambang, hanya virtual account & gerai
+ * yang ditawarkan.
+ * ========================================================================= */
+const UNDANGAN_AMBANG_VA = 2000000;
+
+add_filter('woocommerce_available_payment_gateways', function ($gateways) {
+    if (is_admin() || !function_exists('WC') || !WC()->cart) return $gateways;
+    $total = (float) WC()->cart->get_total('edit');
+    if ($total <= UNDANGAN_AMBANG_VA) return $gateways;
+
+    // Yang dipertahankan: semua VA + gerai retail (nominal besar aman).
+    foreach (array_keys($gateways) as $id) {
+        $aman = str_contains($id, '_va_') || str_contains($id, 'briva') || str_contains($id, 'indomaret') || str_contains($id, 'alfamart');
+        if (!$aman) unset($gateways[$id]);
+    }
+    return $gateways;
+}, 20);
+
+/* =========================================================================
  * F3.8 — nomor resi pengiriman: field order + kolom daftar pesanan.
  * Disimpan sebagai meta `_resi` (HPOS-aman lewat API CRUD order).
  * ========================================================================= */
