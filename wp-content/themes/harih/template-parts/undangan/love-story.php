@@ -24,8 +24,15 @@ $foto = $u['galeri'][1] ?? ($u['galeri'][0] ?? '');
        undangan lama yang berubah tampilannya tanpa diminta. */
     $kisah_item = [];
     $kisah_baris = array_filter(array_map('trim', explode("\n", $u['love_story'])));
+    // Satu baris bukan lini masa — butuh minimal dua babak agar terbaca sebagai
+    // rangkaian; kalimat tunggal ber-em-dash tetap tampil sebagai prosa.
+    if (count($kisah_baris) < 2) $kisah_baris = [];
     foreach ($kisah_baris as $b) {
-        if (preg_match('/^((?:\d{1,2}\s+)?(?:[\p{L}]+\s+)?\d{4})\s*[—–\-·:]\s*(.+)$/u', $b, $m)) {
+        // Label bebas selama pendek (≤ 22 karakter) dan diikuti pemisah:
+        // "2019 — …", "Maret 2026 — …", "Pertemuan pertama — …". Tidak semua
+        // pasangan berpacaran bertahun-tahun; ada yang hitungan bulan, jadi
+        // memaksa format tahun membuat fitur ini tidak terpakai (temuan owner).
+        if (preg_match('/^(.{1,22}?)\s*[—–]\s*(.+)$/u', $b, $m)) {
             $kisah_item[] = [$m[1], $m[2]];
         } else {
             $kisah_item = [];

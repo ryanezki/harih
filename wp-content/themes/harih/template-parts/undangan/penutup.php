@@ -16,8 +16,8 @@ if ($u['wa_cp'] !== '') {
     <p class="penutup-salam">Hormat kami,</p>
     <p class="penutup-nama"><?php echo esc_html(trim($u['nama_pria'] . ' & ' . $u['nama_wanita'], ' &')); ?></p>
 
-    <?php if (!empty($u['salam_islami'])) : ?>
-        <p class="penutup-wassalam">Wassalamu&rsquo;alaikum Warahmatullahi Wabarakatuh</p>
+    <?php if ($u['nuansa_teks']['penutup'] !== '') : ?>
+        <p class="penutup-wassalam"><?php echo wp_kses($u['nuansa_teks']['penutup'], []); ?></p>
     <?php endif; ?>
     <p class="penutup-maaf">Mohon maaf apabila terdapat kesalahan penulisan nama dan gelar.</p>
 

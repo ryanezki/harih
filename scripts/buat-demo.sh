@@ -29,7 +29,11 @@ BASE_URL="$(wp option get siteurl)"
 # sengaja saat membersihkan media. Provenance & lisensi: docs/aset-lisensi.md.
 ASET="$BASE_URL/wp-content/themes/harih/aset/demo"
 GALERI="[\"$ASET/harih-cincin-buket.jpg\",\"$ASET/harih-gaun-detail.jpg\",\"$ASET/harih-cincin-sepatu.jpg\"]"
-QRIS="https://api.qrserver.com/v1/create-qr-code/?size=480x480&data=$(printf '%s' "$BASE_URL" | sed 's|:|%3A|g; s|/|%2F|g')"
+# QRIS demo = aset LOKAL. Sebelumnya memakai api.qrserver.com dan layanan itu
+# mulai mengembalikan PNG kosong 498 byte — bingkai QRIS di demo jadi putih
+# melompong, persis di section yang menjual fitur amplop digital. Etalase tidak
+# boleh bergantung pada layanan pihak ketiga yang tidak kita kendalikan.
+QRIS="$ASET/harih-qris-demo.png"
 VIDEO="https://www.youtube.com/watch?v=M7lc1UVf-VE"
 
 buat_demo() {

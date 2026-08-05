@@ -28,17 +28,11 @@ $u = $args;
             </div>
         </div>
 
-        <div class="row-rsvp">
-            <div class="field">
-                <span>Jumlah Tamu</span>
-                <select name="jumlah" id="rsvp-jumlah">
-                    <?php for ($n = 1; $n <= 6; $n++) : ?><option value="<?php echo $n; ?>"><?php echo $n; ?> orang</option><?php endfor; ?>
-                </select>
-            </div>
-            <label class="field">
-                <span>No. WhatsApp <em class="opsional">(opsional)</em></span>
-                <input type="tel" name="wa" id="rsvp-wa" maxlength="20" inputmode="tel" placeholder="08xx">
-            </label>
+        <div class="field">
+            <span>Jumlah Tamu</span>
+            <select name="jumlah" id="rsvp-jumlah">
+                <?php for ($n = 1; $n <= 6; $n++) : ?><option value="<?php echo $n; ?>"><?php echo $n; ?> orang</option><?php endfor; ?>
+            </select>
         </div>
 
         <div class="field">

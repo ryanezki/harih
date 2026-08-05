@@ -99,6 +99,13 @@ $webhook = harih_form_webhook_url();
                 <h2>2. Mempelai</h2>
                 <label class="field"><span>Nama mempelai pria *</span>
                     <input type="text" name="nama_pria" maxlength="100" required placeholder="mis. Raka Pratama"></label>
+                <label class="field"><span>Nuansa undangan</span>
+                    <select name="nuansa">
+                        <?php foreach (harih_nuansa_daftar() as $harih_nk => $harih_nl) : ?>
+                        <option value="<?php echo esc_attr($harih_nk); ?>"<?php selected($harih_nk, 'islam'); ?>><?php echo esc_html($harih_nl); ?></option>
+                        <?php endforeach; ?>
+                    </select></label>
+                <p class="kartu-note">Menentukan salam pembuka, ayat/kutipan, salam penutup, dan tampil-tidaknya tanggal Hijriah. Pilih <strong>Tanpa unsur agama</strong> bila ingin undangan netral.</p>
                 <label class="field"><span>Orang tua mempelai pria</span>
                     <input type="text" name="ortu_pria" maxlength="150" placeholder="mis. Bapak Hendra & Ibu Sari"></label>
                 <div class="row-2">
@@ -163,7 +170,11 @@ $webhook = harih_form_webhook_url();
                 <h2>4. Kisah Cinta <span class="paket-badge">Favorit+</span></h2>
                 <label class="field"><span>Ceritakan singkat kisah kalian (opsional)</span>
                     <textarea name="love_story" id="love-story" rows="5" maxlength="2000" placeholder="2019 — Pertama bertemu di sebuah kedai kopi&#10;2023 — Lamaran di tempat yang sama&#10;2026 — Hari yang kami tunggu"></textarea></label>
-                <p class="kartu-note">Awali tiap baris dengan tahun (mis. <strong>2019 — Pertama bertemu</strong>) untuk tampil sebagai lini masa. Tanpa itu, ceritamu tampil sebagai satu paragraf.</p>
+                <p class="kartu-note">Dua format, pilih yang cocok — <strong>lini masa</strong> (dua baris atau lebih, tiap baris <em>Label — cerita</em>) atau <strong>paragraf</strong> biasa. Label boleh tahun, bulan, atau kata bebas: cocok untuk yang kenal bertahun-tahun maupun beberapa bulan.</p>
+                <div class="kisah-contoh">
+                    <button type="button" class="btn-mini" data-isi-kisah="linimasa">Contoh lini masa</button>
+                    <button type="button" class="btn-mini" data-isi-kisah="paragraf">Contoh paragraf</button>
+                </div>
                 <p class="counter"><span id="ls-count">0</span>/2000</p>
             </section>
 

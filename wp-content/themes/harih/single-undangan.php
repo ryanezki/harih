@@ -21,6 +21,18 @@ $paket   = harih_paket_aktif($id);
 $plus    = $paket !== 'hemat';   // fitur Favorit ke atas (§10)
 $premium = $paket === 'premium';
 
+// Nuansa keagamaan: undangan lama (tanpa meta `nuansa`) diturunkan dari
+// toggle `salam_islami` supaya tampilannya tidak berubah tanpa diminta.
+$nuansa = $m('nuansa');
+if ($nuansa === '' || !array_key_exists($nuansa, harih_nuansa_daftar())) {
+    $nuansa = $m('salam_islami') === '0' ? 'umum' : 'islam';
+}
+$nuansa_teks = harih_nuansa_teks($nuansa);
+// Penimpa per undangan (CS) — kosong = pakai bawaan nuansa.
+if ($m('salam_teks')  !== '') $nuansa_teks['salam']  = esc_html($m('salam_teks'));
+if ($m('ayat_teks')   !== '') $nuansa_teks['ayat']   = $m('ayat_teks');
+if ($m('ayat_sumber') !== '') $nuansa_teks['sumber'] = $m('ayat_sumber');
+
 $galeri = json_decode($m('galeri') ?: '[]', true);
 $galeri = is_array($galeri) ? array_values(array_filter(array_map('esc_url', $galeri))) : [];
 
@@ -67,13 +79,22 @@ $undangan = [
     'rundown'         => $m('rundown'),
     'catatan_lokasi'      => $m('catatan_lokasi'),
     'catatan_lokasi_akad' => $m('catatan_lokasi_akad'),
-    'salam_islami'    => $m('salam_islami') !== '0',
+    'nuansa'          => $nuansa,
+    'nuansa_teks'     => $nuansa_teks,
+    // Dipertahankan HANYA untuk kompatibilitas: undangan lama tidak punya meta
+    // `nuansa`, jadi nilainya diturunkan dari toggle Islami yang lama.
+    'salam_islami'    => $nuansa === 'islam',
 ];
 ?><!DOCTYPE html>
 <html <?php language_attributes(); ?>>
 <head>
 <meta charset="<?php bloginfo('charset'); ?>">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<?php /* iOS Safari mengubah deret angka panjang jadi tautan telepon biru —
+         nomor rekening & nomor HP di alamat kado jadi hampir tak terbaca di
+         atas latar gelap (temuan owner 2026-08-05). Tautan WA tetap berfungsi
+         karena ditulis sebagai <a> eksplisit. */ ?>
+<meta name="format-detection" content="telephone=no">
 <?php wp_head(); ?>
 </head>
 <body class="undangan-body is-locked">

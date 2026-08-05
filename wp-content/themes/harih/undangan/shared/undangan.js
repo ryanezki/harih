@@ -489,7 +489,6 @@
                 hadir: $('#rsvp-hadir').value,
                 jumlah: parseInt(($('#rsvp-jumlah') || {}).value || '1', 10),
                 sesi: ($('#rsvp-sesi') || {}).value || 'keduanya',
-                wa: (($('#rsvp-wa') || {}).value || '').trim(),
                 pesan: ($('#rsvp-pesan').value || '').trim(),
                 website: form.website.value // honeypot — manusia selalu kosong
             };

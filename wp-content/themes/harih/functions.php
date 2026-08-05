@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) exit;
  * pengunjung & LiteSpeed tetap menyajikan berkas lama meski file di server
  * sudah baru, dan perbaikan tampilan terlihat "tidak berpengaruh".
  */
-const HARIH_VERSION = '1.3.2';
+const HARIH_VERSION = '1.4.0';
 
 add_action('after_setup_theme', function () {
     add_theme_support('title-tag');
@@ -112,6 +112,81 @@ function harih_musik_library(): array {
         $dir . 'harih-romantis-hangat.mp3' => 'Romantis — hangat & mengalun',
         $dir . 'harih-piano-romantis.mp3'  => 'Piano Romantis — lembut',
     ];
+}
+
+/**
+ * Nuansa keagamaan undangan (evaluasi owner 2026-08-05).
+ *
+ * Customer hariH beragam agamanya; sebelumnya hanya ada toggle Islami on/off
+ * sehingga pasangan non-Muslim kehilangan salam pembuka & ayat sama sekali —
+ * padahal undangan Kristen, Hindu, Buddha, dan Konghucu punya konvensi
+ * salamnya sendiri yang sama kuatnya. Nilai `umum` sengaja disediakan untuk
+ * pasangan yang memilih tidak menampilkan unsur agama apa pun.
+ *
+ * Ketiga teks bisa ditimpa per undangan lewat meta `salam_teks`, `ayat_teks`,
+ * `ayat_sumber` — supaya CS bisa menyesuaikan tanpa menyentuh kode.
+ */
+function harih_nuansa_daftar(): array {
+    return [
+        'islam'    => 'Islam',
+        'kristen'  => 'Kristen',
+        'katolik'  => 'Katolik',
+        'hindu'    => 'Hindu',
+        'buddha'   => 'Buddha',
+        'konghucu' => 'Konghucu',
+        'umum'     => 'Tanpa unsur agama (umum)',
+    ];
+}
+
+function harih_nuansa_teks(string $nuansa): array {
+    $peta = [
+        'islam' => [
+            'salam'   => 'Assalamu&rsquo;alaikum Warahmatullahi Wabarakatuh',
+            'ayat'    => 'Dan di antara tanda-tanda (kebesaran)-Nya ialah Dia menciptakan pasangan-pasangan untukmu dari jenismu sendiri, agar kamu cenderung dan merasa tenteram kepadanya, dan Dia menjadikan di antaramu rasa kasih dan sayang.',
+            'sumber'  => 'QS. Ar-Rum: 21',
+            'penutup' => 'Wassalamu&rsquo;alaikum Warahmatullahi Wabarakatuh',
+            'hijriah' => true,
+        ],
+        'kristen' => [
+            'salam'   => 'Salam sejahtera bagi kita semua',
+            'ayat'    => 'Demikianlah mereka bukan lagi dua, melainkan satu. Karena itu, apa yang telah dipersatukan Allah, tidak boleh diceraikan manusia.',
+            'sumber'  => 'Matius 19:6',
+            'penutup' => 'Tuhan Yesus memberkati',
+            'hijriah' => false,
+        ],
+        'katolik' => [
+            'salam'   => 'Salam sejahtera dalam kasih Kristus',
+            'ayat'    => 'Demikianlah mereka bukan lagi dua, melainkan satu. Karena itu, apa yang telah dipersatukan Allah, tidak boleh diceraikan manusia.',
+            'sumber'  => 'Matius 19:6',
+            'penutup' => 'Berkah Dalem',
+            'hijriah' => false,
+        ],
+        'hindu' => [
+            'salam'   => 'Om Swastyastu',
+            'ayat'    => 'Semoga pikiran yang baik datang kepada kami dari segala penjuru.',
+            'sumber'  => 'Rgveda I.89.1',
+            'penutup' => 'Om Shanti, Shanti, Shanti, Om',
+            'hijriah' => false,
+        ],
+        'buddha' => [
+            'salam'   => 'Namo Buddhaya',
+            'ayat'    => 'Semoga semua makhluk hidup berbahagia.',
+            'sumber'  => 'Karaniya Metta Sutta',
+            'penutup' => 'Sabbe satta bhavantu sukhitatta',
+            'hijriah' => false,
+        ],
+        'konghucu' => [
+            'salam'   => 'Wei De Dong Tian',
+            'ayat'    => 'Jalan Suci itu bermula dari hubungan suami dan istri.',
+            'sumber'  => 'Zhong Yong XI: 5',
+            'penutup' => 'Xian You Yi De',
+            'hijriah' => false,
+        ],
+        'umum' => [
+            'salam' => '', 'ayat' => '', 'sumber' => '', 'penutup' => '', 'hijriah' => false,
+        ],
+    ];
+    return $peta[$nuansa] ?? $peta['umum'];
 }
 
 /**

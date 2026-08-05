@@ -80,6 +80,10 @@ Konsep: nama "hariH" adalah permainan kata *hari H*; huruf H terakhir diberi war
 | `logo-harih-wordmark.png` | 1200×400, transparan | Dokumen & situs, latar terang |
 | `logo-harih-wordmark-putih.png` | 1200×400, transparan | Latar gelap |
 
+## QRIS demo
+
+`aset/demo/harih-qris-demo.png` — QR code 480×480 berisi URL `https://harih.id`, dibuat lewat generator QR (QuickChart) dan **disimpan sebagai aset**, bukan dipanggil saat runtime. QR code sendiri bukan objek berhak cipta; yang penting di sini kemandirian: generator sebelumnya (`api.qrserver.com`) mulai mengembalikan PNG kosong 498 byte sehingga bingkai QRIS di undangan demo tampil putih melompong.
+
 ## Font (kartu og:image server-side, FU.1)
 
 Kartu `og:image` per undangan dirender di server dengan GD + FreeType, jadi berkas font harus **ikut di dalam tema** (bukan diambil dari Google Fonts saat runtime — tidak ada koneksi keluar saat render, dan preview WhatsApp tidak boleh bergantung pihak ketiga).

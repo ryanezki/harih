@@ -202,6 +202,30 @@
         if (state.uploading) { e.preventDefault(); e.returnValue = ''; }
     });
 
+    /* ---- Contoh isi Kisah Kami (evaluasi owner: sediakan template) ---- */
+    (function () {
+        var CONTOH = {
+            linimasa: 'Awal 2025 \u2014 Pertama bertemu lewat teman bersama\n' +
+                      'Juni 2025 \u2014 Perjalanan pertama berdua\n' +
+                      'Desember 2025 \u2014 Lamaran di hadapan kedua keluarga\n' +
+                      '2026 \u2014 Hari yang kami tunggu',
+            paragraf: 'Kami dipertemukan oleh teman yang sama pada awal tahun ini. ' +
+                      'Tidak butuh waktu lama untuk yakin, dan dengan restu kedua keluarga, ' +
+                      'kami memutuskan melanjutkannya ke jenjang pernikahan.'
+        };
+        var ta = document.getElementById('love-story');
+        document.querySelectorAll('[data-isi-kisah]').forEach(function (b) {
+            b.addEventListener('click', function () {
+                if (!ta) return;
+                var isi = CONTOH[b.getAttribute('data-isi-kisah')];
+                if (ta.value.trim() !== '' && !confirm('Ganti isi Kisah Kami dengan contoh ini?')) return;
+                ta.value = isi;
+                ta.dispatchEvent(new Event('input', { bubbles: true })); // penghitung karakter ikut segar
+                ta.focus();
+            });
+        });
+    })();
+
     form.addEventListener('submit', function (ev) {
         ev.preventDefault();
         if (state.uploading) return;

@@ -521,6 +521,24 @@ img { max-width: 100%; }
     margin: 0 auto 20px;
 }
 .acara-garis { margin: 22px auto; }
+/* Tautan Instagram mempelai. Tanpa aturan ini ia mewarisi gaya tautan bawaan
+   peramban — biru terang & ikon sebesar teks — yang merusak tipografi kartu
+   (temuan owner 2026-08-05). Sekarang: kecil, seredup teks pendukung, emas
+   saat disentuh. */
+.mempelai-ig {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    color: var(--c-ink-soft);
+    text-decoration: none;
+    font: 400 12.5px/1 var(--font-label, var(--font-body));
+    letter-spacing: .06em;
+    transition: color .3s ease;
+}
+.mempelai-ig svg { width: 14px; height: 14px; opacity: .85; }
+.mempelai-ig:hover, .mempelai-ig:focus-visible { color: var(--c-gold); }
+
 /* Kisah Kami sebagai timeline (FU.3) — garis rambut vertikal dengan titik
    emas per babak. Paragraf panjang di HP dilewati; daftar bertanggal dibaca. */
 .kisah-timeline {
@@ -1007,3 +1025,5 @@ img { max-width: 100%; }
     .gate-inner > .seal, .gate-bawah > * { animation: none; opacity: 1; transform: none; }
     .rekening-item::before, .rekening-item::after, .qris::before, .penutup-nama { animation: none; }
 }
+
+.cd-cal-baris { display: flex; justify-content: center; margin-top: 34px; }

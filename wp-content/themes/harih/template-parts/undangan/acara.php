@@ -41,7 +41,7 @@ if (!$kartu) return;
         <span class="acara-diamond" aria-hidden="true"></span>
         <h3 class="acara-jenis"><?php echo esc_html($k['jenis']); ?></h3>
         <p class="acara-tanggal"><?php echo esc_html(harih_format_tanggal($k['tanggal'])); ?></p>
-        <?php if ($u['salam_islami']) : ?><p class="tgl-hijriah" data-hijriah="<?php echo esc_attr($k['tanggal']); ?>"></p><?php endif; ?>
+        <?php if ($u['nuansa_teks']['hijriah']) : ?><p class="tgl-hijriah" data-hijriah="<?php echo esc_attr($k['tanggal']); ?>"></p><?php endif; ?>
         <?php if ($k['waktu'] !== '') : ?>
             <p class="acara-waktu"><?php echo esc_html($k['waktu']); ?> WIB</p>
         <?php endif; ?>

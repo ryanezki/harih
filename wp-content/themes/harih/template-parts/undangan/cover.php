@@ -36,7 +36,7 @@ $segel = trim($inisial($u['nama_pria']) . 'Â·' . $inisial($u['nama_wanita']), 'Â
             ?></h1>
             <?php if ($u['tanggal_resepsi'] !== '') : ?>
                 <p class="cover-date"><?php echo esc_html(harih_format_tanggal($u['tanggal_resepsi'])); ?></p>
-                <?php if ($u['salam_islami']) : ?><p class="tgl-hijriah" data-hijriah="<?php echo esc_attr($u['tanggal_resepsi']); ?>"></p><?php endif; ?>
+                <?php if ($u['nuansa_teks']['hijriah']) : ?><p class="tgl-hijriah" data-hijriah="<?php echo esc_attr($u['tanggal_resepsi']); ?>"></p><?php endif; ?>
             <?php endif; ?>
             <div class="gate-tamu">
                 <p class="gate-tamu-label">Kepada Yth.</p>
@@ -68,6 +68,6 @@ $segel = trim($inisial($u['nama_pria']) . 'Â·' . $inisial($u['nama_wanita']), 'Â
         <p><?php echo esc_html(harih_format_tanggal($u['tanggal_resepsi'])); ?></p>
         <i data-grow="44"></i>
     </div>
-    <?php if ($u['salam_islami']) : ?><p class="tgl-hijriah hero-hijriah" data-reveal data-delay="420" data-hijriah="<?php echo esc_attr($u['tanggal_resepsi']); ?>"></p><?php endif; ?>
+    <?php if ($u['nuansa_teks']['hijriah']) : ?><p class="tgl-hijriah hero-hijriah" data-reveal data-delay="420" data-hijriah="<?php echo esc_attr($u['tanggal_resepsi']); ?>"></p><?php endif; ?>
     <?php endif; ?>
 </section>
