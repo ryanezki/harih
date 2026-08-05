@@ -109,17 +109,18 @@ $undangan = [
 <main class="undangan" id="top">
 <?php
 get_template_part('template-parts/undangan/cover', null, $undangan);
+// Countdown tepat setelah halaman pembuka, SEBELUM salam (keputusan owner
+// 2026-08-05). Kalimat salam yang berakhir "…pada pernikahan kami:" jadi
+// langsung bersambung ke nama mempelai di bawahnya — itu inti masalahnya;
+// menaruh hitung mundur di sini menyelesaikannya sekaligus memberi kait di
+// layar kedua, sebelum pembaca sempat memutuskan berhenti menggulir.
+get_template_part('template-parts/undangan/countdown', null, $undangan);
 get_template_part('template-parts/undangan/salam', null, $undangan);
 get_template_part('template-parts/undangan/mempelai', null, $undangan);
 if (trim($undangan['turut_mengundang']) !== '') {
     get_template_part('template-parts/undangan/turut', null, $undangan);
 }
 get_template_part('template-parts/undangan/acara', null, $undangan);
-// Countdown SESUDAH acara (temuan owner 2026-08-05): salam ditutup kalimat
-// "…mengundang Bapak/Ibu/Saudara/i pada pernikahan kami:" — titik dua itu
-// menjanjikan nama mempelai, bukan angka hitung mundur. Urutan yang nyambung:
-// salam → siapa (mempelai) → kapan & di mana (acara) → tinggal berapa hari.
-get_template_part('template-parts/undangan/countdown', null, $undangan);
 
 if ($plus && $undangan['love_story'] !== '') {
     get_template_part('template-parts/undangan/love-story', null, $undangan);
@@ -138,6 +139,21 @@ get_template_part('template-parts/undangan/rsvp', null, $undangan);
 get_template_part('template-parts/undangan/penutup', null, $undangan);
 ?>
 </main>
+<?php if ($m('order_id') === 'demo') : ?>
+<?php /* Pemilih nuansa untuk halaman demo (keputusan owner 2026-08-05): calon
+         pemesan bisa mencoba sendiri tiap nuansa pada tema mana pun, tanpa
+         kami perlu membuat 21 undangan demo. Tidak pernah dirender di
+         undangan pelanggan. */ ?>
+<div class="pratinjau-nuansa" hidden>
+    <label for="pilih-nuansa">Nuansa</label>
+    <select id="pilih-nuansa">
+        <?php foreach (harih_nuansa_daftar() as $harih_nk => $harih_nl) : ?>
+        <option value="<?php echo esc_attr($harih_nk); ?>"<?php selected($harih_nk, $nuansa); ?>><?php echo esc_html($harih_nl); ?></option>
+        <?php endforeach; ?>
+    </select>
+    <span class="pratinjau-cap">pratinjau demo</span>
+</div>
+<?php endif; ?>
 <?php if ($undangan['musik_url'] !== '') : ?>
 <audio id="undangan-audio" src="<?php echo esc_url($undangan['musik_url']); ?>" loop preload="none"></audio>
 <?php $harih_musik_judul = harih_musik_library()[$undangan['musik_url']] ?? ''; ?>

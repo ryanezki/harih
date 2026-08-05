@@ -539,6 +539,58 @@ img { max-width: 100%; }
 .mempelai-ig svg { width: 14px; height: 14px; opacity: .85; }
 .mempelai-ig:hover, .mempelai-ig:focus-visible { color: var(--c-gold); }
 
+/* Pemilih nuansa halaman demo. Diletakkan di kiri-bawah supaya berpasangan
+   dengan tombol musik di kanan-bawah, dan diberi kapsul "pratinjau demo" agar
+   jelas ini alat bantu — bukan bagian dari undangan yang diterima tamu. */
+.pratinjau-nuansa {
+    position: fixed;
+    left: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 12px;
+    border: 1px solid color-mix(in srgb, var(--c-gold) 40%, transparent);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--c-bg) 78%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .16);
+    max-width: 46vw;
+}
+.pratinjau-nuansa label {
+    font: 400 9.5px/1 var(--font-label, var(--font-body));
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--c-gold);
+}
+.pratinjau-nuansa select {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 0;
+    background: transparent;
+    color: var(--c-ink);
+    font: 400 13.5px/1.2 var(--font-body);
+    padding: 2px 18px 2px 0;
+    max-width: 100%;
+    cursor: pointer;
+    background-image: linear-gradient(45deg, transparent 50%, var(--c-gold) 50%), linear-gradient(135deg, var(--c-gold) 50%, transparent 50%);
+    background-position: right 6px center, right 1px center;
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+}
+.pratinjau-nuansa select:focus-visible { outline: 1px solid var(--c-gold); outline-offset: 3px; }
+.pratinjau-nuansa option { color: #222; }
+.pratinjau-cap {
+    font: 400 9px/1 var(--font-label, var(--font-body));
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--c-ink-soft);
+    opacity: .8;
+}
+body.is-locked .pratinjau-nuansa { display: none; } /* gerbang tetap sinematik */
+
 /* Kisah Kami sebagai timeline (FU.3) — garis rambut vertikal dengan titik
    emas per babak. Paragraf panjang di HP dilewati; daftar bertanggal dibaca. */
 .kisah-timeline {

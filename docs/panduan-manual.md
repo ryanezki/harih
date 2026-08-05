@@ -190,7 +190,9 @@ Kalau salah satu di atas ternyata **tidak** jalan, itu insiden — lihat runbook
 
 Nuansa keagamaan (**Islam · Kristen · Katolik · Hindu · Buddha · Konghucu · tanpa unsur agama**) **tidak melekat pada tema** — keduanya dua setelan terpisah, jadi tema mana pun bisa dipasangkan dengan nuansa mana pun. Undangan demo sengaja memakai nuansa yang sama supaya yang terbandingkan hanyalah temanya.
 
-Untuk memperlihatkan nuansa lain pada tema mana pun, tambahkan `?nuansa=` di belakang link demo:
+**Cara termudah:** buka undangan demo mana pun, lalu pakai **pemilih “Nuansa” yang mengambang di kiri-bawah** — calon pemesan bisa mencoba sendiri tiap agama tanpa dipandu. Pemilih ini hanya ada di halaman demo, tidak pernah muncul di undangan pelanggan.
+
+Atau langsung lewat URL, tambahkan `?nuansa=` di belakang link demo:
 
 - `https://harih.id/u/demo-tema-01/?nuansa=kristen`
 - `https://harih.id/u/demo-tema-03/?nuansa=hindu`

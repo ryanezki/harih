@@ -350,6 +350,47 @@
         }, { once: true });
     })();
 
+    /* ---- Pemilih nuansa (halaman demo saja) ---- */
+    (function () {
+        var kotak = document.querySelector('.pratinjau-nuansa');
+        if (!kotak) return;
+        var pilih = $('#pilih-nuansa');
+        var url = new URL(window.location.href);
+
+        // Berpindah nuansa memuat ulang halaman; tanpa ini pengunjung harus
+        // menekan "Buka Undangan" dan menggulir ulang tiap kali membandingkan.
+        if (url.searchParams.get('buka') === '1') {
+            var gerbang = $('#gate');
+            if (gerbang) gerbang.classList.add('terbuka');
+            document.body.classList.remove('is-locked');
+            initProgress();
+            // Foto hero baru selesai dimuat setelah frame pertama, jadi satu
+            // requestAnimationFrame saja mendarat di posisi yang keburu bergeser.
+            // Diulang setelah `load` supaya berhenti tepat di blok salam.
+            var keSalam = function () {
+                var salam = document.getElementById('salam');
+                if (!salam) return;
+                // `scroll-behavior: smooth` di <html> membuat lompatan ini
+                // dianimasikan lalu tertelan animasi berikutnya — hasilnya
+                // halaman tetap di puncak. Dimatikan sesaat, lalu dikembalikan.
+                var akar = document.documentElement;
+                var simpan = akar.style.scrollBehavior;
+                akar.style.scrollBehavior = 'auto';
+                window.scrollTo(0, salam.getBoundingClientRect().top + window.scrollY - 8);
+                akar.style.scrollBehavior = simpan;
+            };
+            setTimeout(keSalam, 140);
+            window.addEventListener('load', function () { setTimeout(keSalam, 80); });
+        }
+
+        kotak.hidden = false;
+        pilih.addEventListener('change', function () {
+            url.searchParams.set('nuansa', pilih.value);
+            url.searchParams.set('buka', '1');
+            window.location.href = url.toString();
+        });
+    })();
+
     /* ---- Facade peta: iframe Google dimuat saat DIKLIK, bukan saat load ---- */
     (function () {
         var petas = document.querySelectorAll('.peta-facade[data-peta]');
