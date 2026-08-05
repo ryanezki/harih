@@ -27,6 +27,14 @@
     --c-gold: #b3954a;
     --radius: 16px;
     --shadow: 0 10px 30px rgba(30, 30, 25, .08);
+
+    /* Butiran kertas — SVG feTurbulence sebagai data-URI: nol request, dan
+       inilah pembeda terbesar antara "warna krem datar" dan "terasa seperti
+       kartu cetak". Di-tile di seluruh kolom undangan. */
+    --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.11'/%3E%3C/svg%3E");
+    /* Tint section selang-seling. Sengaja rgba, bukan warna solid, supaya
+       butiran kertas tetap tembus di section yang ber-tint. */
+    --tint-alt: rgba(0, 0, 0, .028);
 }
 
 * { box-sizing: border-box; }
@@ -52,26 +60,50 @@ img { max-width: 100%; }
     max-width: 480px;
     margin: 0 auto;
     min-height: 100svh;
-    background: var(--c-bg);
+    background-color: var(--c-bg);
+    background-image: var(--grain);
     box-shadow: 0 0 60px rgba(0, 0, 0, .12);
     overflow: clip;
 }
 
-.section { padding: 72px 28px; text-align: center; }
+.section { padding: 76px 28px; text-align: center; position: relative; }
+
+/* Irama: dua section selalu-ada diberi tint supaya kolom tidak terbaca
+   sebagai satu blok krem tanpa ujung. Keduanya tidak pernah berdempetan
+   kecuali paket Hemat (tanpa galeri/amplop) — dan di kasus itu pun tetap
+   terbaca wajar. */
+.section.acara, .section.rsvp { background: var(--tint-alt); }
+
+/* Garis rambut pemisah antar section — sangat tipis, memberi struktur tanpa
+   menambah elemen apa pun ke markup. */
+.section + .section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 62%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--c-line), transparent);
+}
 
 .section-title {
-    font: 500 30px/1.25 var(--font-display);
+    font: 500 clamp(31px, 8.4vw, 37px)/1.18 var(--font-display);
     color: var(--c-ink);
+    letter-spacing: -.012em;
     margin: 0 0 30px;
 }
+/* Ornamen khas tema menggantikan garis emas polos. Tiap tema sudah punya
+   motifnya sendiri (--ornament) tapi sebelumnya hanya dipakai di cover &
+   penutup — memakainya di SETIAP judul membuat identitas tema terasa
+   sepanjang halaman, bukan cuma di pembuka. */
 .section-title::after {
     content: '';
     display: block;
-    width: 56px;
-    height: 2px;
-    margin: 16px auto 0;
-    background: var(--c-gold);
-    border-radius: 2px;
+    width: 148px;
+    height: 30px;
+    margin: 15px auto 0;
+    background: center / contain no-repeat var(--ornament, none);
 }
 
 .section-intro, .prose {
@@ -80,6 +112,25 @@ img { max-width: 100%; }
     margin: 0 0 26px;
 }
 .prose { text-align: center; margin-bottom: 0; }
+
+/* Kisah cinta sebelumnya hanya paragraf abu-abu rata tengah — tidak terbaca
+   sebagai bagian yang istimewa padahal itu bagian paling personal di seluruh
+   undangan. Sekarang: huruf display miring + tanda kutip besar sebagai
+   ornamen pembuka. */
+.love-story .prose {
+    font: italic 400 clamp(16px, 4.3vw, 18px)/1.9 var(--font-display);
+    color: var(--c-ink);
+    position: relative;
+    padding-top: 10px;
+}
+.love-story .prose::before {
+    content: '\201C';
+    display: block;
+    font: 400 62px/0.6 var(--font-display);
+    color: var(--c-gold);
+    opacity: .5;
+    margin-bottom: 12px;
+}
 
 .ornament {
     width: 150px;
@@ -98,9 +149,11 @@ img { max-width: 100%; }
     letter-spacing: .04em;
     color: var(--c-accent-ink);
     background: var(--c-accent);
-    padding: 14px 28px;
+    padding: 15px 30px;
     border-radius: 999px;
     text-decoration: none;
+    letter-spacing: .06em;
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--c-accent) 26%, transparent);
     transition: transform .15s ease, box-shadow .15s ease;
 }
 .btn:active { transform: scale(.97); }
@@ -131,13 +184,24 @@ img { max-width: 100%; }
     background-image: var(--cover-image);
     background-size: cover;
     background-position: center;
+    /* Zoom sangat lambat — memberi kesan hidup tanpa terasa "bergerak".
+       Dimatikan pada prefers-reduced-motion di bagian bawah berkas ini. */
+    animation: undangan-kenburns 24s ease-out forwards;
+}
+@keyframes undangan-kenburns {
+    from { transform: scale(1); }
+    to   { transform: scale(1.075); }
 }
 .cover::after {
     content: '';
     position: absolute;
     inset: 0;
     z-index: -1;
-    background: var(--cover-overlay, linear-gradient(180deg, rgba(0, 0, 0, .25), rgba(0, 0, 0, .55)));
+    /* Vignette radial di atas gradasi tema: menarik pandangan ke tengah dan
+       menambah kedalaman — trik lama fotografi, murah dan efektif. */
+    background:
+        radial-gradient(120% 88% at 50% 42%, transparent 38%, rgba(0, 0, 0, .34) 100%),
+        var(--cover-overlay, linear-gradient(180deg, rgba(0, 0, 0, .25), rgba(0, 0, 0, .55)));
 }
 .cover-inner {
     color: var(--cover-ink, #fff);
@@ -163,7 +227,7 @@ img { max-width: 100%; }
     opacity: 1;
     text-shadow: 0 1px 3px rgba(0, 0, 0, .75), 0 1px 14px rgba(0, 0, 0, .5);
 }
-.cover-names { margin: 4px 0 0; font: 500 clamp(34px, 9vw, 44px)/1.15 var(--font-display); }
+.cover-names { margin: 4px 0 0; font: 500 clamp(38px, 10.5vw, 52px)/1.12 var(--font-display); letter-spacing: -.015em; }
 .cover-names .amp { display: block; font-style: italic; font-size: .55em; opacity: .85; margin: 2px 0; }
 .cover-date { margin: 0; font-size: 14px; letter-spacing: .08em; }
 .cover-to { margin: 20px 0 2px; font-size: 13px; opacity: .92; }
@@ -171,44 +235,80 @@ img { max-width: 100%; }
 .btn-open { margin-top: 12px; }
 
 /* ---- 2. Countdown ---- */
-.countdown-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.countdown-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; }
+/* Sebelumnya empat kotak putih ber-shadow — elemen paling generik di seluruh
+   halaman. Sekarang: permukaan tenang dengan bingkai rambut emas, angka pakai
+   huruf display, dan angka rata dengan tabular-nums supaya tidak "melompat"
+   tiap detik berubah. */
 .cd-tile {
+    position: relative;
     background: var(--c-surface);
-    border-radius: var(--radius);
-    padding: 16px 4px 12px;
-    box-shadow: var(--shadow);
-    border-top: 2px solid var(--c-gold);
+    border-radius: 12px;
+    padding: 18px 4px 13px;
+    box-shadow:
+        inset 0 0 0 1px color-mix(in srgb, var(--c-gold) 42%, transparent),
+        0 6px 18px rgba(0, 0, 0, .05);
 }
-.cd-num { display: block; font: 600 26px/1 var(--font-display); }
-.cd-label { display: block; margin-top: 6px; font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: var(--c-ink-soft); }
-.countdown-done { color: var(--c-ink-soft); font-size: 15px; margin: 0; }
+.cd-tile::after {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border-radius: 8px;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c-gold) 18%, transparent);
+    pointer-events: none;
+}
+.cd-num {
+    display: block;
+    font: 500 clamp(26px, 7.6vw, 32px)/1 var(--font-display);
+    color: var(--c-ink);
+    font-variant-numeric: tabular-nums;
+}
+.cd-label {
+    display: block;
+    margin-top: 7px;
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: .16em;
+    color: var(--c-ink-soft);
+}
+.countdown-done { color: var(--c-ink-soft); font-size: 15px; margin: 0; font-style: italic; }
 
 /* ---- 3. Mempelai ---- */
+/* Cincin ganda — mengulang bingkai ganda di cover tanpa foto, jadi motifnya
+   terbaca sebagai bahasa desain yang sama, bukan dua ide berbeda. */
 .monogram {
-    width: 72px;
-    height: 72px;
-    margin: 0 auto 14px;
+    position: relative;
+    width: 84px;
+    height: 84px;
+    margin: 0 auto 16px;
     border-radius: 50%;
     display: grid;
     place-items: center;
-    font: 500 30px/1 var(--font-display);
+    font: 500 34px/1 var(--font-display);
     color: var(--c-accent);
     background: var(--c-surface);
-    box-shadow: inset 0 0 0 1.5px var(--c-gold);
+    box-shadow: inset 0 0 0 1px var(--c-gold);
 }
-.mempelai-nama { font: 500 24px/1.3 var(--font-display); margin: 0 0 6px; }
+.monogram::after {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c-gold) 38%, transparent);
+}
+.mempelai-nama { font: 500 clamp(25px, 6.6vw, 29px)/1.28 var(--font-display); margin: 0 0 6px; }
 .mempelai-ortu { margin: 0; font-size: 14px; color: var(--c-ink-soft); }
-.mempelai-amp { font: 400 40px/1 var(--font-display); font-style: italic; color: var(--c-gold); margin: 22px 0; }
+.mempelai-amp { font: 400 46px/1 var(--font-display); font-style: italic; color: var(--c-gold); margin: 26px 0; opacity: .85; }
 
 /* ---- 4. Acara ---- */
 .acara-card {
     background: var(--c-surface);
     border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 24px;
+    box-shadow: var(--shadow), inset 0 0 0 1px var(--c-line);
+    padding: 26px 24px;
     margin: 0 0 14px;
 }
-.acara-jenis { font: 500 20px/1.2 var(--font-display); margin: 0 0 10px; color: var(--c-accent); }
+.acara-jenis { font: 500 22px/1.2 var(--font-display); margin: 0 0 12px; color: var(--c-accent); }
 .acara-tanggal { margin: 0; font-weight: 500; }
 .acara-waktu { margin: 4px 0 0; color: var(--c-ink-soft); font-size: 14px; }
 .acara-lokasi { margin: 20px 0 22px; }
@@ -223,8 +323,17 @@ img { max-width: 100%; }
     object-fit: cover;
     border-radius: 12px;
     display: block;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, .10);
 }
-.galeri-grid img:first-child { grid-column: 1 / -1; aspect-ratio: 4 / 3; }
+/* Foto pertama jadi potret beratap lengkung — bentuk pelaminan/arch yang
+   langsung terbaca sebagai "pernikahan", dan mengangkat galeri dari sekadar
+   kisi kotak. */
+.galeri-grid img:first-child {
+    grid-column: 1 / -1;
+    aspect-ratio: 4 / 4.6;
+    border-radius: 999px 999px 14px 14px;
+    margin-bottom: 2px;
+}
 
 /* ---- 7. Video ---- */
 .video-frame {
@@ -296,7 +405,7 @@ img { max-width: 100%; }
 .rsvp-msg.error { color: #a4442f; }
 
 .ucapan-list { margin-top: 26px; display: flex; flex-direction: column; gap: 10px; text-align: left; }
-.ucapan-item { background: var(--c-surface); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px; }
+.ucapan-item { background: var(--c-surface); border-radius: var(--radius); box-shadow: var(--shadow), inset 0 0 0 1px var(--c-line); padding: 14px 16px; }
 .ucapan-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .ucapan-nama { font-weight: 600; font-size: 14px; }
 .badge {
@@ -317,7 +426,7 @@ img { max-width: 100%; }
 .penutup { padding-bottom: 96px; }
 .penutup-teks { color: var(--c-ink-soft); font-size: 15px; }
 .penutup-salam { margin: 26px 0 4px; font-size: 14px; color: var(--c-ink-soft); }
-.penutup-nama { font: 500 26px/1.3 var(--font-display); margin: 0 0 26px; }
+.penutup-nama { font: 500 clamp(28px, 7.4vw, 33px)/1.28 var(--font-display); margin: 0 0 26px; letter-spacing: -.01em; }
 .penutup-cp { margin: 14px 0 0; font-size: 13px; }
 .penutup-cp a { color: var(--c-accent); }
 .credit { margin-top: 56px; font-size: 12px; color: var(--c-ink-soft); }
@@ -355,4 +464,5 @@ img { max-width: 100%; }
     html { scroll-behavior: auto; }
     [data-reveal] { opacity: 1; transform: none; transition: none; }
     .music-toggle.playing span { animation: none; }
+    .cover.has-photo::before { animation: none; }
 }

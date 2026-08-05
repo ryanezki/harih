@@ -77,3 +77,9 @@ body.undangan-body {
 
 /* Tile countdown ikut motif lengkung */
 .cd-tile { border-radius: 14px 14px var(--radius) var(--radius); }
+.cd-tile::after { border-radius: 10px 10px 14px 14px; }
+
+/* Lengkung adalah motif utama tema ini — foto galeri pertama dibuat lebih
+   tinggi & lebih melengkung daripada default supaya bentuknya benar-benar
+   terbaca sebagai arch, bukan sekadar sudut membulat. */
+.galeri-grid img:first-child { aspect-ratio: 4 / 5.1; border-radius: 999px 999px 18px 18px; }

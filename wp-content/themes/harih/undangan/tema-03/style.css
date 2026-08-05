@@ -41,6 +41,14 @@
 
 /* Prata hanya punya weight 400 — browser mensintesis 500/600; aman */
 
+/* Di latar gelap, tint section harus LEBIH TERANG (bukan lebih gelap seperti
+   default shared), dan butiran kertas diperhalus supaya tidak terbaca sebagai
+   noise/derau pada navy pekat. */
+:root {
+    --tint-alt: rgba(255, 255, 255, .035);
+    --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.10'/%3E%3C/svg%3E");
+}
+
 /* Taburan bintang halus di latar luar kolom (terlihat di desktop) */
 body.undangan-body {
     background-image: radial-gradient(rgba(201, 164, 92, .10) 1px, transparent 1.6px);
