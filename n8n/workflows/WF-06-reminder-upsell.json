@@ -1,0 +1,179 @@
+{
+  "id": "HARIHUPSELL00006",
+  "name": "WF-06 — Reminder Upsell Cetak (hariH)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * *"
+            }
+          ]
+        }
+      },
+      "id": "wf06-jadwal",
+      "name": "Harian 09:00 WIB",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1120,
+        0
+      ],
+      "notes": "09:00 supaya tidak berbarengan dengan WF-05 (08:00) — WAHA satu sesi, kirim beruntun lebih aman daripada bertabrakan."
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.WP_URL }}/wp-json/wc/v3/orders",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "status",
+              "value": "processing,completed"
+            },
+            {
+              "name": "per_page",
+              "value": "100"
+            },
+            {
+              "name": "after",
+              "value": "={{ new Date(Date.now() - 40 * 86400000).toISOString() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "wf06-ambil-order",
+      "name": "Ambil Order 40 Hari (WC REST)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -900,
+        0
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "HARIHWCREST00001",
+          "name": "WC REST hariH"
+        }
+      },
+      "notes": "Jendela 40 hari cukup untuk menangkap H+3 & H+12 sekaligus menyediakan riwayat untuk memeriksa apakah pembeli sudah pernah pesan cetak."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const crypto = require('crypto');\n\n// Sumber kebenaran jenis produk = SKU, sama persis dengan mu-plugin cetak.php\n// dan WF-01. Jangan menebak dari nama produk (pelajaran bug tier F3.2).\nfunction jenisItem(li) {\n  const sku = String(li.sku || '').toUpperCase();\n  if (sku.startsWith('HARIH-')) return 'digital';\n  if (sku.startsWith('CETAK-') || sku.startsWith('UPG-')) return 'hybrid';\n  if (sku.startsWith('SATUAN-')) return 'satuan';\n  return /hemat|favorit|premium/i.test(String(li.name || '')) ? 'digital' : 'satuan';\n}\n\nfunction normalisasiWa(input) {\n  let d = String(input || '').replace(/\\D/g, '');\n  if (!d) return '';\n  if (d.startsWith('0')) d = '62' + d.slice(1);\n  else if (d.startsWith('620')) d = '62' + d.slice(3);\n  else if (d.startsWith('8')) d = '62' + d;\n  if (!d.startsWith('62') || d.length < 10 || d.length > 15) return '';\n  return d;\n}\n\nconst semua = $input.all().map((i) => i.json).filter((o) => o && o.id);\n\n// Pembeli yang PERNAH memesan cetak tidak boleh ditawari lagi — dicek lintas\n// seluruh riwayat 40 hari, dikunci pada nomor WA & email (satu orang bisa\n// memesan dua kali dengan email berbeda).\nconst sudahCetak = new Set();\nfor (const o of semua) {\n  const punyaCetak = (o.line_items || []).some((li) => ['hybrid', 'satuan'].includes(jenisItem(li)));\n  if (!punyaCetak) continue;\n  const wa = normalisasiWa((o.billing || {}).phone);\n  const em = String((o.billing || {}).email || '').toLowerCase();\n  if (wa) sudahCetak.add('wa:' + wa);\n  if (em) sudahCetak.add('em:' + em);\n}\n\nconst HARI_MS = 86400000;\nconst hariIni = new Date(new Date().toISOString().slice(0, 10) + 'T00:00:00Z').getTime();\nconst keluar = [];\n\nfor (const o of semua) {\n  const items = o.line_items || [];\n  if (!items.length) continue;\n\n  // Hanya pembeli DIGITAL murni — yang sudah beli cetak tidak ditawari apa pun.\n  const semuaDigital = items.every((li) => jenisItem(li) === 'digital');\n  if (!semuaDigital) continue;\n\n  const wa = normalisasiWa((o.billing || {}).phone);\n  const em = String((o.billing || {}).email || '').toLowerCase();\n  if (!wa) continue;\n  if (sudahCetak.has('wa:' + wa) || sudahCetak.has('em:' + em)) continue;\n\n  const dibayar = o.date_paid_gmt || o.date_created_gmt || '';\n  if (!dibayar) continue;\n  const tglBayar = new Date(dibayar.slice(0, 10) + 'T00:00:00Z').getTime();\n  const umur = Math.round((hariIni - tglBayar) / HARI_MS);\n\n  // Dua ketukan saja: H+3 (masih hangat) dan H+12 (dua hari sebelum kredit\n  // 14 hari habis). Lebih dari itu berubah jadi gangguan, bukan pengingat.\n  if (umur !== 3 && umur !== 12) continue;\n\n  if (!$env.FORM_TOKEN_SECRET) throw new Error('Env FORM_TOKEN_SECRET belum di-set di container n8n');\n  const token = crypto.createHmac('sha256', $env.FORM_TOKEN_SECRET).update(String(o.id)).digest('hex').slice(0, 16);\n  const link = `${$env.WP_URL}/upsell/?order=${o.id}&key=${token}`;\n  const namaDepan = (o.billing || {}).first_name || 'Kak';\n  const sisaHari = 14 - umur;\n\n  const teks = umur === 3\n    ? `Halo ${namaDepan} 🤍\\n\\nUndangan digitalmu sudah tayang. Satu hal yang sering ditanyakan pemesan lain: *bagaimana dengan orang tua dan sesepuh yang kurang terbiasa dengan HP?*\\n\\nUntuk mereka ada undangan cetak lipat beserta amplop bernama tamu — desainnya sama persis dengan undangan digitalmu, dikerjakan dari data yang sudah kamu isi. Yang sudah kamu bayar dihitung sebagai kredit (berlaku ${sisaHari} hari lagi):\\n${link}\\n\\nKalau tidak perlu, abaikan saja pesan ini ya 🙏\\n— hariH`\n    : `Halo ${namaDepan} 🤍\\n\\nPengingat singkat: kredit untuk naik ke paket cetak *berakhir ${sisaHari} hari lagi*.\\n\\nUndangan cetak lipat + amplop bernama tamu untuk orang tua & sesepuh, desain sama dengan undangan digitalmu:\\n${link}\\n\\nSetelah itu harga kembali normal. Ini pengingat terakhir dari kami 🙏\\n— hariH`;\n\n  keluar.push({ json: { order_id: String(o.id), nama_depan: namaDepan, wa, umur, sisa_hari: sisaHari, link, teks } });\n}\n\nreturn keluar;"
+      },
+      "id": "wf06-pilih",
+      "name": "Pilih Penerima & Susun Pesan",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -680,
+        0
+      ],
+      "notes": "Aturan: hanya pembeli digital murni, belum pernah pesan cetak, tepat H+3 atau H+12 sejak pembayaran."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.WAHA_URL }}/api/sendText",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "={{ $env.WAHA_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ session: 'default', chatId: $json.wa + '@c.us', text: $json.teks }) }}",
+        "options": {}
+      },
+      "id": "wf06-kirim",
+      "name": "Kirim WA (WAHA)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -460,
+        0
+      ],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput",
+      "notes": "Gagal kirim TIDAK boleh menghentikan penerima lain — pengingat bukan pesan transaksional."
+    },
+    {
+      "parameters": {},
+      "id": "wf06-selesai",
+      "name": "Selesai",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Harian 09:00 WIB": {
+      "main": [
+        [
+          {
+            "node": "Ambil Order 40 Hari (WC REST)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ambil Order 40 Hari (WC REST)": {
+      "main": [
+        [
+          {
+            "node": "Pilih Penerima & Susun Pesan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pilih Penerima & Susun Pesan": {
+      "main": [
+        [
+          {
+            "node": "Kirim WA (WAHA)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kirim WA (WAHA)": {
+      "main": [
+        [
+          {
+            "node": "Selesai",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": "WF-00"
+  }
+}

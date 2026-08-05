@@ -304,6 +304,18 @@ add_action('woocommerce_init', function () {
     ]);
 });
 
+/** Sisa slot produksi bulan berjalan (di-cache 10 menit — dipanggil tiap
+ *  pemuatan halaman harga, dan hitungannya menyapu order). */
+function undangan_sisa_slot(): int {
+    $kunci = 'harih_sisa_slot_' . gmdate('Y-m');
+    $sisa  = get_transient($kunci);
+    if ($sisa === false) {
+        $sisa = max(0, UNDANGAN_KUOTA_BULAN - undangan_kuota_terpakai());
+        set_transient($kunci, $sisa, 10 * MINUTE_IN_SECONDS);
+    }
+    return (int) $sisa;
+}
+
 /** Jumlah pesanan cetak yang sudah masuk pada bulan berjalan. */
 function undangan_kuota_terpakai(): int {
     $orders = wc_get_orders([

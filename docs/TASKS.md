@@ -46,6 +46,7 @@
 
 **2026-08-06 — PERUBAHAN BESAR: percetakan & alat milik sendiri, produk cetak jadi undangan lipat.** Owner ternyata sudah punya bisnis percetakan dengan peralatan lengkap, jadi **fase subkontrak (F1.2) gugur** — tidak ada modal alat yang perlu dikeluarkan dan tidak ada pihak ketiga yang perlu dicari. Produk cetak juga berubah dari kartu QR 55×85mm menjadi **undangan lipat dua (A4→A5) beserta amplop bernama tamu**: penerima undangan cetak umumnya orang tua & sesepuh, dan kartu yang isinya hanya QR menuntut mereka membuka HP dulu. Jumlah per paket **turun** (150/150/200 → 50/100/150) sementara harga paket tetap — mutu naik, jam mesin turun.
 
+> ✅ **Metrik pengendali sudah terjawab (F1.7a, 6 Agu):** percetakan reguler Rp 100–200rb/jam, undangan hybrid ±Rp 580rb/jam — **lulus 3–6× lipat**, dengan ruang membengkak sampai ±13 jam/order sebelum kalah dari pekerjaan reguler. Catatan aslinya:
 > ⚠️ **Metrik pengendali berubah total.** Patokan lama "≥ Rp 600rb/jam" tidak lagi relevan; kapasitas bukan tak terbatas melainkan **jam mesin yang selama ini dipakai order percetakan reguler**. Undangan wajib **mengalahkan marjin per jam bisnis cetak yang sekarang** — kalau tidak, ini hanya memindahkan uang dari kantong kiri ke kanan sambil menambah risiko deadline pernikahan. **Angka itu belum ada dan harus dihitung lebih dulu** (F1.7a).
 
 **Menunggu keputusan owner:** daftar lengkap + saran per poin ada di [`konfirmasi-owner.md`](./konfirmasi-owner.md) — dibuat 2026-08-06 setelah F3, dipimpin satu celah mendesak (paket cetak sudah bisa dibeli langsung tanpa konfirmasi slot).
@@ -163,8 +164,12 @@
 
 *Target fase ini: **5 order cetak nyata, disubkontrakkan, dengan biaya & waktu tercatat.*** Yang dicari bukan efisiensi — yang dicari angka pengganti tebakan.
 
-- [ ] **F1.7a** 🔴 👤 **Hitung marjin per jam bisnis cetak yang sekarang**
-  **Angka penentu tunggal.** Semua keputusan lain menggantung padanya: bila order reguler menghasilkan Rp 400rb/jam, undangan wajib di atas itu. Tanpa angka ini kita tidak tahu apakah lini undangan layak dikerjakan sama sekali — bukan "apakah untung", tapi "apakah lebih untung dari pekerjaan yang jamnya ia rebut".
+- [x] **F1.7a** **Marjin per jam bisnis cetak yang sekarang** → **TERJAWAB 2026-08-06**
+  **Percetakan reguler: Rp 100.000–200.000/jam marjin kotor. Undangan hybrid Rp 2,9 juta: ±Rp 580.000/jam.**
+  **Artinya gerbang kelayakan LULUS dengan jarak lebar — 3–6× lipat.** Ini bukan sekadar "untung", tapi lebih untung daripada pekerjaan yang jamnya ia rebut, yang memang satu-satunya pertanyaan yang relevan begitu mesinnya milik sendiri.
+  **Ruang aman yang dibeli angka itu:** pada marjin ±Rp 2,6 juta per Paket Resepsi, ±Rp 580rb/jam berarti waktu produksi ±4,5 jam/order. Supaya tetap **di atas** patokan tertinggi pekerjaan reguler (Rp 200rb/jam), waktu produksi boleh membengkak sampai **±13 jam/order** — hampir tiga kali lipat dari estimasi sekarang. Jadi meleset satu-dua jam tidak membatalkan apa pun; yang perlu diawasi hanya pembengkakan ekstrem (mis. lipat manual 800 lembar/bulan).
+  **Kuota 8/bulan konsisten dengan ini:** 8 × 4,5 jam ≈ **36 jam mesin per bulan** — porsi yang masuk akal diambil dari jadwal reguler, dan justru pemakaian jam yang paling menguntungkan.
+  ⚠️ **Yang tetap harus diukur (F1.7):** angka 4,5 jam masih estimasi. Yang membuatnya bisa runtuh cuma satu: **lipat manual**. Karena itu pemeriksaan mesin creasing di F1.1 tetap wajib sebelum kuota dinaikkan.
 
 - [ ] **F1.1** 🔴 👤 **Cetak satu undangan lipat + amplop lengkap — hari ini**
   Satu sampel menjawab empat hal sekaligus: **bobot nyata** (untuk ongkir yang kita tanggung), **waktu lipat per unit**, **uji pindai QR** (di A5 lipat, QR bisa dicetak jauh lebih besar dan tanpa laminasi doff — hampir pasti lolos), dan mutu amplop bernama.
@@ -306,7 +311,8 @@
 
 - [ ] **F4.7** **Antrean produksi** — diurutkan berdasarkan **deadline, bukan tanggal order**; batch dikelompokkan berdasarkan **bahan & finishing, bukan per pelanggan**.
 
-- [ ] **F4.8** **Upsell otomatis** menggantikan versi manual — baru dibangun setelah F3.10 memberi tahu keberatan apa yang sebenarnya muncul.
+- [x] **F4.8a** **Pengingat upsell otomatis (WF-06)** → **SELESAI & LIVE 2026-08-06** — workflow terjadwal 09:00 WIB, **9 workflow aktif** sekarang. Menyapu order 40 hari terakhir lewat WC REST, memilih **pembeli digital murni yang belum pernah memesan cetak** (dicek lintas riwayat by nomor WA **dan** email — satu orang bisa memesan dengan email berbeda), lalu mengirim WA tepat di **H+3** ("bagaimana dengan orang tua yang kurang terbiasa HP?") dan **H+12** (kredit tinggal 2 hari). Dua ketukan saja; lebih dari itu berubah jadi gangguan. Gagal kirim ke satu orang tidak menghentikan penerima lain. Logika pemilihannya diuji 7 skenario di dalam container sebelum dipasang — termasuk kasus orang yang sudah beli cetak belakangan (tidak ditawari) dan order tanpa nomor WA valid.
+- [ ] **F4.8** **Upsell otomatis penuh** menggantikan versi manual — baru dibangun setelah F3.10 memberi tahu keberatan apa yang sebenarnya muncul.
 
 ---
 

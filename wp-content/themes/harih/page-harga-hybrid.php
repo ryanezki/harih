@@ -172,6 +172,23 @@ $harih_satuan = [
 
         </div>
         <p class="paket-catatan">Harga sudah termasuk desain dari data undangan Anda, proof sebelum cetak, dan <strong>gratis ongkir ke seluruh Indonesia</strong>.</p>
+        <?php
+        /* Sisa slot ditampilkan APA ADANYA (F4.6). Angka 8/bulan berasal dari
+           kapasitas nyata: ±4,5 jam mesin per order × 8 = ±36 jam/bulan.
+           Menampilkan sisa yang jujur lebih kuat daripada "kuota terbatas"
+           yang tidak bisa diperiksa siapa pun — dan mencegah kami menerima
+           pesanan yang tidak bisa dipenuhi tepat waktu. */
+        $harih_sisa = function_exists('undangan_sisa_slot') ? undangan_sisa_slot() : null;
+        ?>
+        <?php if ($harih_sisa !== null) : ?>
+        <p class="paket-slot-sisa">
+            <?php if ($harih_sisa > 0) : ?>
+                <strong><?php echo esc_html($harih_sisa); ?> dari 8 slot produksi <?php echo esc_html(wp_date('F')); ?></strong> masih tersedia.
+            <?php else : ?>
+                <strong>Slot produksi <?php echo esc_html(wp_date('F')); ?> sudah penuh.</strong> Hubungi kami untuk jadwal bulan berikutnya.
+            <?php endif; ?>
+        </p>
+        <?php endif; ?>
         <p class="paket-catatan paket-slot"><strong>Pemesanan cetak dikonfirmasi lebih dulu lewat WhatsApp.</strong> Kapasitas produksi per bulan terbatas dan pesanan diterima paling lambat H-21 sebelum acara — kami pastikan slot &amp; tanggal Anda aman sebelum ada pembayaran. Itulah yang membuat Garansi Tepat Waktu bisa kami tanda tangani.</p>
     </section>
 
