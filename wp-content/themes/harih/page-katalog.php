@@ -121,15 +121,7 @@ $harih_aset         = get_stylesheet_directory_uri() . '/aset';
 </head>
 <body class="katalog-body">
 
-<header class="nav">
-    <p class="brand">hariH</p>
-    <nav class="nav-tautan">
-        <a href="#tema">Tema</a>
-        <a href="#paket">Paket</a>
-        <?php if ($harih_ada_harga) : ?><a href="#cetak">Cetak</a><?php endif; ?>
-        <a class="nav-cta" href="#paket">Buat Undangan</a>
-    </nav>
-</header>
+<?php get_template_part('template-parts/toko/nav', null, ['beranda' => true]); ?>
 
 <section class="hero hero-utama">
     <div class="hero-teks">
@@ -284,23 +276,7 @@ $harih_marquee = str_replace('✦', '<i>✦</i>', $harih_marquee);
     </section>
 </main>
 
-<footer class="kaki">
-    <div class="kaki-atas">
-        <div>
-            <p class="brand">hariH</p>
-            <p class="kaki-tag">Undangan digital untuk hari bahagiamu.</p>
-        </div>
-        <nav class="kaki-nav">
-            <a href="<?php echo esc_url(home_url('/kontak/')); ?>">Kontak</a>
-            <a href="<?php echo esc_url(home_url('/syarat-ketentuan/')); ?>">Syarat &amp; Ketentuan</a>
-            <a href="<?php echo esc_url(home_url('/kebijakan-privasi/')); ?>">Kebijakan Privasi</a>
-            <a href="<?php echo esc_url(home_url('/kebijakan-refund/')); ?>">Refund</a>
-            <?php if ($harih_ada_harga) : ?><a href="<?php echo esc_url(home_url('/harga/')); ?>">Paket Cetak</a><?php endif; ?>
-            <?php if ($harih_ada_reseller) : ?><a href="<?php echo esc_url(home_url('/jadi-reseller/')); ?>">Jadi Reseller</a><?php endif; ?>
-        </nav>
-    </div>
-    <p class="kaki-cc">© <?php echo esc_html(wp_date('Y')); ?> hariH · harih.id</p>
-</footer>
+<?php get_template_part('template-parts/toko/kaki', null, null); ?>
 
 <script>
 (function () {

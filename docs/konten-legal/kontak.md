@@ -12,6 +12,9 @@
 
 ## Identitas Usaha
 
-- **Nama usaha:** hariH (usaha perorangan — Ryan Ezkirianto)
-- **Alamat:** Jalur Sutera Blvd No. 43, Alam Sutera, Pinang
-- **Domisili:** Kota Tangerang, Banten, Indonesia
+- **Nama usaha:** hariH — layanan undangan pernikahan digital & cetak
+- **Bentuk usaha:** usaha perorangan terdaftar di Indonesia
+- **Wilayah layanan:** seluruh Indonesia (pengiriman produk cetak gratis)
+- **Kanal resmi:** WhatsApp & email di atas — hariH tidak memiliki kantor layanan tatap muka
+
+> Data identitas lengkap penanggung jawab usaha tersedia bagi pihak berwenang, mitra pembayaran, dan pemesan yang memerlukannya untuk keperluan sah — silakan minta lewat email di atas.

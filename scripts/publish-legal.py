@@ -86,6 +86,20 @@ def ke_html(md: str) -> str:
             keluar.append("".join(t))
             continue
 
+        # Catatan provenance untuk repo, bukan untuk pengunjung: tanggal terbit
+        # sudah ditampilkan template sebagai "Terakhir diperbarui". Disaring di
+        # sini supaya markdown-nya tetap menyimpan riwayat.
+        # Tanggal berlaku dokumen = baris di markdown (bukan tanggal publish
+        # ulang WP). Diangkat jadi subjudul bergaya, bukan paragraf biasa.
+        if s.startswith("Terakhir diperbarui"):
+            keluar.append('<p class="teks-tanggal">' + inline(s) + "</p>")
+            i += 1
+            continue
+
+        if s.startswith("> Dipublikasikan sebagai halaman situs"):
+            i += 1
+            continue
+
         if s.startswith("> "):
             kutipan = []
             while i < len(baris) and baris[i].strip().startswith(">"):
@@ -138,7 +152,7 @@ def publish(slug: str) -> None:
         sys.exit(f"Halaman /{slug}/ tidak ditemukan di situs")
 
     subprocess.run(
-        SSH + [f"cd {WP_DIR} && wp post update {pid} - --post_status=publish"],
+        SSH + [f"cd {WP_DIR} && wp post update {pid} - --post_status=publish && wp post meta update {pid} _wp_page_template page-teks.php"],
         input=isi, text=True, check=True, capture_output=True)
 
     tabel = isi.count("<table>")

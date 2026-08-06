@@ -110,8 +110,9 @@ $harih_satuan = [
 </head>
 <body class="katalog-body harga-hybrid-body">
 
+<?php get_template_part('template-parts/toko/nav', null, ['beranda' => false]); ?>
+
 <header class="hero">
-    <p class="brand">hariH</p>
     <h1>Satu desain, dua wujud:<br>di layar semua tamu, di tangan yang terhormat.</h1>
     <p class="hero-sub">Undangan digital untuk semua tamu — dan <strong>undangan cetak lipat beserta amplop bernama</strong> untuk orang tua, sesepuh, dan atasan. Satu kali isi data, keduanya jadi, dengan desain yang sama.</p>
     <div class="hero-cta">
@@ -233,17 +234,7 @@ $harih_satuan = [
     </section>
 </main>
 
-<footer class="kaki">
-    <p class="brand">hariH</p>
-    <p class="kaki-tag">Satu desain, dua wujud — digital &amp; cetak.</p>
-    <nav class="kaki-nav">
-        <a href="<?php echo esc_url(home_url('/kontak/')); ?>">Kontak</a>
-        <a href="<?php echo esc_url(home_url('/syarat-ketentuan/')); ?>">Syarat &amp; Ketentuan</a>
-        <a href="<?php echo esc_url(home_url('/kebijakan-privasi/')); ?>">Kebijakan Privasi</a>
-        <a href="<?php echo esc_url(home_url('/kebijakan-refund/')); ?>">Kebijakan Refund</a>
-    </nav>
-    <p class="kaki-cc">© <?php echo esc_html(wp_date('Y')); ?> hariH · harih.id</p>
-</footer>
+<?php get_template_part('template-parts/toko/kaki', null, ['tagline' => 'Satu desain, dua wujud — digital & cetak.']); ?>
 
 <?php wp_footer(); ?>
 </body>

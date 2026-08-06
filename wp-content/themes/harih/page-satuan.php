@@ -41,8 +41,9 @@ $harih_min_transaksi = defined('UNDANGAN_MIN_TRANSAKSI_SATUAN') ? UNDANGAN_MIN_T
 </head>
 <body class="katalog-body satuan-body">
 
+<?php get_template_part('template-parts/toko/nav', null, ['beranda' => false]); ?>
+
 <header class="hero hero-ringkas">
-    <p class="brand">hariH</p>
     <h1>Beli satuan</h1>
     <p class="hero-sub">Sudah punya undangan digital, tinggal butuh cetakannya? Semua item bisa dipesan terpisah. <strong>Paket tetap lebih hemat per unit</strong> — halaman ini pembandingnya.</p>
     <div class="hero-cta">
@@ -83,22 +84,13 @@ $harih_min_transaksi = defined('UNDANGAN_MIN_TRANSAKSI_SATUAN') ? UNDANGAN_MIN_T
 
     <section class="jembatan-cetak">
         <p class="jembatan-label">Perbandingan</p>
-        <h2>Isi Paket Resepsi kalau dibeli satuan: Rp 3.525.000</h2>
-        <p>Harga paketnya Rp 2.900.000 — selisih <strong>Rp 625.000</strong>, dan undangan digital customnya sudah termasuk.</p>
+        <h2>Isi Paket Resepsi kalau dibeli satuan: Rp 3.600.000</h2>
+        <p>Harga paketnya Rp 2.900.000 — selisih <strong>Rp 700.000</strong>, dan undangan digital customnya sudah termasuk.</p>
         <a class="btn btn-utama" href="<?php echo esc_url(home_url('/harga/')); ?>">Lihat Paket</a>
     </section>
 </main>
 
-<footer class="kaki">
-    <p class="brand">hariH</p>
-    <nav class="kaki-nav">
-        <a href="<?php echo esc_url(home_url('/harga/')); ?>">Paket Cetak</a>
-        <a href="<?php echo esc_url(home_url('/kontak/')); ?>">Kontak</a>
-        <a href="<?php echo esc_url(home_url('/syarat-ketentuan/')); ?>">Syarat &amp; Ketentuan</a>
-        <a href="<?php echo esc_url(home_url('/kebijakan-refund/')); ?>">Kebijakan Refund</a>
-    </nav>
-    <p class="kaki-cc">© <?php echo esc_html(wp_date('Y')); ?> hariH · harih.id</p>
-</footer>
+<?php get_template_part('template-parts/toko/kaki', null, null); ?>
 
 <?php wp_footer(); ?>
 </body>

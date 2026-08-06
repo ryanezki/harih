@@ -478,6 +478,55 @@ a { color: var(--c-accent); }
 .kaki-nav a:hover { color: var(--c-accent-ink); text-decoration: underline; }
 .kaki-cc { max-width: 1120px; margin: 26px auto 0; font-size: 12px; color: rgba(201, 195, 174, .5); text-align: left; }
 
+/* ---------- Halaman teks (kontak + legal) ---------- */
+
+.brand-tautan { text-decoration: none; flex: 1; }
+.teks { max-width: 720px; margin: 0 auto; padding: clamp(24px, 5vw, 44px) var(--pad-x) clamp(48px, 7vw, 72px); }
+.teks h1 { font-size: clamp(32px, 5.5vw, 46px); line-height: 1.12; margin: 0 0 8px; text-wrap: balance; }
+.teks-tanggal { color: var(--c-ink-soft); font-size: 13.5px; margin: -2px 0 28px; }
+.teks-isi .teks-tanggal:first-child { margin-top: 0; }
+.teks-isi { font-size: 16px; line-height: 1.75; color: var(--c-ink-2); }
+.teks-isi h2 {
+    font-size: clamp(21px, 3vw, 26px);
+    text-align: left;
+    color: var(--c-ink);
+    margin: 36px 0 10px;
+    padding-top: 20px;
+    border-top: 1.5px dashed var(--c-line);
+}
+.teks-isi h2:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+.teks-isi h3 { font-size: 18px; margin: 24px 0 6px; color: var(--c-ink); }
+.teks-isi p { margin: 0 0 14px; }
+.teks-isi ul, .teks-isi ol { margin: 0 0 16px; padding-left: 22px; display: grid; gap: 7px; }
+.teks-isi li::marker { color: var(--c-gold); }
+.teks-isi strong { color: var(--c-ink); }
+.teks-isi a { color: var(--c-accent); text-underline-offset: 3px; }
+.teks-isi blockquote {
+    margin: 18px 0;
+    padding: 16px 20px;
+    background: var(--c-surface);
+    border: 1.5px solid var(--c-line);
+    border-left: 3px solid var(--c-gold);
+    border-radius: var(--radius);
+    color: var(--c-ink-2);
+}
+.teks-isi blockquote p:last-child { margin-bottom: 0; }
+.teks-isi table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 0 18px;
+    font-size: 14.5px;
+    background: var(--c-surface);
+    border: 1.5px solid var(--c-line);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+.teks-isi th, .teks-isi td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--c-line); }
+.teks-isi th { font-size: 12.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--c-ink-soft); font-weight: 800; }
+.teks-isi tr:last-child td { border-bottom: 0; }
+.teks-isi code { background: var(--c-surface); border: 1px solid var(--c-line); padding: .1rem .35rem; border-radius: 6px; font-size: .88em; }
+.teks-body .kaki { margin-top: 0; }
+
 /* ---------- Demo (dipakai halaman lain yang masih memakai daftar tombol) ---------- */
 
 .demo { text-align: center; max-width: 640px; margin: 0 auto; padding: 2rem var(--pad-x); }

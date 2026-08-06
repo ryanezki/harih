@@ -11,19 +11,37 @@
 [hidden] { display: none !important; }
 
 
+/* Font di-selfhost, sama persis dengan halaman toko (redesain 2026-08-06) —
+   pemesan yang baru saja membayar tidak boleh merasa berpindah ke situs lain
+   saat mengisi datanya. */
+@font-face {
+    font-family: 'DM Serif Display';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('../../aset/font/DMSerifDisplay-regular.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'Figtree';
+    font-style: normal;
+    font-weight: 400 800;
+    font-display: swap;
+    src: url('../../aset/font/Figtree-latin.woff2') format('woff2-variations');
+}
+
 :root {
-    --f-display: 'Playfair Display', Georgia, serif;
-    --f-body: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-    --bg: #f1eee6;
+    --f-display: 'DM Serif Display', Georgia, serif;
+    --f-body: 'Figtree', system-ui, -apple-system, sans-serif;
+    --bg: #faf7f0;
     --surface: #ffffff;
-    --ink: #34332c;
-    --soft: #837f6e;
-    --line: #e3ded0;
+    --ink: #2a2922;
+    --soft: #6b675a;
+    --line: #e6e1d2;
     --accent: #3f5c4f;
     --accent-ink: #f4f1e7;
     --gold: #b4923f;
-    --radius: 16px;
-    --shadow: 0 8px 24px rgba(63, 92, 79, .08);
+    --radius: 18px;
+    --shadow: 0 12px 32px rgba(63, 92, 79, .10);
 }
 
 * { box-sizing: border-box; }

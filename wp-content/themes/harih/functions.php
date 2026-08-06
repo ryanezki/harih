@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) exit;
  * pengunjung & LiteSpeed tetap menyajikan berkas lama meski file di server
  * sudah baru, dan perbaikan tampilan terlihat "tidak berpengaruh".
  */
-const HARIH_VERSION = '2.0.1';
+const HARIH_VERSION = '2.2.1';
 
 add_action('after_setup_theme', function () {
     add_theme_support('title-tag');
@@ -230,7 +230,7 @@ function harih_reseller_webhook_url(): string {
 
 // Halaman toko: style child di atas Astra.
 add_action('wp_enqueue_scripts', function () {
-    if (is_singular('undangan') || is_page_template('page-isi-data.php') || is_page_template('page-katalog.php') || is_page_template('page-jadi-reseller.php') || is_page_template('page-harga-hybrid.php') || is_page_template('page-satuan.php') || is_page_template('page-upsell.php') || is_page_template('page-proof.php') || is_page_template('page-tamu.php') || is_page_template('page-rekap.php')) return;
+    if (is_singular('undangan') || is_page_template('page-isi-data.php') || is_page_template('page-katalog.php') || is_page_template('page-jadi-reseller.php') || is_page_template('page-harga-hybrid.php') || is_page_template('page-satuan.php') || is_page_template('page-upsell.php') || is_page_template('page-proof.php') || is_page_template('page-tamu.php') || is_page_template('page-rekap.php') || is_page_template('page-teks.php')) return;
     wp_enqueue_style('harih-child', get_stylesheet_uri(), [], HARIH_VERSION);
 }, 20);
 
@@ -242,7 +242,7 @@ add_action('wp_enqueue_scripts', function () {
     $is_isidata  = is_page_template('page-isi-data.php');
     $is_katalog  = is_page_template('page-katalog.php');
     $is_reseller = is_page_template('page-jadi-reseller.php');
-    $is_hybrid   = is_page_template('page-harga-hybrid.php') || is_page_template('page-satuan.php') || is_page_template('page-upsell.php') || is_page_template('page-proof.php') || is_page_template('page-tamu.php') || is_page_template('page-rekap.php');
+    $is_hybrid   = is_page_template('page-harga-hybrid.php') || is_page_template('page-satuan.php') || is_page_template('page-upsell.php') || is_page_template('page-proof.php') || is_page_template('page-tamu.php') || is_page_template('page-rekap.php') || is_page_template('page-teks.php');
     if (!$is_undangan && !$is_isidata && !$is_katalog && !$is_reseller && !$is_hybrid) return;
 
     global $wp_styles, $wp_scripts;
@@ -265,7 +265,7 @@ add_action('wp_enqueue_scripts', function () {
     }
 
     if ($is_isidata) {
-        wp_enqueue_style('undangan-fonts', harih_tema_fonts('tema-01'), [], null);
+        // Font self-hosted lewat @font-face di isi-data.css — tidak lagi CDN.
         wp_enqueue_style('undangan-isidata', get_stylesheet_directory_uri() . '/undangan/shared/isi-data.css', [], HARIH_VERSION);
         wp_enqueue_script('undangan-isidata-js', get_stylesheet_directory_uri() . '/undangan/shared/isi-data.js', [], HARIH_VERSION, true);
         return;
@@ -297,7 +297,8 @@ add_action('wp_head', function () {
     if (!is_page_template('page-katalog.php') && !is_page_template('page-harga-hybrid.php')
         && !is_page_template('page-satuan.php') && !is_page_template('page-upsell.php')
         && !is_page_template('page-proof.php') && !is_page_template('page-tamu.php')
-        && !is_page_template('page-rekap.php') && !is_page_template('page-jadi-reseller.php')) return;
+        && !is_page_template('page-rekap.php') && !is_page_template('page-jadi-reseller.php')
+        && !is_page_template('page-teks.php')) return;
     $dir = get_stylesheet_directory_uri() . '/aset/font/';
     foreach (['DMSerifDisplay-regular.woff2', 'Figtree-latin.woff2'] as $f) {
         printf('<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin>' . "\n", esc_url($dir . $f));
@@ -306,7 +307,7 @@ add_action('wp_head', function () {
 
 // Preconnect Google Fonts hanya di halaman standalone kita.
 add_filter('wp_resource_hints', function ($urls, $relation) {
-    if ($relation === 'preconnect' && (is_singular('undangan') || is_page_template('page-isi-data.php'))) {
+    if ($relation === 'preconnect' && is_singular('undangan')) {
         $urls[] = 'https://fonts.googleapis.com';
         $urls[] = ['href' => 'https://fonts.gstatic.com', 'crossorigin'];
     }

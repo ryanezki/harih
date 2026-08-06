@@ -31,6 +31,8 @@ $webhook = harih_reseller_webhook_url();
 </head>
 <body class="katalog-body">
 
+<?php get_template_part('template-parts/toko/nav', null, ['beranda' => false]); ?>
+
 <header class="hero">
     <p class="brand"><a href="<?php echo esc_url(home_url('/')); ?>">hariH</a></p>
     <h1>Jadi reseller,<br>dapat komisi 30% tiap order.</h1>
@@ -98,15 +100,7 @@ $webhook = harih_reseller_webhook_url();
     </section>
 </main>
 
-<footer class="kaki">
-    <p class="brand">hariH</p>
-    <nav class="kaki-nav">
-        <a href="<?php echo esc_url(home_url('/')); ?>">Katalog</a>
-        <a href="<?php echo esc_url(home_url('/kontak/')); ?>">Kontak</a>
-        <a href="<?php echo esc_url(home_url('/syarat-ketentuan/')); ?>">Syarat &amp; Ketentuan</a>
-    </nav>
-    <p class="kaki-cc">© <?php echo esc_html(wp_date('Y')); ?> hariH · harih.id</p>
-</footer>
+<?php get_template_part('template-parts/toko/kaki', null, ['tagline' => 'Komisi 30% tiap order digital.']); ?>
 
 <script>
 window.RESELLER = <?php echo wp_json_encode(['webhook' => $webhook]); ?>;
