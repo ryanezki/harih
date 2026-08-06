@@ -84,6 +84,8 @@ Kesimpulan: hambatan ada di **jalur jaringan lingkungan kerja saya**, bukan di s
 
 **Menunggu keputusan owner:** daftar lengkap + saran per poin ada di [`konfirmasi-owner.md`](./konfirmasi-owner.md) — dibuat 2026-08-06 setelah F3, dipimpin satu celah mendesak (paket cetak sudah bisa dibeli langsung tanpa konfirmasi slot).
 
+**2026-08-06 — evaluasi ide "konsep Gen Z" dari teman owner:** analisis 11 poin + rencana per perubahan ada di [`evaluasi-ide-genz.md`](./evaluasi-ide-genz.md). Ringkasnya: 2 poin sudah ada, **5 diterapkan** (fase **G1**, ±3–3,5 hari, nol rupiah, tidak menyentuh desain undangan yang dibekukan — dark mode halaman toko · self-host font undangan · "coba nama kalian" di beranda · galeri kolase · koordinat+Waze · tombol WA mempelai di RSVP · dompet digital di amplop), **3 digerbang F0.3** (fase **G2** — AI copywriter, video cover Premium, pratinjau langsung), dan **4 ditolak dengan pengganti**: Spotify sebagai musik latar (tidak bisa autoplay + menembus whitelist `musik_url`), RSVP masuk ke nomor WA bisnis (**risiko ban sesi WAHA = 9 workflow mati**), Supabase (datastore ketiga; migrasi Postgres sudah direncanakan), escrow amplop digital (perilaku agregator/PJP + risiko akun Duitku — gerbang tunggal semua uang). 👤 Empat keputusan owner tercantum di akhir dokumen itu.
+
 **Akses:** Hostinger `ssh -p 65002 u803921702@147.93.80.20` (`domains/harih.id/public_html`) · VPS `ssh root@31.97.50.197` (`/opt/harih`) · rahasia: `vps/.env` + `vps/google-sa.json` (lokal, gitignored) = cermin server · aksi owner: [`panduan-manual.md`](./panduan-manual.md) · operasional: [`runbook.md`](./runbook.md) · import n8n: [`../n8n/workflows/README.md`](../n8n/workflows/README.md).
 
 ---
