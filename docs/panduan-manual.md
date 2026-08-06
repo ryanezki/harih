@@ -4,6 +4,8 @@
 >
 > Disusun 2026-08-04, menggantikan `panduan-go-live.md`. **Diperbarui 2026-08-06**: proyek berubah jadi hybrid (digital + cetak milik sendiri), jadi ditambahkan **bagian 10 — menjalankan pesanan cetak dari awal sampai kirim**, yang isinya alat-alat yang sudah jadi tapi belum pernah Anda pakai. Untuk operasional harian, pegangannya [`runbook.md`](./runbook.md).
 
+> **Status per 6 Agustus 2026:** owner melaporkan **sebagian besar langkah 1–9 sudah dikerjakan**. Rinciannya belum dikonfirmasi satu per satu — dikonfirmasi di sesi berikutnya, lalu yang selesai dicoret dari daftar ini. Bagian **10 (alur pesanan cetak)** dan **11 (tiga hal yang menunggu)** masih berlaku penuh.
+
 **Cara pakai:** kerjakan berurutan dari atas. Tiap langkah punya **verifikasi** — kalau verifikasinya lolos, langkah itu benar-benar selesai. Kalau tersendat, sebut nomornya saja ke saya.
 
 ---

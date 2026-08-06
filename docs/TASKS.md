@@ -18,7 +18,28 @@
 
 ---
 
-## Kondisi saat ini (diverifikasi langsung 2026-08-05)
+## Kondisi saat ini (checkpoint sesi 2026-08-06)
+
+**Mulai dari sini di sesi berikutnya.**
+
+**Yang berubah paling besar sesi ini:** owner ternyata punya **percetakan & peralatan sendiri** → fase subkontrak gugur, dan produk cetak berubah dari kartu QR jadi **undangan lipat (A4→A5) + amplop bernama tamu** (50/100/150 per paket, harga tetap). Marjin per jam sudah diukur: percetakan reguler Rp 100–200rb/jam vs undangan hybrid **±Rp 580rb/jam** → gerbang kelayakan lulus 3–6× lipat, dengan ruang membengkak sampai ±13 jam/order.
+
+**Jalur cetak sudah lengkap secara kode & operasional** (F3 tuntas 11/11; F4.1, F4.5, F4.6, F4.7 selesai): produk & kategori, checkout beralamat + gratis ongkir se-Indonesia, gerbang H-21 & kuota 8/bulan, snapshot beku + persetujuan proof ber-hash, daftar tamu → amplop bernama + link personal massal, rekap RSVP + CSV, antrean produksi, komisi per jenis produk, upsell bertoken + pengingat H+3/H+12. **9 workflow n8n aktif.**
+
+**Yang menahan uang, semuanya di tangan owner:**
+1. **Approval Duitku production** — gerbang tunggal semua uang. ⚠️ profil merchant menyebut Rp 99–299 ribu, padahal paket cetak sampai Rp 5,9 juta — beri tahu Duitku.
+2. **Cetak satu sampel lengkap** — menjawab bobot nyata (sekarang masih tebakan 2/4/7 kg), waktu lipat, uji pindai QR, dan **apakah mesin creasing sanggup** (800 lipatan/bulan; kalau manual, hitungan marjin batal).
+3. **Cek mekanisme refund Duitku** — Garansi Tepat Waktu sudah mengikat sejak halaman harga tayang.
+
+**Gerbang yang masih dipasang sengaja:** produk cetak & satuan **disembunyikan dari `/shop/`** sampai satu order uji internal tuntas penuh; halaman `/harga/` & `/satuan/` tetap menampilkannya.
+
+**Yang belum dibangun & memang menunggu order nyata:** engine render SVG→PDF (F4.3), imposition (F4.4), upsell otomatis penuh (F4.8), fase vendor/white-label (F5). Membangunnya sekarang = menebak bagian mana dari produksi yang layak diotomasi.
+
+**Halaman bertoken (semua memakai HMAC yang sama, 403 tanpa token):** `/isi-data/` · `/upsell/` · `/proof/` · `/tamu/` · `/rekap/`.
+
+---
+
+## Kondisi sebelumnya (diverifikasi langsung 2026-08-05)
 
 **Platform digital hidup dan terbukti end-to-end.** Checkout → pembayaran → undangan terbit otomatis → delivery WA+email, berjalan sendiri sejak 22 Juli. 8 workflow aktif, backup mingguan jalan, smoke test `scripts/cek-live.sh` 21/21 hijau, produksi bersih dari data uji (hanya 3 undangan demo).
 
