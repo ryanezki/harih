@@ -143,10 +143,12 @@
 
 > **Gerbang: tiga di bawah dikerjakan setelah F0.3 (10 pembeli asing).** Ketiganya fitur yang *dijual*, bukan perbaikan tampilan — membangunnya sebelum ada yang membayar mengulang kesalahan urutan uang yang sudah dikoreksi penasihat bisnis. Ketiganya juga bahan Tier B rencana hybrid, jadi biayanya terbayar dua kali.
 
-- [ ] **FU.5** 🔒 **Dashboard rekap RSVP + ekspor** *(poin 16)*
+- [x] **FU.5** **Rekap RSVP + ekspor** *(poin 16)* → **SELESAI & LIVE 2026-08-06**
   **Apa:** halaman bertoken untuk mempelai: total tamu per sesi, daftar hadir/tidak/ragu, unduh CSV. **Satu-satunya tempat nomor WhatsApp tamu (`wa_rsvp`) boleh tampil** — endpoint publik sengaja tidak pernah mengembalikannya.
-  **Langkah:** pola `/isi-data/` (token HMAC di URL, `noindex`, tanpa GA4) — sudah terbukti; tinggal template + endpoint baca berautentikasi.
-  **Selesai bila:** mempelai membuka satu link, melihat rekap benar, mengunduh CSV; tanpa token → 403.
+  **Kenapa dikerjakan meski digerbang F0.3:** ini bukan fitur baru yang dijual, tapi **lubang pada fitur yang sudah dijual di semua paket**. RSVP ada sejak awal, tapi pembelinya tidak pernah punya cara memakainya — dinding ucapan di undangan hanya menampilkan pesan, tanpa hitungan, tanpa pembagian sesi, dan tidak bisa dibawa ke katering.
+  **Yang dibangun:** `/rekap/?order=&key=` bertoken. Angka besar dulu (mempelai membukanya untuk menjawab satu pertanyaan: berapa orang), lalu tabel. **Yang dihitung adalah jumlah tamu yang dibawa**, bukan jumlah pengisi form — dan dipecah jadi **hadir di akad** vs **hadir di resepsi** (yang memilih "keduanya" masuk ke dua-duanya), persis angka yang dipakai memesan porsi katering & kursi. CSV ekspor menyertakan **pesan tamu** meski tidak ditampilkan di tabel (di layar ia membuat baris jadi panjang, tapi mempelai sering ingin membacanya utuh). Bertaut dua arah dengan `/tamu/`.
+  **Catatan privasi:** kolom kontak sengaja **tidak ada** — sejak nomor WA tamu berhenti dikumpulkan di form RSVP (keputusan owner), tidak ada kontak yang perlu ditampilkan.
+  **Terverifikasi live** dengan 5 RSVP contoh bercampur status/jumlah/sesi: total 9 tamu · akad 7 · resepsi 6 · 5 responden · pil status 3/1/1 — semuanya cocok dengan hitungan manual. Data uji dihapus.
 
 - [x] **FU.6** **Daftar tamu → link personal massal + CSV** *(poin 15)* → **SELESAI & LIVE 2026-08-06**
   **Apa:** mempelai menempel daftar nama → dapat tabel link `?to=Nama` siap kirim + teks broadcast yang sudah tersapa nama. Parameter `?to=` **sudah bekerja**; yang belum ada pembuat massalnya.

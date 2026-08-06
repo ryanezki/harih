@@ -115,6 +115,7 @@ $link   = $undangan_id ? get_permalink($undangan_id) : '';
         <div class="tamu-aksi">
             <button type="button" class="btn btn-garis" id="salin-semua">Salin semua link</button>
             <button type="button" class="btn btn-garis" id="unduh-csv">Unduh CSV</button>
+            <a class="btn btn-garis" href="<?php echo esc_url(add_query_arg(['order' => $order_id, 'key' => $key], home_url('/rekap/'))); ?>">Rekap kehadiran</a>
         </div>
         <ul class="tamu-daftar" id="tamu-daftar" data-link="<?php echo esc_attr($link); ?>">
             <?php foreach (array_slice($nama, 0, 300) as $n) : ?>
