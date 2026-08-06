@@ -463,9 +463,14 @@ Ketiganya fitur yang **dijual** atau berbiaya berjalan. Membangunnya sebelum ada
 
 **Setelah F0.3:** G2.2 (AI copywriter) → G2.1 (video cover) → G2.3 (pratinjau) → G2.4 (playlist).
 
-## Yang butuh keputusan owner 👤
+## Keputusan owner — TERJAWAB 2026-08-07 👤
 
-1. **Model AI: `claude-opus-5` (±Rp 230/generasi) atau `claude-haiku-4-5` (±Rp 45)?** Saran saya Opus 5 — kualitas bahasa Indonesia adalah seluruh nilai fiturnya, dan plafon Rp 4.600/order tidak menggerakkan apa pun. Bisa diturunkan belakangan dengan mengubah satu baris.
-2. **Hosting video (G2.1)** — perlu angka kuota & wajar-pakai Hostinger sebelum jalur dipilih.
-3. **Escrow amplop digital** — kalau owner tetap ingin mengejarnya, jalurnya bermitra dengan PJP berizin, bukan lewat akun Duitku hariH. Itu uji tuntas hukum, bukan tugas kode.
-4. **Rekap RSVP harian ke WA mempelai** (tambahan G1.6) — mau dipasang? Satu pesan/hari ke nomor yang sudah kontak kita; aman, tapi tetap keputusan owner soal seberapa sering kita menyapa.
+1. **Model AI → Google Gemini Flash 3.5 lewat OpenRouter**, bukan Claude. Konsekuensi untuk G2.2: WF-10 memanggil `https://openrouter.ai/api/v1/chat/completions` (skema OpenAI-compatible), bukan Anthropic Messages API. **Slug model harus diverifikasi ke daftar model OpenRouter saat implementasi** — jangan ditebak dari ingatan; simpan sebagai env `OPENROUTER_MODEL` supaya slug bisa dikoreksi tanpa menyentuh JSON workflow. Kredensial `OPENROUTER_API_KEY` mengikuti pola rahasia lain: `vps/.env` + `/opt/harih/.env` lalu `docker compose up -d n8n`. Kewajiban privasi tidak berubah — OpenRouter (dan penyedia model di belakangnya) masuk tabel pemroses data di Kebijakan Privasi sebelum fiturnya menyala.
+2. **Disk → 0,8 GB terpakai, 25 GB tersedia.** Ruang bukan penghalang untuk G2.1 (video cover). ⚠️ Yang **belum** terjawab dan tetap harus dicek sebelum membangun: **kuota/wajar-pakai bandwidth**, bukan disk. 10 MB × 300 tamu = 3 GB **per undangan** — yang habis lebih dulu adalah transfer bulanan, bukan penyimpanan.
+3. **Escrow → tidak jadi.** Sesuai analisis; yang dibangun tetap G1.8 (deep link dompet milik mempelai).
+4. **Rekap RSVP harian ke WA mempelai → dipasang.** Ditambahkan ke WF-05 (cron harian yang sudah ada), satu pesan/hari ke nomor mempelai yang memang sudah kontak kita.
+
+## Status eksekusi (2026-08-07)
+
+**Selesai & live:** G1.7 baseline · G1.2 self-host font undangan · G1.1 mode gelap · G1.3 "coba nama kalian" · G1.6 tombol WA mempelai.
+**Sisa G1:** G1.4 galeri kolase · G1.5 koordinat + Waze · G1.8 dompet digital · G1.9 WF-02 satu kali sentuh · rekap harian di WF-05.

@@ -18,9 +18,34 @@
 
 ---
 
-## Kondisi saat ini (checkpoint sesi 2026-08-06)
+## ⏸ CHECKPOINT SESI 2026-08-07 — fase G1 berjalan (5 dari 8 selesai & live)
 
-**Mulai dari sini di sesi berikutnya.**
+**Mulai dari sini di sesi berikutnya.** Konteks lengkap + alasan tiap keputusan: [`evaluasi-ide-genz.md`](./evaluasi-ide-genz.md).
+
+**Selesai & terverifikasi live** (`HARIH_VERSION 2.6.0`):
+
+- **G1.7 baseline performa** — dicatat di [`runbook.md`](./runbook.md) §9b. ⚠️ PSI API tanpa kunci kena kuota harian; pakai UI pagespeed.web.dev. Jangan mengukur dari mesin developer (diagnosis jaringan 2026-08-06).
+- **G1.2 font undangan di-selfhost** — menghapus rantai serial `HTML → CSS googleapis (0,34 dtk) → woff2 gstatic (0,33 dtk)`. Sumbernya ternyata **variable font**, jadi satu berkas menutup weight 400/500/600. Dipecah latin/latin-ext per `unicode-range`. Dua face **italic** ditambahkan (OFL) karena `undangan.css` memakai italic di empat tempat — tanpa itu ampersand 46px jadi oblique sintetis. Generator: `scripts/buat-font-web.py`.
+- **G1.1 mode gelap** — 9 halaman toko + `/isi-data/`. **21 pasangan kontras diukur**, terendah 5,23:1. `--c-accent` dipecah jadi peran latar + `--c-accent-teks` (satu warna mustahil ≥4,5:1 di dua sisi). Anti-kedip lewat script inline `data-no-optimize` di `<head>`. **Halaman undangan sengaja tidak ikut** — temanya barang yang dibeli.
+- **G1.3 "coba nama kalian"** — form di beranda → demo terbuka dengan nama pengunjung. Sisi klien, **demo saja** (`window.UNDANGAN.demo`), diuji dengan undangan uji non-demo bahwa parameternya diabaikan total.
+- **G1.6 tombol konfirmasi RSVP ke WA mempelai** — arah tamu → mempelai, **nomor bisnis hariH tidak tersentuh** (sesi WAHA tidak berisiko).
+- **Bonus, temuan sampingan:** menghapus undangan meninggalkan kartu `og:image`-nya di uploads selamanya — memuat nama mempelai + potongan foto, tetap bisa diakses publik. Ditutup dengan `before_delete_post` di `og.php`.
+
+**Sisa fase G1** — dikerjakan sebagai satu paket karena tiga field baru harus masuk WF-02 **sekali sentuh** (ritual import→publish→restart itu mahal & rawan):
+
+1. **G1.4** galeri kolase (meta `galeri_tata`)
+2. **G1.5** koordinat presisi + tombol Waze (meta `koordinat`, `koordinat_akad`; WF-02 menyelesaikan short link Google Maps sekali saat undangan dibuat)
+3. **G1.8** deep link dompet digital mempelai (meta `dompet`, **whitelist host** seperti `musik_url`)
+4. **G1.9** WF-02: teruskan keempat field di atas — satu kali import
+5. **Rekap RSVP harian ke WA mempelai** di WF-05 (disetujui owner 2026-08-07)
+
+**Keputusan owner 2026-08-07:** AI copywriter (G2.2) memakai **Gemini Flash lewat OpenRouter**, bukan Claude — slug model wajib diverifikasi ke daftar OpenRouter saat implementasi, simpan sebagai env `OPENROUTER_MODEL`; **disk 25 GB bebas** (tapi yang masih harus dicek untuk G2.1 adalah **bandwidth**, bukan disk); **escrow tidak jadi**; **rekap RSVP harian dipasang**.
+
+**Catatan kebersihan produksi:** ada satu ucapan lama (`ID 55`, "ryan / amin", 2026-08-05) di buku tamu demo tema-02 — sisa uji owner, bukan dari sesi ini. Tampil ke calon pembeli yang membuka demo. Hapus bila memang tidak diinginkan: `wp post delete 55 --force`.
+
+---
+
+## Kondisi sebelumnya (checkpoint sesi 2026-08-06)
 
 **Yang berubah paling besar sesi ini:** owner ternyata punya **percetakan & peralatan sendiri** → fase subkontrak gugur, dan produk cetak berubah dari kartu QR jadi **undangan lipat (A4→A5) + amplop bernama tamu** (50/100/150 per paket, harga tetap). Marjin per jam sudah diukur: percetakan reguler Rp 100–200rb/jam vs undangan hybrid **±Rp 580rb/jam** → gerbang kelayakan lulus 3–6× lipat, dengan ruang membengkak sampai ±13 jam/order.
 
