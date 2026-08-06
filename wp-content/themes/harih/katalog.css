@@ -436,3 +436,22 @@ h2 { font-size: 1.7rem; text-align: center; margin-bottom: 1.4rem; }
     border-radius: 999px;
     background: color-mix(in srgb, var(--c-gold) 8%, transparent);
 }
+
+/* Halaman persetujuan proof (F4.5). Tampilan sengaja tenang & padat: ini
+   halaman pemeriksaan, bukan halaman jualan. */
+.proof-notif { max-width: 640px; margin: 0 auto 18px; padding: 12px 18px; border-radius: var(--radius); background: color-mix(in srgb, var(--c-accent) 10%, transparent); text-align: center; }
+.proof-berkas { max-width: 720px; margin: 0 auto; padding: 0 20px; display: grid; gap: 16px; }
+.proof-item { margin: 0; text-align: center; }
+.proof-item img { width: 100%; height: auto; border: 1px solid var(--c-line); border-radius: var(--radius); background: #fff; }
+.proof-item figcaption { margin-top: 6px; font-size: .8rem; color: var(--c-ink-2); }
+.proof-data { max-width: 640px; margin: 34px auto 0; padding: 0 20px; }
+.proof-data h2 { text-align: center; margin-bottom: 16px; }
+.proof-daftar { border: 1px solid var(--c-line); border-radius: var(--radius); background: var(--c-surface); overflow: hidden; }
+.proof-daftar > div { display: grid; grid-template-columns: 40% 1fr; gap: 10px; padding: 10px 16px; border-bottom: 1px solid color-mix(in srgb, var(--c-line) 55%, transparent); }
+.proof-daftar > div:last-child { border-bottom: 0; }
+.proof-daftar dt { font-size: .82rem; color: var(--c-ink-2); }
+.proof-daftar dd { margin: 0; font-size: .95rem; color: var(--c-ink); }
+.proof-kunci { margin-top: 12px; font-size: .86rem; color: var(--c-ink-2); }
+.proof-setuju { max-width: 640px; margin: 30px auto 0; padding: 0 20px 10px; }
+.proof-konsekuensi { font-size: .92rem; color: var(--c-ink); background: color-mix(in srgb, var(--c-gold) 9%, transparent); border: 1px solid color-mix(in srgb, var(--c-gold) 40%, transparent); border-radius: var(--radius); padding: 14px 18px; margin-bottom: 16px; }
+.proof-batal { text-align: center; margin-top: 12px; font-size: .88rem; color: var(--c-ink-2); }

@@ -289,7 +289,7 @@
 
 *Perkiraan jujur: F4.3–F4.5 adalah 2–3 minggu kerja fokus sebagai satu kesatuan. Imposition dengan bleed/gutter/registration mark adalah bagian paling fiddly.*
 
-- [ ] **F4.1** **Snapshot beku bernomor versi** — fondasi semua yang lain. Saat order cetak dikonfirmasi, data dibekukan; seluruh produksi membaca snapshot, bukan data live. Pelanggan yang mengedit setelahnya diberi peringatan bahwa perubahan tidak berlaku untuk cetakan yang sudah diproses. Meta undangan sudah terstruktur rapi — snapshot cukup JSON beku + hash sebagai meta order.
+- [x] **F4.1** **Snapshot beku** → **SELESAI & LIVE 2026-08-06** — — fondasi semua yang lain. Saat order cetak dikonfirmasi, data dibekukan; seluruh produksi membaca snapshot, bukan data live. Pelanggan yang mengedit setelahnya diberi peringatan bahwa perubahan tidak berlaku untuk cetakan yang sudah diproses. Meta undangan sudah terstruktur rapi — snapshot cukup JSON beku + hash sebagai meta order.
 
 - [ ] **F4.2** **Validasi wajib di FORM, bukan di proof** — hari vs tanggal harus cocok — **hanya relevan untuk template cetak**. Diperiksa 2026-08-05: di sisi digital ini mustahil terjadi, karena nama hari **diturunkan** dari tanggal lewat `wp_date('l, j F Y')` dan formnya memakai `<input type="date">`, bukan teks bebas. Baru jadi risiko bila template cetak menerima tanggal yang diketik manual · batas panjang field · resolusi foto minimum ±650×1000px ditolak di titik upload · QR error correction H + quiet zone + short URL sendiri agar slug bisa diubah tanpa cetak ulang · pembulatan kuantitas ("tambah 9 pcs gratis" saat 90→99 sama-sama 11 lembar).
 
@@ -300,7 +300,14 @@
 - [ ] **F4.4** **Imposition + cut file** — N kartu di area efektif ±190×270mm, bleed 3mm, gutter, registration mark 4 sudut; cut file sebagai layer terpisah.
   **Batas yang harus disadari:** Silhouette Studio tidak punya API/CLI. Otomasi berhenti di PDF + cut file; impor ke Studio dan operasional mesin tetap manual. Yang realistis: **waktu desain jadi nol menit**, bukan "sepenuhnya otomatis".
 
-- [ ] **F4.5** **Proof + persetujuan ber-hash** — render preview, wajib disetujui sebelum masuk antrean, **simpan timestamp + hash file yang disetujui**. Tanpa tahap ini setiap typo jadi biaya perusahaan; dengan tahap ini, pembagian tanggung jawab di S&K punya bukti.
+- [x] **F4.5** **Proof + persetujuan ber-hash** → **SELESAI & LIVE 2026-08-06** — — render preview, wajib disetujui sebelum masuk antrean, **simpan timestamp + hash file yang disetujui**. Tanpa tahap ini setiap typo jadi biaya perusahaan; dengan tahap ini, pembagian tanggung jawab di S&K punya bukti.
+
+**F4.1 + F4.5 dikerjakan 2026-08-06, mendahului engine render (F4.3).** Alasannya sama seperti F4.6: S&K §12.1 sudah menyatakan *"setelah proof Anda setujui, kebenaran seluruh teks menjadi tanggung jawab Anda"* — klausul itu tayang, tapi sistemnya belum bisa membuktikan apa pun. Selama kosong, tiap sengketa typo otomatis jadi biaya kita.
+- **Snapshot** (`_snapshot` + `_snapshot_hash`): data undangan dibekukan jadi JSON berurutan tetap saat proof dibuat, sehingga hash-nya stabil. Produksi membaca snapshot, bukan data live. **Snapshot yang sudah disetujui tidak bisa ditimpa** — diuji: percobaan bekukan ulang ditolak.
+- **Halaman `/proof/?order=&key=`** bertoken (HMAC yang sama dengan `/isi-data/` & `/upsell/`): menampilkan berkas proof + tabel data beku, dan konsekuensi persetujuan ditulis **terang di atas tombol**, bukan disembunyikan di tautan S&K. Ada jalan keluar "ada yang perlu diperbaiki" ke WhatsApp supaya pemesan tidak merasa terpojok menyetujui.
+- **Persetujuan tercatat**: waktu, IP, hash berkas proof **dan** hash snapshot dikunci jadi satu — salah satunya berubah, hash berbeda. Catatan order ditulis lengkap dengan rujukan §12.1.
+- **Halaman order**: kolom URL proof, tombol bekukan snapshot, status persetujuan, dan link siap salin untuk dikirim ke pemesan.
+- Diuji end-to-end dengan order + undangan sungguhan (dibuat, disetujui lewat halaman publik, diverifikasi di meta & catatan order, lalu dihapus).
 
 - [x] **F4.6** **Deadline H-21 + kuota bulanan di checkout** → **SELESAI & LIVE 2026-08-06** *(dikerjakan mendahului urutan F4)*
   **Kenapa didahulukan:** dua janji di S&K §12 sudah mengikat sejak halaman harga tayang. Order yang mustahil dikerjakan harus ditolak **sebelum uang berpindah** — menolak sesudah dibayar berarti refund, dan refund atas order Rp 2,9 juta bukan kerugian kecil.

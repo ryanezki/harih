@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) exit;
  * pengunjung & LiteSpeed tetap menyajikan berkas lama meski file di server
  * sudah baru, dan perbaikan tampilan terlihat "tidak berpengaruh".
  */
-const HARIH_VERSION = '1.6.2';
+const HARIH_VERSION = '1.7.0';
 
 add_action('after_setup_theme', function () {
     add_theme_support('title-tag');
@@ -230,7 +230,7 @@ function harih_reseller_webhook_url(): string {
 
 // Halaman toko: style child di atas Astra.
 add_action('wp_enqueue_scripts', function () {
-    if (is_singular('undangan') || is_page_template('page-isi-data.php') || is_page_template('page-katalog.php') || is_page_template('page-jadi-reseller.php') || is_page_template('page-harga-hybrid.php') || is_page_template('page-satuan.php') || is_page_template('page-upsell.php')) return;
+    if (is_singular('undangan') || is_page_template('page-isi-data.php') || is_page_template('page-katalog.php') || is_page_template('page-jadi-reseller.php') || is_page_template('page-harga-hybrid.php') || is_page_template('page-satuan.php') || is_page_template('page-upsell.php') || is_page_template('page-proof.php')) return;
     wp_enqueue_style('harih-child', get_stylesheet_uri(), [], HARIH_VERSION);
 }, 20);
 
@@ -242,7 +242,7 @@ add_action('wp_enqueue_scripts', function () {
     $is_isidata  = is_page_template('page-isi-data.php');
     $is_katalog  = is_page_template('page-katalog.php');
     $is_reseller = is_page_template('page-jadi-reseller.php');
-    $is_hybrid   = is_page_template('page-harga-hybrid.php') || is_page_template('page-satuan.php') || is_page_template('page-upsell.php');
+    $is_hybrid   = is_page_template('page-harga-hybrid.php') || is_page_template('page-satuan.php') || is_page_template('page-upsell.php') || is_page_template('page-proof.php');
     if (!$is_undangan && !$is_isidata && !$is_katalog && !$is_reseller && !$is_hybrid) return;
 
     global $wp_styles, $wp_scripts;
@@ -291,7 +291,7 @@ add_action('wp_enqueue_scripts', function () {
 
 // Preconnect Google Fonts hanya di halaman standalone kita.
 add_filter('wp_resource_hints', function ($urls, $relation) {
-    if ($relation === 'preconnect' && (is_singular('undangan') || is_page_template('page-isi-data.php') || is_page_template('page-katalog.php') || is_page_template('page-jadi-reseller.php') || is_page_template('page-harga-hybrid.php') || is_page_template('page-satuan.php') || is_page_template('page-upsell.php'))) {
+    if ($relation === 'preconnect' && (is_singular('undangan') || is_page_template('page-isi-data.php') || is_page_template('page-katalog.php') || is_page_template('page-jadi-reseller.php') || is_page_template('page-harga-hybrid.php') || is_page_template('page-satuan.php') || is_page_template('page-upsell.php') || is_page_template('page-proof.php'))) {
         $urls[] = 'https://fonts.googleapis.com';
         $urls[] = ['href' => 'https://fonts.gstatic.com', 'crossorigin'];
     }
@@ -392,7 +392,7 @@ function harih_halaman_utilitas(): array {
     $ids = [];
     // `/upsell/` bertoken (403 tanpa token) dan `/satuan/` adalah pembanding
     // harga, bukan halaman yang ingin kita menangkan di pencarian.
-    foreach (['isi-data', 'upsell', 'satuan'] as $slug) {
+    foreach (['isi-data', 'upsell', 'satuan', 'proof'] as $slug) {
         if ($p = get_page_by_path($slug)) $ids[] = (int) $p->ID;
     }
     if (function_exists('wc_get_page_id')) {
@@ -423,6 +423,10 @@ add_filter('document_title_parts', function ($parts) {
         unset($parts['tagline'], $parts['page']);
     } elseif (is_page_template('page-satuan.php')) {
         $parts['title'] = 'Beli Satuan — Kartu QR, Label & Souvenir';
+        $parts['site']  = 'hariH';
+        unset($parts['tagline'], $parts['page']);
+    } elseif (is_page_template('page-proof.php')) {
+        $parts['title'] = 'Persetujuan Proof Cetak';
         $parts['site']  = 'hariH';
         unset($parts['tagline'], $parts['page']);
     } elseif (is_page_template('page-upsell.php')) {
