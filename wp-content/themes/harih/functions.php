@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) exit;
  * pengunjung & LiteSpeed tetap menyajikan berkas lama meski file di server
  * sudah baru, dan perbaikan tampilan terlihat "tidak berpengaruh".
  */
-const HARIH_VERSION = '1.8.0';
+const HARIH_VERSION = '2.0.1';
 
 add_action('after_setup_theme', function () {
     add_theme_support('title-tag');
@@ -254,7 +254,9 @@ add_action('wp_enqueue_scripts', function () {
     }
 
     if ($is_katalog || $is_reseller || $is_hybrid) {
-        wp_enqueue_style('undangan-fonts', harih_tema_fonts('tema-01'), [], null);
+        // Font halaman toko SELF-HOSTED sejak redesain 2026-08-06 (@font-face di
+        // katalog.css) — tidak lagi memanggil Google Fonts. Preload woff2 yang
+        // dipakai di layar pertama supaya judul tidak berkedip ganti font.
         wp_enqueue_style('undangan-katalog', get_stylesheet_directory_uri() . '/katalog.css', [], HARIH_VERSION);
         if ($is_reseller) {
             wp_enqueue_script('undangan-reseller-js', get_stylesheet_directory_uri() . '/reseller.js', [], HARIH_VERSION, true);
@@ -289,9 +291,22 @@ add_action('wp_enqueue_scripts', function () {
     wp_add_inline_script('undangan-js', 'window.UNDANGAN = ' . wp_json_encode($cfg) . ';', 'before');
 }, 999);
 
+// Preload font halaman toko (self-hosted) — dua berkas yang pasti dipakai di
+// layar pertama: display untuk judul, body variabel untuk sisanya.
+add_action('wp_head', function () {
+    if (!is_page_template('page-katalog.php') && !is_page_template('page-harga-hybrid.php')
+        && !is_page_template('page-satuan.php') && !is_page_template('page-upsell.php')
+        && !is_page_template('page-proof.php') && !is_page_template('page-tamu.php')
+        && !is_page_template('page-rekap.php') && !is_page_template('page-jadi-reseller.php')) return;
+    $dir = get_stylesheet_directory_uri() . '/aset/font/';
+    foreach (['DMSerifDisplay-regular.woff2', 'Figtree-latin.woff2'] as $f) {
+        printf('<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin>' . "\n", esc_url($dir . $f));
+    }
+}, 1);
+
 // Preconnect Google Fonts hanya di halaman standalone kita.
 add_filter('wp_resource_hints', function ($urls, $relation) {
-    if ($relation === 'preconnect' && (is_singular('undangan') || is_page_template('page-isi-data.php') || is_page_template('page-katalog.php') || is_page_template('page-jadi-reseller.php') || is_page_template('page-harga-hybrid.php') || is_page_template('page-satuan.php') || is_page_template('page-upsell.php') || is_page_template('page-proof.php') || is_page_template('page-tamu.php') || is_page_template('page-rekap.php'))) {
+    if ($relation === 'preconnect' && (is_singular('undangan') || is_page_template('page-isi-data.php'))) {
         $urls[] = 'https://fonts.googleapis.com';
         $urls[] = ['href' => 'https://fonts.gstatic.com', 'crossorigin'];
     }

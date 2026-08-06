@@ -94,5 +94,10 @@ Kartu `og:image` per undangan dirender di server dengan GD + FreeType, jadi berk
 | `aset/font/Karla.ttf` | Karla (variable) | SIL OFL 1.1 | github.com/google/fonts `ofl/karla` |
 | `aset/font/Prata.ttf` | Prata Regular | SIL OFL 1.1 | github.com/google/fonts `ofl/prata` |
 | `aset/font/Manrope.ttf` | Manrope (variable) | SIL OFL 1.1 | github.com/google/fonts `ofl/manrope` |
+| `aset/font/DMSerifDisplay-regular.woff2` | DM Serif Display 400 | SIL OFL 1.1 | fonts.gstatic.com (subset latin) |
+| `aset/font/DMSerifDisplay-italic.woff2` | DM Serif Display 400 italic | SIL OFL 1.1 | fonts.gstatic.com (subset latin) |
+| `aset/font/Figtree-latin.woff2` | Figtree variable 400–800 | SIL OFL 1.1 | fonts.gstatic.com (subset latin) |
 
-Teks lisensi keempatnya digabung di `aset/font/OFL.txt` (OFL mensyaratkan lisensi ikut disertakan saat font didistribusikan ulang). Keempatnya **font yang memang dipakai skin undangan**, jadi kartu preview memakai tipografi yang sama dengan produk yang dijual: tema-01 Cormorant · tema-02 Karla · tema-03 Prata + Manrope.
+Tiga berkas woff2 terakhir dipakai **halaman toko** (katalog, harga, satuan, upsell, proof, tamu, rekap, reseller) sejak redesain 2026-08-06 dan **di-selfhost**, bukan dipanggil dari CDN Google: satu permintaan lintas-domain lebih sedikit dan tampilan tidak bergantung layanan pihak ketiga. Lisensinya di `OFL-DMSerifDisplay.txt` & `OFL-Figtree.txt`.
+
+Teks lisensi keempat font undangan digabung di `aset/font/OFL.txt` (OFL mensyaratkan lisensi ikut disertakan saat font didistribusikan ulang). Keempatnya **font yang memang dipakai skin undangan**, jadi kartu preview memakai tipografi yang sama dengan produk yang dijual: tema-01 Cormorant · tema-02 Karla · tema-03 Prata + Manrope.

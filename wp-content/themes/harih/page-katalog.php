@@ -2,13 +2,20 @@
 /**
  * Template Name: Katalog hariH
  *
- * Halaman katalog/landing (TASKS T1.20) — dipasang sebagai front page oleh
+ * Halaman katalog/landing — dipasang sebagai front page oleh
  * scripts/buat-toko.sh. Dirender standalone (tanpa CSS Astra/WooCommerce,
- * lihat dequeue di functions.php) supaya ringan & konsisten dengan brand
- * tema-01. Versi minimum untuk review merchant Duitku; polish di T3.8.
+ * lihat dequeue di functions.php) supaya ringan & bebas bentrok CSS.
  *
- * Tombol beli → /checkout/?add-to-cart=<id> — mu-plugin mengosongkan cart
- * sebelum add (T1.17), jadi 1 klik = 1 paket, langsung ke checkout.
+ * REDESAIN 2026-08-06 — konsep "Gen-Z editorial" dari handoff desain:
+ * serif display beraksen italic berwarna, foto arch bersticker, strip marquee,
+ * kartu chunky ber-radius besar, carousel tema scroll-snap, dan layout fluid
+ * TANPA media query (clamp + auto-fit + flex-wrap + scroll-snap).
+ * Sekaligus mengeksekusi temuan review UX: bukti visual produk di atas fold,
+ * baris trust pembayaran, kontras teks lolos WCAG AA, filter tamu yang bisa
+ * di-reset, dan CTA penutup.
+ *
+ * Tombol beli → /checkout/?add-to-cart=<id> — mu-plugin mengganti paket lain
+ * di cart sebelum add (F3.5), jadi 1 klik = 1 paket, langsung ke checkout.
  */
 
 if (!defined('ABSPATH')) exit;
@@ -21,12 +28,11 @@ $harih_paket = [
         'sub'    => 'Semua esensi undangan digital.',
         'badge'  => '',
         'fitur'  => [
-            'Cover, countdown, detail akad & resepsi + Google Maps',
+            'Cover, countdown, akad &amp; resepsi + Google Maps',
             'Musik latar instrumental',
             'RSVP + ucapan tamu',
             'Nama tamu otomatis di link',
             '3 tema dasar',
-            'Revisi via CS: Rp 25rb per pengajuan',
             'Masa aktif sampai H+7',
         ],
     ],
@@ -35,7 +41,7 @@ $harih_paket = [
         'nama'   => 'Favorit',
         'harga'  => '179',
         'sub'    => 'Paling laris — lengkap untuk hari bahagiamu.',
-        'badge'  => 'Terpopuler',
+        'badge'  => 'Paling Laris ✦',
         'fitur'  => [
             'Semua fitur paket Hemat',
             'Galeri sampai 10 foto + kisah cinta',
@@ -49,7 +55,7 @@ $harih_paket = [
         'sku'    => 'HARIH-PREMIUM',
         'nama'   => 'Premium',
         'harga'  => '299',
-        'sub'    => 'Terlengkap, termasuk video & prioritas.',
+        'sub'    => 'Terlengkap, termasuk video &amp; prioritas.',
         'badge'  => '',
         'fitur'  => [
             'Semua fitur paket Favorit',
@@ -70,29 +76,37 @@ function harih_url_beli(string $sku): string {
 }
 
 /**
- * Demo per tema (P0.2) — daftarnya diturunkan dari `undangan_get_temas()`
- * supaya tema baru otomatis ikut tertaut di sini (slug demo: `demo-{tema}`,
- * dibuat oleh scripts/buat-demo.sh).
+ * Demo per tema — daftarnya diturunkan dari `undangan_get_temas()` supaya tema
+ * baru otomatis ikut tertaut di sini (slug demo: `demo-{tema}`).
  */
 $harih_temas = function_exists('undangan_get_temas')
     ? undangan_get_temas()
     : ['tema-01' => 'Tema 01 — Botanical Elegan'];
 
-/** "Tema 01 — Botanical Elegan" → "Botanical Elegan" (label tombol demo). */
+/** "Tema 01 — Botanical Elegan" → "Botanical Elegan" (label kartu tema). */
 function harih_nama_tema(string $label): string {
     $bagian = preg_split('/\s*—\s*/u', $label, 2);
     return trim($bagian[1] ?? $label);
 }
 
+/** Keterangan kecil per tema — sifat visualnya, bukan daftar fiturnya. */
+$harih_tema_sifat = [
+    'tema-01' => 'klasik · sage &amp; emas',
+    'tema-02' => 'modern · terakota &amp; krem',
+    'tema-03' => 'dramatis · navy &amp; emas',
+];
+
 $harih_ada_reseller = (bool) get_page_by_path('jadi-reseller');
+$harih_ada_harga    = (bool) get_page_by_path('harga');
+$harih_aset         = get_stylesheet_directory_uri() . '/aset';
 ?><!DOCTYPE html>
 <html <?php language_attributes(); ?>>
 <head>
 <meta charset="<?php bloginfo('charset'); ?>">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<?php /* Deskripsi SERP (P2.4) — ±155 karakter, memuat kata kunci + harga + kanal */ ?>
-<meta name="description" content="Undangan pernikahan digital yang jadi otomatis dalam hitungan menit dan langsung terkirim ke WhatsApp — plus kartu undangan fisik ber-QR untuk yang paling Anda hormati.">
-<?php /* Open Graph katalog (T1.14 + P0.3) — reseller membagikan link ini di WA */ ?>
+<?php /* Deskripsi SERP — ±155 karakter, memuat kata kunci + kanal */ ?>
+<meta name="description" content="Undangan pernikahan digital yang jadi otomatis dalam hitungan menit dan langsung terkirim ke WhatsApp — plus undangan cetak beramplop nama untuk yang paling Anda hormati.">
+<?php /* Open Graph — reseller & pemesan membagikan link ini di WA */ ?>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="hariH">
 <meta property="og:locale" content="id_ID">
@@ -107,118 +121,194 @@ $harih_ada_reseller = (bool) get_page_by_path('jadi-reseller');
 </head>
 <body class="katalog-body">
 
-<header class="hero">
+<header class="nav">
     <p class="brand">hariH</p>
-    <h1>Undangan pernikahan digital,<br>jadi dalam hitungan menit.</h1>
-    <p class="hero-sub">Pilih paket, bayar, isi data — undangan cantikmu langsung terkirim ke WhatsApp &amp; email. <strong>Tanpa antre desainer, tanpa menunggu berhari-hari.</strong></p>
-    <div class="hero-cta">
-        <a class="btn btn-utama" href="#paket">Lihat Paket</a>
-        <a class="btn btn-garis" href="#demo">Lihat Contoh Undangan</a>
-    </div>
+    <nav class="nav-tautan">
+        <a href="#tema">Tema</a>
+        <a href="#paket">Paket</a>
+        <?php if ($harih_ada_harga) : ?><a href="#cetak">Cetak</a><?php endif; ?>
+        <a class="nav-cta" href="#paket">Buat Undangan</a>
+    </nav>
 </header>
+
+<section class="hero hero-utama">
+    <div class="hero-teks">
+        <p class="hero-badge">Undangan Digital · No Ribet</p>
+        <h1>Undangan nikah yang <em class="aksen-emas">aesthetic</em>, jadi dalam <em class="aksen-sage">hitungan menit</em>.</h1>
+        <p class="hero-sub">Pilih paket, bayar, isi data dari HP — undangan cantikmu langsung terkirim ke WhatsApp &amp; email. Tanpa antre desainer, tanpa nunggu berhari-hari.</p>
+        <div class="hero-cta">
+            <a class="btn btn-utama" href="#paket">Lihat Paket →</a>
+            <a class="btn btn-garis" href="#tema">Intip Contohnya</a>
+        </div>
+        <?php /* Baris trust (temuan review A2): kanal pembayaran disebut sebelum
+                 pengunjung menekan apa pun — keberatan "aman tidak?" dijawab di muka. */ ?>
+        <p class="hero-trust"><strong>Mulai Rp 99rb</strong>, sekali bayar · QRIS, VA &amp; e-wallet — gateway berlisensi</p>
+    </div>
+    <div class="hero-visual">
+        <div class="hero-panggung">
+            <div class="hero-arch hero-arch-1" data-naik>
+                <img src="<?php echo esc_url($harih_aset . '/demo/harih-cincin-buket.jpg'); ?>" alt="" width="600" height="800" fetchpriority="high" decoding="async">
+            </div>
+            <div class="hero-arch hero-arch-2">
+                <img src="<?php echo esc_url($harih_aset . '/demo/harih-gaun-detail.jpg'); ?>" alt="" width="600" height="800" loading="lazy" decoding="async">
+            </div>
+            <span class="stiker stiker-1">±5 Menit Jadi</span>
+            <span class="stiker stiker-2">Mulai 99rb</span>
+            <span class="stiker stiker-3">langsung ke WA ✦</span>
+        </div>
+    </div>
+</section>
+
+<?php
+/* Marquee: konten diduplikasi 2× agar loop translateX(-50%) mulus. */
+$harih_marquee = 'jadi dalam hitungan menit ✦ mulai Rp 99rb sekali bayar ✦ langsung terkirim ke WhatsApp ✦ RSVP &amp; ucapan tamu ✦ amplop digital ✦ nama tamu otomatis di link ✦ ';
+$harih_marquee = str_replace('✦', '<i>✦</i>', $harih_marquee);
+?>
+<div class="marquee" aria-hidden="true">
+    <div class="marquee-jalur">
+        <span><?php echo $harih_marquee; ?></span>
+        <span><?php echo $harih_marquee; ?></span>
+    </div>
+</div>
 
 <main>
     <section class="cara">
-        <h2>Cara pesan</h2>
-        <ol class="cara-grid">
-            <li><span class="cara-no">1</span><strong>Pilih paket &amp; bayar</strong><span>QRIS, transfer bank, atau e-wallet — aman via payment gateway resmi.</span></li>
-            <li><span class="cara-no">2</span><strong>Isi data undangan</strong><span>Link form dikirim ke WhatsApp &amp; email. Isinya ±10 menit dari HP.</span></li>
-            <li><span class="cara-no">3</span><strong>Undangan jadi otomatis</strong><span>±5 menit setelah data dikirim, link undangan + QR code sampai ke kamu.</span></li>
-        </ol>
+        <h2>Tiga langkah, <em class="aksen-emas">beres</em>.</h2>
+        <p class="seksi-sub">Semuanya dari HP, sambil rebahan juga bisa.</p>
+        <div class="cara-grid">
+            <div class="cara-kartu" data-naik><span class="cara-no">1</span><strong>Pilih paket &amp; bayar</strong><span>QRIS, transfer bank, atau e-wallet — aman via payment gateway resmi.</span></div>
+            <div class="cara-kartu" data-naik><span class="cara-no">2</span><strong>Isi data undangan</strong><span>Link form dikirim ke WhatsApp &amp; email. Isinya ±10 menit dari HP.</span></div>
+            <div class="cara-kartu" data-naik><span class="cara-no">3</span><strong>Undangan jadi otomatis</strong><span>±5 menit setelah data dikirim, link undangan + QR code sampai ke kamu.</span></div>
+        </div>
+    </section>
+
+    <?php /* Bukti visual produk (temuan review A1): tema tampil sebagai gambar,
+             bukan sekadar tautan teks. Carousel scroll-snap supaya di HP tetap
+             satu kartu penuh per geseran. */ ?>
+    <section class="tema" id="tema">
+        <div class="tema-kepala">
+            <h2>Intip dulu <em class="aksen-sage">hasilnya</em></h2>
+            <p>Geser untuk lihat semua tema →</p>
+        </div>
+        <div class="tema-track">
+            <?php foreach ($harih_temas as $harih_tid => $harih_label) : ?>
+            <a class="tema-kartu" href="<?php echo esc_url(home_url('/u/demo-' . $harih_tid . '/')); ?>" target="_blank" rel="noopener">
+                <span class="tema-gambar"><img src="<?php echo esc_url($harih_aset . '/og/og-' . $harih_tid . '.jpg'); ?>" alt="Contoh <?php echo esc_attr(harih_nama_tema($harih_label)); ?>" width="1200" height="630" loading="lazy" decoding="async"></span>
+                <span class="tema-baris">
+                    <span>
+                        <span class="tema-nama"><?php echo esc_html(harih_nama_tema($harih_label)); ?></span>
+                        <span class="tema-sifat"><?php echo $harih_tema_sifat[$harih_tid] ?? 'bandingkan dari HP-mu'; ?></span>
+                    </span>
+                    <span class="tema-pill">Demo ↗</span>
+                </span>
+            </a>
+            <?php endforeach; ?>
+            <a class="tema-kartu tema-kartu-akhir" href="#tema">
+                <span class="tema-akhir-judul">Tema baru<br>terus nambah</span>
+                <span class="tema-akhir-pill">Lihat semua demo</span>
+            </a>
+        </div>
     </section>
 
     <section class="paket" id="paket">
-        <h2>Pilih paketmu</h2>
+        <h2>Pilih <em class="aksen-emas">paketmu</em></h2>
+        <p class="seksi-sub">Sekali bayar, tanpa biaya tersembunyi.</p>
 
         <?php /*
           Satu pertanyaan sebelum tabel harga. Tujuannya bukan segmentasi
           canggih — tujuannya berhenti menawarkan paket Hemat kepada resepsi
-          gedung 300 tamu. Itu salah-jual yang merugikan dua pihak: masa aktif
-          H+7 dan tanpa galeri jelas tidak cocok, dan pembelinya kecewa.
-          Penyaringan dilakukan di klien; SEMUA kartu tetap ada di DOM supaya
-          mesin pencari tetap membaca seluruh tangga harga.
+          gedung 300 tamu: masa aktif H+7 dan tanpa galeri jelas tidak cocok,
+          dan pembelinya kecewa. Penyaringan dilakukan di klien; SEMUA kartu
+          tetap ada di DOM supaya mesin pencari membaca seluruh tangga harga.
+          Klik kedua pada chip yang sama = reset (temuan review A4).
         */ ?>
         <div class="tamu-tanya" id="tamu-tanya">
-            <p class="tamu-label" id="tamu-label">Perkiraan jumlah tamu?</p>
+            <p class="tamu-label" id="tamu-label">Kira-kira tamumu berapa?</p>
             <div class="tamu-opsi" role="group" aria-labelledby="tamu-label">
                 <button type="button" class="tamu-btn" data-tamu="kecil">Di bawah 100</button>
                 <button type="button" class="tamu-btn" data-tamu="sedang">100–200</button>
                 <button type="button" class="tamu-btn" data-tamu="besar">Di atas 200</button>
             </div>
-            <p class="tamu-catatan" id="tamu-catatan" hidden></p>
+            <p class="tamu-catatan" id="tamu-catatan"></p>
         </div>
 
         <div class="paket-grid">
-            <?php foreach ($harih_paket as $p) : $beli = harih_url_beli($p['sku']); ?>
-            <article class="paket-card<?php echo $p['badge'] ? ' unggulan' : ''; ?>" data-paket="<?php echo esc_attr(strtolower($p['nama'])); ?>">
-                <?php if ($p['badge']) : ?><p class="paket-badge"><?php echo esc_html($p['badge']); ?></p><?php endif; ?>
-                <h3><?php echo esc_html($p['nama']); ?></h3>
-                <p class="paket-harga"><span class="rp">Rp</span><?php echo esc_html($p['harga']); ?><span class="rb">rb</span></p>
-                <p class="paket-sub"><?php echo esc_html($p['sub']); ?></p>
+            <?php foreach ($harih_paket as $p) : $beli = harih_url_beli($p['sku']); $unggulan = $p['badge'] !== ''; ?>
+            <article class="paket-card<?php echo $unggulan ? ' unggulan' : ''; ?>" data-paket="<?php echo esc_attr(strtolower($p['nama'])); ?>">
+                <?php if ($unggulan) : ?><p class="paket-badge"><?php echo esc_html($p['badge']); ?></p><?php endif; ?>
+                <p class="paket-label"><?php echo esc_html(strtoupper($p['nama'])); ?></p>
+                <p class="paket-harga"><?php echo esc_html($p['harga']); ?><span class="rb"> rb</span></p>
+                <p class="paket-sub"><?php echo $p['sub']; ?></p>
                 <ul class="paket-fitur">
-                    <?php foreach ($p['fitur'] as $f) : ?><li><?php echo esc_html($f); ?></li><?php endforeach; ?>
+                    <?php foreach ($p['fitur'] as $f) : ?><li><span class="fitur-cek" aria-hidden="true">✓</span><?php echo $f; ?></li><?php endforeach; ?>
                 </ul>
                 <?php if ($beli) : ?>
-                    <a class="btn btn-utama btn-blok" href="<?php echo esc_url($beli); ?>">Pesan Paket <?php echo esc_html($p['nama']); ?></a>
+                    <a class="btn btn-blok <?php echo $unggulan ? 'btn-terang' : 'btn-garis-sage'; ?>" href="<?php echo esc_url($beli); ?>">Pesan <?php echo esc_html($p['nama']); ?></a>
                 <?php else : ?>
                     <span class="btn btn-blok btn-nonaktif" aria-disabled="true">Segera tersedia</span>
                 <?php endif; ?>
             </article>
             <?php endforeach; ?>
         </div>
-        <p class="paket-catatan">Harga sekali bayar — tanpa biaya tersembunyi. Undangan tetap jadi <strong>instan &amp; otomatis</strong> di semua paket.</p>
     </section>
 
-    <?php /* Jembatan ke paket cetak (F1.5). Sengaja SETELAH tangga digital:
-             pembeli yang datang untuk undangan digital menemukannya sebagai
-             peningkatan, bukan sebagai penghalang di depan pintu. */ ?>
-    <section class="jembatan-cetak">
-        <p class="jembatan-label">Undangan Cetak</p>
-        <h2>Ingin juga kartu fisik untuk orang tua &amp; sesepuh?</h2>
-        <p>Kartu undangan ber-QR: tamu memindainya, undangan digital kalian terbuka. Satu desain, dua wujud — dikerjakan dari data undangan yang sama, gratis ongkir ke seluruh Indonesia.</p>
-        <a class="btn btn-utama" href="<?php echo esc_url(home_url('/harga/')); ?>">Lihat Paket Cetak &amp; Digital</a>
-    </section>
-
-    <section class="demo" id="demo">
-        <h2>Lihat dulu hasilnya</h2>
-        <p>Buka contoh undangan dari HP-mu — persis seperti yang akan diterima tamu. Isi ketiganya sengaja dibuat sama, supaya kamu bisa membandingkan tampilan tiap tema.</p>
-        <div class="demo-tema">
-            <?php foreach ($harih_temas as $harih_tid => $harih_label) : ?>
-                <a class="btn btn-garis" href="<?php echo esc_url(home_url('/u/demo-' . $harih_tid . '/')); ?>" target="_blank" rel="noopener"><?php echo esc_html(harih_nama_tema($harih_label)); ?> ↗</a>
-            <?php endforeach; ?>
+    <?php if ($harih_ada_harga) : ?>
+    <section class="band-cetak" id="cetak">
+        <div class="band-kartu">
+            <img class="band-foto" src="<?php echo esc_url($harih_aset . '/demo/harih-cincin-sepatu.jpg'); ?>" alt="" width="1200" height="800" loading="lazy" decoding="async">
+            <div class="band-scrim" aria-hidden="true"></div>
+            <div class="band-isi">
+                <p class="band-badge">Undangan Cetak</p>
+                <h2>Buat orang tua &amp; sesepuh: undangan cetak beramplop nama, <em class="aksen-emas-muda">satu desain</em> dengan undangan digitalmu.</h2>
+                <p>Detail acara terbaca tanpa HP, QR-nya membuka undangan digital kalian. Dari data yang sama, gratis ongkir ke seluruh Indonesia.</p>
+                <a class="btn btn-terang" href="<?php echo esc_url(home_url('/harga/')); ?>">Lihat Paket Cetak</a>
+            </div>
         </div>
     </section>
+    <?php endif; ?>
 
     <section class="faq">
-        <h2>Pertanyaan umum</h2>
+        <h2>Sering <em class="aksen-emas">ditanya</em></h2>
         <details><summary>Berapa lama undangan saya jadi?</summary><p>Setelah kamu mengisi form data (±10 menit), undangan dibuat otomatis dan link-nya dikirim ke WhatsApp &amp; email dalam ±5 menit.</p></details>
         <details><summary>Bagaimana cara membagikan ke tamu?</summary><p>Cukup bagikan satu link via WhatsApp. Nama tamu bisa muncul otomatis di halaman pembuka dengan menambah <code>?to=Nama%20Tamu</code> di belakang link — panduannya dikirim bersama undangan.</p></details>
         <details><summary>Bisa revisi setelah jadi?</summary><p>Bisa, lewat CS. Paket Favorit dapat 1× revisi gratis, Premium 3× gratis dan didahulukan. Paket Hemat dan revisi di luar jatah dikenakan Rp 25 ribu per pengajuan. Kalau kesalahannya dari sistem kami, koreksinya selalu gratis. Revisi dikerjakan maksimal 2×24 jam — ajukan paling lambat H-3 sebelum acara.</p></details>
         <details><summary>Pembayarannya bagaimana?</summary><p>QRIS, virtual account bank, dan e-wallet — diproses payment gateway berlisensi resmi. Kamu menerima bukti pembayaran otomatis via email.</p></details>
     </section>
+
+    <?php /* CTA penutup (temuan review A5): pembaca yang sampai bawah tidak
+             dibiarkan buntu tanpa ajakan. */ ?>
+    <section class="cta-penutup">
+        <h2>Hari bahagiamu, <em class="aksen-emas-muda">diundang dengan indah</em>.</h2>
+        <p>Mulai Rp 99 ribu, sekali bayar — jadi dalam hitungan menit.</p>
+        <a class="btn btn-terang" href="#paket">Pilih Paket Sekarang →</a>
+    </section>
 </main>
 
 <footer class="kaki">
-    <p class="brand">hariH</p>
-    <p class="kaki-tag">Undangan digital untuk hari bahagiamu.</p>
-    <nav class="kaki-nav">
-        <a href="<?php echo esc_url(home_url('/kontak/')); ?>">Kontak</a>
-        <a href="<?php echo esc_url(home_url('/syarat-ketentuan/')); ?>">Syarat &amp; Ketentuan</a>
-        <a href="<?php echo esc_url(home_url('/kebijakan-privasi/')); ?>">Kebijakan Privasi</a>
-        <a href="<?php echo esc_url(home_url('/kebijakan-refund/')); ?>">Kebijakan Refund</a>
-        <a href="<?php echo esc_url(home_url('/harga/')); ?>">Paket Cetak</a>
-        <?php if ($harih_ada_reseller) : ?><a href="<?php echo esc_url(home_url('/jadi-reseller/')); ?>">Jadi Reseller</a><?php endif; ?>
-    </nav>
+    <div class="kaki-atas">
+        <div>
+            <p class="brand">hariH</p>
+            <p class="kaki-tag">Undangan digital untuk hari bahagiamu.</p>
+        </div>
+        <nav class="kaki-nav">
+            <a href="<?php echo esc_url(home_url('/kontak/')); ?>">Kontak</a>
+            <a href="<?php echo esc_url(home_url('/syarat-ketentuan/')); ?>">Syarat &amp; Ketentuan</a>
+            <a href="<?php echo esc_url(home_url('/kebijakan-privasi/')); ?>">Kebijakan Privasi</a>
+            <a href="<?php echo esc_url(home_url('/kebijakan-refund/')); ?>">Refund</a>
+            <?php if ($harih_ada_harga) : ?><a href="<?php echo esc_url(home_url('/harga/')); ?>">Paket Cetak</a><?php endif; ?>
+            <?php if ($harih_ada_reseller) : ?><a href="<?php echo esc_url(home_url('/jadi-reseller/')); ?>">Jadi Reseller</a><?php endif; ?>
+        </nav>
+    </div>
     <p class="kaki-cc">© <?php echo esc_html(wp_date('Y')); ?> hariH · harih.id</p>
 </footer>
 
 <script>
 (function () {
     'use strict';
-    // Resepsi di atas 200 tamu: paket Hemat disembunyikan. Masa aktif H+7 dan
-    // tanpa galeri memang tidak cocok untuk skala itu — menawarkannya hanya
-    // menghasilkan pembeli kecewa. Ini nudge, bukan penegakan: pengunjung tetap
-    // bisa memilih ulang atau memuat ulang halaman.
+    // Filter tamu. Resepsi di atas 200 tamu: paket Hemat disembunyikan — masa
+    // aktif H+7 dan tanpa galeri memang tidak cocok untuk skala itu, dan
+    // menawarkannya hanya menghasilkan pembeli kecewa. Ini nudge, bukan
+    // penegakan: klik kedua pada chip yang sama mengembalikan semua paket.
     var tombol = document.querySelectorAll('.tamu-btn');
     var kartu = document.querySelectorAll('.paket-card');
     var catatan = document.getElementById('tamu-catatan');
@@ -226,18 +316,22 @@ $harih_ada_reseller = (bool) get_page_by_path('jadi-reseller');
     var PESAN = {
         kecil:  'Ketiga paket cocok untuk skala ini.',
         sedang: 'Galeri foto & amplop digital biasanya mulai terasa perlu di skala ini.',
-        besar:  'Paket Hemat kami sembunyikan — masa aktif H+7 dan tanpa galeri tidak cocok untuk resepsi sebesar ini.'
+        besar:  'Paket Hemat kami sembunyikan — masa aktif H+7 dan tanpa galeri tidak cocok untuk resepsi sebesar ini. Klik lagi untuk menampilkan semua paket.'
     };
+    var pilihan = null;
+
+    function terapkan() {
+        tombol.forEach(function (b) { b.classList.toggle('aktif', b.dataset.tamu === pilihan); });
+        kartu.forEach(function (k) {
+            k.hidden = pilihan ? SEMBUNYI[pilihan].indexOf(k.dataset.paket) !== -1 : false;
+        });
+        catatan.textContent = pilihan ? PESAN[pilihan] : '';
+    }
 
     tombol.forEach(function (b) {
         b.addEventListener('click', function () {
-            var pilihan = b.dataset.tamu;
-            tombol.forEach(function (x) { x.classList.toggle('aktif', x === b); });
-            kartu.forEach(function (k) {
-                k.hidden = SEMBUNYI[pilihan].indexOf(k.dataset.paket) !== -1;
-            });
-            catatan.textContent = PESAN[pilihan];
-            catatan.hidden = false;
+            pilihan = pilihan === b.dataset.tamu ? null : b.dataset.tamu;
+            terapkan();
         });
     });
 })();
