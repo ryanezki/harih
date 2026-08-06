@@ -197,7 +197,7 @@
             "nama": "={{ $json.nama }}",
             "email": "={{ $json.email }}",
             "wa": "={{ $json.wa }}",
-            "paket": "={{ $json.jenis_order === 'cetak_saja' ? 'cetak' : $json.paket }}",
+            "paket": "={{ $json.jenis_order === 'cetak_saja' ? 'cetak' : ($json.jenis_order === 'hybrid' ? $json.paket + '+cetak' : $json.paket) }}",
             "kupon": "={{ $json.kupon }}",
             "total": "={{ $json.total }}",
             "token": "={{ $json.token }}",

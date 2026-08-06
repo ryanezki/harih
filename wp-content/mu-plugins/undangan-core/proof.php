@@ -178,3 +178,99 @@ function undangan_catat_persetujuan(WC_Order $order): array {
     ), false);
     return ['ok' => true, 'pesan' => 'Terima kasih — persetujuan Anda tercatat.'];
 }
+
+/* =========================================================================
+ * F4.7 — ANTREAN PRODUKSI.
+ *
+ * Diurutkan berdasarkan **tenggat**, bukan tanggal order: pesanan yang masuk
+ * belakangan bisa saja acaranya lebih dulu. Halaman ini yang dipakai memilih
+ * pekerjaan hari ini, jadi yang ditampilkan hanya hal yang mengubah keputusan:
+ * berapa hari tersisa, langkah mana yang menghambat, dan berapa nama tamu yang
+ * sudah masuk (tanpa itu amplop tidak bisa dicetak).
+ * ========================================================================= */
+
+add_action('admin_menu', function () {
+    add_submenu_page(
+        'woocommerce',
+        'Antrean Produksi Cetak',
+        'Antrean Cetak',
+        'edit_shop_orders',
+        'harih-antrean',
+        'undangan_render_antrean'
+    );
+});
+
+function undangan_render_antrean(): void {
+    $orders = wc_get_orders([
+        'limit'   => 60,
+        'status'  => ['processing', 'on-hold', 'completed'],
+        'return'  => 'objects',
+        'orderby' => 'date',
+        'order'   => 'DESC',
+    ]);
+
+    $baris = [];
+    foreach ($orders as $o) {
+        $cetak = false;
+        foreach ($o->get_items() as $item) {
+            if (in_array(undangan_jenis_produk($item->get_product()), ['hybrid', 'satuan'], true)) { $cetak = true; break; }
+        }
+        if (!$cetak) continue;
+
+        $uid   = undangan_cari_undangan_order($o->get_id());
+        $acara = (string) $o->get_meta('_tanggal_acara');
+        if (!$acara && $uid) $acara = (string) get_post_meta($uid, 'tanggal_resepsi', true);
+        $sisa  = $acara ? (int) floor((strtotime($acara) - time()) / 86400) : null;
+        $tamu  = $uid ? count(array_filter(array_map('trim', explode("\n", (string) get_post_meta($uid, 'daftar_tamu', true))))) : 0;
+
+        // Langkah penghambat — satu kalimat, karena itu yang menentukan
+        // pekerjaan berikutnya. Urutannya = urutan alur produksi.
+        if (!$uid)                              $tahap = ['Menunggu data undangan', 'gagal'];
+        elseif ($o->get_meta('_proof_disetujui')) $tahap = $o->get_meta('_resi') ? ['Terkirim', 'ok'] : ['SIAP CETAK', 'siap'];
+        elseif (undangan_proof_berkas($o))        $tahap = ['Menunggu persetujuan pelanggan', 'tunggu'];
+        elseif ($tamu === 0)                      $tahap = ['Menunggu daftar tamu', 'tunggu'];
+        else                                      $tahap = ['Siapkan proof', 'aksi'];
+
+        $baris[] = compact('o', 'acara', 'sisa', 'tamu', 'tahap') + ['uid' => $uid];
+    }
+
+    // Tenggat terdekat di atas; yang tanpa tanggal ditaruh paling bawah.
+    usort($baris, static fn($a, $b) => ($a['sisa'] ?? PHP_INT_MAX) <=> ($b['sisa'] ?? PHP_INT_MAX));
+
+    $warna = ['gagal' => '#b32d2e', 'tunggu' => '#996800', 'aksi' => '#2271b1', 'siap' => '#1e7e34', 'ok' => '#646970'];
+
+    echo '<div class="wrap"><h1>Antrean Produksi Cetak</h1>';
+    printf(
+        '<p>Kuota bulan ini: <strong>%d dari %d</strong> terpakai. Diurutkan berdasarkan <strong>tenggat acara</strong>, bukan tanggal pesanan.</p>',
+        (int) undangan_kuota_terpakai(), (int) UNDANGAN_KUOTA_BULAN
+    );
+
+    if (!$baris) {
+        echo '<p>Belum ada pesanan cetak yang berjalan.</p></div>';
+        return;
+    }
+
+    echo '<table class="wp-list-table widefat fixed striped"><thead><tr>'
+       . '<th style="width:90px">Pesanan</th><th>Pelanggan</th><th style="width:150px">Acara</th>'
+       . '<th style="width:90px">Sisa</th><th style="width:80px">Tamu</th><th style="width:230px">Langkah berikutnya</th>'
+       . '<th style="width:150px">Resi</th></tr></thead><tbody>';
+
+    foreach ($baris as $b) {
+        $o = $b['o'];
+        printf(
+            '<tr><td><a href="%s"><strong>#%d</strong></a></td><td>%s</td><td>%s</td>'
+            . '<td%s>%s</td><td>%s</td><td><span style="color:%s;font-weight:600">%s</span></td><td>%s</td></tr>',
+            esc_url($o->get_edit_order_url()),
+            $o->get_id(),
+            esc_html(trim($o->get_billing_first_name() . ' ' . $o->get_billing_last_name()) ?: '—'),
+            esc_html($b['acara'] ?: '—'),
+            $b['sisa'] !== null && $b['sisa'] < 14 ? ' style="color:#b32d2e;font-weight:600"' : '',
+            $b['sisa'] === null ? '—' : esc_html($b['sisa'] . ' hari'),
+            esc_html((string) $b['tamu']),
+            esc_attr($warna[$b['tahap'][1]] ?? '#000'),
+            esc_html($b['tahap'][0]),
+            esc_html(trim($o->get_meta('_kurir') . ' ' . $o->get_meta('_resi')) ?: '—')
+        );
+    }
+    echo '</tbody></table></div>';
+}
