@@ -127,6 +127,7 @@ add_action('init', function () {
         'rundown'         => 'sanitize_textarea_field',// "18.00 Pembukaan" per baris
         'catatan_lokasi'      => 'sanitize_textarea_field', // parkir/valet/pintu masuk — resepsi
     'catatan_lokasi_akad' => 'sanitize_textarea_field', // idem — venue akad
+    'daftar_tamu'     => 'sanitize_textarea_field', // satu nama per baris — amplop bernama + link personal
     'nuansa'          => 'sanitize_key',            // islam|kristen|katolik|hindu|buddha|konghucu|umum
     'salam_teks'      => 'sanitize_text_field',     // penimpa opsional (CS)
     'ayat_teks'       => 'sanitize_textarea_field', // idem

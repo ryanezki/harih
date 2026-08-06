@@ -148,10 +148,11 @@
   **Langkah:** pola `/isi-data/` (token HMAC di URL, `noindex`, tanpa GA4) — sudah terbukti; tinggal template + endpoint baca berautentikasi.
   **Selesai bila:** mempelai membuka satu link, melihat rekap benar, mengunduh CSV; tanpa token → 403.
 
-- [ ] **FU.6** 🔒 **Generator link personal massal + template broadcast WA** *(poin 15)*
+- [x] **FU.6** **Daftar tamu → link personal massal + CSV** *(poin 15)* → **SELESAI & LIVE 2026-08-06**
   **Apa:** mempelai menempel daftar nama → dapat tabel link `?to=Nama` siap kirim + teks broadcast yang sudah tersapa nama. Parameter `?to=` **sudah bekerja**; yang belum ada pembuat massalnya.
-  **Kenapa bernilai jual:** ini pekerjaan paling menjemukan bagi pemesan (300 tamu = 300 salin-tempel), dan pembeda paling terasa dibanding undangan digital murah.
-  **Selesai bila:** 300 nama → 300 link + teks siap salin, dalam satu halaman, tanpa spreadsheet.
+  **Kenapa dikerjakan sekarang, bukan menunggu gerbang F0.3:** satu daftar ini melayani **tiga** hal sekaligus — **amplop bernama tamu** (pembeda paket cetak yang percetakan konvensional jual mahal, sementara bagi kita biayanya nol karena datanya sudah ada), link personal massal, dan kelak QR check-in. Begitu produk cetak berubah jadi undangan lipat + amplop, daftar tamu berhenti jadi fitur tambahan dan jadi **prasyarat produksi**.
+  **Yang dibangun:** halaman bertoken `/tamu/?order=&key=` (HMAC yang sama dengan `/isi-data/`, `/upsell/`, `/proof/`) — tempel nama satu per baris, hitungan langsung dibandingkan **jatah amplop paket** (Hormat 50 · Resepsi 100 · Grand 150; item satuan mengikuti kuantitas), **Salin semua link** (nama + link, dipisah tab — siap tempel ke aplikasi pengirim), dan **Unduh CSV** ber-BOM yang dipakai dua arah: mencetak nama di amplop **dan** kirim massal. Batas 600 nama, tampilan dipangkas 300 agar ringan di HP. Link daftar tamu + jumlah nama terkumpul tampil di halaman order, bersebelahan dengan proof.
+  **Terverifikasi live** dengan order + undangan uji: 5 nama tersimpan, link personal terbentuk benar termasuk nama ber-`&` (`?to=Bapak%20Hendra%20%26%20Ibu%20Sari`), tombol salin & CSV berfungsi. Data uji dihapus.
 
 - [ ] **FU.7** 🔒 **QR check-in tamu di venue** *(poin 7)*
   **Apa:** tiap link personal membawa QR; panitia memindai di pintu → tercatat hadir. Pasangan alami kartu QR fisik di paket cetak (F1) — QR yang sama, dua wujud.

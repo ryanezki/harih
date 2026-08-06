@@ -113,6 +113,16 @@ add_action('woocommerce_admin_order_data_after_shipping_address', function ($ord
     } elseif ($link) {
         printf('<p style="margin:6px 0">Link persetujuan untuk pelanggan:<br><input type="text" readonly value="%s" style="width:100%%" onclick="this.select()"></p>', esc_attr($link));
     }
+    $tamu = add_query_arg(
+        ['order' => $order->get_id(), 'key' => substr(hash_hmac('sha256', (string) $order->get_id(), FORM_TOKEN_SECRET), 0, 16)],
+        home_url('/tamu/')
+    );
+    printf('<p style="margin:10px 0 0">Link daftar tamu (amplop bernama + link personal):<br><input type="text" readonly value="%s" style="width:100%%" onclick="this.select()"></p>', esc_attr($tamu));
+    $uid = undangan_cari_undangan_order($order->get_id());
+    if ($uid) {
+        $n = count(array_filter(array_map('trim', explode("\n", (string) get_post_meta($uid, 'daftar_tamu', true)))));
+        printf('<p style="margin:6px 0">Nama tamu terkumpul: <strong>%d</strong></p>', $n);
+    }
     echo '</div>';
 }, 20);
 

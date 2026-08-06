@@ -455,3 +455,24 @@ h2 { font-size: 1.7rem; text-align: center; margin-bottom: 1.4rem; }
 .proof-setuju { max-width: 640px; margin: 30px auto 0; padding: 0 20px 10px; }
 .proof-konsekuensi { font-size: .92rem; color: var(--c-ink); background: color-mix(in srgb, var(--c-gold) 9%, transparent); border: 1px solid color-mix(in srgb, var(--c-gold) 40%, transparent); border-radius: var(--radius); padding: 14px 18px; margin-bottom: 16px; }
 .proof-batal { text-align: center; margin-top: 12px; font-size: .88rem; color: var(--c-ink-2); }
+
+/* Daftar tamu (FU.6 + amplop bernama). */
+.tamu-form { max-width: 640px; margin: 0 auto; padding: 0 20px; }
+.tamu-form .field span { display: block; margin-bottom: 6px; font-size: .9rem; color: var(--c-ink-2); }
+.tamu-form textarea {
+    width: 100%; padding: 12px 14px; font: 400 15px/1.7 inherit;
+    border: 1px solid var(--c-line); border-radius: var(--radius);
+    background: var(--c-surface); color: var(--c-ink); resize: vertical;
+}
+.tamu-hitung { margin: 10px 0 16px; font-size: .88rem; color: var(--c-ink-2); font-variant-numeric: tabular-nums; }
+.tamu-lebih { color: var(--c-gold); }
+.tamu-link { max-width: 720px; margin: 36px auto 0; padding: 0 20px; }
+.tamu-link h2 { text-align: center; }
+.tamu-link > p { text-align: center; color: var(--c-ink-2); font-size: .93rem; margin-bottom: 16px; }
+.tamu-aksi { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 18px; }
+.tamu-daftar { list-style: none; margin: 0; padding: 0; border: 1px solid var(--c-line); border-radius: var(--radius); background: var(--c-surface); max-height: 420px; overflow-y: auto; }
+.tamu-daftar li { padding: 10px 16px; border-bottom: 1px solid color-mix(in srgb, var(--c-line) 55%, transparent); }
+.tamu-daftar li:last-child { border-bottom: 0; }
+.tamu-nama { display: block; font-size: .95rem; color: var(--c-ink); }
+.tamu-url { display: block; margin-top: 2px; font-size: .74rem; color: var(--c-ink-2); word-break: break-all; }
+.tamu-catatan { margin-top: 10px; font-size: .82rem; color: var(--c-ink-2); text-align: center; }
