@@ -2,7 +2,7 @@
 
 > Daftar hal yang **hanya bisa Anda kerjakan**: butuh akun pihak ketiga, kartu identitas, HP nomor bisnis, keputusan bisnis, atau password. Semua hal lain di platform ini sudah otomatis atau bisa saya kerjakan dari CLI.
 >
-> Disusun 2026-08-04, menggantikan `panduan-go-live.md` yang langkah-langkahnya sudah selesai semua. Untuk operasional harian setelah launch, pegangannya [`runbook.md`](./runbook.md).
+> Disusun 2026-08-04, menggantikan `panduan-go-live.md`. **Diperbarui 2026-08-06**: proyek berubah jadi hybrid (digital + cetak milik sendiri), jadi ditambahkan **bagian 10 — menjalankan pesanan cetak dari awal sampai kirim**, yang isinya alat-alat yang sudah jadi tapi belum pernah Anda pakai. Untuk operasional harian, pegangannya [`runbook.md`](./runbook.md).
 
 **Cara pakai:** kerjakan berurutan dari atas. Tiap langkah punya **verifikasi** — kalau verifikasinya lolos, langkah itu benar-benar selesai. Kalau tersendat, sebut nomornya saja ke saya.
 
@@ -16,7 +16,8 @@
 
 1. Login dashboard Duitku (akun production, **bukan** sandbox) → menu pendaftaran merchant.
 2. Isi formulir aplikasi merchant **perorangan**. Siapkan: KTP, NPWP (bila diminta), rekening bank atas nama sendiri, dan URL situs `https://harih.id`.
-3. Saat ditanya jenis usaha/produk: *jasa pembuatan undangan pernikahan digital*, produk digital, sekali bayar Rp 99.000–Rp 299.000.
+3. Saat ditanya jenis usaha/produk: *jasa pembuatan undangan pernikahan digital **dan cetak***, sekali bayar **Rp 99.000–Rp 5.900.000**.
+   ⚠️ **Rentang nilainya berubah sejak paket cetak ada.** Kalau aplikasi Anda sudah terlanjur menyebut "Rp 99.000–299.000", **beri tahu Duitku** — kanal pembayaran punya batas nominal, dan merchant yang tiba-tiba menerima transaksi Rp 2,9 juta di luar profil yang didaftarkan bisa kena tahan. Sistem kita sudah membatasi order di atas Rp 2 juta ke virtual account & gerai retail saja, tapi profil merchantnya tetap harus cocok.
 4. Kirim, lalu pantau statusnya. Duitku biasanya mereview situs — situs Anda sudah siap: katalog dengan harga jelas, 4 halaman legal live, 3 demo produk yang bisa dibuka, kontak yang bisa dihubungi.
 
 **Setelah approval keluar** — beri tahu saya, lalu:
@@ -159,6 +160,62 @@ Pertanyaannya cuma satu: **layakkah ini dibayar Rp 99–299 ribu?** Kalau ada ya
 
 ---
 
+---
+
+## 🖨️ 10. Menjalankan pesanan cetak — dari masuk sampai terkirim
+
+Bagian ini **baru** (6 Agustus 2026). Semua alat di bawah sudah jadi dan sudah live, tapi belum pernah Anda pakai karena belum ada order. Baca sekali sekarang; saat order pertama masuk, Anda tinggal mengikuti.
+
+### Layar utama Anda: **WooCommerce → Antrean Cetak**
+
+Satu halaman yang menjawab "hari ini saya kerjakan apa". Diurutkan berdasarkan **tenggat acara**, bukan tanggal pesanan — pesanan yang masuk belakangan bisa saja acaranya lebih dulu, dan itu kesalahan penjadwalan yang paling mahal. Sisa hari **memerah otomatis di bawah 14 hari**.
+
+Kolom **"Langkah berikutnya"** selalu berisi satu kalimat — itulah yang menghambat pesanan itu:
+
+| Yang tertulis | Artinya | Yang Anda lakukan |
+|---|---|---|
+| Menunggu data undangan | Pembeli belum mengisi form | Tunggu; ingatkan lewat WA bila > 3 hari |
+| Menunggu daftar tamu | Data undangan ada, nama tamu belum | Kirim ulang link daftar tamu (ada di halaman order) |
+| Siapkan proof | Semua bahan lengkap | **Giliran Anda** — lihat langkah di bawah |
+| Menunggu persetujuan pelanggan | Proof sudah dikirim | Tunggu; ingatkan bila > 2 hari |
+| **SIAP CETAK** | Sudah disetujui, terkunci | **Cetak sekarang** |
+| Terkirim | Resi sudah diisi | Selesai |
+
+### Alur satu pesanan
+
+**1. Pesanan masuk.** Sistem sudah menolak duluan yang mustahil dikerjakan: acara kurang dari H-21 ditolak di checkout, dan kalau kuota bulan ini (8 pesanan) penuh, pembeli diberi tahu sejak di keranjang. Jadi apa pun yang lolos sampai ke Anda, secara jadwal memang bisa dikerjakan.
+
+**2. Pembeli mengisi data undangan** lewat link yang otomatis dikirim ke WhatsApp-nya. Undangan digitalnya terbit sendiri.
+
+**3. Pembeli mengisi daftar tamu.** Link-nya ikut terkirim otomatis di pesan "undangan sudah jadi", dan juga tersedia di halaman order. **Tanpa daftar ini amplop bernama tidak bisa dicetak** — itu sebabnya ia muncul sebagai penghambat di antrean. Halamannya menghitung sendiri apakah jumlah nama melebihi jatah paket.
+
+**4. Anda menyiapkan proof.** Buka halaman order, lalu:
+   - tempel **URL berkas proof** (satu per baris) — unggah gambarnya ke mana pun yang bisa diakses publik;
+   - centang **"Bekukan snapshot data undangan sekarang"** lalu Update.
+   Sejak dibekukan, produksi memakai salinan beku itu — kalau pembeli mengedit undangan digitalnya besok, yang dicetak **tidak ikut berubah**.
+   - salin **link persetujuan** yang muncul, kirim ke pembeli lewat WhatsApp.
+
+**5. Pembeli menyetujui.** Halaman persetujuan menyebut konsekuensinya terang-terangan, dan saat ia menekan tombol, sistem mencatat waktu, hash berkas proof, dan hash snapshot. **Ini bukti Anda** kalau kelak ada sengketa typo — S&K §12.1 menggantungkan pembagian tanggung jawab persis pada catatan ini.
+   ⚠️ Setelah disetujui, snapshot **tidak bisa ditimpa**. Kalau pembeli minta perubahan setelah menyetujui, itu revisi berbayar — dan memang begitu aturannya.
+
+**6. Cetak, kirim, isi resi.** Di halaman order ada kolom **Kurir** dan **Nomor resi**. Isi keduanya; antrean langsung berubah jadi "Terkirim".
+
+### Yang otomatis berjalan tanpa Anda sentuh
+
+- Pembeli **digital** menerima tawaran naik ke paket cetak: sekali di pesan "undangan sudah jadi", lalu pengingat **H+3** dan **H+12** (kredit berlaku 14 hari). Berhenti sendiri kalau ia sudah membeli cetak.
+- Semua pembeli menerima link **rekap kehadiran** — jumlah tamu per sesi, bisa diunduh CSV untuk katering.
+- Halaman harga menampilkan **sisa slot bulan ini** apa adanya, dan menolak sendiri saat penuh.
+
+---
+
+## 🔴 11. Tiga hal yang menunggu Anda sekarang
+
+1. **Cetak satu undangan lipat + amplop lengkap.** Satu sampel menjawab empat pertanyaan sekaligus: bobot nyata (untuk ongkir yang kita tanggung), waktu lipat per unit, hasil uji pindai QR, dan — yang paling menentukan — **apakah mesin creasing sanggup**. Kalau lipatnya manual, 100 lipatan × 8 order = 800 lipatan/bulan, dan seluruh hitungan marjin per jam batal. Timbang sampelnya, lalu beri tahu saya angkanya; bobot produk masih tebakan saya (2/4/7 kg).
+2. **Cek mekanisme refund di dashboard Duitku.** Garansi Tepat Waktu menjanjikan uang kembali 100% atas order sampai Rp 5,9 juta, dan janji itu **sudah mengikat sejak halaman harga tayang**. Yang perlu dipastikan: bisa dilakukan sendiri dari dashboard atau harus tiket, berapa lama, dan apakah fee kanal ikut kembali. Kebijakan Refund kita sudah menyediakan jalan keluar ("ke metode pembayaran asal **atau transfer bank**"), jadi kalaupun ribet, uangnya tetap bisa bergerak.
+3. **Kejar approval Duitku production.** Masih gerbang tunggal semua uang — digital maupun cetak.
+
+---
+
 ## Ritme rutin setelah launch
 
 | Kapan | Apa | Berapa lama |
@@ -170,6 +227,8 @@ Pertanyaannya cuma satu: **layakkah ini dibayar Rp 99–299 ribu?** Kalau ada ya
 | Saat ada alert | Buka [`runbook.md`](./runbook.md) §3 — tiap alert ada tabel tindakannya | sesuai kasus |
 
 ---
+
+**Sejak ada pesanan cetak, tambahkan ke ritme harian:** buka **Antrean Cetak** sekali sehari. Kalau tidak ada baris yang bertuliskan "Siapkan proof" atau "SIAP CETAK", tidak ada yang perlu Anda kerjakan hari itu.
 
 ## Yang **tidak** perlu Anda lakukan
 
