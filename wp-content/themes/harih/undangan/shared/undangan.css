@@ -591,6 +591,35 @@ img { max-width: 100%; }
 }
 body.is-locked .pratinjau-nuansa { display: none; } /* gerbang tetap sinematik */
 
+/* Penanda "coba nama kalian" (G1.3) — hanya muncul di undangan DEMO yang dibuka
+   dengan ?pria=&wanita=. Ditaruh di ATAS supaya tidak bertumpuk dengan pemilih
+   nuansa (kiri-bawah) dan tombol musik (kanan-bawah). Sengaja kecil & tidak
+   menuntut: tugasnya cuma mencegah pengunjung mengira undangannya sudah jadi. */
+.pratinjau-nama {
+    position: fixed;
+    top: calc(12px + env(safe-area-inset-top, 0px));
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 60;
+    margin: 0;
+    padding: 7px 14px;
+    border: 1px solid color-mix(in srgb, var(--c-gold) 40%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--c-bg) 80%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .16);
+    font: 400 10px/1 var(--font-label, var(--font-body));
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--c-ink-soft);
+    white-space: nowrap;
+    max-width: calc(100vw - 32px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+body.is-locked .pratinjau-nama { display: none; } /* gerbang tetap sinematik */
+
 /* Kisah Kami sebagai timeline (FU.3) — garis rambut vertikal dengan titik
    emas per babak. Paragraf panjang di HP dilewati; daftar bertanggal dibaca. */
 .kisah-timeline {

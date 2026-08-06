@@ -14,9 +14,70 @@
 
     /* ---- Nama tamu dari ?to= — client-side supaya semua tamu memakai satu
        cache halaman yang sama (keputusan A2 blueprint) ---- */
-    var nama = new URLSearchParams(location.search).get('to');
+    var qs = new URLSearchParams(location.search);
+    var nama = qs.get('to');
     if (nama) {
         document.querySelectorAll('.guest-name').forEach(function (el) { el.textContent = nama; });
+    }
+
+    /* ---- Pratinjau "coba nama kalian" (G1.3) — HANYA di undangan demo ----
+
+       Calon pembeli mengetik namanya di beranda dan langsung melihatnya di
+       dalam produk. Semuanya sisi klien: tidak ada yang disimpan, tidak ada
+       permintaan tambahan, dan cache halaman tetap satu untuk semua orang —
+       pola yang sama dengan ?to= di atas.
+
+       Dibatasi ke demo (window.UNDANGAN.demo, diisi server dari meta order_id)
+       supaya nama di undangan PELANGGAN tidak bisa diubah lewat URL oleh siapa
+       pun yang memegang tautannya. Pembatasan yang sama sudah dipakai pemilih
+       nuansa `?nuansa=`.
+
+       textContent, bukan innerHTML — nama datang dari input publik. */
+    if (window.UNDANGAN && window.UNDANGAN.demo) {
+        (function () {
+            var pria   = (qs.get('pria')   || '').trim().slice(0, 20);
+            var wanita = (qs.get('wanita') || '').trim().slice(0, 20);
+            var tgl    = qs.get('tgl') || '';
+            if (!pria && !wanita) return;
+
+            // Nama tampil di dua tempat: panel gerbang & hero. Keduanya memakai
+            // struktur "<nama> <span class=amp>&</span> <nama>", jadi yang boleh
+            // diganti cuma simpul teksnya — span ampersand dipertahankan supaya
+            // gaya italic display-nya tidak hilang.
+            document.querySelectorAll('.cover-names').forEach(function (el) {
+                var amp = el.querySelector('.amp');
+                if (!amp) return;
+                var teks = [];
+                el.childNodes.forEach(function (n) { if (n.nodeType === 3) teks.push(n); });
+                if (teks.length >= 2) {
+                    if (pria)   teks[0].textContent = pria + ' ';
+                    if (wanita) teks[teks.length - 1].textContent = ' ' + wanita;
+                }
+            });
+
+            // Tanggal: dirender ulang di klien dengan locale id-ID. Hijriah
+            // sengaja TIDAK ikut diubah — blok itu punya perhitungannya sendiri
+            // dari data undangan, dan menyesatkan kalau setengah tersinkron.
+            if (/^\d{4}-\d{2}-\d{2}$/.test(tgl)) {
+                var d = new Date(tgl + 'T12:00:00+07:00');
+                if (!isNaN(d)) {
+                    var f = new Intl.DateTimeFormat('id-ID', {
+                        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+                    }).format(d);
+                    document.querySelectorAll('.cover-date, .hero-tanggal p').forEach(function (el) {
+                        el.textContent = f;
+                    });
+                }
+            }
+
+            // Kapsul penanda: pengunjung harus tahu ini pratinjau, bukan
+            // undangannya yang sudah jadi. Berpasangan dengan pemilih nuansa
+            // yang sudah ada di kiri-bawah, jadi ditaruh di atas.
+            var tanda = document.createElement('p');
+            tanda.className = 'pratinjau-nama';
+            tanda.textContent = 'pratinjau — nama kalian di tema ini';
+            document.body.appendChild(tanda);
+        })();
     }
 
     /* ---- Tanggal Hijriah (Intl bawaan browser — kalender islamic-umalqura) ---- */

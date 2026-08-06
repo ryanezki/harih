@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) exit;
  * pengunjung & LiteSpeed tetap menyajikan berkas lama meski file di server
  * sudah baru, dan perbaikan tampilan terlihat "tidak berpengaruh".
  */
-const HARIH_VERSION = '2.4.0';
+const HARIH_VERSION = '2.5.0';
 
 add_action('after_setup_theme', function () {
     add_theme_support('title-tag');
@@ -282,6 +282,10 @@ add_action('wp_enqueue_scripts', function () {
         'restUrl' => esc_url_raw(rest_url('undangan/v1')),
         'target'  => harih_target_countdown($id),
         'musik'   => esc_url_raw((string) get_post_meta($id, 'musik_url', true)),
+        // Penanda undangan DEMO. Dipakai undangan.js untuk mengizinkan pratinjau
+        // nama lewat query (G1.3) — undangan pelanggan harus mengabaikannya
+        // sepenuhnya, sama seperti pemilih nuansa `?nuansa=` yang juga khusus demo.
+        'demo'    => get_post_meta($id, 'order_id', true) === 'demo',
     ];
     wp_add_inline_script('undangan-js', 'window.UNDANGAN = ' . wp_json_encode($cfg) . ';', 'before');
 }, 999);

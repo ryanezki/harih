@@ -200,6 +200,37 @@ $harih_marquee = str_replace('✦', '<i>✦</i>', $harih_marquee);
                 <span class="tema-akhir-pill">Lihat semua demo</span>
             </a>
         </div>
+
+        <?php /* "Coba nama kalian" (G1.3, 2026-08-07). Melihat NAMA SENDIRI di
+                 dalam produk sebelum membayar adalah pemicu keinginan paling
+                 langsung yang bisa kita berikan, dan biayanya hampir nol:
+                 semuanya sisi klien, hanya berlaku di undangan demo, tidak ada
+                 yang disimpan, tidak ada endpoint baru. Polanya sudah terbukti —
+                 `?to=Nama` dan pemilih nuansa demo bekerja persis begini.
+
+                 `<form>` sungguhan supaya Enter di HP mengirim; JS-nya cuma
+                 merakit URL, tidak ada yang dikirim ke server. */ ?>
+        <form class="coba-nama" id="coba-nama" autocomplete="off">
+            <p class="coba-nama-judul">Coba pakai <em class="aksen-sage">nama kalian</em></p>
+            <div class="coba-nama-baris">
+                <label class="coba-nama-field">
+                    <span>Nama panggilan kamu</span>
+                    <input type="text" id="coba-pria" maxlength="20" placeholder="Raka" required>
+                </label>
+                <label class="coba-nama-field">
+                    <span>Nama panggilan pasangan</span>
+                    <input type="text" id="coba-wanita" maxlength="20" placeholder="Sela" required>
+                </label>
+                <label class="coba-nama-field coba-nama-tgl">
+                    <span>Tanggal <span class="coba-opsional">(opsional)</span></span>
+                    <input type="date" id="coba-tgl">
+                </label>
+            </div>
+            <div class="coba-nama-kaki">
+                <button type="submit" class="btn btn-utama">Lihat undangan kami →</button>
+                <span class="coba-nama-catatan">Langsung terbuka — tanpa daftar, tanpa bayar.</span>
+            </div>
+        </form>
     </section>
 
     <section class="paket" id="paket">
@@ -281,6 +312,34 @@ $harih_marquee = str_replace('✦', '<i>✦</i>', $harih_marquee);
 <script>
 (function () {
     'use strict';
+    // "Coba nama kalian" (G1.3): merakit URL demo, tidak mengirim apa pun.
+    // Nama TIDAK di-encode manual — URLSearchParams yang mengurusnya, jadi
+    // nama ber-& / spasi / emoji aman (pelajaran dari `?to=` di FU.6, yang
+    // sempat perlu diperbaiki untuk kasus "Bapak Hendra & Ibu Sari").
+    var form = document.getElementById('coba-nama');
+    if (form) {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var pria   = document.getElementById('coba-pria').value.trim();
+            var wanita = document.getElementById('coba-wanita').value.trim();
+            var tgl    = document.getElementById('coba-tgl').value;
+            if (!pria || !wanita) return;
+
+            var q = new URLSearchParams();
+            q.set('pria', pria);
+            q.set('wanita', wanita);
+            if (/^\d{4}-\d{2}-\d{2}$/.test(tgl)) q.set('tgl', tgl);
+            q.set('buka', '1');   // gerbang langsung terbuka — tanpa ini pengunjung
+                                  // harus menekan "Buka Undangan" dulu dan efek
+                                  // "nama kami muncul" hilang di layar pertama
+            // Tema pertama di carousel = tema paling laku; dari sana pengunjung
+            // bisa berpindah lewat tautan demo yang lain.
+            var demo = document.querySelector('.tema-track .tema-kartu[href*="/u/demo-"]');
+            if (!demo) return;
+            window.open(demo.getAttribute('href') + '?' + q.toString(), '_blank', 'noopener');
+        });
+    }
+
     // Filter tamu. Resepsi di atas 200 tamu: paket Hemat disembunyikan — masa
     // aktif H+7 dan tanpa galeri memang tidak cocok untuk skala itu, dan
     // menawarkannya hanya menghasilkan pembeli kecewa. Ini nudge, bukan

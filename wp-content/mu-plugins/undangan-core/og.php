@@ -228,3 +228,31 @@ function undangan_og_kartu(int $id): string {
     @chmod($file, 0644);
     return $url;
 }
+
+/**
+ * Undangan dihapus → kartunya ikut dihapus.
+ *
+ * Pembersihan di atas hanya membuang versi LAMA dari undangan yang masih ada.
+ * Saat undangan itu sendiri dihapus, kartunya tertinggal selamanya — ketahuan
+ * 2026-08-07 saat membersihkan undangan uji: postnya hilang, `117-*.jpg` masih
+ * ada di uploads.
+ *
+ * Bukan sekadar sampah disk. Kartu itu memuat NAMA MEMPELAI dan potongan foto
+ * mereka, dan tetap bisa diakses publik lewat URL-nya setelah undangannya
+ * dihapus — persis yang tidak boleh terjadi pada undangan yang diarsipkan atau
+ * dihapus atas permintaan pelanggan.
+ *
+ * `before_delete_post`, bukan `trashed_post`: undangan di trash masih bisa
+ * dipulihkan, jadi kartunya belum boleh hilang.
+ */
+add_action('before_delete_post', function ($post_id) {
+    if (get_post_type($post_id) !== 'undangan') return;
+
+    $up = wp_get_upload_dir();
+    if (!empty($up['error'])) return;
+
+    $dir = trailingslashit($up['basedir']) . 'harih-og';
+    foreach ((array) glob("{$dir}/" . (int) $post_id . "-*.jpg") as $berkas) {
+        @unlink($berkas);
+    }
+});
