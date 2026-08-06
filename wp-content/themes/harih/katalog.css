@@ -65,6 +65,17 @@
     --c-gold-light: #d8bd7a;
     --c-cek: #eef0e6;
 
+    /* Ditokenkan 2026-08-07 (G1.1) supaya mode gelap punya tempat menimpanya —
+       sebelumnya nilai-nilai ini hardcoded di tengah berkas dan akan tetap
+       terang (atau tetap gelap) saat seluruh halaman berganti mode. */
+    --c-accent-soft: #35503f;          /* sage lebih terang: hover tombol & puncak gradasi */
+    --c-on-gold: #ffffff;              /* teks di atas keping emas (badge, stiker) */
+    --grad-unggulan: linear-gradient(170deg, #35503f 0%, #22352c 100%);
+    --c-warn-bg: #fdf3e0;
+    --c-warn-line: #e5c98c;
+    --c-warn-ink: #7a5b1e;
+    --c-error: #a2452f;
+
     --radius: 18px;
     --radius-kartu: 26px;
     --radius-paket: 30px;
@@ -77,7 +88,144 @@
 
     --pad-x: clamp(18px, 4vw, 40px);
     --lebar: 1160px;
+
+    /* Peran TEKS dari sage, dipisah dari peran LATAR 2026-08-07 (G1.1).
+       Di mode terang keduanya sama persis — tampilan tidak berubah sedikit pun.
+       Di mode gelap keduanya WAJIB berbeda, dan itu bukan selera: satu warna
+       tidak mungkin sekaligus ≥4,5:1 terhadap latar nyaris hitam DAN terhadap
+       teks gading di atasnya (rasio gading:latar cuma ±16:1, sementara syarat
+       dua sisi menuntut ≥20:1). Jadi tautan/ikon pakai sage terang, tombol
+       pakai sage sedang. */
+    --c-accent-teks: var(--c-accent);
+
+    /* ---- Palet MODE GELAP (nilainya sekali di sini, dipetakan dua kali di
+            bawah: sekali untuk setelan sistem, sekali untuk tombol manual). ---- */
+    --d-bg: #111510;
+    --d-surface: #1e241d;
+    --d-ink: #f0ede2;
+    --d-ink-2: #d3cfc2;
+    --d-ink-soft: #a39d8d;
+    --d-line: #313828;
+    --d-line-2: #3f4837;
+    --d-accent: #476b5a;             /* latar tombol — teks gading di atasnya 5,28:1 */
+    --d-accent-soft: #3a5b4b;        /* hover MENGGELAP di mode gelap: tidak ada ruang
+                                        menaikkan terang tanpa menjatuhkan kontras teks */
+    --d-accent-teks: #8cba9e;        /* tautan & garis — 8,46:1 di latar halaman */
+    --d-accent-deep: #22302a;
+    --d-darkest: #0a0d09;
+    --d-ivory-muted: #a9a394;
+    --d-gold: #d4ab55;
+    --d-gold-light: #e6cd93;
+    --d-on-gold: #1a1408;            /* keping emas jadi terang → teksnya gelap */
+    --d-cek: #24301f;
+    --d-warn-bg: #2e2513;
+    --d-warn-line: #5c4a20;
+    --d-warn-ink: #e8c98a;
+    --d-error: #e98872;
+    --d-grad-unggulan: linear-gradient(170deg, #2c4835 0%, #1f3226 100%);
+    --d-shadow: 0 12px 32px rgba(0, 0, 0, .5);
+    --d-shadow-cta: 0 14px 30px rgba(0, 0, 0, .55);
+    --d-shadow-hover: 0 24px 48px rgba(0, 0, 0, .6);
 }
+
+/* =============================================================================
+   MODE GELAP (G1.1, 2026-08-07)
+
+   Dua pintu masuk, urutannya penting:
+     1. `@media (prefers-color-scheme: dark)` — otomatis mengikuti setelan HP.
+        Di-`:not([data-tema="terang"])` supaya pengguna yang SENGAJA memilih
+        terang tidak ditarik balik oleh setelan sistemnya.
+     2. `:root[data-tema="gelap"]` — pilihan manual, ditulis SETELAH blok media
+        supaya menang di kedua arah (sistem terang → pilih gelap, dan sebaliknya).
+
+   Atribut `data-tema` dipasang script inline di <head> sebelum CSS terpasang
+   (functions.php) — bukan setelah halaman tampil, supaya tidak berkedip putih.
+   Aman terhadap cache LiteSpeed: HTML-nya identik untuk semua orang, keputusan
+   ada di sisi klien.
+
+   Kontras seluruh pasangan teks diukur, bukan dikira-kira: 21 pasangan, terendah
+   5,28:1 (teks tombol utama) — semuanya lolos WCAG AA. Halaman UNDANGAN sengaja
+   TIDAK ikut: temanya adalah barang yang dibeli pelanggan, dan pilihan gelap
+   sudah tersedia sebagai produk (Tema 03 Langit Malam).
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-tema="terang"]) {
+        color-scheme: dark;
+        --c-bg: var(--d-bg);                    --c-surface: var(--d-surface);
+        --c-ink: var(--d-ink);                  --c-ink-2: var(--d-ink-2);
+        --c-ink-soft: var(--d-ink-soft);        --c-line: var(--d-line);
+        --c-line-2: var(--d-line-2);            --c-accent: var(--d-accent);
+        --c-accent-soft: var(--d-accent-soft);  --c-accent-teks: var(--d-accent-teks);
+        --c-accent-deep: var(--d-accent-deep);  --c-darkest: var(--d-darkest);
+        --c-ivory-muted: var(--d-ivory-muted);  --c-gold: var(--d-gold);
+        --c-gold-light: var(--d-gold-light);    --c-on-gold: var(--d-on-gold);
+        --c-cek: var(--d-cek);                  --c-warn-bg: var(--d-warn-bg);
+        --c-warn-line: var(--d-warn-line);      --c-warn-ink: var(--d-warn-ink);
+        --c-error: var(--d-error);              --grad-unggulan: var(--d-grad-unggulan);
+        --shadow: var(--d-shadow);              --shadow-cta: var(--d-shadow-cta);
+        --shadow-hover: var(--d-shadow-hover);
+    }
+}
+
+:root[data-tema="gelap"] {
+    color-scheme: dark;
+    --c-bg: var(--d-bg);                    --c-surface: var(--d-surface);
+    --c-ink: var(--d-ink);                  --c-ink-2: var(--d-ink-2);
+    --c-ink-soft: var(--d-ink-soft);        --c-line: var(--d-line);
+    --c-line-2: var(--d-line-2);            --c-accent: var(--d-accent);
+    --c-accent-soft: var(--d-accent-soft);  --c-accent-teks: var(--d-accent-teks);
+    --c-accent-deep: var(--d-accent-deep);  --c-darkest: var(--d-darkest);
+    --c-ivory-muted: var(--d-ivory-muted);  --c-gold: var(--d-gold);
+    --c-gold-light: var(--d-gold-light);    --c-on-gold: var(--d-on-gold);
+    --c-cek: var(--d-cek);                  --c-warn-bg: var(--d-warn-bg);
+    --c-warn-line: var(--d-warn-line);      --c-warn-ink: var(--d-warn-ink);
+    --c-error: var(--d-error);              --grad-unggulan: var(--d-grad-unggulan);
+    --shadow: var(--d-shadow);              --shadow-cta: var(--d-shadow-cta);
+    --shadow-hover: var(--d-shadow-hover);
+}
+
+/* Tombol ganti tema di nav. Ikonnya dua lapis; yang tampil dipilih CSS supaya
+   tidak perlu menyentuh DOM sama sekali saat berganti mode. */
+.tema-toggle {
+    background: transparent;
+    border: 1.5px solid var(--c-line-2);
+    color: var(--c-ink);
+    width: 38px;
+    height: 38px;
+    border-radius: 999px;
+    display: inline-grid;
+    place-items: center;
+    cursor: pointer;
+    font-size: 15px;
+    line-height: 1;
+    padding: 0;
+    transition: border-color .2s ease, color .2s ease, transform .2s ease;
+}
+.tema-toggle:hover { border-color: var(--c-accent-teks); color: var(--c-accent-teks); }
+.tema-toggle:active { transform: scale(.94); }
+.tema-toggle:focus-visible { outline: 2px solid var(--c-accent-teks); outline-offset: 2px; }
+.tema-toggle .ikon-gelap { display: none; }
+@media (prefers-color-scheme: dark) {
+    :root:not([data-tema="terang"]) .tema-toggle .ikon-terang { display: none; }
+    :root:not([data-tema="terang"]) .tema-toggle .ikon-gelap { display: block; }
+}
+:root[data-tema="gelap"] .tema-toggle .ikon-terang { display: none; }
+:root[data-tema="gelap"] .tema-toggle .ikon-gelap { display: block; }
+:root[data-tema="terang"] .tema-toggle .ikon-terang { display: block; }
+:root[data-tema="terang"] .tema-toggle .ikon-gelap { display: none; }
+
+/* Foto & tangkapan layar produk sedikit diredam di mode gelap — foto pernikahan
+   ber-highlight putih terasa menyilaukan di halaman nyaris hitam. Logo & QRIS
+   dikecualikan: QRIS yang diredam bisa gagal dipindai. */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-tema="terang"]) .hero-arch img,
+    :root:not([data-tema="terang"]) .band-foto,
+    :root:not([data-tema="terang"]) .tema-kartu img { filter: brightness(.88); }
+}
+:root[data-tema="gelap"] .hero-arch img,
+:root[data-tema="gelap"] .band-foto,
+:root[data-tema="gelap"] .tema-kartu img { filter: brightness(.88); }
 
 * { box-sizing: border-box; }
 
@@ -96,18 +244,18 @@ img { max-width: 100%; }
 
 h1, h2, h3 { font-family: var(--font-display); font-weight: 400; margin: 0 0 .6rem; }
 h2 { font-size: clamp(30px, 4.5vw, 42px); text-align: center; margin: 0 0 8px; line-height: 1.15; text-wrap: balance; }
-a { color: var(--c-accent); }
+a { color: var(--c-accent-teks); }
 
 /* Aksen italic berwarna — inti karakter tipografi desain ini: satu kata kunci
    per judul diberi warna, bukan seluruh judul. */
 .aksen-emas { color: var(--c-gold); font-style: italic; }
-.aksen-sage { color: var(--c-accent); font-style: italic; }
+.aksen-sage { color: var(--c-accent-teks); font-style: italic; }
 .aksen-emas-muda { color: var(--c-gold-light); font-style: italic; }
 
 .brand {
     font-family: var(--font-display);
     font-size: 26px;
-    color: var(--c-accent);
+    color: var(--c-accent-teks);
     margin: 0;
 }
 
@@ -126,15 +274,15 @@ a { color: var(--c-accent); }
     transition: transform .2s ease, box-shadow .3s ease, background .2s ease, color .2s ease;
 }
 .btn:active { transform: scale(.98); }
-.btn:focus-visible { outline: 2px solid var(--c-accent); outline-offset: 3px; }
+.btn:focus-visible { outline: 2px solid var(--c-accent-teks); outline-offset: 3px; }
 .btn-utama { background: var(--c-accent); color: var(--c-accent-ink); box-shadow: var(--shadow-cta); }
-.btn-utama:hover { background: #35503f; color: var(--c-accent-ink); }
+.btn-utama:hover { background: var(--c-accent-soft); color: var(--c-accent-ink); }
 .btn-garis { background: var(--c-surface); border: 1.5px solid var(--c-ink); color: var(--c-ink); font-weight: 700; }
 .btn-garis:hover { background: var(--c-ink); color: var(--c-accent-ink); }
-.btn-garis-sage { background: transparent; border: 1.5px solid var(--c-accent); color: var(--c-accent); padding: 14px 24px; font-size: 14px; }
+.btn-garis-sage { background: transparent; border: 1.5px solid var(--c-accent-teks); color: var(--c-accent-teks); padding: 14px 24px; font-size: 14px; }
 .btn-garis-sage:hover { background: var(--c-accent); color: var(--c-accent-ink); }
 .btn-terang { background: var(--c-accent-ink); color: var(--c-accent-deep); padding: 15px 30px; font-size: 14px; }
-.btn-terang:hover { background: #fff; color: var(--c-accent-deep); }
+.btn-terang:hover { background: var(--c-surface); color: var(--c-accent-deep); }
 .btn-blok { display: block; width: 100%; }
 .btn-nonaktif { background: var(--c-line); color: var(--c-ink-soft); cursor: not-allowed; box-shadow: none; }
 
@@ -152,9 +300,9 @@ a { color: var(--c-accent); }
 .nav .brand { flex: 1; }
 .nav-tautan { display: flex; gap: 6px 18px; align-items: center; flex-wrap: wrap; font-size: 14px; font-weight: 700; }
 .nav-tautan a { text-decoration: none; color: var(--c-ink); padding: 8px 10px; border-radius: 999px; }
-.nav-tautan a:hover { color: var(--c-accent); }
+.nav-tautan a:hover { color: var(--c-accent-teks); }
 .nav-cta { background: var(--c-accent); color: var(--c-accent-ink) !important; padding: 11px 22px !important; font-size: 13.5px; }
-.nav-cta:hover { background: #35503f; }
+.nav-cta:hover { background: var(--c-accent-soft); }
 
 /* ---------- 2. Hero (khusus front page; `.hero` polos dipakai halaman lain) ---------- */
 
@@ -191,7 +339,7 @@ a { color: var(--c-accent); }
     font-weight: 800;
     letter-spacing: .08em;
     text-transform: uppercase;
-    color: var(--c-accent);
+    color: var(--c-accent-teks);
     margin: 0 0 18px;
 }
 .hero-trust { margin: 0; font-size: 13px; color: var(--c-ink-soft); }
@@ -220,8 +368,8 @@ a { color: var(--c-accent); }
     border-radius: 999px;
     white-space: nowrap;
 }
-.stiker-1 { left: -2%; bottom: 14%; background: var(--c-gold); color: #fff; transform: rotate(-7deg); box-shadow: 0 10px 24px rgba(180, 146, 63, .4); animation: wiggle 4s ease-in-out infinite; }
-.stiker-2 { right: 2%; top: 6%; background: var(--c-surface); color: var(--c-accent); border: 1.5px solid var(--c-accent); transform: rotate(6deg); }
+.stiker-1 { left: -2%; bottom: 14%; background: var(--c-gold); color: var(--c-on-gold); transform: rotate(-7deg); box-shadow: 0 10px 24px rgba(180, 146, 63, .4); animation: wiggle 4s ease-in-out infinite; }
+.stiker-2 { right: 2%; top: 6%; background: var(--c-surface); color: var(--c-accent-teks); border: 1.5px solid var(--c-accent-teks); transform: rotate(6deg); }
 .stiker-3 { right: -1%; bottom: 40%; background: var(--c-accent-deep); color: var(--c-accent-ink); font-weight: 700; transform: rotate(-4deg); }
 
 /* ---------- 3. Marquee ---------- */
@@ -336,9 +484,9 @@ a { color: var(--c-accent); }
     cursor: pointer;
     transition: all .2s ease;
 }
-.tamu-btn:hover { border-color: var(--c-accent); color: var(--c-ink); }
+.tamu-btn:hover { border-color: var(--c-accent-teks); color: var(--c-ink); }
 .tamu-btn.aktif { background: var(--c-accent); border-color: var(--c-accent); color: var(--c-accent-ink); }
-.tamu-btn:focus-visible { outline: 2px solid var(--c-accent); outline-offset: 2px; }
+.tamu-btn:focus-visible { outline: 2px solid var(--c-accent-teks); outline-offset: 2px; }
 .tamu-catatan { font-size: 13.5px; color: var(--c-ink-soft); margin: 14px auto 0; min-height: 1.5em; max-width: 46rem; }
 
 .paket-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 18px; align-items: stretch; }
@@ -354,7 +502,7 @@ a { color: var(--c-accent); }
 }
 .paket-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-hover); }
 .paket-card.unggulan {
-    background: linear-gradient(170deg, #35503f 0%, #22352c 100%);
+    background: var(--grad-unggulan);
     border-color: transparent;
     color: var(--c-accent-ink);
     box-shadow: var(--shadow-unggulan);
@@ -364,7 +512,7 @@ a { color: var(--c-accent); }
     top: -13px;
     left: 24px;
     background: var(--c-gold);
-    color: #fff;
+    color: var(--c-on-gold);
     font-size: 11.5px;
     font-weight: 800;
     letter-spacing: .1em;
@@ -401,7 +549,7 @@ a { color: var(--c-accent); }
     height: 16px;
     border-radius: 50%;
     background: var(--c-cek);
-    color: var(--c-accent);
+    color: var(--c-accent-teks);
     font-size: 10px;
     font-weight: 800;
     display: inline-flex;
@@ -500,7 +648,7 @@ a { color: var(--c-accent); }
 .teks-isi ul, .teks-isi ol { margin: 0 0 16px; padding-left: 22px; display: grid; gap: 7px; }
 .teks-isi li::marker { color: var(--c-gold); }
 .teks-isi strong { color: var(--c-ink); }
-.teks-isi a { color: var(--c-accent); text-underline-offset: 3px; }
+.teks-isi a { color: var(--c-accent-teks); text-underline-offset: 3px; }
 .teks-isi blockquote {
     margin: 18px 0;
     padding: 16px 20px;
@@ -588,22 +736,22 @@ a { color: var(--c-accent); }
     padding: .7rem .9rem;
     width: 100%;
 }
-.field input:focus { outline: 2px solid var(--c-accent); outline-offset: 1px; }
+.field input:focus { outline: 2px solid var(--c-accent-teks); outline-offset: 1px; }
 .row-2 { display: grid; gap: 1rem; grid-template-columns: 1fr; }
 
 /* Honeypot: tak terlihat manusia, tetap terkirim di FormData */
 .hp-field { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 
 .banner-warning {
-    background: #fdf3e0;
-    border: 1px solid #e5c98c;
-    color: #7a5b1e;
+    background: var(--c-warn-bg);
+    border: 1px solid var(--c-warn-line);
+    color: var(--c-warn-ink);
     border-radius: 10px;
     padding: .8rem 1rem;
     font-size: .9rem;
 }
 .kirim-msg { text-align: center; font-size: .92rem; color: var(--c-ink-soft); min-height: 1.4em; margin: 0; }
-.kirim-msg.error { color: #a2452f; }
+.kirim-msg.error { color: var(--c-error); }
 
 .panel-sukses {
     background: var(--c-surface);
@@ -663,8 +811,8 @@ a { color: var(--c-accent); }
 .paket-harga-full { text-align: center; font-size: 1.06rem; color: var(--c-ink-2); margin: 2px 0 8px; }
 .paket-harga-full strong { font-size: 1.5rem; color: var(--c-ink); letter-spacing: .01em; }
 .paket-hemat {
-    text-align: center; font-size: .82rem; color: var(--c-accent);
-    background: color-mix(in srgb, var(--c-accent) 9%, transparent);
+    text-align: center; font-size: .82rem; color: var(--c-accent-teks);
+    background: color-mix(in srgb, var(--c-accent-teks) 9%, transparent);
     border-radius: 999px; padding: 5px 12px; margin: 0 auto 10px; width: fit-content;
 }
 .paket-spek { font-size: .78rem; color: var(--c-ink-3, var(--c-ink-2)); text-align: center; margin: 10px 0 12px; letter-spacing: .02em; }
@@ -780,10 +928,10 @@ a { color: var(--c-accent); }
 
 /* Halaman persetujuan proof (F4.5). Tampilan sengaja tenang & padat: ini
    halaman pemeriksaan, bukan halaman jualan. */
-.proof-notif { max-width: 640px; margin: 0 auto 18px; padding: 12px 18px; border-radius: var(--radius); background: color-mix(in srgb, var(--c-accent) 10%, transparent); text-align: center; }
+.proof-notif { max-width: 640px; margin: 0 auto 18px; padding: 12px 18px; border-radius: var(--radius); background: color-mix(in srgb, var(--c-accent-teks) 10%, transparent); text-align: center; }
 .proof-berkas { max-width: 720px; margin: 0 auto; padding: 0 20px; display: grid; gap: 16px; }
 .proof-item { margin: 0; text-align: center; }
-.proof-item img { width: 100%; height: auto; border: 1px solid var(--c-line); border-radius: var(--radius); background: #fff; }
+.proof-item img { width: 100%; height: auto; border: 1px solid var(--c-line); border-radius: var(--radius); background: var(--c-surface); }
 .proof-item figcaption { margin-top: 6px; font-size: .8rem; color: var(--c-ink-2); }
 .proof-data { max-width: 640px; margin: 34px auto 0; padding: 0 20px; }
 .proof-data h2 { text-align: center; margin-bottom: 16px; }

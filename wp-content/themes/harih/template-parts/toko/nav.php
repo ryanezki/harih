@@ -25,5 +25,27 @@ $ada_harga  = (bool) get_page_by_path('harga');
             <a href="<?php echo esc_url($di_beranda ? '#cetak' : home_url('/harga/')); ?>">Cetak</a>
         <?php endif; ?>
         <a class="nav-cta" href="<?php echo esc_url($basis . '#paket'); ?>">Buat Undangan</a>
+        <?php /* Mode gelap (G1.1). Ikon dipilih CSS lewat atribut `data-tema` di
+                 <html>, jadi JS tidak perlu menyentuh isi tombol sama sekali. */ ?>
+        <button type="button" class="tema-toggle" id="tema-toggle"
+                aria-label="Ganti mode terang / gelap" title="Ganti mode terang / gelap">
+            <span class="ikon-terang" aria-hidden="true">☾</span>
+            <span class="ikon-gelap" aria-hidden="true">☀</span>
+        </button>
     </nav>
 </header>
+<script data-no-optimize="1">
+(function () {
+    var b = document.getElementById('tema-toggle');
+    if (!b) return;
+    b.addEventListener('click', function () {
+        // Sumber kebenaran = yang benar-benar dirender, bukan tebakan dari
+        // atribut: pada kunjungan pertama atribut memang belum ada dan temanya
+        // datang dari setelan sistem.
+        var gelap = getComputedStyle(document.documentElement).colorScheme === 'dark';
+        var baru  = gelap ? 'terang' : 'gelap';
+        document.documentElement.dataset.tema = baru;
+        try { localStorage.setItem('harihTema', baru); } catch (e) {}
+    });
+})();
+</script>

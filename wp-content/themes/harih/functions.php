@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) exit;
  * pengunjung & LiteSpeed tetap menyajikan berkas lama meski file di server
  * sudah baru, dan perbaikan tampilan terlihat "tidak berpengaruh".
  */
-const HARIH_VERSION = '2.3.0';
+const HARIH_VERSION = '2.4.0';
 
 add_action('after_setup_theme', function () {
     add_theme_support('title-tag');
@@ -286,14 +286,54 @@ add_action('wp_enqueue_scripts', function () {
     wp_add_inline_script('undangan-js', 'window.UNDANGAN = ' . wp_json_encode($cfg) . ';', 'before');
 }, 999);
 
+/**
+ * Delapan halaman yang memakai katalog.css. Daftarnya sebelumnya ditulis ulang
+ * di beberapa tempat dan mulai berbeda satu sama lain — persis penyakit yang
+ * membuat nav & footer diangkat jadi komponen bersama.
+ */
+function harih_halaman_toko(): bool {
+    static $tpl = [
+        'page-katalog.php', 'page-harga-hybrid.php', 'page-satuan.php', 'page-upsell.php',
+        'page-proof.php', 'page-tamu.php', 'page-rekap.php', 'page-jadi-reseller.php',
+        'page-teks.php',
+    ];
+    foreach ($tpl as $t) {
+        if (is_page_template($t)) return true;
+    }
+    return false;
+}
+
+/**
+ * Mode gelap halaman toko (G1.1) — pemasang atribut anti-kedip.
+ *
+ * WAJIB inline & sinkron di <head> SEBELUM CSS terpasang. Kalau keputusan tema
+ * diambil setelah halaman tampil, pengunjung yang memilih gelap melihat kilatan
+ * putih penuh layar dulu setiap kali membuka halaman.
+ *
+ * Aman terhadap cache LiteSpeed: HTML yang di-cache identik untuk semua orang —
+ * yang berbeda cuma isi localStorage di sisi klien. `data-no-optimize` menahan
+ * LiteSpeed men-defer/menggabung script ini; kalau ter-defer, kedipnya kembali.
+ */
+add_action('wp_head', function () {
+    // `/isi-data/` ikut meski bukan halaman toko: pemesan berpindah ke sana tepat
+    // setelah membayar, dan pilihan temanya harus terbawa.
+    if (!harih_halaman_toko() && !is_page_template('page-isi-data.php')) return;
+    ?>
+<script data-no-optimize="1" data-cfasync="false">
+(function () {
+    try {
+        var t = localStorage.getItem('harihTema');
+        if (t === 'gelap' || t === 'terang') document.documentElement.dataset.tema = t;
+    } catch (e) { /* localStorage diblokir (mode privat) → ikuti setelan sistem */ }
+})();
+</script>
+    <?php
+}, 0);
+
 // Preload font halaman toko (self-hosted) — dua berkas yang pasti dipakai di
 // layar pertama: display untuk judul, body variabel untuk sisanya.
 add_action('wp_head', function () {
-    if (!is_page_template('page-katalog.php') && !is_page_template('page-harga-hybrid.php')
-        && !is_page_template('page-satuan.php') && !is_page_template('page-upsell.php')
-        && !is_page_template('page-proof.php') && !is_page_template('page-tamu.php')
-        && !is_page_template('page-rekap.php') && !is_page_template('page-jadi-reseller.php')
-        && !is_page_template('page-teks.php')) return;
+    if (!harih_halaman_toko()) return;
     $dir = get_stylesheet_directory_uri() . '/aset/font/';
     foreach (['DMSerifDisplay-regular.woff2', 'Figtree-latin.woff2'] as $f) {
         printf('<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin>' . "\n", esc_url($dir . $f));

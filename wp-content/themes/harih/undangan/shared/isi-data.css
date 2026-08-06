@@ -40,8 +40,49 @@
     --accent: #3f5c4f;
     --accent-ink: #f4f1e7;
     --gold: #b4923f;
+    /* Ditokenkan 2026-08-07 (G1.1) supaya mode gelap punya tempat menimpanya. */
+    --surface-2: #fdfcf9;      /* panel di dalam kartu */
+    --surface-3: #f5f4ec;      /* keping/chip */
+    --on-gold: #ffffff;
+    --warn-bg: #fdf3e4;
+    --warn-line: #ecd9b3;
+    --warn-ink: #7a5c1e;
+    --error: #a4442f;
     --radius: 18px;
     --shadow: 0 12px 32px rgba(63, 92, 79, .10);
+}
+
+/* =============================================================================
+   MODE GELAP (G1.1, 2026-08-07) — nilainya sama persis dengan katalog.css.
+   Halaman ini ikut karena pemesan yang baru saja membayar akan berpindah dari
+   halaman toko ke sini; kalau salah satunya terang dan satunya gelap, ia terasa
+   seperti berpindah situs — persis alasan yang membuat font & nav diseragamkan
+   2026-08-06. Atribut `data-tema` dipasang script inline yang sama di
+   functions.php, jadi pilihan pengguna terbawa lintas halaman.
+   ========================================================================== */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-tema="terang"]) {
+        color-scheme: dark;
+        --bg: #111510;          --surface: #1e241d;
+        --ink: #f0ede2;         --soft: #a39d8d;
+        --line: #313828;        --accent: #8cba9e;
+        --accent-ink: #141a13;  --gold: #d4ab55;
+        --surface-2: #232a21;   --surface-3: #262d24;
+        --on-gold: #1a1408;     --warn-bg: #2e2513;
+        --warn-line: #5c4a20;   --warn-ink: #e8c98a;
+        --error: #e98872;       --shadow: 0 12px 32px rgba(0, 0, 0, .5);
+    }
+}
+:root[data-tema="gelap"] {
+    color-scheme: dark;
+    --bg: #111510;          --surface: #1e241d;
+    --ink: #f0ede2;         --soft: #a39d8d;
+    --line: #313828;        --accent: #8cba9e;
+    --accent-ink: #141a13;  --gold: #d4ab55;
+    --surface-2: #232a21;   --surface-3: #262d24;
+    --on-gold: #1a1408;     --warn-bg: #2e2513;
+    --warn-line: #5c4a20;   --warn-ink: #e8c98a;
+    --error: #e98872;       --shadow: 0 12px 32px rgba(0, 0, 0, .5);
 }
 
 * { box-sizing: border-box; }
@@ -65,9 +106,9 @@ body.isidata-body {
 .sub-kecil { margin: 8px 0 0; color: var(--soft); font-size: 13px; }
 
 .banner-warning {
-    background: #fdf3e4;
-    border: 1px solid #ecd9b3;
-    color: #7a5c1e;
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-line);
+    color: var(--warn-ink);
     border-radius: 12px;
     padding: 12px 16px;
     font-size: 13px;
@@ -115,7 +156,7 @@ body.isidata-body {
 .field input, .field select, .field textarea {
     width: 100%;
     border: 1px solid var(--line);
-    background: #fdfcf9;
+    background: var(--surface-2);
     border-radius: 12px;
     padding: 12px 14px;
     font: 400 15px/1.5 var(--f-body);
@@ -143,13 +184,13 @@ fieldset:disabled { opacity: .6; }
     border-radius: 12px;
     padding: 14px;
     cursor: pointer;
-    background: #fdfcf9;
+    background: var(--surface-2);
 }
 .tema-card input { position: absolute; opacity: 0; pointer-events: none; }
 .tema-card:has(input:checked) {
     border-color: var(--accent);
     box-shadow: 0 0 0 2px rgba(63, 92, 79, .18);
-    background: #f5f4ec;
+    background: var(--surface-3);
 }
 .tema-nama { font-weight: 600; font-size: 14px; }
 .tema-demo { font-size: 12px; color: var(--accent); text-decoration: none; }
@@ -168,7 +209,7 @@ fieldset:disabled { opacity: .6; }
     border: 0;
     border-radius: 50%;
     background: var(--ink);
-    color: #fff;
+    color: var(--on-gold);
     font-size: 13px;
     line-height: 1;
     cursor: pointer;
@@ -184,7 +225,7 @@ fieldset:disabled { opacity: .6; }
     padding: 11px 18px;
     border-radius: 999px;
 }
-.pesan-file { min-height: 1.1em; margin: 8px 0 0; font-size: 12px; color: #a4442f; }
+.pesan-file { min-height: 1.1em; margin: 8px 0 0; font-size: 12px; color: var(--error); }
 
 /* ---- Kirim ---- */
 .kirim-area { text-align: center; margin-top: 8px; }
@@ -219,7 +260,7 @@ fieldset:disabled { opacity: .6; }
     transition: width .25s ease;
 }
 .kirim-msg { min-height: 1.3em; margin: 12px 0 0; font-size: 14px; color: var(--soft); }
-.kirim-msg.error { color: #a4442f; }
+.kirim-msg.error { color: var(--error); }
 .bantuan { margin: 18px 0 0; font-size: 12px; color: var(--soft); }
 .bantuan a { color: var(--accent); }
 
@@ -255,13 +296,13 @@ fieldset:disabled { opacity: .6; }
 .kisah-contoh { display: flex; gap: 10px; flex-wrap: wrap; margin: -4px 0 4px; }
 .btn-mini {
     appearance: none;
-    border: 1px solid var(--c-line, #e2ddd2);
+    border: 1px solid var(--line);
     background: transparent;
-    color: var(--c-accent, #3f5c4f);
+    color: var(--accent);
     border-radius: 999px;
     padding: 7px 14px;
     font: 500 12.5px/1 inherit;
     cursor: pointer;
     transition: background .2s ease, border-color .2s ease;
 }
-.btn-mini:hover { background: rgba(63, 92, 79, .07); border-color: var(--c-accent, #3f5c4f); }
+.btn-mini:hover { background: rgba(63, 92, 79, .07); border-color: var(--accent); }
