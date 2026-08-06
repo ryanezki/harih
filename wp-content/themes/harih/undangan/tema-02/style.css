@@ -2,9 +2,45 @@
    Tema 02 — Senja Terakota (hariH)
    Skin di atas undangan/shared/undangan.css: palet terakota + krem hangat +
    tembaga, tipografi Cormorant Garamond + Karla, motif lengkung (arch) senja.
-   Ornamen SVG inline — tanpa file gambar. Terdaftar di undangan_get_temas()
-   dan harih_tema_fonts().
+   Ornamen SVG inline — tanpa file gambar. Terdaftar di undangan_get_temas().
    ========================================================================= */
+
+/* Font SELF-HOSTED sejak 2026-08-07 (G1.2) — alasan & cara membangunnya
+   dijelaskan lengkap di tema-01/style.css. Ringkasnya: menghapus rantai serial
+   ke fonts.googleapis.com + fonts.gstatic.com. Dibangun oleh
+   scripts/buat-font-web.py; sumber .ttf tetap dipertahankan untuk kartu OG. */
+@font-face {
+    font-family: 'Karla';
+    font-style: normal;
+    font-weight: 200 800;
+    font-display: swap;
+    src: url('../../aset/font/karla-latin.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+    font-family: 'Karla';
+    font-style: normal;
+    font-weight: 200 800;
+    font-display: swap;
+    src: url('../../aset/font/karla-latinext.woff2') format('woff2');
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+    font-family: 'Karla';
+    font-style: italic;
+    font-weight: 200 800;
+    font-display: swap;
+    src: url('../../aset/font/karla-italic-latin.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+    font-family: 'Karla';
+    font-style: italic;
+    font-weight: 200 800;
+    font-display: swap;
+    src: url('../../aset/font/karla-italic-latinext.woff2') format('woff2');
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
 
 :root {
     /* KONSEP: modern hangat — SATU keluarga sans untuk seluruh halaman.

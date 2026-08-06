@@ -103,6 +103,24 @@ Halaman undangan otomatis dinonaktifkan (jadi `draft`) setelah masa aktif paketn
   ```
 - ⚠️ **Backup berjalan mingguan (Minggu ±02:00 WIB), jadi selalu ada jendela sampai 7 hari yang belum tercakup.** Yang menyelamatkan: hampir semua bisa dibangun ulang dari repo — halaman legal via `scripts/publish-legal.py`, undangan demo via `scripts/buat-demo.sh`, produk & kategori via `scripts/buat-toko.sh`, aset via generator. Yang TIDAK bisa dibangun ulang: data order & undangan pelanggan riil. Itulah yang sesungguhnya dilindungi backup ini.
 
+## 9b. Baseline performa (G1.7)
+
+**Cara mengukur — dan kenapa bukan dari mesin developer.** Diagnosis 2026-08-06 membuktikan jalur jaringan lingkungan kerja developer bisa menggantung di jabat tangan TLS ke harih.id **dan** n8n.harih.id serentak, sementara host luar baik-baik saja. Artinya angka dari mesin itu tidak bisa dipercaya. Ukur lewat jalur Google → server:
+
+- **PageSpeed Insights** — buka <https://pagespeed.web.dev/> untuk tiap URL (mobile). API `pagespeedonline/v5` tanpa kunci sering kena *"Quota exceeded … Queries per day"* (terjadi 2026-08-07); pakai UI-nya, atau daftarkan kunci API gratis di Google Cloud Console bila mau otomatis.
+- **Rantai request** bisa diukur dari mana saja dengan `curl -w` karena yang dibandingkan relatif, bukan absolut.
+
+**Terukur 2026-08-07 — rantai font halaman undangan, sebelum vs sesudah G1.2** (UA iPhone, tema-01):
+
+| | Sebelum (Google Fonts) | Sesudah (self-hosted) |
+|---|---|---|
+| Permintaan sebelum teks tampil benar | HTML → CSS `googleapis` → woff2 `gstatic` — **serial, 3 langkah, 2 origin baru** | HTML + woff2 **paralel, 1 origin, sudah ter-preload** |
+| CSS font | 0,34 dtk · 12,3 KB (mendeklarasikan 30 varian) | — (tidak ada) |
+| woff2 | 0,33 dtk · 24,6 KB | 0,19 dtk · 65 KB (menutup weight 400/500/600 sekaligus) |
+| Diunduh per tema (latin) | bervariasi per weight yang terpakai | tema-01 **113 KB** · tema-02 **70 KB** · tema-03 **34 KB** |
+
+**Diverifikasi di peramban sungguhan:** ketiga tema nol permintaan ke `googleapis`/`gstatic`; face latin `loaded`, latin-ext `unloaded` (benar — nama demo tidak memuat karakternya); `.mempelai-amp` 46px memakai face **italic sungguhan**, bukan oblique sintetis.
+
 ## 10. Kapan menghubungi developer
 
 Alert WF-00 beruntun pada order berbeda · rekonsiliasi menemukan order tertinggal berulang kali tanpa sebab jelas · restore gagal · perubahan kode/tema/workflow apa pun. Sertakan: link eksekusi n8n dari alert + order_id.

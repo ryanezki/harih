@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) exit;
  * pengunjung & LiteSpeed tetap menyajikan berkas lama meski file di server
  * sudah baru, dan perbaikan tampilan terlihat "tidak berpengaruh".
  */
-const HARIH_VERSION = '2.2.1';
+const HARIH_VERSION = '2.3.0';
 
 add_action('after_setup_theme', function () {
     add_theme_support('title-tag');
@@ -36,23 +36,19 @@ function harih_paket_aktif(int $post_id): string {
     return in_array($p, ['hemat', 'favorit', 'premium'], true) ? $p : 'hemat';
 }
 
-/**
- * Google Fonts per tema. Tiap tema punya KONSEP tipografi sendiri, bukan sekadar
- * font berbeda dengan struktur sama:
- *   tema-01 — satu keluarga serif (Cormorant) untuk display, teks, DAN label
+/*
+ * Font per tema. Tiap tema punya KONSEP tipografi sendiri, bukan sekadar font
+ * berbeda dengan struktur sama:
+ *   tema-01 — satu keluarga serif (Cormorant Garamond) untuk display, teks, DAN label
  *   tema-02 — satu keluarga sans (Karla) untuk semuanya; kontemporer
  *   tema-03 — kontras tinggi disengaja: didone Prata + Manrope 300
- * Karena itu tema-01 & tema-02 kini hanya memuat SATU keluarga — lebih sedikit
- * yang diunduh sekaligus lebih menyatu.
+ *
+ * `harih_tema_fonts()` DIHAPUS 2026-08-07 (G1.2): font tidak lagi datang dari
+ * Google Fonts, melainkan dari @font-face self-hosted di undangan/{tema}/style.css
+ * — jadi tidak ada lagi stylesheet yang perlu di-enqueue terpisah. Alasan &
+ * angka pengukurannya ada di komentar tema-01/style.css dan
+ * scripts/buat-font-web.py. Preload-nya diatur di blok wp_head di bawah.
  */
-function harih_tema_fonts(string $tema): string {
-    $map = [
-        'tema-01' => 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap',
-        'tema-02' => 'https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap',
-        'tema-03' => 'https://fonts.googleapis.com/css2?family=Prata&family=Manrope:wght@300;400;500&display=swap',
-    ];
-    return $map[$tema] ?? '';
-}
 
 /** "2026-09-12" → "Sabtu, 12 September 2026" (butuh locale situs id_ID). */
 function harih_format_tanggal(string $tgl): string {
@@ -275,9 +271,8 @@ add_action('wp_enqueue_scripts', function () {
     $tema = harih_tema_aktif($id);
     $dir  = get_stylesheet_directory_uri();
 
-    if ($font = harih_tema_fonts($tema)) {
-        wp_enqueue_style('undangan-fonts', $font, [], null);
-    }
+    // Font self-hosted lewat @font-face di undangan/{tema}/style.css — tidak ada
+    // lagi stylesheet Google Fonts yang di-enqueue (G1.2, 2026-08-07).
     wp_enqueue_style('undangan-shared', "{$dir}/undangan/shared/undangan.css", [], HARIH_VERSION);
     wp_enqueue_style('undangan-tema', "{$dir}/undangan/{$tema}/style.css", ['undangan-shared'], HARIH_VERSION);
     wp_enqueue_script('undangan-js', "{$dir}/undangan/shared/undangan.js", [], HARIH_VERSION, true);
@@ -305,14 +300,36 @@ add_action('wp_head', function () {
     }
 }, 1);
 
-// Preconnect Google Fonts hanya di halaman standalone kita.
-add_filter('wp_resource_hints', function ($urls, $relation) {
-    if ($relation === 'preconnect' && is_singular('undangan')) {
-        $urls[] = 'https://fonts.googleapis.com';
-        $urls[] = ['href' => 'https://fonts.gstatic.com', 'crossorigin'];
+/**
+ * Preload font UNDANGAN (self-hosted sejak 2026-08-07, G1.2).
+ *
+ * Menggantikan preconnect ke fonts.googleapis.com/gstatic.com yang ada di sini
+ * sebelumnya. Preconnect hanya menghemat jabat tangan; yang mahal adalah
+ * rantai SERIAL-nya — HTML harus diurai dulu sebelum CSS Google diminta
+ * (terukur 0,34 dtk), dan woff2 baru boleh mulai setelah CSS itu tiba (0,33
+ * dtk lagi). Sekarang berkasnya satu origin dengan HTML, jadi bisa
+ * dipreload paralel sejak byte pertama.
+ *
+ * Hanya varian LATIN yang di-preload: latin-ext dibiarkan diambil normal lewat
+ * `unicode-range` (jarang terpakai — lihat komentar @font-face di tema-01).
+ * Yang di-preload cuma face yang pasti tampil di layar pertama; italic tidak,
+ * karena pemakaian pertamanya (ampersand .mempelai-amp) ada di bawah lipatan.
+ */
+add_action('wp_head', function () {
+    if (!is_singular('undangan')) return;
+
+    $per_tema = [
+        'tema-01' => ['cormorant-garamond-latin.woff2'],
+        'tema-02' => ['karla-latin.woff2'],
+        'tema-03' => ['prata-latin.woff2', 'manrope-latin.woff2'],
+    ];
+    $tema = harih_tema_aktif(get_queried_object_id());
+    $dir  = get_stylesheet_directory_uri() . '/aset/font/';
+
+    foreach ($per_tema[$tema] ?? [] as $f) {
+        printf('<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin>' . "\n", esc_url($dir . $f));
     }
-    return $urls;
-}, 10, 2);
+}, 1);
 
 /* =========================================================================
  * Open Graph (T1.14) — preview share WhatsApp adalah etalase produk.

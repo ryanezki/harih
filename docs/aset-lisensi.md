@@ -84,20 +84,32 @@ Konsep: nama "hariH" adalah permainan kata *hari H*; huruf H terakhir diberi war
 
 `aset/demo/harih-qris-demo.png` — QR code 480×480 berisi URL `https://harih.id`, dibuat lewat generator QR (QuickChart) dan **disimpan sebagai aset**, bukan dipanggil saat runtime. QR code sendiri bukan objek berhak cipta; yang penting di sini kemandirian: halaman demo tidak perlu menunggu domain pihak ketiga untuk menampilkan fitur amplop digital yang sedang dijualnya. *(Koreksi 2026-08-06: alasan awal yang saya catat — "generator lama mengembalikan PNG kosong" — keliru. 498 byte adalah ukuran wajar PNG 1-bit dan QR-nya valid.)*
 
-## Font (kartu og:image server-side, FU.1)
+## Font
 
-Kartu `og:image` per undangan dirender di server dengan GD + FreeType, jadi berkas font harus **ikut di dalam tema** (bukan diambil dari Google Fonts saat runtime — tidak ada koneksi keluar saat render, dan preview WhatsApp tidak boleh bergantung pihak ketiga).
+Font dipakai dua jalur, dan **berkas `.ttf` sumber tidak boleh dihapus**: kartu `og:image` per undangan dirender di server dengan GD + FreeType, jadi berkasnya harus ikut di dalam tema (tidak ada koneksi keluar saat render, dan preview WhatsApp tidak boleh bergantung pihak ketiga). Berkas `.woff2` adalah turunannya untuk peramban.
+
+### Sumber `.ttf` — dipakai generator kartu OG (FU.1)
 
 | Berkas | Keluarga | Lisensi | Sumber |
 |---|---|---|---|
-| `aset/font/CormorantGaramond.ttf` | Cormorant Garamond (variable) | SIL OFL 1.1 | github.com/google/fonts `ofl/cormorantgaramond` |
-| `aset/font/Karla.ttf` | Karla (variable) | SIL OFL 1.1 | github.com/google/fonts `ofl/karla` |
-| `aset/font/Prata.ttf` | Prata Regular | SIL OFL 1.1 | github.com/google/fonts `ofl/prata` |
-| `aset/font/Manrope.ttf` | Manrope (variable) | SIL OFL 1.1 | github.com/google/fonts `ofl/manrope` |
-| `aset/font/DMSerifDisplay-regular.woff2` | DM Serif Display 400 | SIL OFL 1.1 | fonts.gstatic.com (subset latin) |
-| `aset/font/DMSerifDisplay-italic.woff2` | DM Serif Display 400 italic | SIL OFL 1.1 | fonts.gstatic.com (subset latin) |
-| `aset/font/Figtree-latin.woff2` | Figtree variable 400–800 | SIL OFL 1.1 | fonts.gstatic.com (subset latin) |
+| `aset/font/CormorantGaramond.ttf` | Cormorant Garamond (variable, wght 300–700) | SIL OFL 1.1 | github.com/google/fonts `ofl/cormorantgaramond` |
+| `aset/font/CormorantGaramond-Italic.ttf` | Cormorant Garamond Italic (variable, wght 300–700) | SIL OFL 1.1 | github.com/google/fonts `ofl/cormorantgaramond` |
+| `aset/font/Karla.ttf` | Karla (variable, wght 200–800) | SIL OFL 1.1 | github.com/google/fonts `ofl/karla` |
+| `aset/font/Karla-Italic.ttf` | Karla Italic (variable, wght 200–800) | SIL OFL 1.1 | github.com/google/fonts `ofl/karla` |
+| `aset/font/Prata.ttf` | Prata Regular (statis) | SIL OFL 1.1 | github.com/google/fonts `ofl/prata` |
+| `aset/font/Manrope.ttf` | Manrope (variable, wght 200–800) | SIL OFL 1.1 | github.com/google/fonts `ofl/manrope` |
 
-Tiga berkas woff2 terakhir dipakai **halaman toko** (katalog, harga, satuan, upsell, proof, tamu, rekap, reseller) sejak redesain 2026-08-06 dan **di-selfhost**, bukan dipanggil dari CDN Google: satu permintaan lintas-domain lebih sedikit dan tampilan tidak bergantung layanan pihak ketiga. Lisensinya di `OFL-DMSerifDisplay.txt` & `OFL-Figtree.txt`.
+Dua berkas **Italic** ditambahkan 2026-08-07 (G1.2). Sebelumnya italic datang dari Google Fonts saat runtime; begitu font di-selfhost, tanpa face italik sungguhan browser akan mensintesis oblique — dan `undangan.css` memakai `font-style: italic` di empat tempat, yang paling kentara ampersand 46px di `.mempelai-amp`. Prata memang tidak punya face italic (sama seperti permintaan Google Fonts sebelumnya, yang juga tanpa `ital`), jadi tema-03 tetap memakai oblique sintetis — persis seperti tampilan live sebelum perubahan.
 
-Teks lisensi keempat font undangan digabung di `aset/font/OFL.txt` (OFL mensyaratkan lisensi ikut disertakan saat font didistribusikan ulang). Keempatnya **font yang memang dipakai skin undangan**, jadi kartu preview memakai tipografi yang sama dengan produk yang dijual: tema-01 Cormorant · tema-02 Karla · tema-03 Prata + Manrope.
+### Turunan `.woff2` — dipakai peramban
+
+| Berkas | Dipakai | Lisensi | Dibangun oleh |
+|---|---|---|---|
+| `aset/font/{cormorant-garamond,karla,prata,manrope}[-italic]-{latin,latinext}.woff2` | halaman **undangan** (tema-01/02/03) | SIL OFL 1.1 | `scripts/buat-font-web.py` |
+| `aset/font/DMSerifDisplay-regular.woff2` · `-italic.woff2` · `Figtree-latin.woff2` | halaman **toko** | SIL OFL 1.1 | fonts.gstatic.com (subset latin) |
+
+Halaman **toko** self-hosted sejak redesain 2026-08-06; halaman **undangan** menyusul 2026-08-07 (G1.2). Alasannya sama dan terukur: sebelumnya rantai SERIAL `HTML → CSS fonts.googleapis.com (0,34 dtk) → woff2 fonts.gstatic.com (0,33 dtk)` ke dua domain pihak ketiga sebelum teks tampil dalam font yang benar. Sekarang satu origin, bisa di-preload paralel.
+
+Berkas undangan **dipecah per `unicode-range`** (latin / latin-ext) persis seperti yang Google lakukan — pada Cormorant, latin-ext menambah 55 KB dan hampir tidak pernah terpakai, tapi membuangnya berarti nama mempelai ber-Ā/ł/ș jatuh ke font fallback. Membangun ulang: `python3 scripts/buat-font-web.py` (butuh `pip install fonttools brotli`).
+
+Teks lisensi font undangan digabung di `aset/font/OFL.txt`, font toko di `OFL-DMSerifDisplay.txt` & `OFL-Figtree.txt` (OFL mensyaratkan lisensi ikut disertakan saat font didistribusikan ulang). Semuanya **font yang memang dipakai skin undangan**, jadi kartu preview memakai tipografi yang sama dengan produk yang dijual: tema-01 Cormorant · tema-02 Karla · tema-03 Prata + Manrope.
