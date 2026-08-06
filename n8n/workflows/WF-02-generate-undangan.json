@@ -626,6 +626,14 @@
             {
               "name": "data",
               "value": "={{ $json.link }}"
+            },
+            {
+              "name": "ecc",
+              "value": "H"
+            },
+            {
+              "name": "qzone",
+              "value": "4"
             }
           ]
         },
@@ -649,7 +657,7 @@
       "maxTries": 2,
       "waitBetweenTries": 3000,
       "onError": "continueRegularOutput",
-      "notes": "T2.21: QR gagal ≠ delivery gagal — email tetap terkirim tanpa lampiran, WA memang teks+link saja."
+      "notes": "ecc=H + qzone=4 (F4.2): QR ini dicetak di undangan lipat, bukan sekadar lampiran email. Catatan: parameter `margin` dihitung dalam PIKSEL (4px ≈ nol pada gambar 600px) — yang benar `qzone`, dihitung dalam MODUL; terukur 59px ≈ 4 modul."
     },
     {
       "parameters": {

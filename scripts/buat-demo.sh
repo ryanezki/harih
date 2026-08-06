@@ -29,10 +29,13 @@ BASE_URL="$(wp option get siteurl)"
 # sengaja saat membersihkan media. Provenance & lisensi: docs/aset-lisensi.md.
 ASET="$BASE_URL/wp-content/themes/harih/aset/demo"
 GALERI="[\"$ASET/harih-cincin-buket.jpg\",\"$ASET/harih-gaun-detail.jpg\",\"$ASET/harih-cincin-sepatu.jpg\"]"
-# QRIS demo = aset LOKAL. Sebelumnya memakai api.qrserver.com dan layanan itu
-# mulai mengembalikan PNG kosong 498 byte — bingkai QRIS di demo jadi putih
-# melompong, persis di section yang menjual fitur amplop digital. Etalase tidak
-# boleh bergantung pada layanan pihak ketiga yang tidak kita kendalikan.
+# QRIS demo = aset LOKAL, bukan panggilan ke api.qrserver.com saat halaman
+# dibuka. KOREKSI 2026-08-06: alasan yang sempat saya tulis di sini ("layanan
+# mengembalikan PNG kosong") KELIRU — 498 byte itu ukuran wajar PNG 1-bit dan
+# QR-nya valid; gambarnya kemungkinan besar hanya belum termuat saat saya
+# memeriksa. Alasan yang benar tetap berlaku: etalase tidak boleh menunggu
+# domain pihak ketiga untuk menampilkan fitur yang sedang dijualnya, dan aset
+# lokal ikut version control.
 QRIS="$ASET/harih-qris-demo.png"
 VIDEO="https://www.youtube.com/watch?v=M7lc1UVf-VE"
 

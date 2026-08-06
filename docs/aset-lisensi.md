@@ -82,7 +82,7 @@ Konsep: nama "hariH" adalah permainan kata *hari H*; huruf H terakhir diberi war
 
 ## QRIS demo
 
-`aset/demo/harih-qris-demo.png` — QR code 480×480 berisi URL `https://harih.id`, dibuat lewat generator QR (QuickChart) dan **disimpan sebagai aset**, bukan dipanggil saat runtime. QR code sendiri bukan objek berhak cipta; yang penting di sini kemandirian: generator sebelumnya (`api.qrserver.com`) mulai mengembalikan PNG kosong 498 byte sehingga bingkai QRIS di undangan demo tampil putih melompong.
+`aset/demo/harih-qris-demo.png` — QR code 480×480 berisi URL `https://harih.id`, dibuat lewat generator QR (QuickChart) dan **disimpan sebagai aset**, bukan dipanggil saat runtime. QR code sendiri bukan objek berhak cipta; yang penting di sini kemandirian: halaman demo tidak perlu menunggu domain pihak ketiga untuk menampilkan fitur amplop digital yang sedang dijualnya. *(Koreksi 2026-08-06: alasan awal yang saya catat — "generator lama mengembalikan PNG kosong" — keliru. 498 byte adalah ukuran wajar PNG 1-bit dan QR-nya valid.)*
 
 ## Font (kartu og:image server-side, FU.1)
 
