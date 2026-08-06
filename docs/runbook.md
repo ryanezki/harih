@@ -121,6 +121,31 @@ Halaman undangan otomatis dinonaktifkan (jadi `draft`) setelah masa aktif paketn
 
 **Diverifikasi di peramban sungguhan:** ketiga tema nol permintaan ke `googleapis`/`gstatic`; face latin `loaded`, latin-ext `unloaded` (benar — nama demo tidak memuat karakternya); `.mempelai-amp` 46px memakai face **italic sungguhan**, bukan oblique sintetis.
 
+## 9c. Menguji workflow n8n bertrigger JADWAL (2026-08-07)
+
+Workflow bercron **tidak bisa** dijalankan lewat `n8n execute --id=…`: CLI menolak dengan *"Missing node to start execution — Please make sure the workflow contains an Execute Workflow Trigger node"*. Dan `n8n execute` juga bentrok dengan instance yang hidup (*"Task Broker's port 5679 is already in use"*) — bisa diakali dengan `-e N8N_RUNNERS_BROKER_PORT=5699`, tapi penolakan trigger tetap berlaku.
+
+**Cara yang bekerja** — ubah jadwalnya sebentar, biarkan menyala, lalu **kembalikan**:
+
+1. Buat salinan JSON dengan `cronExpression` = `* * * * *` (**jangan** ubah berkas repo).
+2. Import + `publish:workflow` + `docker restart harih-n8n`.
+3. Tunggu ≥ 90 detik.
+4. Baca hasilnya (lihat jebakan WAL di bawah).
+5. **Import ulang berkas repo** untuk memulihkan jadwal, publish, restart. Verifikasi: `docker exec harih-n8n grep -o 'cronExpression","expression":"[^"]*' /tmp/cek.json`.
+
+⚠️ **Jebakan WAL — eksekusi baru tidak terlihat kalau hanya menyalin `database.sqlite`.** n8n memakai SQLite mode WAL; tulisan terbaru masih ada di `database.sqlite-wal`. Menyalin berkas utama saja membuat eksekusi hari ini **tidak muncul sama sekali**, dan mudah disalahartikan sebagai "cron-nya tidak jalan". Salin ketiganya:
+
+```bash
+for f in database.sqlite database.sqlite-wal database.sqlite-shm; do
+  docker cp harih-n8n:/home/node/.n8n/$f /root/wf-import/db3${f#database.sqlite}
+done
+# lalu di lokal: sqlite3/python baca execution_entity + execution_data
+```
+
+## 9d. OPcache — perubahan mu-plugin butuh sampai ±60 detik
+
+Setelah `rsync` berkas PHP ke Hostinger, **web SAPI masih menyajikan bytecode lama** sampai OPcache merevalidasi. `wp eval` **tidak** memperlihatkannya: CLI punya cache sendiri, jadi fungsinya sudah mengembalikan nilai baru sementara endpoint HTTP masih lama. Terjadi 2026-08-07 dan sempat terlihat seperti bug. Kalau perubahan "tidak berpengaruh": tunggu semenit dan ulangi sebelum mencari sebab lain. (Berbeda dari cache LiteSpeed — itu di-purge dengan `wp litespeed-purge all`.)
+
 ## 10. Kapan menghubungi developer
 
 Alert WF-00 beruntun pada order berbeda · rekonsiliasi menemukan order tertinggal berulang kali tanpa sebab jelas · restore gagal · perubahan kode/tema/workflow apa pun. Sertakan: link eksekusi n8n dari alert + order_id.

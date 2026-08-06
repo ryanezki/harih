@@ -42,6 +42,31 @@
 
 **Bug yang ketemu & ditutup saat mengujinya:** section amplop hanya dirender bila ada rekening/QRIS — pasangan yang **hanya** mengisi dompet digital (atau hanya alamat kado) kehilangan seluruh amplopnya.
 
+### 🔴 Regresi yang saya buat sendiri di WF-05 — sudah ditutup, tapi polanya wajib diingat
+
+Node `Ambil Rekap RSVP` diletakkan **di tengah rantai** WF-05. Endpoint-nya mengembalikan `[]` saat tidak ada RSVP baru — dan **node HTTP n8n memecah respons array jadi satu item per elemen**, jadi `[]` = **nol item**, dan node berikutnya **tidak dijalankan sama sekali**. Artinya: di hari tanpa RSVP baru (yaitu hampir setiap hari), SELURUH reminder harian ikut mati — nudge belum-isi-data, pengingat H-3, dan peringatan masa aktif. Tidak ada pesan galat; workflow-nya cuma berhenti diam-diam.
+
+Ditutup dua lapis: endpoint kini **selalu** membalas objek `{"data": {...}}` (tidak pernah array telanjang), dan node diberi **`alwaysOutputData: true`**. **Aturan umum: jangan pernah menaruh node yang bisa menghasilkan nol item di tengah rantai** — taruh di ujung, atau pastikan bentuk responsnya selalu satu item.
+
+**Diverifikasi empiris**, bukan diasumsikan: jadwal diubah sementara jadi tiap menit, dan eksekusi `4121` menunjukkan `Baca Orders → Ambil Rekap RSVP → Susun Pesan Harian` ketiganya berjalan dengan rekap kosong, workflow `status=success`. Jadwal `0 8 * * *` sudah dipulihkan & diverifikasi; 9 workflow aktif. Cara mengujinya dicatat di [`runbook.md`](./runbook.md) §9c.
+
+### 🔴 Google Sheet `orders` TIDAK bersih — 5 baris data uji, dan ia MEMICU kiriman WhatsApp
+
+Klaim "produksi bersih dari data uji" selama ini benar untuk WordPress (3 undangan demo) tapi **tidak untuk Google Sheet**. Kelima barisnya sisa uji 6 Agustus:
+
+| baris | order | email | wa |
+|---|---|---|---|
+| 2 | 82 | `uji@example.com` | `628123456789` |
+| 3 | 84 | `b@example.com` | — |
+| 4 | 91 | `proof@example.com` | `628123456789` |
+| 5 | 94 | `tamu@example.com` | — |
+| 6 | 102 | `rekap@example.com` | — |
+
+Sementara WooCommerce punya **nol order**. Konsekuensinya nyata: saat WF-05 dijalankan untuk pengujian, ia membangun pesan `nudge #82` dan **benar-benar mencoba mengirim WhatsApp** ke `628123456789` — WAHA membalas `500 · No LID for user` (nomor tidak terdaftar). Mengirim berulang ke nomor tak dikenal adalah persis pola yang catatan kebijakan kita sendiri larang, karena itulah yang membuat sesi WhatsApp Web di-ban — dan sesi itu memikul seluruh kanal delivery.
+
+👤 **Saya tidak menghapusnya sendiri: itu sheet operasional milik owner.** Hapus baris 2–6 tab `orders` (semuanya `example.com`), lalu klaim "produksi bersih" jadi benar untuk kedua sisi.
+*Catatan desain untuk nanti:* WF-01 memverifikasi nomor lewat WAHA `check-exists` sebelum mengirim; **WF-05 tidak**. Menambahkannya akan mencegah kiriman ke nomor tidak terdaftar sama sekali — layak dipertimbangkan, tapi penyebab sesungguhnya di sini adalah data uji yang tertinggal.
+
 ### ⚠️ Dua temuan operasional dari sesi ini — baca sebelum menyentuh n8n lagi
 
 1. **Import n8n bisa diam-diam memakai berkas BASI.** `scp` ke `/tmp` server gagal (`Permission denied` — ada berkas milik uid lain + sticky bit) **tapi `import:workflow` tetap melaporkan sukses**, memakai berkas 6 Agustus yang tergeletak di sana. WF-02 live sempat mundur ke versi lama tanpa satu pun pesan galat. Prosedur yang benar sekarang ada di [`n8n/workflows/README.md`](../n8n/workflows/README.md) — unggah ke `/root/wf-import/`, nama berkas baru di container, **periksa isinya dari dalam container sebelum import**, lalu verifikasi hasil ekspor yang HIDUP. Sudah dipulihkan & diverifikasi identik dengan repo.

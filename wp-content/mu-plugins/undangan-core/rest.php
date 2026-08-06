@@ -210,6 +210,18 @@ add_action('rest_api_init', function () {
     ]);
 });
 
+/**
+ * ⚠️ SELALU mengembalikan objek `{"data": {...}}`, tidak pernah array telanjang.
+ *
+ * Bukan gaya-gayaan. Node HTTP n8n MEMECAH respons array jadi satu item per
+ * elemen — jadi `[]` menghasilkan NOL item, dan node berikutnya tidak dijalankan
+ * sama sekali. Karena node ini duduk di tengah rantai WF-05, hari tanpa RSVP
+ * baru (yaitu hampir setiap hari) akan diam-diam mematikan SELURUH reminder
+ * harian: nudge belum-isi-data, pengingat H-3, dan peringatan masa aktif.
+ *
+ * Pembungkus `data` membuat responsnya selalu satu objek → selalu satu item.
+ * Sabuk pengaman kedua ada di sisi n8n (`alwaysOutputData: true`).
+ */
 function undangan_rekap_harian(): array {
     $sejak = gmdate('Y-m-d H:i:s', time() - DAY_IN_SECONDS);
 
@@ -220,7 +232,7 @@ function undangan_rekap_harian(): array {
         'date_query'     => [['after' => $sejak, 'column' => 'post_date_gmt']],
         'fields'         => 'ids',
     ]);
-    if (!$baru) return [];
+    if (!$baru) return ['data' => new stdClass()];
 
     $hitung_baru = [];
     foreach ($baru as $uid) {
@@ -263,5 +275,8 @@ function undangan_rekap_harian(): array {
         ];
     }
 
-    return $hasil;
+    // (object) — bukan array. Kunci berupa order_id memang menghasilkan objek
+    // JSON saat isinya ada, tapi PHP menyerialkan array kosong jadi `[]`.
+    // Pemaksaan ini membuat bentuknya sama di kedua kasus.
+    return ['data' => (object) $hasil];
 }
