@@ -69,7 +69,7 @@ Konsekuensinya nyata, bukan sekadar kotor: saat WF-05 diuji, ia membangun pesan 
 
 **Keputusan owner 2026-08-07:** AI copywriter (G2.2) memakai **Gemini Flash lewat OpenRouter**, bukan Claude — slug model wajib diverifikasi ke daftar OpenRouter saat implementasi, simpan sebagai env `OPENROUTER_MODEL`; **disk 25 GB bebas** (tapi yang masih harus dicek untuk G2.1 adalah **bandwidth**, bukan disk); **escrow tidak jadi**; **rekap RSVP harian dipasang**.
 
-**Catatan kebersihan produksi:** ada satu ucapan lama (`ID 55`, "ryan / amin", 2026-08-05) di buku tamu demo tema-02 — sisa uji owner, bukan dari sesi ini. Tampil ke calon pembeli yang membuka demo. Hapus bila memang tidak diinginkan: `wp post delete 55 --force`.
+**Kebersihan produksi — TUNTAS 2026-08-07.** Ucapan lama `ID 55` ("ryan / amin", 2026-08-05) di buku tamu demo tema-02 sudah dihapus atas permintaan owner; ia satu-satunya `ucapan` di seluruh produksi, dan tampil ke calon pembeli yang membuka demo. Sekarang: **0 ucapan · 3 undangan (semuanya demo) · 3 kartu OG · sheet `orders` hanya header · 0 order WooCommerce.** Dinding ucapan di demo diverifikasi kosong lewat REST dan lewat peramban; form RSVP & tombol WA mempelai tetap berfungsi.
 
 ---
 
