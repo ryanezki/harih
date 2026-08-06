@@ -31,6 +31,8 @@
 2. **Cetak satu sampel lengkap** — menjawab bobot nyata (sekarang masih tebakan 2/4/7 kg), waktu lipat, uji pindai QR, dan **apakah mesin creasing sanggup** (800 lipatan/bulan; kalau manual, hitungan marjin batal).
 3. **Cek mekanisme refund Duitku** — Garansi Tepat Waktu sudah mengikat sejak halaman harga tayang.
 
+**⚠️ Perlu diawasi (temuan 2026-08-06, belum tuntas):** beberapa kali hari ini halaman yang **belum ter-cache** membalas sangat lambat atau timeout (`/`, `/kontak/`, `/u/demo-tema-01/`), sementara halaman yang sudah ter-cache 0,2–0,5 detik. Yang sudah diperiksa: **bukan** kode kita (semua fungsi kita diukur lewat endpoint sementara: `wc_get_orders` 0,003 dtk · kuota 0 dtk · sisa slot 0,002 dtk · locale 0,001 dtk), **bukan** MySQL (tidak ada query menggantung), **bukan** antrean WP-Cron (`DISABLE_WP_CRON` aktif, cron hPanel jalan, tidak ada event menumpuk). Yang terlihat: `load average` host **19,5** dan satu proses PHP menggantung 6 menit pada **CPU 0%** — menunggu I/O, bukan berputar. Dugaan terkuat: kepadatan di shared hosting. **Bila terulang saat sudah ada pelanggan**, itu alasan kuat naik ke paket hosting lebih tinggi — bukan alasan mengutak-atik kode.
+
 **Gerbang yang masih dipasang sengaja:** produk cetak & satuan **disembunyikan dari `/shop/`** sampai satu order uji internal tuntas penuh; halaman `/harga/` & `/satuan/` tetap menampilkannya.
 
 **Yang belum dibangun & memang menunggu order nyata:** engine render SVG→PDF (F4.3), imposition (F4.4), upsell otomatis penuh (F4.8), fase vendor/white-label (F5). Membangunnya sekarang = menebak bagian mana dari produksi yang layak diotomasi.

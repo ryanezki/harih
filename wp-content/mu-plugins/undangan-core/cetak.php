@@ -126,9 +126,21 @@ add_filter('woocommerce_ship_to_different_address_checked', '__return_false');
  * dipasang sehingga alamat kembali muncul apa adanya.
  * ========================================================================= */
 add_filter('woocommerce_get_country_locale', function ($locale) {
-    // Konteks keranjang tidak selalu ada (mis. saat admin memuat locale).
-    if (!function_exists('WC') || !WC()->cart || WC()->cart->is_empty()) return $locale;
-    if (undangan_cart_ada_fisik()) return $locale;
+    // ⚠️ REKURSI — penyebab `/harga/` menggantung 2026-08-06:
+    // filter ini membaca keranjang, sedangkan MEMUAT keranjang sendiri
+    // meminta data locale → filter ini dipanggil lagi → tak berujung.
+    // Dua penjaga: bendera re-entrancy, dan syarat bahwa keranjang memang
+    // sudah selesai dimuat dari sesi (tanpa itu jangan disentuh sama sekali).
+    static $sedang_jalan = false;
+    if ($sedang_jalan) return $locale;
+    if (is_admin() || !function_exists('WC')) return $locale;
+    if (!did_action('woocommerce_cart_loaded_from_session')) return $locale;
+    if (!WC()->cart || WC()->cart->is_empty()) return $locale;
+
+    $sedang_jalan = true;
+    $ada_fisik = undangan_cart_ada_fisik();
+    $sedang_jalan = false;
+    if ($ada_fisik) return $locale;
 
     $sembunyi = ['address_1', 'address_2', 'city', 'state', 'postcode'];
     foreach (array_keys($locale) as $negara) {
@@ -261,6 +273,11 @@ const UNDANGAN_AMBANG_VA = 2000000;
 
 add_filter('woocommerce_available_payment_gateways', function ($gateways) {
     if (is_admin() || !function_exists('WC') || !WC()->cart) return $gateways;
+    // Hanya di halaman keranjang/checkout. `get_total('edit')` memicu
+    // calculate_totals() → kalkulasi ongkir; kalau filter ini ikut berjalan di
+    // halaman biasa (plugin lain bisa menghitung gateway kapan saja), setiap
+    // pemuatan halaman menyeret pekerjaan yang tidak ada gunanya di situ.
+    if (!function_exists('is_checkout') || !(is_checkout() || is_cart() || (defined('REST_REQUEST') && REST_REQUEST))) return $gateways;
     $total = (float) WC()->cart->get_total('edit');
     if ($total <= UNDANGAN_AMBANG_VA) return $gateways;
 
