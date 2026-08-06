@@ -472,5 +472,5 @@ Ketiganya fitur yang **dijual** atau berbiaya berjalan. Membangunnya sebelum ada
 
 ## Status eksekusi (2026-08-07)
 
-**Selesai & live:** G1.7 baseline · G1.2 self-host font undangan · G1.1 mode gelap · G1.3 "coba nama kalian" · G1.6 tombol WA mempelai.
-**Sisa G1:** G1.4 galeri kolase · G1.5 koordinat + Waze · G1.8 dompet digital · G1.9 WF-02 satu kali sentuh · rekap harian di WF-05.
+**Selesai & live: seluruh fase G1 (8/8)** — G1.7 baseline · G1.2 self-host font undangan · G1.1 mode gelap · G1.3 "coba nama kalian" · G1.6 tombol WA mempelai · G1.4 galeri kolase · G1.5 koordinat + Waze · G1.8 dompet digital · G1.9 WF-02 · rekap RSVP harian di WF-05.
+**Berikutnya:** fase G2, digerbang F0.3 (10 pembeli asing) — AI copywriter via OpenRouter · video cover Premium · pratinjau langsung · section playlist.

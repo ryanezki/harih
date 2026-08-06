@@ -64,6 +64,168 @@ function undangan_sanitize_musik_url($value): string {
     return array_key_exists($url, harih_musik_library()) ? $url : '';
 }
 
+/**
+ * `galeri_tata` — tata letak galeri: `slider` (bawaan, geser satu per satu) atau
+ * `kolase` (grid mozaik, semua foto terlihat sekaligus). Nilai di luar keduanya
+ * jatuh ke `slider`, sehingga undangan lama tidak berubah tampilan tanpa diminta.
+ */
+function undangan_sanitize_galeri_tata($value): string {
+    $v = sanitize_key((string) $value);
+    return in_array($v, ['slider', 'kolase'], true) ? $v : 'slider';
+}
+
+/**
+ * `koordinat` / `koordinat_akad` — "lat,lng" ternormalisasi, atau '' bila tidak
+ * masuk akal. Dipakai peta tersemat & tombol Waze; nilai sampah di sini berarti
+ * TAMU DIARAHKAN KE TEMPAT YANG SALAH, jadi rentangnya divalidasi, bukan cuma
+ * bentuknya.
+ */
+function undangan_sanitize_koordinat($value): string {
+    $v = trim((string) $value);
+    if ($v === '') return '';
+    if (!preg_match('/^(-?\d{1,3}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)$/', $v, $m)) return '';
+
+    $lat = (float) $m[1];
+    $lng = (float) $m[2];
+    if ($lat < -90 || $lat > 90 || $lng < -180 || $lng > 180) return '';
+    // 0,0 = "Null Island" — hampir selalu hasil parsing gagal, bukan lokasi nyata.
+    if ($lat === 0.0 && $lng === 0.0) return '';
+
+    return $m[1] . ',' . $m[2];
+}
+
+/**
+ * Ambil "lat,lng" dari URL Google Maps yang SUDAH panjang. Tidak melakukan
+ * permintaan jaringan apa pun.
+ */
+function undangan_koordinat_dari_url(string $url): string {
+    // Diurutkan dari yang paling menunjuk TITIK TEMPAT ke yang paling menunjuk
+    // titik tengah peta:
+    //   1. `!3d..!4d..`  — koordinat pin tempatnya sendiri (paling tepat)
+    //   2. `@lat,lng,17z` — titik tengah peta saat URL disalin dari peramban
+    //   3. `?q=` / `query=` / `ll=` / `daddr=` — koordinat yang ditulis eksplisit
+    //      di query. Bentuk inilah yang muncul setelah short link diselesaikan
+    //      (`maps.app.goo.gl` → `google.com/maps?q=lat,lng`) — sempat terlewat
+    //      dan baru ketahuan saat menguji jalur jaringannya sungguhan.
+    // Semua pola menuntut DUA angka berdesimal, jadi `?q=Jalan Melati, Bandung`
+    // tidak pernah salah tertangkap.
+    $pola = [
+        '~!3d(-?\d{1,3}\.\d+)!4d(-?\d{1,3}\.\d+)~',
+        '~[@/](-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)~',
+        '~[?&](?:q|query|ll|sll|daddr|center|destination)=(-?\d{1,3}\.\d+),\s*(-?\d{1,3}\.\d+)~i',
+    ];
+    foreach ($pola as $p) {
+        if (preg_match($p, $url, $m)) {
+            $koord = undangan_sanitize_koordinat($m[1] . ',' . $m[2]);
+            if ($koord !== '') return $koord;
+        }
+    }
+    return '';
+}
+
+/**
+ * Isi `koordinat` otomatis dari `gmaps_url` — sekali, saat undangan dibuat.
+ *
+ * KENAPA DI SINI, bukan di WF-02: menyelesaikan short link butuh satu permintaan
+ * HTTP mengikuti redirect. Menaruhnya di workflow berarti membedah struktur node
+ * yang bercabang (risiko tinggi, dan tiap perubahan menuntut ritual
+ * import→publish→restart). Menaruhnya di render halaman berarti tamu pertama
+ * menunggu permintaan ke Google. Di sini ia berjalan tepat sekali, di dalam
+ * permintaan REST yang dibuat WF-02 — yang webhook-nya sudah dibalas 200 lebih
+ * dulu, jadi pemesan tidak menunggu.
+ *
+ * Tidak pernah fatal: gagal apa pun → `koordinat` tetap kosong dan peta kembali
+ * memakai kueri nama+alamat seperti sebelumnya. Pemesan juga tetap bisa mengisi
+ * koordinatnya sendiri di form, dan nilai yang sudah ada TIDAK PERNAH ditimpa.
+ */
+function undangan_isi_koordinat(int $post_id, string $meta_url, string $meta_koord): void {
+    if (get_post_type($post_id) !== 'undangan') return;
+    if (trim((string) get_post_meta($post_id, $meta_koord, true)) !== '') return;   // sudah ada → hormati
+
+    $url = trim((string) get_post_meta($post_id, $meta_url, true));
+    if ($url === '') return;
+
+    // URL panjang sudah memuat koordinatnya — tanpa permintaan jaringan.
+    $koord = undangan_koordinat_dari_url($url);
+
+    if ($koord === '') {
+        $host = strtolower((string) wp_parse_url($url, PHP_URL_HOST));
+        // Hanya pemendek Google yang diikuti. Mengikuti redirect URL sembarangan
+        // yang datang dari form = SSRF; daftar ini yang menahannya.
+        if (!in_array($host, ['maps.app.goo.gl', 'goo.gl', 'maps.google.com', 'www.google.com'], true)) return;
+
+        $res = wp_remote_get($url, [
+            'timeout'     => 5,
+            'redirection' => 5,
+            'user-agent'  => 'Mozilla/5.0 (compatible; hariH/1.0)',
+        ]);
+        if (is_wp_error($res)) return;
+
+        // WP menyimpan riwayat redirect; URL terakhir yang dipakai ada di
+        // `http_response`. Bila tidak tersedia, coba tarik dari body.
+        $akhir = '';
+        $obj   = $res['http_response'] ?? null;
+        if ($obj && method_exists($obj, 'get_response_object')) {
+            $akhir = (string) ($obj->get_response_object()->url ?? '');
+        }
+        $koord = $akhir !== '' ? undangan_koordinat_dari_url($akhir) : '';
+        if ($koord === '') $koord = undangan_koordinat_dari_url((string) wp_remote_retrieve_body($res));
+    }
+
+    if ($koord !== '') update_post_meta($post_id, $meta_koord, $koord);
+}
+
+add_action('added_post_meta', function ($mid, $post_id, $key) {
+    if ($key === 'gmaps_url')      undangan_isi_koordinat((int) $post_id, 'gmaps_url', 'koordinat');
+    if ($key === 'gmaps_akad_url') undangan_isi_koordinat((int) $post_id, 'gmaps_akad_url', 'koordinat_akad');
+}, 10, 3);
+
+/**
+ * Host dompet digital yang boleh jadi tautan di amplop.
+ *
+ * WHITELIST, bukan blacklist — disiplin yang sama dengan `musik_url`. Nilai ini
+ * datang dari form pemesan dan berakhir sebagai `<a href>` di halaman yang
+ * disebar ke ratusan tamu: tanpa penyaringan, satu tautan salah mengubah
+ * undangan jadi open redirect di halaman yang justru dipercaya orang.
+ * Menambah penyedia cukup di sini.
+ */
+function undangan_dompet_host(): array {
+    return [
+        'gopay.co.id', 'gojek.link', 'gopay.link', 'gojek.com',
+        'link.dana.id', 'm.dana.id', 'dana.id',
+        'ovo.id', 'link.ovo.id',
+        'shopee.co.id', 's.shopee.co.id', 'shp.ee',
+        'linkaja.id', 'link.linkaja.id',
+    ];
+}
+
+/**
+ * `dompet` — satu per baris, `Nama|URL` (label boleh dikosongkan: `URL` saja,
+ * labelnya diturunkan dari host). Maksimal 5 baris; baris yang host-nya di luar
+ * whitelist DIBUANG DIAM-DIAM, sama seperti perlakuan `musik_url`.
+ */
+function undangan_sanitize_dompet($value): string {
+    $keluar = [];
+    $host_ok = undangan_dompet_host();
+
+    foreach (array_filter(array_map('trim', explode("\n", (string) $value))) as $baris) {
+        $bagian = explode('|', $baris, 2);
+        $label  = count($bagian) === 2 ? sanitize_text_field(trim($bagian[0])) : '';
+        $url    = esc_url_raw(trim(end($bagian)), ['https']);   // https saja
+        if ($url === '') continue;
+
+        $host = strtolower((string) wp_parse_url($url, PHP_URL_HOST));
+        $host = preg_replace('/^www\./', '', $host);
+        if (!in_array($host, $host_ok, true)) continue;
+
+        if ($label === '') $label = ucfirst(explode('.', $host)[0]);
+        $keluar[] = mb_substr($label, 0, 24) . '|' . $url;
+        if (count($keluar) >= 5) break;
+    }
+
+    return implode("\n", $keluar);
+}
+
 add_action('init', function () {
     register_post_type('undangan', [
         'labels'              => ['name' => 'Undangan', 'singular_name' => 'Undangan'],
@@ -133,6 +295,12 @@ add_action('init', function () {
     'ayat_teks'       => 'sanitize_textarea_field', // idem
     'ayat_sumber'     => 'sanitize_text_field',     // idem
     'salam_islami'    => 'sanitize_text_field',    // '' / '1' (default tampil) · '0' = sembunyikan (toggle CS)
+    // --- G1 (2026-08-07). Keempatnya diperkenalkan SEKALIGUS supaya WF-02
+    //     cukup disentuh satu kali; ritual import→publish→restart itu mahal. ---
+    'galeri_tata'     => 'undangan_sanitize_galeri_tata', // slider (bawaan) | kolase
+    'koordinat'       => 'undangan_sanitize_koordinat',   // "lat,lng" venue resepsi
+    'koordinat_akad'  => 'undangan_sanitize_koordinat',   // idem — venue akad
+    'dompet'          => 'undangan_sanitize_dompet',      // "Nama|URL" per baris, host di-whitelist
     ];
 
     foreach ($fields as $field => $sanitize) {

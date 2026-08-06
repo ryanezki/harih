@@ -83,7 +83,7 @@ services:
     # rilis itu; tag lama = teks saja). Naikkan versi secara sadar, lalu cek
     # sesi masih `WORKING` sebelum commit tag barunya.
     # digest saat dipin: sha256:f3c33e8e70a78eb37af4f4e2eb655849d42d8ffdc4b8254f9de38069e906a146
-    image: devlikeapro/waha:2026.6.2
+    image: devlikeapro/waha:2026.6.2   # ⚠️ tag sudah dihapus dari Docker Hub — lihat catatan di docker-compose.yml
     container_name: harih-waha
     restart: unless-stopped
     ports:

@@ -45,6 +45,34 @@ $baris = array_values(array_filter(array_map('trim', explode("\n", $u['rekening'
             </div>
             <?php endforeach; ?>
 
+            <?php
+            /* Dompet digital (G1.8, 2026-08-07) — jawaban atas ide "gifting
+               digital via payment gateway", tanpa escrow-nya. Uang mengalir
+               LANGSUNG dari tamu ke mempelai; kita cuma menyediakan tombolnya.
+               Nol fee platform, nol dana singgah, nol urusan izin PJP.
+
+               Host sudah di-whitelist saat sanitasi meta (`cpt.php`) — field ini
+               datang dari form pemesan dan berakhir sebagai <a href> di halaman
+               yang disebar ke ratusan tamu; tanpa itu ia jadi open redirect di
+               halaman yang justru dipercaya orang. Format tersimpan: "Nama|URL". */
+            $dompet = [];
+            foreach (array_filter(array_map('trim', explode("\n", (string) ($u['dompet'] ?? '')))) as $baris) {
+                $bagian = explode('|', $baris, 2);
+                if (count($bagian) === 2 && $bagian[1] !== '') $dompet[] = $bagian;
+            }
+            ?>
+            <?php if ($dompet) : ?>
+            <div class="dompet-kartu">
+                <p class="qris-label">Dompet Digital</p>
+                <p class="qris-sub">Langsung ke aplikasi, tanpa salin nomor:</p>
+                <div class="dompet-tombol">
+                    <?php foreach ($dompet as $d) : ?>
+                    <a class="btn btn-ghost" href="<?php echo esc_url($d[1]); ?>" target="_blank" rel="noopener"><?php echo esc_html($d[0]); ?></a>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+
             <?php if ($u['qris_media_url'] !== '') : ?>
             <div class="qris-kartu">
                 <i class="tick t1"></i><i class="tick t2"></i><i class="tick t3"></i><i class="tick t4"></i>

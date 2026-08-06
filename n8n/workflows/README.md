@@ -48,7 +48,35 @@
    - Brevo & WAHA **tidak** butuh credential UI — dipakai via `$env` di node HTTP.
 4. **Nama produk WC harus memuat kata paketnya** (`Hemat`/`Favorit`/`Premium`, T1.16) — WF-01 mendeteksi paket dari nama line item; bila tak terdeteksi, enforcement WF-02 fallback ke **hemat** (tidak pernah upgrade gratis).
 
-## Import
+## Deploy dari CLI — urutan yang sudah terbukti (2026-08-07)
+
+⚠️ **Container hariH bernama `harih-n8n`.** VPS yang sama juga menjalankan **`root-n8n-1`** — n8n produksi lain milik owner. **Jangan pernah menjalankan perintah n8n tanpa menyebut container-nya.**
+
+```bash
+# 1. Unggah ke path yang PASTI milik root — JANGAN /tmp (lihat jebakan di bawah)
+ssh root@31.97.50.197 'mkdir -p /root/wf-import && rm -f /root/wf-import/*.json'
+scp n8n/workflows/WF-0X-*.json root@31.97.50.197:/root/wf-import/
+
+# 2. Salin ke container dengan nama BARU, lalu PERIKSA ISINYA DARI DALAM container
+ssh root@31.97.50.197 "
+  docker cp /root/wf-import/WF-0X-*.json harih-n8n:/tmp/deploy-0X.json
+  docker exec harih-n8n grep -c '<penanda perubahanmu>' /tmp/deploy-0X.json    # HARUS > 0
+  docker exec harih-n8n n8n import:workflow --input=/tmp/deploy-0X.json
+  docker exec harih-n8n n8n publish:workflow --id=<ID>
+  docker restart harih-n8n"
+
+# 3. Verifikasi yang HIDUP, bukan yang dikirim
+ssh root@31.97.50.197 'docker exec harih-n8n n8n export:workflow --id=<ID> --output=/tmp/live.json'
+# tarik & bandingkan jsCode-nya dengan berkas repo
+```
+
+**Jebakan yang memakan waktu 2026-08-07 — import diam-diam memakai berkas BASI.** `scp` ke `/tmp` server gagal (`Permission denied`: di sana masih ada berkas milik uid lain dari sesi sebelumnya, dan `/tmp` ber-sticky-bit), **tapi perintah import tetap sukses** — memakai berkas 6 Agustus yang tergeletak di sana. Akibatnya WF-02 live sempat mundur ke versi lama tanpa satu pun pesan galat. Karena itu: unggah ke `/root/wf-import/`, pakai nama berkas baru di container, dan **selalu periksa isinya dari dalam container sebelum import**.
+
+**Jebakan kedua — `EACCES` saat import dari `/root` di dalam container.** Proses n8n berjalan sebagai user `node`; ia tidak bisa membaca `/root/*` di dalam container. Salin ke `/tmp` **di dalam container** (bukan di host).
+
+**⚠️ Jangan pakai `docker compose up -d n8n` untuk merestart.** Tag `devlikeapro/waha:2026.6.2` sudah **dihapus dari Docker Hub** (tersedia sekarang: 2026.7.2), sehingga compose gagal me-resolve image dan seluruh perintah berhenti. Sudah dimitigasi 2026-08-07 dengan **retag lokal** (`docker tag <sha> devlikeapro/waha:2026.6.2`) sehingga pin resolve tanpa menarik dari registry — container tidak tersentuh. Untuk merestart n8n pakai **`docker restart harih-n8n`**, atau `docker compose up -d --no-deps n8n`. Bare `docker compose up -d` berisiko **me-recreate WAHA**, dan sesi WhatsApp adalah titik tunggal kegagalan seluruh kanal delivery.
+
+## Import (lewat UI)
 
 1. n8n → **Workflows → ⋯ → Import from File** → `WF-00-error-handler.json`, simpan.
 2. Import WF-01, WF-02, WF-03, WF-04, WF-05, WF-07, WF-08. Buka tiap node **Google Sheets** / **HTTP dengan Basic Auth** → pilih credential yang dibuat di atas (referensi credential tidak ikut terbawa saat import) → pada node Sheets, klik refresh mapping kolom agar schema terbaca.

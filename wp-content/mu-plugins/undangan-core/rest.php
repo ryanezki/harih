@@ -182,3 +182,86 @@ add_action('template_redirect', function () {
 add_filter('oembed_response_data', function ($data, $post) {
     return ($post instanceof WP_Post && $post->post_type === 'undangan') ? false : $data;
 }, 10, 2);
+
+/* =========================================================================
+ * Rekap RSVP harian (G1, 2026-08-07) — sumber data untuk WF-05.
+ *
+ * Dipanggil sekali sehari oleh n8n, BUKAN oleh publik: `edit_posts` + Basic Auth
+ * Application Password yang sudah dipakai WF-02. Perhitungannya dilakukan di
+ * sini karena datanya memang tinggal di sini (CPT `ucapan`); menariknya mentah
+ * ke n8n berarti memindahkan ratusan baris hanya untuk dijumlahkan.
+ *
+ * Dikembalikan berkunci `order_id` supaya WF-05 bisa menjodohkannya langsung
+ * dengan baris sheet — yang sudah memuat nomor WA PEMBELI. Sengaja bukan
+ * `wa_cp`: pembeli adalah kontak yang memang sudah pernah kami hubungi (dia
+ * yang membeli dan menerima pesan delivery), sementara CP undangan bisa jadi
+ * orang lain yang tidak pernah menghubungi kami sama sekali.
+ *
+ * Hanya undangan yang PUNYA RSVP BARU 24 jam terakhir yang dikembalikan —
+ * tanpa itu WF-05 akan mengirim "0 RSVP baru" tiap hari sampai acaranya lewat,
+ * dan pesan yang tidak membawa kabar apa-apa adalah gangguan.
+ * ========================================================================= */
+
+add_action('rest_api_init', function () {
+    register_rest_route('undangan/v1', '/rekap-harian', [
+        'methods'             => 'GET',
+        'permission_callback' => function () { return current_user_can('edit_posts'); },
+        'callback'            => 'undangan_rekap_harian',
+    ]);
+});
+
+function undangan_rekap_harian(): array {
+    $sejak = gmdate('Y-m-d H:i:s', time() - DAY_IN_SECONDS);
+
+    // 1) Undangan mana yang dapat RSVP baru? Satu kueri, hanya ID + relasi.
+    $baru = get_posts([
+        'post_type'      => 'ucapan',
+        'posts_per_page' => 500,
+        'date_query'     => [['after' => $sejak, 'column' => 'post_date_gmt']],
+        'fields'         => 'ids',
+    ]);
+    if (!$baru) return [];
+
+    $hitung_baru = [];
+    foreach ($baru as $uid) {
+        $target = (int) get_post_meta($uid, 'undangan_id', true);
+        if ($target) $hitung_baru[$target] = ($hitung_baru[$target] ?? 0) + 1;
+    }
+
+    // 2) Total keseluruhan per undangan — angka yang benar-benar dipakai
+    //    mempelai adalah JUMLAH TAMU YANG DIBAWA, bukan jumlah pengisi form.
+    //    Pemisahan akad/resepsi mengikuti halaman /rekap/ (FU.5): yang memilih
+    //    "keduanya" dihitung di dua-duanya, persis angka untuk katering & kursi.
+    $hasil = [];
+    foreach ($hitung_baru as $undangan_id => $jml_baru) {
+        $order_id = trim((string) get_post_meta($undangan_id, 'order_id', true));
+        if ($order_id === '' || $order_id === 'demo') continue;
+
+        $semua = get_posts([
+            'post_type'      => 'ucapan',
+            'posts_per_page' => 2000,
+            'meta_key'       => 'undangan_id',
+            'meta_value'     => $undangan_id,
+            'fields'         => 'ids',
+        ]);
+
+        $akad = $resepsi = $responden = 0;
+        foreach ($semua as $u) {
+            if (get_post_meta($u, 'hadir', true) !== 'hadir') continue;
+            $responden++;
+            $jumlah = max(1, (int) get_post_meta($u, 'jumlah', true));
+            $sesi   = (string) get_post_meta($u, 'sesi', true);
+            if ($sesi === 'akad' || $sesi === 'keduanya' || $sesi === '') $akad    += $jumlah;
+            if ($sesi === 'resepsi' || $sesi === 'keduanya' || $sesi === '') $resepsi += $jumlah;
+        }
+
+        $hasil[$order_id] = [
+            'baru'          => $jml_baru,
+            'hadir_akad'    => $akad,
+            'hadir_resepsi' => $resepsi,
+            'responden'     => $responden,
+        ];
+    }
+
+    return $hasil;
+}

@@ -31,13 +31,21 @@
 - **G1.6 tombol konfirmasi RSVP ke WA mempelai** — arah tamu → mempelai, **nomor bisnis hariH tidak tersentuh** (sesi WAHA tidak berisiko).
 - **Bonus, temuan sampingan:** menghapus undangan meninggalkan kartu `og:image`-nya di uploads selamanya — memuat nama mempelai + potongan foto, tetap bisa diakses publik. Ditutup dengan `before_delete_post` di `og.php`.
 
-**Sisa fase G1** — dikerjakan sebagai satu paket karena tiga field baru harus masuk WF-02 **sekali sentuh** (ritual import→publish→restart itu mahal & rawan):
+**Fase G1 SELESAI 8/8** — paket terakhir (G1.4 · G1.5 · G1.8 · G1.9 · rekap WF-05) dikerjakan 2026-08-07, `HARIH_VERSION 2.7.1`, 9 workflow tetap aktif:
 
-1. **G1.4** galeri kolase (meta `galeri_tata`)
-2. **G1.5** koordinat presisi + tombol Waze (meta `koordinat`, `koordinat_akad`; WF-02 menyelesaikan short link Google Maps sekali saat undangan dibuat)
-3. **G1.8** deep link dompet digital mempelai (meta `dompet`, **whitelist host** seperti `musik_url`)
-4. **G1.9** WF-02: teruskan keempat field di atas — satu kali import
-5. **Rekap RSVP harian ke WA mempelai** di WF-05 (disetujui owner 2026-08-07)
+- **G1.4 galeri kolase** — meta `galeri_tata` (`slider` bawaan | `kolase`). Grid mozaik tanpa media query; foto pertama mengambil dua kolom. Lightbox dipakai bersama kedua tata letak.
+- **G1.5 koordinat + Waze** — meta `koordinat`/`koordinat_akad`, divalidasi **rentangnya** (bukan cuma bentuknya) + tolak `0,0`. Peta tersemat memakai koordinat bila ada; tombol Waze hanya muncul bila koordinatnya ada — tombol navigasi yang menyesatkan lebih buruk daripada tidak ada.
+- **G1.8 dompet digital** — meta `dompet` (`Nama|URL` per baris), **host di-whitelist** (GoPay/DANA/OVO/ShopeePay/LinkAja, https saja). Terbukti: host asing & `http://` dibuang diam-diam.
+- **G1.9 WF-02** — keempat field diteruskan dalam **satu kali** import.
+- **Rekap RSVP harian** — endpoint baru `undangan/v1/rekap-harian` (butuh `edit_posts`) + node `Ambil Rekap RSVP` di WF-05. Dikirim ke **nomor pembeli** (kontak yang sudah berkorespondensi), hanya bila ada RSVP baru 24 jam terakhir.
+- **Resolusi koordinat otomatis** dari `gmaps_url` dikerjakan **di WP saat meta ditulis**, bukan di WF-02 — menghindari bedah node bercabang, dan tamu pertama tidak menunggu permintaan ke Google. Host pemendek di-whitelist (anti-SSRF), nilai yang sudah ada tidak pernah ditimpa, gagal apa pun tidak fatal.
+
+**Bug yang ketemu & ditutup saat mengujinya:** section amplop hanya dirender bila ada rekening/QRIS — pasangan yang **hanya** mengisi dompet digital (atau hanya alamat kado) kehilangan seluruh amplopnya.
+
+### ⚠️ Dua temuan operasional dari sesi ini — baca sebelum menyentuh n8n lagi
+
+1. **Import n8n bisa diam-diam memakai berkas BASI.** `scp` ke `/tmp` server gagal (`Permission denied` — ada berkas milik uid lain + sticky bit) **tapi `import:workflow` tetap melaporkan sukses**, memakai berkas 6 Agustus yang tergeletak di sana. WF-02 live sempat mundur ke versi lama tanpa satu pun pesan galat. Prosedur yang benar sekarang ada di [`n8n/workflows/README.md`](../n8n/workflows/README.md) — unggah ke `/root/wf-import/`, nama berkas baru di container, **periksa isinya dari dalam container sebelum import**, lalu verifikasi hasil ekspor yang HIDUP. Sudah dipulihkan & diverifikasi identik dengan repo.
+2. **Tag `devlikeapro/waha:2026.6.2` sudah dihapus dari Docker Hub.** Container yang berjalan memang 2026.6.2 dan sehat (sesi `default` = `WORKING`), tapi `docker compose up -d` gagal me-resolve image itu — jadi **prosedur restart yang tercatat selama ini tidak jalan**. Dimitigasi dengan **retag lokal** di VPS (container tidak tersentuh). Restart n8n pakai `docker restart harih-n8n`; **hindari bare `docker compose up -d`** karena berisiko me-recreate WAHA, dan sesi WhatsApp adalah titik tunggal kegagalan seluruh delivery. 👤 Menaikkan pin ke versi yang masih ada (2026.7.2) perlu dijadwalkan sadar — naik versi WAHA berpotensi menuntut scan QR ulang.
 
 **Keputusan owner 2026-08-07:** AI copywriter (G2.2) memakai **Gemini Flash lewat OpenRouter**, bukan Claude — slug model wajib diverifikasi ke daftar OpenRouter saat implementasi, simpan sebagai env `OPENROUTER_MODEL`; **disk 25 GB bebas** (tapi yang masih harus dicek untuk G2.1 adalah **bandwidth**, bukan disk); **escrow tidak jadi**; **rekap RSVP harian dipasang**.
 

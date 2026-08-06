@@ -59,6 +59,13 @@ services:
 
   waha:
     image: devlikeapro/waha:2026.6.2   # PIN (P1.4) — WAJIB ≥ 2026.6.1, fitur media gratis di Core (T2.1)
+    # ⚠️ 2026-08-07: tag ini SUDAH DIHAPUS dari Docker Hub (tersedia: 2026.7.2).
+    #    Container yang berjalan memang 2026.6.2 dan sehat (sesi WORKING), tapi
+    #    `docker compose up -d` gagal me-resolve image ini. Dimitigasi dengan retag
+    #    LOKAL di VPS: `docker tag <sha-image-berjalan> devlikeapro/waha:2026.6.2`.
+    #    Mitigasi itu hilang bila image lokal ter-prune → WAHA tidak bisa dibangun
+    #    ulang sama sekali. Naikkan pin ke versi yang masih ada SEBELUM itu terjadi;
+    #    naik versi WAHA berpotensi menuntut scan QR ulang, jadi jadwalkan sadar.
     restart: unless-stopped
     ports:
       - "127.0.0.1:3000:3000"   # hanya localhost — JANGAN ganti ke 0.0.0.0 (T1.7)

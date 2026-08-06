@@ -141,6 +141,8 @@ $webhook = harih_form_webhook_url();
                     <textarea name="lokasi_akad_alamat" rows="2" maxlength="300" placeholder="alamat lokasi akad (bila beda)"></textarea></label>
                 <label class="field"><span>Link Google Maps akad</span>
                     <input type="url" name="gmaps_akad_url" maxlength="300" inputmode="url" placeholder="https://maps.app.goo.gl/…"></label>
+                <label class="field"><span>Koordinat lokasi akad <em class="opsional">(opsional)</em></span>
+                    <input type="text" name="koordinat_akad" maxlength="60" inputmode="decimal" placeholder="-6.914744,107.609810"></label>
                 <label class="field"><span>Catatan lokasi akad <em class="opsional">(parkir, pintu masuk)</em></span>
                     <textarea name="catatan_lokasi_akad" rows="2" maxlength="400" placeholder="Parkir di halaman masjid, masuk lewat pintu timur"></textarea></label>
                 <div class="row-2">
@@ -161,6 +163,9 @@ $webhook = harih_form_webhook_url();
                     <textarea name="lokasi_alamat" rows="2" maxlength="300" required placeholder="mis. Jl. Melati No. 12, Bandung"></textarea></label>
                 <label class="field"><span>Link Google Maps</span>
                     <input type="url" name="gmaps_url" maxlength="300" inputmode="url" placeholder="https://maps.app.goo.gl/…"></label>
+                <label class="field"><span>Koordinat lokasi <em class="opsional">(opsional — paling akurat)</em></span>
+                    <input type="text" name="koordinat" maxlength="60" inputmode="decimal" placeholder="-6.914744,107.609810">
+                    <em class="petunjuk">Di Google Maps: tekan lama titik lokasi → koordinat muncul di bawah → salin ke sini. Kalau dikosongkan, kami coba ambil sendiri dari link Maps di atas.</em></label>
                 <label class="field"><span>Catatan lokasi resepsi <em class="opsional">(parkir, valet, pintu masuk)</em></span>
                     <textarea name="catatan_lokasi" rows="2" maxlength="400" placeholder="Valet tersedia di lobi utama · parkir basement P2"></textarea></label>
             </section>
@@ -185,6 +190,21 @@ $webhook = harih_form_webhook_url();
                 <label class="btn-file" for="input-foto">＋ Pilih foto</label>
                 <input type="file" id="input-foto" accept="image/jpeg,image/png,image/webp" multiple hidden>
                 <p class="pesan-file" id="pesan-foto" role="status"></p>
+                <div class="field">
+                    <span>Tata letak galeri</span>
+                    <div class="pilih-tata">
+                        <label class="tata-opsi">
+                            <input type="radio" name="galeri_tata" value="slider" checked>
+                            <span class="tata-ikon" aria-hidden="true"><i class="tt-besar"></i></span>
+                            <span class="tata-nama">Geser<em>satu foto penuh per geseran</em></span>
+                        </label>
+                        <label class="tata-opsi">
+                            <input type="radio" name="galeri_tata" value="kolase">
+                            <span class="tata-ikon" aria-hidden="true"><i class="tt-a"></i><i></i><i></i><i></i><i></i></span>
+                            <span class="tata-nama">Kolase<em>semua foto terlihat sekaligus</em></span>
+                        </label>
+                    </div>
+                </div>
             </section>
             <?php endif; ?>
 
@@ -208,6 +228,9 @@ $webhook = harih_form_webhook_url();
                 <h2>7. Amplop Digital <span class="paket-badge">Favorit+</span></h2>
                 <label class="field"><span>Rekening (satu per baris, opsional)</span>
                     <textarea name="rekening" rows="3" maxlength="300" placeholder="BCA 1234567890 a.n. Nama&#10;Mandiri 9876543210 a.n. Nama"></textarea></label>
+                <label class="field"><span>Tautan dompet digital <em class="opsional">(opsional, satu per baris)</em></span>
+                    <textarea name="dompet" rows="3" maxlength="500" placeholder="GoPay|https://gopay.link/…&#10;DANA|https://link.dana.id/…"></textarea>
+                    <em class="petunjuk">Format: <strong>Nama|tautan</strong>. Hanya tautan resmi GoPay, DANA, OVO, ShopeePay, dan LinkAja yang diterima — tautan lain kami abaikan demi keamanan tamu Anda.</em></label>
                 <label class="field"><span>Alamat kirim kado/hampers <em class="opsional">(opsional)</em></span>
                     <textarea name="alamat_kado" rows="2" maxlength="400" placeholder="Nama penerima, alamat lengkap, no. HP"></textarea></label>
                 <div class="field">

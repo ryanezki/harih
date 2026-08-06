@@ -65,16 +65,20 @@ $undangan = [
     'lokasi_nama'     => $m('lokasi_nama'),
     'lokasi_alamat'   => $m('lokasi_alamat'),
     'gmaps_url'       => $m('gmaps_url'),
+    'koordinat'       => $m('koordinat'),
     'lokasi_akad_nama'   => $m('lokasi_akad_nama'),
     'lokasi_akad_alamat' => $m('lokasi_akad_alamat'),
     'gmaps_akad_url'     => $m('gmaps_akad_url'),
+    'koordinat_akad'     => $m('koordinat_akad'),
     'love_story'      => $m('love_story'),
     'galeri'          => $galeri,
+    'galeri_tata'     => $m('galeri_tata') !== '' ? $m('galeri_tata') : 'slider',
     'cover_image'     => $galeri[0] ?? '',
     'musik_url'       => $m('musik_url'),
     'video_url'       => $m('video_url'),
     'rekening'        => $m('rekening'),
     'qris_media_url'  => $m('qris_media_url'),
+    'dompet'          => $m('dompet'),
     'wa_cp'           => $m('wa_cp'),
     'anak_ke_pria'    => $m('anak_ke_pria'),
     'anak_ke_wanita'  => $m('anak_ke_wanita'),
@@ -131,7 +135,12 @@ if ($plus && $galeri) {
 if ($premium && $undangan['video_url'] !== '') {
     get_template_part('template-parts/undangan/video', null, $undangan);
 }
-if ($plus && ($undangan['rekening'] !== '' || $undangan['qris_media_url'] !== '')) {
+// `dompet` & `alamat_kado` ikut jadi syarat sejak 2026-08-07 (G1.8). Tanpa itu
+// pasangan yang HANYA mengisi tautan dompet digital (atau hanya alamat kado)
+// kehilangan seluruh section amplop — ketahuan saat menguji undangan uji yang
+// tidak punya rekening maupun QRIS.
+if ($plus && ($undangan['rekening'] !== '' || $undangan['qris_media_url'] !== ''
+    || $undangan['dompet'] !== '' || trim($undangan['alamat_kado']) !== '')) {
     get_template_part('template-parts/undangan/amplop', null, $undangan);
 }
 

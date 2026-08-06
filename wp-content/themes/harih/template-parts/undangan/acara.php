@@ -17,6 +17,7 @@ if ($u['tanggal_akad'] !== '') {
         'lokasi'  => $u['lokasi_akad_nama'],
         'alamat'  => $u['lokasi_akad_alamat'],
         'gmaps'   => $u['gmaps_akad_url'],
+        'koord'   => $u['koordinat_akad'] ?? '',
         'catatan' => $u['catatan_lokasi_akad'],
     ];
 }
@@ -28,6 +29,7 @@ if ($u['tanggal_resepsi'] !== '') {
         'lokasi'  => $u['lokasi_nama'],
         'alamat'  => $u['lokasi_alamat'],
         'gmaps'   => $u['gmaps_url'],
+        'koord'   => $u['koordinat'] ?? '',
         'catatan' => $u['catatan_lokasi'],
     ];
 }
@@ -58,9 +60,17 @@ if (!$kartu) return;
             /* Peta TERSEMAT dengan pola facade — sama seperti live streaming:
                iframe Google baru dimuat saat DIKLIK. Kalau dimuat saat load,
                tiap undangan menyeret ±1 MB skrip peta dan satu permintaan ke
-               pihak ketiga sebelum tamu meminta apa pun. Kueri peta dirakit
-               dari nama+alamat venue (embed tanpa API key). */
-            $peta_q = trim($k['lokasi'] . ($k['alamat'] !== '' ? ', ' . $k['alamat'] : ''));
+               pihak ketiga sebelum tamu meminta apa pun.
+
+               KOORDINAT LEBIH DIUTAMAKAN daripada teks (G1.5, 2026-08-07).
+               Kueri berbasis nama+alamat tepat untuk gedung terkenal, tapi untuk
+               "Kediaman Bapak …, Jl. …" ia bisa mendarat di jalan yang salah —
+               dan tamu yang mengikuti pin salah adalah tamu yang tidak datang.
+               Koordinatnya diisi WF-02 sekali saat undangan dibuat (menyelesaikan
+               short link Google Maps), atau diketik sendiri di form. */
+            $peta_q = $k['koord'] !== ''
+                ? $k['koord']
+                : trim($k['lokasi'] . ($k['alamat'] !== '' ? ', ' . $k['alamat'] : ''));
             ?>
             <?php if ($peta_q !== '') : ?>
                 <div class="peta-facade" data-peta="<?php echo esc_attr($peta_q); ?>" role="button" tabindex="0"
@@ -73,8 +83,28 @@ if (!$kartu) return;
                     <span class="peta-teks">Tampilkan Peta</span>
                 </div>
             <?php endif; ?>
-            <?php if ($k['gmaps'] !== '') : ?>
-                <a class="btn btn-ghost acara-maps" href="<?php echo esc_url($k['gmaps']); ?>" target="_blank" rel="noopener">Petunjuk Arah</a>
+            <?php
+            /* Dua tombol navigasi berdampingan. Waze ditambahkan G1.5: di
+               Indonesia ia masih banyak dipakai untuk menghindari macet, dan
+               tamu yang harus menyalin alamat manual ke aplikasi lain sering
+               berakhir tidak berangkat. Waze hanya muncul bila koordinatnya ada
+               — `waze.com/ul?q=` berbasis teks sering meleset, dan tombol yang
+               menyesatkan lebih buruk daripada tombol yang tidak ada. */
+            $ada_nav = $k['gmaps'] !== '' || $k['koord'] !== '';
+            ?>
+            <?php if ($ada_nav) : ?>
+            <div class="acara-nav">
+                <?php if ($k['gmaps'] !== '' || $k['koord'] !== '') : ?>
+                    <a class="btn btn-ghost acara-maps"
+                       href="<?php echo esc_url($k['gmaps'] !== '' ? $k['gmaps'] : 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($k['koord'])); ?>"
+                       target="_blank" rel="noopener">Petunjuk Arah</a>
+                <?php endif; ?>
+                <?php if ($k['koord'] !== '') : ?>
+                    <a class="btn btn-ghost acara-waze"
+                       href="<?php echo esc_url('https://waze.com/ul?ll=' . rawurlencode($k['koord']) . '&navigate=yes'); ?>"
+                       target="_blank" rel="noopener">Buka di Waze</a>
+                <?php endif; ?>
+            </div>
             <?php endif; ?>
             <?php if (trim($k['catatan']) !== '') : ?>
                 <p class="lokasi-catatan"><?php echo nl2br(esc_html($k['catatan'])); ?></p>
