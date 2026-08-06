@@ -50,22 +50,17 @@ Ditutup dua lapis: endpoint kini **selalu** membalas objek `{"data": {...}}` (ti
 
 **Diverifikasi empiris**, bukan diasumsikan: jadwal diubah sementara jadi tiap menit, dan eksekusi `4121` menunjukkan `Baca Orders → Ambil Rekap RSVP → Susun Pesan Harian` ketiganya berjalan dengan rekap kosong, workflow `status=success`. Jadwal `0 8 * * *` sudah dipulihkan & diverifikasi; 9 workflow aktif. Cara mengujinya dicatat di [`runbook.md`](./runbook.md) §9c.
 
-### 🔴 Google Sheet `orders` TIDAK bersih — 5 baris data uji, dan ia MEMICU kiriman WhatsApp
+### ✅ Google Sheet `orders` dibersihkan 2026-08-07 — sebelumnya ia MEMICU kiriman WhatsApp
 
-Klaim "produksi bersih dari data uji" selama ini benar untuk WordPress (3 undangan demo) tapi **tidak untuk Google Sheet**. Kelima barisnya sisa uji 6 Agustus:
+Klaim "produksi bersih dari data uji" selama ini benar untuk WordPress (3 undangan demo) tapi **tidak untuk Google Sheet**: kelima barisnya sisa uji 6 Agustus (`uji@`, `b@`, `proof@`, `tamu@`, `rekap@example.com`, semuanya `MENUNGGU_DATA`, dua di antaranya bernomor `628123456789`) — sementara WooCommerce punya **nol order**.
 
-| baris | order | email | wa |
-|---|---|---|---|
-| 2 | 82 | `uji@example.com` | `628123456789` |
-| 3 | 84 | `b@example.com` | — |
-| 4 | 91 | `proof@example.com` | `628123456789` |
-| 5 | 94 | `tamu@example.com` | — |
-| 6 | 102 | `rekap@example.com` | — |
+Konsekuensinya nyata, bukan sekadar kotor: saat WF-05 diuji, ia membangun pesan `nudge #82` dan **benar-benar mencoba mengirim WhatsApp** ke nomor palsu itu; WAHA membalas `500 · No LID for user`. Mengirim berulang ke nomor tak dikenal adalah persis pola yang catatan kebijakan kita sendiri larang, karena itulah yang membuat sesi WhatsApp Web di-ban — dan sesi itu memikul seluruh kanal delivery.
 
-Sementara WooCommerce punya **nol order**. Konsekuensinya nyata: saat WF-05 dijalankan untuk pengujian, ia membangun pesan `nudge #82` dan **benar-benar mencoba mengirim WhatsApp** ke `628123456789` — WAHA membalas `500 · No LID for user` (nomor tidak terdaftar). Mengirim berulang ke nomor tak dikenal adalah persis pola yang catatan kebijakan kita sendiri larang, karena itulah yang membuat sesi WhatsApp Web di-ban — dan sesi itu memikul seluruh kanal delivery.
+**Dihapus atas permintaan owner** (baris 2–6 dalam satu `deleteDimension`, dengan penjagaan: batal bila ada satu saja baris non-`example.com`). Tab `orders` kini **hanya header**; `resellers` & `komisi` memang sudah kosong. Klaim "produksi bersih" sekarang benar untuk kedua sisi.
 
-👤 **Saya tidak menghapusnya sendiri: itu sheet operasional milik owner.** Hapus baris 2–6 tab `orders` (semuanya `example.com`), lalu klaim "produksi bersih" jadi benar untuk kedua sisi.
-*Catatan desain untuk nanti:* WF-01 memverifikasi nomor lewat WAHA `check-exists` sebelum mengirim; **WF-05 tidak**. Menambahkannya akan mencegah kiriman ke nomor tidak terdaftar sama sekali — layak dipertimbangkan, tapi penyebab sesungguhnya di sini adalah data uji yang tertinggal.
+**Konsekuensi yang perlu diketahui:** dengan sheet kosong, `Baca Orders` menghasilkan nol item sehingga **WF-05 jadi no-op** — itu benar dan tidak berbahaya (tidak ada order = tidak ada yang perlu diingatkan), dan sembuh sendiri begitu order asli pertama masuk.
+
+*Catatan desain untuk nanti:* WF-01 memverifikasi nomor lewat WAHA `check-exists` sebelum mengirim; **WF-05 tidak**. Menambahkannya akan mencegah kiriman ke nomor tidak terdaftar sama sekali — layak dipertimbangkan, meski penyebab sesungguhnya kali ini adalah data uji yang tertinggal.
 
 ### ⚠️ Dua temuan operasional dari sesi ini — baca sebelum menyentuh n8n lagi
 
