@@ -955,6 +955,9 @@ body.is-locked .pratinjau-nama { display: none; } /* gerbang tetap sinematik */
 .hp-field { position: absolute !important; left: -9999px; opacity: 0; height: 0; width: 0; pointer-events: none; }
 .rsvp-msg { min-height: 1.2em; font-size: 13px; margin: 0; color: var(--c-ink-soft); }
 .rsvp-msg.error { color: #a4442f; }
+/* Tombol konfirmasi ke WA mempelai (G1.6) — sekunder terhadap tombol Kirim:
+   tugas utamanya sudah selesai saat RSVP tersimpan, ini tawaran tambahan. */
+.rsvp-wa { margin-top: 10px; width: 100%; }
 
 .ucapan-list {
     margin-top: 26px;

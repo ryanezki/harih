@@ -52,6 +52,17 @@ $u = $args;
 
         <button type="submit" class="btn" id="rsvp-submit">Kirim</button>
         <p class="rsvp-msg" id="rsvp-msg" role="status"></p>
+
+        <?php /* Konfirmasi ke WhatsApp MEMPELAI (G1.6) — muncul setelah RSVP
+                 terkirim, isinya sudah terisi dari jawaban tamu. Pesannya
+                 berjalan dari nomor TAMU ke nomor mempelai; nomor bisnis hariH
+                 tidak menerima apa pun, jadi sesi WAHA tidak berisiko.
+                 Hanya dirender bila undangan punya nomor CP. */ ?>
+        <?php if (trim($u['wa_cp']) !== '') : ?>
+        <a class="btn btn-ghost rsvp-wa" id="rsvp-wa" href="#" target="_blank" rel="noopener" hidden>
+            Beri tahu mempelai lewat WhatsApp
+        </a>
+        <?php endif; ?>
     </form>
 
     <div class="ucapan-list" id="ucapan-list" aria-live="polite"></div>

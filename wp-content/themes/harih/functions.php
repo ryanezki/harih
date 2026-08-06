@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) exit;
  * pengunjung & LiteSpeed tetap menyajikan berkas lama meski file di server
  * sudah baru, dan perbaikan tampilan terlihat "tidak berpengaruh".
  */
-const HARIH_VERSION = '2.5.0';
+const HARIH_VERSION = '2.6.0';
 
 add_action('after_setup_theme', function () {
     add_theme_support('title-tag');
@@ -277,6 +277,14 @@ add_action('wp_enqueue_scripts', function () {
     wp_enqueue_style('undangan-tema', "{$dir}/undangan/{$tema}/style.css", ['undangan-shared'], HARIH_VERSION);
     wp_enqueue_script('undangan-js', "{$dir}/undangan/shared/undangan.js", [], HARIH_VERSION, true);
 
+    // Normalisasi sama dengan yang dipakai section penutup, supaya nomor yang
+    // sama tidak dirapikan dua cara berbeda.
+    $harih_wa_mentah = (string) get_post_meta($id, 'wa_cp', true);
+    $harih_wa_cp     = $harih_wa_mentah === '' ? ''
+        : (function_exists('undangan_normalize_phone')
+            ? undangan_normalize_phone($harih_wa_mentah)
+            : preg_replace('/\D+/', '', $harih_wa_mentah));
+
     $cfg = [
         'id'      => $id,
         'restUrl' => esc_url_raw(rest_url('undangan/v1')),
@@ -286,6 +294,11 @@ add_action('wp_enqueue_scripts', function () {
         // nama lewat query (G1.3) — undangan pelanggan harus mengabaikannya
         // sepenuhnya, sama seperti pemilih nuansa `?nuansa=` yang juga khusus demo.
         'demo'    => get_post_meta($id, 'order_id', true) === 'demo',
+        // Nomor CP mempelai untuk tombol konfirmasi WhatsApp pasca-RSVP (G1.6).
+        // Bukan data baru yang dibuka: nomor ini SUDAH tampil publik di section
+        // penutup undangan yang sama. Yang tidak pernah keluar tetap `wa_rsvp`
+        // (nomor TAMU) — itu memang sengaja tidak ada di API publik.
+        'waCp'    => $harih_wa_cp,
     ];
     wp_add_inline_script('undangan-js', 'window.UNDANGAN = ' . wp_json_encode($cfg) . ';', 'before');
 }, 999);

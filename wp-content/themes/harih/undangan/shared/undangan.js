@@ -581,6 +581,39 @@
     muatUcapan();
 
     if (form) {
+        /* Konfirmasi ke WhatsApp MEMPELAI (G1.6, 2026-08-07).
+
+           Ini jawaban kami atas ide "RSVP lewat WhatsApp" — tapi arahnya
+           dibalik. Yang DITOLAK adalah tamu mengirim RSVP ke nomor bisnis
+           hariH: ratusan nomor asing menghubungi satu sesi WhatsApp Web adalah
+           pola yang membuat sesi di-ban, dan sesi itu memikul SELURUH kanal
+           delivery (9 workflow). Yang dikerjakan: pesan berjalan dari nomor
+           TAMU ke nomor PRIBADI MEMPELAI — sesi WAHA kita tidak tersentuh sama
+           sekali, jadi risikonya nol. Nilainya juga lebih tepat sasaran: yang
+           ingin tahu siapa yang datang memang mempelai, bukan kami.
+
+           Tanpa endpoint baru, tanpa field baru, tanpa perubahan REST. */
+        function tampilkanTombolWa(data) {
+            var wa = (window.UNDANGAN && window.UNDANGAN.waCp) || '';
+            if (!wa) return;                       // undangan tanpa CP: tombol tidak dirender
+            var tombol = $('#rsvp-wa');
+            if (!tombol) return;
+
+            var kabar = data.hadir === 'hadir' ? 'insya Allah kami hadir'
+                      : data.hadir === 'tidak' ? 'mohon maaf kami berhalangan hadir'
+                      : 'kami belum bisa memastikan kehadiran';
+            var jml   = data.hadir === 'hadir' && data.jumlah > 1 ? ' bersama ' + data.jumlah + ' orang' : '';
+            var sesi  = data.hadir === 'hadir'
+                      ? (data.sesi === 'akad' ? ' di acara akad'
+                       : data.sesi === 'resepsi' ? ' di acara resepsi' : '')
+                      : '';
+            var teks  = 'Halo, saya ' + data.nama + '. Saya sudah mengisi konfirmasi kehadiran — '
+                      + kabar + jml + sesi + '. Selamat menempuh hidup baru 🙏';
+
+            tombol.href = 'https://wa.me/' + wa + '?text=' + encodeURIComponent(teks);
+            tombol.hidden = false;
+        }
+
         form.addEventListener('submit', function (ev) {
             ev.preventDefault();
             var btn = $('#rsvp-submit');
@@ -614,6 +647,7 @@
                 if (list) {
                     list.prepend(itemUcapan({ nama: data.nama, pesan: data.pesan, hadir: data.hadir, jumlah: data.jumlah, sesi: data.sesi, waktu: '' }));
                 }
+                tampilkanTombolWa(data);
                 form.reset();
             }).catch(function (err) {
                 msg.classList.add('error');
