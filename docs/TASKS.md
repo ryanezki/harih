@@ -390,7 +390,7 @@ Empat halaman bertoken tidak memanggil `nocache_headers()` sementara produksi me
 | Reseller vs vendor | Satu orang **tidak boleh** jadi dua-duanya |
 | Katalog | Tetap menjual **paket penuh** — pembeli resepsi gedung bisa langsung beli tanpa lewat digital |
 | Upsell pasca-bayar | Tiga SKU upgrade berharga tetap. Kredit **Rp 300.000 rata**, berlaku **14 hari dengan hitung mundur tampil** |
-| Halaman upgrade | **Hanya Resepsi & Grand.** Hormat dicabut (marjin ±1,1× pekerjaan reguler — setelah disesuaikan risiko, lebih buruk daripada tidak mengambilnya). `CETAK-HORMAT` tetap dijual penuh di katalog |
+| Halaman upgrade | **Hanya Resepsi & Grand.** Hormat dicabut — **ditinjau ulang 2026-08-08 dengan angka terukur, lalu DITEGASKAN.** ⚠️ Alasan aslinya (marjin ±1,1×) terbukti **keliru**: pengukuran nyata memberi ±Rp 241rb/jam dinding untuk versi upgrade Rp 890rb, masih di atas pekerjaan reguler. Yang menahannya bukan marjin melainkan **jangkar harga** — Rp 890rb di sebelah Rp 2,6 jt menarik pembeli ke yang termurah, dan itu tidak terbantah oleh pengukuran apa pun. `CETAK-HORMAT` tetap dijual penuh di katalog |
 | Bingkai penawaran | **Kredit, bukan diskon.** "Paket digitalmu sudah dibayar — tinggal cetaknya" |
 | À la carte | **Dilarang muncul di halaman upsell.** Minimum **Rp 1.000.000/transaksi** |
 | Pengiriman | **Satu metode: gratis se-Indonesia.** Ongkir dalam struktur biaya: Rp 150.000 *(belum diuji ke tarif kurir nyata — lihat pertanyaan owner #4)* |

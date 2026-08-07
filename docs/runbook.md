@@ -102,41 +102,156 @@ Halaman undangan otomatis dinonaktifkan (jadi `draft`) setelah masa aktif paketn
   ```
 - Aturan hari ada di `wp-content/mu-plugins/undangan-core/masa-aktif.php` (otoritas). Nilainya juga tersalin di WF-05 hanya untuk menghitung waktu peringatan.
 
-## 7c. Pesanan MANUAL lewat WhatsApp (berlaku selama Duitku masih sandbox)
+## 7c. Pesanan MANUAL lewat WhatsApp — panduan lengkap
 
-> **Kenapa manual.** `duitku_environment` masih `sandbox` — tombol bayar online
-> tidak bisa menerima uang sungguhan. Sejak 2026-08-07 seluruh CTA di beranda
-> dan `/satuan/` mengarah ke WhatsApp. **Begitu kredensial production dipasang,
-> situs kembali ke checkout otomatis** (`harih_bayar_online_siap()` membaca opsi
-> itu langsung) — tidak perlu deploy apa pun.
+> **Kenapa manual.** `duitku_environment` masih `sandbox`; tombol bayar online
+> tidak bisa menerima uang sungguhan. Sejak 2026-08-07 seluruh CTA di beranda &
+> `/satuan/` mengarah ke WhatsApp. **Begitu kredensial production dipasang,
+> situs kembali ke checkout otomatis sendiri** — `harih_bayar_online_siap()`
+> membaca opsi itu langsung, tidak perlu minta deploy.
+>
+> DP transfer bukan penurunan kelas: itu norma vendor pernikahan Indonesia.
+> Untuk pesanan Rp 2,9 juta, DP 50% justru **mempercepat closing**.
 
-**Untuk paket digital (Rp 99–299 ribu) — bayar lunas di muka:**
+**Isi sekali sebelum mulai** — ganti di semua template di bawah:
+`{{rekening}}` = nomor rekening + nama pemilik · `{{nama}}` = nama pembeli
 
-1. Pembeli chat lewat tombol di situs; pesannya sudah menyebut paket yang dipilih.
-2. Kirim nomor rekening + nominal. Minta bukti transfer.
-3. Setelah dana masuk, buat pesanan di wp-admin → WooCommerce → Pesanan → Tambah:
-   - **Billing:** nama, email, **nomor WhatsApp** (wajib — link undangan dikirim ke sana)
-   - **Item:** tambahkan produk `HARIH-HEMAT` / `HARIH-FAVORIT` / `HARIH-PREMIUM`
-   - Simpan, lalu ubah status ke **Processing**
-4. Status `processing` itulah pemicunya — WF-01 menyala dan seluruh otomasi
-   berjalan persis seperti pesanan biasa: baris sheet, email, WA berisi link isi data.
-5. Catat di sheet `orders` kolom `kupon`: `MANUAL` (supaya nanti bisa dibedakan
-   dari pesanan yang lewat gerbang otomatis).
+---
 
-**Untuk paket cetak (Rp 1,19–5,9 juta) — DP 50%:**
+### Angka yang dipakai
 
-1. **Konfirmasi slot & tanggal dulu, sebelum uang berpindah.** Cek sisa kuota
-   bulan berjalan di kepala halaman WooCommerce → Antrean Cetak.
-2. Pastikan acara **≥ H-21**. Di bawah itu jangan disanggupi — Garansi Tepat
-   Waktu tidak bisa ditepati dan refundnya penuh.
-3. Sepakati DP 50%. Buat pesanan seperti langkah 3 di atas dengan produk
-   `CETAK-*`, isi **alamat kirim lengkap** dan **tanggal acara**.
-4. Set status **Processing** hanya setelah DP masuk. Catat nominal DP dan sisa
-   tagihan di catatan pesanan.
-5. ⚠️ **Jaminan H-14 baru mulai berjalan** sejak data undangan, daftar nama
-   tamu, dan persetujuan proof lengkap diterima (S&K §12.2) — beri tahu pembeli
-   tanggal itu, jangan tanggal pesanan.
-6. Pelunasan sebelum barang dikirim.
+| Paket | Harga | Pembayaran | Nominal |
+|---|---|---|---|
+| Hemat / Favorit / Premium | 99 / 179 / 299 rb | **lunas di muka** | penuh |
+| **Hormat** | Rp 1.190.000 | DP 50% | **Rp 595.000** → pelunasan Rp 595.000 |
+| **Resepsi** | Rp 2.900.000 | DP 50% | **Rp 1.450.000** → pelunasan Rp 1.450.000 |
+| **Grand** | Rp 5.900.000 | DP 50% | **Rp 2.950.000** → pelunasan Rp 2.950.000 |
+
+---
+
+### ⚠️ Periksa DULU sebelum menyanggupi tanggal
+
+Tiga hal ini mengikat secara hukum begitu Anda menyanggupinya. Periksa **sebelum** membalas, bukan sesudah:
+
+1. **Acara ≥ H-21?** Di bawah itu jangan disanggupi — Garansi Tepat Waktu tidak bisa ditepati dan refundnya penuh.
+2. **Kuota bulan itu masih ada?** Lihat kepala halaman **WooCommerce → Antrean Cetak**.
+3. **Jam produksi cukup?** Resepsi ±1,7 jam tangan, Grand ±2,2 jam (terukur 2026-08-08).
+
+> **Jaminan H-14 mulai berjalan sejak data undangan, daftar nama tamu, DAN
+> persetujuan proof lengkap diterima** (S&K §12.2) — bukan sejak pesanan masuk.
+> Sebutkan ini di awal, jangan setelah terlambat.
+
+---
+
+### Alur DIGITAL (Rp 99–299 ribu) — lunas di muka
+
+**1 · Balas pertama** *(pesan pembeli sudah menyebut paketnya — datang dari tombol di situs)*
+
+```
+Halo {{nama}}! 🤍 Terima kasih sudah tertarik.
+
+Paket {{paket}} — Rp {{harga}}, sekali bayar.
+Undangannya jadi otomatis, lalu link-nya dikirim ke WhatsApp ini.
+
+Kalau cocok, silakan transfer ke:
+{{rekening}}
+
+Kirim bukti transfernya ke sini ya, nanti langsung saya proses.
+```
+
+**2 · Dana masuk → buat pesanan**
+
+wp-admin → WooCommerce → Pesanan → **Tambah**:
+- **Billing:** nama · email · **nomor WhatsApp** *(wajib — link undangan dikirim ke sana)*
+- **Item:** `HARIH-HEMAT` / `HARIH-FAVORIT` / `HARIH-PREMIUM`
+- Kolom `kupon`: tulis `MANUAL` *(supaya nanti bisa dibedakan dari pesanan gerbang otomatis)*
+- Simpan → ubah status ke **Processing**
+
+**3 · Status `processing` adalah pemicunya.** Otomasi menyala sendiri: baris sheet, email, dan WA berisi link isi data. **Anda tidak perlu mengirim apa pun lagi.**
+
+---
+
+### Alur CETAK (Rp 1,19–5,9 juta) — DP 50%
+
+**1 · Balas pertama — konfirmasi slot dulu, jangan langsung minta uang**
+
+```
+Halo {{nama}}! 🤍
+
+Sebelum saya kunci slotnya, boleh dibantu dua info:
+1. Tanggal acaranya kapan?
+2. Perkiraan berapa undangan cetak yang dibutuhkan?
+
+Saya cek dulu ketersediaan produksi bulan itu — kalau aman,
+langsung saya kabari beserta rinciannya.
+```
+
+**2 · Setelah slot dicek aman — penawaran + DP**
+
+```
+Slot untuk {{tanggal}} masih ada, {{nama}} 🤍
+
+Paket {{paket}} — Rp {{harga}}
+· {{jumlah}} undangan cetak lipat + amplop bernama tamu (nama dicetak
+  langsung pada amplopnya, bukan stiker)
+· undangan digital dengan desain yang sama
+· gratis ongkir ke seluruh Indonesia
+· proof disetujui dulu, baru dicetak
+
+Untuk mengunci slot: DP 50% = Rp {{dp}}
+{{rekening}}
+Pelunasan sebelum barang dikirim.
+
+Satu hal supaya tidak ada salah paham: jaminan barang tiba H-14
+mulai berjalan sejak data undangan, daftar nama tamu, dan
+persetujuan proof lengkap saya terima — bukan sejak DP masuk.
+Biasanya cepat kok, tinggal isi form.
+```
+
+**3 · DP masuk → buat pesanan**
+
+Sama seperti digital, **plus**:
+- **alamat kirim lengkap**
+- **tanggal acara** *(field khusus pesanan cetak)*
+- Item: `CETAK-HORMAT` / `CETAK-RESEPSI` / `CETAK-GRAND`
+- Catatan pesanan: `DP Rp {{dp}} masuk {{tanggal}}. Sisa Rp {{sisa}}.`
+- Status → **Processing**
+
+**4 · Otomatis terkirim ke pembeli:** konfirmasi + link isi data + link daftar tamu.
+
+**5 · Pantau di Antrean Cetak.** Tahapnya berurutan: menunggu data → menunggu daftar tamu → siapkan proof → menunggu persetujuan → **SIAP CETAK** → terkirim.
+
+**6 · Saat proof siap** — kirim link `/proof/` dari halaman pesanan:
+
+```
+{{nama}}, proof cetakannya sudah siap 🤍
+Mohon diperiksa baik-baik — terutama ejaan nama, gelar, tanggal, dan alamat:
+
+{{link_proof}}
+
+Setelah disetujui, teks yang sudah tampak di proof jadi tanggung jawab
+pemesan (S&K §12.1), jadi tidak apa-apa periksa pelan-pelan dulu.
+Ada yang perlu diperbaiki? Kabari saya, jangan disetujui dulu.
+```
+
+**7 · Sebelum kirim — minta pelunasan**
+
+```
+{{nama}}, cetakannya sudah selesai dan siap dikirim 🤍
+Sisa pelunasan Rp {{sisa}} ke {{rekening}}.
+Begitu masuk, langsung saya kirim dan nomor resinya saya kabari.
+```
+
+**8 · Isi nomor resi di halaman pesanan** → pembeli diberi tahu otomatis.
+
+---
+
+### Yang JANGAN dilakukan
+
+- ❌ Menyanggupi tanggal sebelum mengecek kuota & H-21
+- ❌ Mencetak sebelum proof disetujui — itu yang memindahkan risiko salah ketik ke pemesan
+- ❌ Mengirim sebelum pelunasan
+- ❌ Menyebut "jaminan H-14 dari tanggal pesanan" — jaminannya mulai dari data lengkap
 
 ## 8. Revisi manual (layanan sesuai paket)
 

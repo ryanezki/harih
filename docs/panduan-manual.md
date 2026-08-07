@@ -85,7 +85,9 @@ Sekarang seluruh tombol "Pesan" di situs mengarah ke WhatsApp. Alasannya: gerban
 
 DP transfer manual memang norma di pasar pernikahan Indonesia (WO, MUA, katering, dekorasi semuanya begitu), jadi ini bukan penurunan kelas.
 
-Langkah lengkapnya ada di **[`runbook.md`](./runbook.md) §7c**. Ringkasnya:
+**Panduan lengkapnya — termasuk template pesan WhatsApp siap salin-tempel untuk
+tiap tahap, angka DP per paket, dan daftar "jangan dilakukan" — ada di
+[`runbook.md`](./runbook.md) §7c.** Ringkasnya:
 
 **Digital (Rp 99–299 ribu) — lunas di muka:**
 kirim rekening → dana masuk → buat pesanan di wp-admin (nama, email, **nomor WhatsApp**, produk `HARIH-*`) → set **Processing** → otomasi menyala sendiri.
