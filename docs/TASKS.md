@@ -1,191 +1,267 @@
-# TASKS — hariH · Platform Undangan Hybrid
+# TASKS — hariH
 
-**Sumber:** [blueprint teknis](./blueprint-undangan-digital.md) + Rencana Bisnis Hybrid v2.0 · **Status:** aktif · **Ditulis ulang:** 2026-08-05
+**Status:** aktif · **Ditulis ulang:** 2026-08-07 setelah audit menyeluruh 6 dimensi (keamanan · kode PHP · frontend · n8n/infra · produk-bisnis · benchmark pasar).
 
-> Menggantikan dua dokumen sebelumnya (`TASKS.md` jalur digital + `TASKS-hybrid.md`). Hybrid bukan lagi cabang — **hybrid adalah rencananya sekarang**. Riwayat rinci ada di git log.
+> Versi sebelumnya (553 baris, checkpoint bertumpuk) diarsipkan di [`arsip/TASKS-2026-08-07.md`](./arsip/TASKS-2026-08-07.md). Dokumen ini hanya memuat **yang berlaku sekarang**. Riwayat lengkap ada di git log.
 
-**Cara pakai:** centang `- [x]` saat selesai. ID (`F1.6`) stabil. Anotasi `(eks-P0.1)` menunjuk ID lama yang masih dirujuk komentar kode & `n8n/workflows/README.md`. **👤** = butuh tangan owner. **🔒** = gerbang: fase berikutnya tidak boleh dimulai sebelum ini lolos.
+**Cara pakai:** centang `- [x]` saat selesai. ID (`A1`) stabil. 👤 = butuh tangan owner · 🤖 = bisa dikerjakan asisten · 🤝 = keduanya. Urutan grup adalah urutan kerja — jangan lompat ke P1 sebelum P0 tuntas.
 
----
-
-## Prinsip yang mengatur seluruh urutan
-
-> **1. Bukti pasar mendahului modal.** Order uji ke diri sendiri membuktikan kabel tersambung, bukan bahwa ada yang mau membeli. Tidak ada rupiah keluar untuk alat sebelum ada pembeli asing yang membayar.
->
-> **2. Jual dan penuhi manual dulu, bangun mesin belakangan.** Attach rate, waktu produksi 4 jam, dan kesediaan bayar Rp 2,9 juta semuanya masih tebakan (Rencana Bisnis §13.3). Lima order pertama disubkontrakkan; mesin dibeli dari laba, bukan dari tabungan.
->
-> **3. Jangan bongkar yang belum perlu dibongkar.** Penjualan manual tidak melewati WooCommerce maupun n8n, jadi seluruh pembedahan checkout menunggu sampai harga terbukti laku.
+**Tingkat keyakinan temuan:** A1 (kedua bug WF-02) **diverifikasi langsung** terhadap file — bukan laporan. Sisanya lolos satu putaran verifikasi adversarial (55 lolos, 1 dibantah) tapi belum dikonfirmasi tangan kedua; **periksa file yang dirujuk sebelum mengeksekusi**, terutama sebelum menyentuh n8n.
 
 ---
 
-## ⏸ CHECKPOINT SESI 2026-08-07 — fase G1 TUNTAS (8/8), produksi bersih
+## Diagnosis
 
-**Mulai dari sini di sesi berikutnya.** `HARIH_VERSION 2.9.0` · 9 workflow aktif · smoke 21/21 · WAHA 2026.7.2 (sesi `WORKING`).
+Proyek ini **sudah terlalu banyak dibangun dan terlalu sedikit dijual.** Platform hidup end-to-end sejak 22 Juli — 104 commit, 9 workflow n8n, 7 mu-plugin, 5 halaman bertoken, 3 tema × 7 nuansa — dan **nol order WooCommerce, nol pembeli asing, ±2,5 minggu tanpa satu rupiah.**
+
+Yang lebih tajam: **satu-satunya jalur pemenuhan otomatis pasti gagal hari ini.** Pembeli pertama yang sudah membayar akan mengisi form 10 menit, menekan Kirim, dan menerima HTTP 500 berapa kali pun ia coba.
+
+Dokumen lama menyebut approval Duitku sebagai "gerbang tunggal semua uang". Itu keliru — ada **dua gerbang yang lebih rapat**:
+
+1. **Hulu kosong.** Tidak ada satu mekanisme pun yang mendatangkan pengunjung. Nol commit menyentuh akuisisi, nol rencana dalam 2.833 baris dokumen. Satu-satunya cara orang sampai ke harih.id hari ini adalah owner mengirim link manual.
+2. **Hilir mati.** Pipeline yang akan menerima order itu rusak (A1).
+
+**Duitku bisa disetujui besok pagi dan angkanya tetap nol.** Yang kurang bukan cara menagih, melainkan orang yang ditagih.
 
 ---
 
-## 👤 YANG PERLU OWNER LAKUKAN — diurutkan dari yang paling menghambat
+## Lima hal yang paling merugikan bila diabaikan
 
-**Semuanya menunggu tangan owner. Tidak ada satu pun yang bisa saya kerjakan sendiri.**
+**1. Pipeline pemenuhan mati di jalur pembeli sah — dan belum pernah diuji sekali pun.**
+`WF-02` node `Cek Order & Validasi` memakai `adaCetak` yang tidak pernah dideklarasikan (deklarasinya ada di **WF-01:50**, tidak ikut tersalin). `ReferenceError` terjadi di jalur `route:'ok'` sebelum node Respond. Empat jalur `out()` lain return lebih dulu — itulah sebabnya seluruh uji negatif tetap hijau dan menutupinya sejak 6 Agustus. Begitu diperbaiki, cacat kedua langsung menggantikan (lihat A1).
 
-### 1. 🔴 Approval Duitku production *(F0.1)* — gerbang TUNGGAL semua uang
-Diajukan 2026-08-04, masih menunggu. Selama ini belum keluar, **tidak ada satu rupiah pun bisa masuk** — digital maupun cetak.
-⚠️ Profil merchant menyebut Rp 99–299 ribu, padahal paket cetak sampai Rp 5,9 juta — **beri tahu Duitku**, kalau tidak pembayaran besar bisa ditolak di langkah terakhir.
-⚠️ Sekalian tanyakan: **mekanisme refund** (Garansi Tepat Waktu menjanjikan uang kembali 100% atas order Rp 2,9 juta — berapa lama, siapa menanggung fee kanal) dan **batas nominal per kanal** (e-wallet/QRIS sering punya plafon di bawah Rp 5,9 juta).
-**Setelah approve:** ganti kredensial plugin ke Production → beri tahu saya → F0.2 jalan.
+**2. Gerbang uang punya dua mode gagal yang belum pernah disentuh.**
+Nomor WhatsApp — satu-satunya kanal pengiriman link — tidak wajib dan tidak divalidasi di checkout **blok**, karena ketiga hook penjaganya hanya difire checkout shortcode. Terpisah dari itu, filter gateway untuk keranjang > Rp 2 juta menghapus setiap gateway yang id-nya tidak cocok dengan empat substring **tebakan**, tanpa penjaga anti-kosong. Paket Rp 2,9 jt & Rp 5,9 jt bisa menampilkan checkout tanpa satu tombol bayar, sementara Hormat Rp 1,19 jt lolos sehingga gejalanya tersamar.
 
-### 2. 🔴 Cetak satu sampel lengkap *(F1.1)* — undangan lipat + amplop bernama
-Satu sampel menjawab empat hal sekaligus: **bobot nyata** (ongkir yang kita tanggung — sekarang masih tebakan 2/5/9 kg), **waktu lipat per unit**, **uji pindai QR**, dan mutu amplop.
-⚠️ Yang paling menentukan: **apakah mesin creasing sanggup**. 100 lipatan × 8 order = 800 lipatan/bulan. Kalau harus dilipat tangan, seluruh hitungan marjin per jam batal.
-**Sekalian catat waktu untuk 50 unit, bukan hanya 100.** Analisis 2026-08-07 menunjukkan paket terkecil menanggung setup yang sama dengan pendapatan terkecil — **Hormat di harga penuh cuma ±1,6× pekerjaan reguler**, dan jalur upgrade-nya sudah dicabut karena hanya ±1,1×. Apakah Hormat dipertahankan, dinaikkan harganya, atau dihentikan **menunggu angka waktu dari sampel ini** — jangan diputuskan sebelum itu.
+**3. Tidak ada mekanisme yang mendatangkan pembeli — dan itu satu-satunya hal penting tanpa ID task.**
+Gerbang F0.3 menuntut 10 pembeli asing, tapi isinya hanya "catat dari mana datangnya" — tanpa satu langkah *bagaimana*. Ironisnya jalur termurah sudah tertulis dan menganggur: mendekati 5 vendor/WO sudah dinyatakan bisa paralel, nol biaya, dan masih di urutan bawah daftar owner.
 
-### 3. QA perangkat riil *(F0.4)* — iPhone Safari & Android Chrome
-Checklist di [`panduan-manual.md`](./panduan-manual.md) langkah 5: musik mulai setelah tap · countdown jalan · tombol salin rekening · upload foto HEIC · preview share WA.
-**Tambahan dari sesi ini** yang belum pernah disentuh tangan manusia di HP asli: **mode gelap** (tombol ☾/☀ di nav, dan apakah mengikuti setelan HP) · **galeri kolase** · **tombol Waze** · **tombol "beri tahu mempelai lewat WhatsApp"** setelah RSVP · **penolakan foto beresolusi rendah** di form.
-⚠️ WA meng-cache preview per URL — uji dengan `?x=1` supaya dianggap URL baru.
+**4. Halaman yang sudah tayang menjanjikan hal yang kode dan keputusan bisnis tidak dukung.**
+Tiga sekaligus, semuanya live: `/jadi-reseller/` menjanjikan komisi 30% "tiap order" di tujuh titik sementara keputusan terkunci membayar rupiah tetap untuk cetak (selisih **Rp 570.000/order Resepsi**); Kebijakan Privasi berjanji token halaman "tidak dikirim ke pihak ketiga mana pun" sementara GA4 aktif di empat halaman bertoken; S&K masih menjual kartu QR & label souvenir yang sudah diganti. Klaim tertulis yang tidak ditepati jauh lebih mahal daripada perbaikannya — dan semuanya berbiaya menit.
 
-### 4. 10 penjualan dari orang asing *(F0.3)* 🔒 — gerbang sesungguhnya
-Teman, keluarga, dan diri sendiri **tidak dihitung**. Ini yang menggerbang seluruh fase G2 dan F1 berikutnya. Catat per penjualan: tier · dari mana datangnya · bertanya dulu atau langsung bayar.
+**5. Kegagalan senyap di titik kerja terberat pelanggan.**
+Empat halaman bertoken tidak memanggil `nocache_headers()` sementara produksi mengirim `max-age=604800`. Nonce anonim hanya sah 24 jam → HTML ter-cache seminggu membuat nonce mati jadi kasus **normal**. Dan keduanya gagal tanpa suara: 300 nama tamu yang baru ditempel lenyap tanpa satu kalimat galat, dan tombol "setujui proof" jadi tombol mati sementara Antrean Cetak menampilkan "Menunggu persetujuan pelanggan" selamanya pada order yang tenggat garansinya berjalan.
 
+---
 
-> **Kredit upgrade DIKUNCI sampai gerbang ini lewat.** Tidak ada lagi optimasi angka sebelum ada data — attach rate masih hipotesis (Hemat 2–5% · Favorit 10–15% · Premium 30–40%). Tinjau dengan tabel ini, bukan dengan perasaan:
->
-> | Temuan setelah 10 penjualan | Tindakan |
-> |---|---|
-> | Attach rate Premium ≥ 30% | **Jangan sentuh apa pun** |
-> | Attach rate Premium < 15% | Perbaiki foto produk, salinan, garansi — **bukan kredit** |
-> | Masih < 15% setelah itu | Baru naikkan kredit ke Rp 500rb, **khusus Resepsi** |
-> | Yang laku hanya Hormat | Marjin Hormat harga penuh diperiksa ulang **sebelum order berikutnya diterima** |
+## P0 — Buka jalan uang, dan pastikan order berbayar pertama tidak gagal
 
-### 5. Keputusan & tinjauan yang tidak mendesak
-- **Naikkan pin WAHA lagi?** Sekarang `latest-2026.7.2`. Upgrade berikutnya berpotensi menuntut scan QR ulang → jadwalkan saat tidak ada order berjalan.
-- **Review gaya bahasa** pesan otomatis di [`copywriting-pesan.md`](./copywriting-pesan.md).
-- **Review visual tema-02 & tema-03 di HP** sebagai calon pembeli.
+> Semuanya harus tuntas **sebelum** Duitku production dinyalakan. Jangan sampai order berbayar pertama yang jadi alat ujinya.
+
+- [ ] **A1** 🤖 `menit` — **WF-02: deklarasikan `adaCetak` + kupas sufiks `+cetak` sebelum whitelist tier**
+  **Dua bug, satu node, satu ronde import** (ritual import→publish→restart mahal dan terbukti rawan).
+  (a) `ada_cetak: adaCetak` memakai identifier tak dideklarasikan → `ReferenceError` di jalur `route:'ok'` → pembeli dapat HTTP 500, tidak ada undangan terbit.
+  (b) `const paket = ['hemat','favorit','premium'].includes(...)` sementara **WF-01 menulis kolom sheet `premium+cetak`** untuk order hybrid (`Append Baris Order`: `$json.paket + '+cetak'`) → begitu (a) diperbaiki, pembeli Rp 2,9 juta jatuh ke tier **Hemat**: galeri hilang, love story kosong, masa aktif 7 hari.
+  **Selesai bila:** node memuat `const raw = String(row.paket||'').toLowerCase(); const adaCetak = raw.endsWith('+cetak') || raw === 'cetak'; const tier = raw.replace('+cetak',''); const paket = ['hemat','favorit','premium'].includes(tier) ? tier : 'hemat';` — dan uji dengan baris sheet `paket=premium+cetak` menghasilkan undangan tier premium dengan blok **daftar tamu** (bukan blok upsell) di pesan delivery.
+
+- [ ] **A2** 🤝 `menit` — **Tarik WF-01 & WF-02 dari container SEBELUM import**
+  Repo belum tentu sama dengan yang hidup — insiden 2026-08-07 menunjukkan `import:workflow` diam-diam memakai berkas basi. Kalau live ternyata sudah benar dan repo yang rusak, import A1 justru **merusak yang hidup**.
+  **Selesai bila:** `docker exec harih-n8n n8n export:workflow --id=XLtEUPxG3aeI48IP` dijalankan, isinya dibandingkan dengan repo, selisihnya dicatat di sini. Import hanya setelah selisihnya dipahami.
+
+- [ ] **A3** 🤝 `jam` — **Uji happy-path end-to-end: satu order dari nol sampai undangan terbit**
+  Ini akar sebenarnya dari A1. Semua uji yang ada adalah uji **negatif** — `cek-live.sh:93` hanya menguji token salah → 403. Jalur `route:'ok'`, satu-satunya jalur pembeli sah, belum pernah dieksekusi sekali pun. Tanpa uji ini, perbaikan A1 pun cuma keyakinan.
+  **Selesai bila:** satu baris uji `MENUNGGU_DATA` di sheet (sekali `paket=premium`, sekali `paket=premium+cetak`) + curl multipart ke `/webhook/form-undangan` menghasilkan: undangan terbit dengan tier benar · email terkirim · WA terkirim dengan blok benar · status sheet jadi `SUDAH_JADI`. Langkahnya ditulis ke `cek-live.sh` atau runbook supaya bisa diulang.
+
+- [ ] **A4** 🤖 `jam` — **Nomor WhatsApp wajib & tervalidasi di checkout blok**
+  `woocommerce.php` memasang label, validasi, dan normalisasi nomor WA lewat hook yang **hanya difire checkout shortcode**. `cetak.php` sudah mencatat sendiri bahwa checkout yang dipakai adalah blok, tapi perbaikan F3.6 hanya menambal field **alamat** — `phone` tidak pernah ikut. Akibatnya nomor WA boleh kosong → WF-01 menolaknya → status `TIDAK_VALID` → link `/isi-data/` hanya lewat email. Pembeli yang sudah bayar tidak pernah menerima undangannya.
+  **Selesai bila:** field telepon wajib di checkout blok, berlabel "Nomor WhatsApp" dengan penjelasan bahwa link dikirim ke sana, validasi + normalisasi lewat `woocommerce_store_api_checkout_update_order_from_request` (hook yang sudah terbukti jalan di `cetak.php:402`) memakai `undangan_normalize_phone()` + `undangan_is_valid_wa()` yang sudah ada.
+
+- [ ] **A5** 🤝 `jam` — **Penjaga anti-checkout-kosong pada filter gateway + verifikasi ID gateway Duitku**
+  `cetak.php:284-288` menghapus setiap gateway yang id-nya tidak memuat `_va_`, `briva`, `indomaret`, `alfamart` untuk keranjang > Rp 2 juta — **tanpa penjaga "kalau hasilnya kosong, kembalikan aslinya"**. Keempat substring itu tebakan; tidak ada satu berkas pun di repo yang mencatat ID gateway Duitku yang nyata.
+  **Selesai bila:** penjaga terpasang (hasil penyaringan kosong → kembalikan `$gateways` utuh) **dan** ID nyata dicetak di server (`wp eval 'print_r(array_keys(WC()->payment_gateways->get_available_payment_gateways()));'`) lalu `str_contains` diganti allowlist eksplisit yang sudah diverifikasi.
+
+- [ ] **A6** 🤝 `menit` — **`/proof/` & `/tamu/`: nocache + cabang else saat nonce gagal**
+  Cabang `else` bernilai sama besar dengan header — kalau cache tingkat server tetap lolos, `else` yang menyelamatkan ketikan pemesan.
+  **Selesai bila:** `nocache_headers(); do_action('litespeed_control_set_nocache');` di awal keempat template bertoken · kedua blok POST punya cabang else yang menampilkan "Sesi halaman ini sudah kedaluwarsa — muat ulang lalu coba lagi" **dan mengembalikan isi `$_POST` ke textarea** · 👤 owner menambahkan `/upsell/ /proof/ /tamu/ /rekap/` ke LiteSpeed → Cache → Excludes → URI (kode saja tidak cukup), instruksinya diperbarui di `scripts/setup-hostinger.sh:65`.
+
+- [ ] **A7** 🤝 `jam` — **Buka jalur bayar manual untuk paket digital — berhenti menunggu Duitku**
+  Dokumen lama menyebut Duitku "gerbang tunggal", tapi F1.6 **sudah merestui** invoice WA + transfer manual untuk order Rp 2,9 juta. Jalur yang sah untuk produk 30× lebih mahal belum pernah diterapkan ke produk Rp 99–299 ribu yang 10 penjualannya adalah gerbang sesungguhnya. **Tidak butuh satu baris kode baru:** owner kirim rekening/QRIS → buat order WooCommerce → set `processing` → WF-01 menyala persis seperti biasa. Setiap hari menunggu adalah hari tanpa data attach rate, closing rate, dan distribusi tier.
+  **Selesai bila:** tombol "Pesan lewat WhatsApp" di samping tombol checkout di katalog · runbook memuat langkah membuat order manual + set processing · satu penjualan uji tuntas sampai undangan terbit (menumpang A3).
+
+- [ ] **A8** 👤 `menit` — **Tindak lanjuti Duitku: profil nominal, mekanisme refund, plafon per kanal**
+  Diajukan 2026-08-04, belum keluar. Tiga hal yang bisa menggagalkan pembayaran di langkah terakhir: profil merchant menyebut Rp 99–299 ribu padahal paket cetak sampai Rp 5,9 juta · mekanisme refund (Garansi Tepat Waktu menjanjikan 100% — berapa lama, siapa menanggung fee kanal) · plafon per kanal (e-wallet/QRIS sering di bawah Rp 5,9 juta). Jawabannya juga menentukan bentuk akhir A5.
+  **Selesai bila:** ketiga pertanyaan terkirim & jawabannya dicatat di sini. Bila approval keluar: kredensial plugin ke Production dan order uji dijalankan — **setelah A1–A6 tuntas**.
+
+---
+
+## P1 — Tutup lubang yang merugikan order pertama & janji yang sudah tayang
+
+> Tidak menghambat rupiah pertama, tapi bila terjadi biayanya reputasi atau hukum — jenis kerugian yang tidak bisa ditambal belakangan. **B8 dan B9 menumpang ronde import WF-02 yang sama dengan A1** — jangan menyentuh WF-02 dua kali.
+
+- [ ] **B1** 🤖 `jam` — **Endpoint RSVP publik bisa dipanen dengan loop nomor**
+  `rest.php:19-23` mendaftarkan `/rsvp/(?P<id>\d+)` dengan `permission_callback => '__return_true'`, dan `undangan_rsvp_list()` mengembalikan nama, pesan, hadir, jumlah, sesi, waktu untuk 50 ucapan **tanpa memeriksa** bahwa post itu ada, bertipe `undangan`, atau berstatus publish. Seluruh strategi privasi bertumpu pada "slug tidak bisa ditebak" — dan endpoint ini justru memakai **ID post berurutan**. Satu loop `1..5000` memanen nama tamu & ucapan pribadi semua pelanggan tanpa pernah tahu satu link undangan. Ironis: file yang sama berjuang menutup semua jalur enumerasi lain.
+  **Selesai bila:** endpoint dikunci ke slug (`get_page_by_path($slug, OBJECT, 'undangan')`), menolak 404 bila tipe bukan `undangan` atau status bukan `publish`; `undangan.js` diberi `cfg.slug`; pemeriksaan sama diterapkan di `undangan_rsvp_create`.
+
+- [ ] **B2** 🤖 `menit` — **GA4 mengirim token HMAC pelanggan ke Google dari empat halaman bertoken**
+  `functions.php:459-461` hanya mengecualikan undangan dan `/isi-data/`, sementara `functions.php:442-450` menulis alasannya sendiri: URL halaman ini memuat token order — sebuah bearer credential — dan GA4 mengirim URL lengkap sebagai `page_location`. Keempat halaman lain memakai token yang sama dan sama-sama memasang `<meta name="referrer" content="no-referrer">`: penulisnya tahu tokennya sensitif, hanya lupa pengecualian GA4-nya. Kebijakan Privasi **sudah tayang** berjanji halaman bertoken "tidak boleh dikirim ke pihak ketiga mana pun".
+  **Selesai bila:** helper `harih_halaman_bertoken()` berisi kelima template, dipakai di blok GA4, filter `wp_robots`, dan `harih_halaman_utilitas()` — supaya halaman bertoken berikutnya otomatis ikut terlindungi.
+
+- [ ] **B3** 🤝 `menit` — **errorWorkflow tidak terikat, dan 5 JSON tanpa `id` akan membuat workflow DUPLIKAT**
+  Hanya WF-06 punya `errorWorkflow`, dan isinya **nama** ("WF-00") bukan ID — ikatan itu tidak menunjuk apa pun. Akibatnya `runbook.md:20` ("kalau tidak ada alert, sistem sehat") jadi janji kosong. Lebih tajam: **WF-00, WF-03, WF-04, WF-07, WF-08 tidak punya `id` sama sekali** — import atas berkas itu membuat workflow baru alih-alih menimpa, meninggalkan duplikat sementara versi lama tetap aktif. WF-06 juga kehilangan `timezone: Asia/Jakarta` padahal ia cron 09:00 WIB.
+  **Selesai bila:** ID live diambil (`n8n list:workflow`), ditanam di lima JSON · `errorWorkflow: <ID-WF-00>` di kesembilan blok settings · timezone WF-06 dikembalikan · diverifikasi dari yang **hidup** lewat `export:workflow` + grep, dan sekali dipaksa error untuk membuktikan alertnya sampai.
+
+- [ ] **B4** 🤖 `menit` — **WF-01 `Baca Ulang Orders` tanpa `alwaysOutputData`**
+  Node punya `retryOnFail` tapi tidak `alwaysOutputData`, sementara node berikutnya dibuka dengan `throw new Error('Verifikasi idempotency gagal...')` yang jelas ditulis untuk kasus nol baris. Bila lookup mengembalikan 0 item, n8n tidak menjalankan node hilir sama sekali — throw itu **tidak pernah dieksekusi**, eksekusi berakhir SUKSES, email & WA tidak terkirim, dan barisnya tetap ada di sheet sehingga WF-08 tidak menganggapnya tertinggal. Baru berguna setelah B3 beres.
+  **Selesai bila:** `alwaysOutputData: true` di `Baca Ulang Orders`, dan `Append Baris Order` — satu-satunya node Sheets di jalur uang tanpa retry — diberi `retryOnFail: true, maxTries: 3, waitBetweenTries: 3000`.
+
+- [ ] **B5** 🤝 `jam` — **`/jadi-reseller/` & WF-03 menjanjikan komisi 30% "tiap order"**
+  Ditulis di h1, hero-sub, langkah 3, daftar syarat, meta description, og:description, dan tagline kaki — hanya baris kaki memakai kata "digital". Berhadapan dengan keputusan terkunci: digital 30%, fisik rupiah tetap Rp 150/300/500rb. Reseller yang menjual Paket Resepsi mengharapkan Rp 870.000 dan menerima Rp 300.000 — **selisih Rp 570.000 per order** di kanal yang seluruh nilainya kepercayaan. Lebih cepat lagi: kupon `RES-` **ditolak di keranjang cetak** sehingga order terbesar berhenti di langkah terakhir. **Halaman ini live dan menerima pendaftar hari ini.**
+  **Selesai bila:** setiap klaim 30% dikualifikasi jadi "30% untuk paket digital · Rp 150/300/500rb untuk paket cetak · item satuan tanpa komisi" di ketujuh titik + teks WF-03. Bila owner memilih menutup pendaftaran (lihat pertanyaan owner), halaman diturunkan sebagai gantinya. Kontradiksi rekrut-vs-tidak antara arsip TASKS dan `panduan-manual.md:159` ikut diselesaikan.
+
+- [ ] **B6** 🤖 `menit` — **Kebijakan Privasi tidak menyebut nomor rekening reseller maupun daftar nama tamu**
+  Yang benar-benar telanjang adalah **nomor rekening**: formulir publik `/jadi-reseller/` mengumpulkan nama, WA, bank, norek; WF-03 menaruhnya di pesan WhatsApp + email approval lalu menyimpannya di tab `resellers` — kategori data keuangan tanpa satu kalimat dasar pemrosesan atau retensi. Daftar nama tamu (sampai 600 nama pihak ketiga) sebagian tertutup semangat kebijakan tapi tetap perlu diklarifikasi. **Jangan tunggu C8 selesai** — menunda teksnya memperpanjang periode tanpa pemberitahuan.
+  **Selesai bila:** bagian 1 memuat sub-bagian "Dari pemesan" (daftar nama tamu untuk amplop & link personal) dan "Dari calon reseller" (nama, WA, bank, nomor rekening untuk pembayaran komisi), diterbitkan lewat `scripts/publish-legal.py`.
+
+- [ ] **B7** 🤝 `jam` — **S&K & Refund masih menjual produk yang sudah diganti + tidak ada batas waktu bagi pelanggan**
+  (a) `syarat-ketentuan.md:9` masih menyebut produk fisik sebagai "kartu QR akses, label souvenir, kartu terima kasih, stiker segel" — model berubah jadi undangan lipat + amplop bernama pada 6 Agustus. "Garansi QR Terbaca" berjanji mengganti seluruh **batch**; bila "batch" kini ditafsirkan 150 undangan lipat premium, biayanya berlipat. Dalam sengketa, ambiguitas ditafsirkan **melawan penyusun dokumen**.
+  (b) §12.2 hanya mengikat tanggal **pemesanan**; tidak ada satu kewajiban waktu bagi pelanggan, padahal 3 dari 6 tahap antrean menunggu pelanggan. Order H-21 yang pelanggannya lambat 10 hari = barang terlambat, refund Rp 2,9 juta, bahan + ongkir tetap keluar.
+  **Selesai bila:** daftar produk fisik di S&K §1 dan Refund §4 diperbarui · Garansi QR ditulis ulang dengan objek "QR pada undangan cetak" dan remedy proporsional · rujukan bagian di Refund:7 dibetulkan · klausul waktu pelanggan ditambahkan ke §12.2 **setelah owner menyetujui** · diterbitkan lewat `publish-legal.py`.
+
+- [ ] **B8** 🤖 `menit` — **Nama berkas foto & QRIS pelanggan bisa ditebak dari nomor order berurutan**
+  WF-02 membuat `undangan-${order_id}-foto-${i+1}.${ext}` dan `undangan-${order_id}-qris.png`. Ironisnya slug halaman undangan justru **sengaja diacak**. URL `/wp-content/uploads/2026/08/undangan-142-qris.png` bisa dicoba satu per satu. Yang bocor bukan cuma foto pranikah melainkan **gambar QRIS** — instrumen pembayaran mempelai — dan pemetaan nomor order ke identitas pasangan. Berkasnya tetap hidup setelah masa aktif habis karena `masa-aktif.php` hanya mendraft post.
+  **Selesai bila:** node `Pisahkan File` menyisipkan `crypto.randomBytes(4).toString('hex')` ke nama foto dan QRIS; A3 membuktikan berkasnya tetap tampil benar.
+
+- [ ] **B9** 🤖 `jam` — **Beri cakupan pada token: satu token seumur hidup membuka kelima halaman**
+  Rumusnya identik dan hanya dari `order_id`, tanpa komponen waktu maupun cakupan. Meneruskan link `/rekap/` ke wedding organizer untuk menghitung porsi katering — perilaku yang **pasti terjadi** karena halaman itu memang untuk dipakai bersama — otomatis menyerahkan wewenang menekan "setujui proof", dan `proof.php` mencatatnya sebagai bukti yang memindahkan tanggung jawab typo ke pemesan. Saat sengketa datang, bukti itu runtuh. Kriptografinya benar; **cakupannya yang salah**. Kerjakan sekarang selagi nol pelanggan — begitu link beredar, migrasi token jadi mahal.
+  **Luasnya:** 5 template + `proof.php` dua tempat + WF-01 + **tiga** perhitungan token di node `Siapkan Pesan Delivery` WF-02 → wajib satu ronde dengan A1 & B8.
+  **Selesai bila:** bahan HMAC memuat nama halaman (`$order_id . '|proof'`, `'|tamu'`, dst.) di seluruh titik; A3 membuktikan kelima link dari pesan delivery masih terbuka **dan** link `/rekap/` tidak bisa membuka `/proof/`.
+
+---
+
+## P2 — Naikkan konversi & keandalan
+
+> Tidak ada yang gagal hari ini karena nol pengunjung dan nol order. Yang masuk di sini dibenarkan oleh **biayanya** (menit, di berkas yang toh sudah dibuka), bukan besarnya dampak. **C3 dan C9 layak lebih dulu** — keduanya menyentuh alasan orang datang & membeli.
+
+- [ ] **C9** 👤 `hari` — **Isi hulu akuisisi** *(lubang terbesar dalam rencana)*
+  Grep `tiktok|iklan|marketplace|blog` di seluruh docs: **nol rencana**. Dari 104 commit: **nol menyentuh akuisisi**. Tema tidak punya template artikel sama sekali, sementara SERP untuk kata kunci niat-beli dikuasai blog vendor pesaing — artikel merekalah yang menanamkan pagu "Rp 500rb–1jt" ke kepala pembeli yang lalu membuka halaman Hormat Rp 1,19 juta.
+  **Selesai bila:** tiga aksi berjalan, tanpa kode — (1) **5 vendor/WO pertama didekati** (sudah tertulis sebagai F1.9, sudah dinyatakan bisa paralel, nol biaya — **naikkan ke urutan 2 daftar owner, di atas QA perangkat**); (2) 3 halaman statis ber-SEO lewat `page-teks.php` yang sudah ada ("harga undangan cetak vs digital 2026", "berapa undangan cetak yang sebenarnya dibutuhkan") — di sinilah harga per lembar dibenarkan di depan orang yang sedang membandingkan; (3) lapak di satu direktori pernikahan dengan harga tercantum, CTA tetap WhatsApp sehingga tidak menunggu payment gateway.
+
+- [ ] **C3** 🤖 `menit` — **Empat kalimat copy yang melawan penjualan sendiri**
+  (a) `page-harga-hybrid.php:186` menyiarkan "**8 dari 8 slot** produksi Agustus masih tersedia" — pada nol order itu memberi tahu calon pembeli bahwa **belum ada seorang pun yang memesan**, di halaman yang menutup Rp 2,9 juta. Kelangkaan hanya bekerja bila sebagian sudah terpakai.
+  (b) `page-katalog.php:36` "Masa aktif sampai H+7" adalah satu-satunya baris di katalog yang isinya **kabar buruk**, di paket jangkar harga terendah — sementara pesaing Rp 50.000 berbayar menjual "Masa Aktif Selamanya". Hapus barisnya; `masa-aktif.php` tetap menegakkan H+7.
+  (c) Hero memimpin dengan "satu desain, dua wujud" — padahal percetakan pesaing sudah melempar undangan digital sebagai **bonus gratis**. Pimpin dengan yang tidak diberikan gratis siapa pun: **amplop bernama tercetak + tiga garansi**.
+  (d) "bukan tulis tangan" mengalahkan lawan yang tidak ada; lawan sebenarnya adalah **stiker label yang ditempel**, dan hampir semua percetakan memberi label nama gratis. Ubah jadi "dicetak langsung pada amplop — bukan stiker label yang ditempel".
+  **Selesai bila:** sisa slot hanya tampil bila `> 0 && <= 4` (ambang jadi konstanta bersebelahan dengan `UNDANGAN_KUOTA_BULAN`, cabang "slot penuh" dipertahankan) · baris H+7 hilang dari kartu harga · H1 hybrid memimpin dengan garansi + amplop tercetak · frasa "bukan tulis tangan" diganti di tiga tempat.
+
+- [ ] **C1** 🤖 `jam` — **Undangan bisa tampil rusak atau tidak terbuka sama sekali di HP tamu**
+  Tiga cacat pada satu-satunya produk yang dilihat calon pembeli sebelum membeli.
+  (a) `color-scheme` nol di `undangan.css` dan ketiga skin, padahal sudah dipakai di halaman toko — mode gelap paksa Samsung Internet/Chrome membalik krem tema-01/02 jadi abu.
+  (b) `--c-ink-soft` tema-01 (3,76:1) dan tema-02 (3,73:1) **gagal WCAG AA** — dan token itulah yang mewarnai **alamat lokasi** pada 14px. tema-03 sudah membawa komentar bahwa auditnya dilakukan, lalu berhenti di satu tema; **tema-01 adalah tema bawaan**.
+  (c) `is-locked` ditulis **statis** di `single-undangan.php:112` dan hanya bisa dibuka JS di footer — satu kegagalan JS = gerbang layar penuh dengan tombol mati **dan** halaman tak bisa digulir, nol persen isi terbaca.
+  **Selesai bila:** `color-scheme: only light` di tema-01 & 02, `only dark` di tema-03 · `--c-ink-soft` digelapkan ke ±`#6b6758` dan ±`#77685a` (lolos 4,5:1) · `is-locked` dipasang lewat script inline sinkron di head (pola `data-no-optimize="1"`) sehingga kegagalan JS = halaman tidak pernah terkunci. **Jangan** pakai `<noscript>` (tidak menolong 4G putus atau galat runtime) dan **jangan** pakai `setTimeout` pelepas (halaman menggulir di belakang overlay fixed = tampak hang).
+
+- [ ] **C2** 🤖 `menit` — **Tombol salin berbohong saat gagal, label tersangkut**
+  `undangan.js:510-511` memakai `.then(selesai, selesai)` — argumen kedua adalah handler **penolakan**, diisi fungsi yang sama dengan jalur sukses → tombol menampilkan "Tersalin ✓" walaupun penyalinan gagal. Di WebView WhatsApp (dari mana mayoritas tamu Indonesia membuka undangan) `clipboard.writeText` bisa menolak, dan justru di kondisi itu kode ini berbohong — tamu menempel isi clipboard lama di aplikasi m-banking. Yang lebih pasti terjadi: `var asli = btn.textContent` dibaca **setiap klik**, jadi ketukan kedua dalam 1800 ms menyimpan "Tersalin ✓" sebagai teks asli dan label tersangkut permanen.
+  **Selesai bila:** `.then(selesai, gagalSalin)` dengan label "Gagal menyalin — tekan lama nomornya" · label asli disimpan di `btn.dataset.label` di luar handler klik · `u.jumlah` dibungkus `u.hadir === 'hadir'` (buku tamu publik kini menampilkan "Berhalangan · 3 tamu") · `beforeunload` di `isi-data.js:255` dilonggarkan dari `if (state.uploading)` jadi "form kotor **atau** sedang mengunggah".
+
+- [ ] **C4** 🤖 `menit` — **`cetak.php`: waktu UTC dipakai untuk acara WIB, dan kuota hanya membaca 50 order terakhir**
+  (a) `cetak.php:380` menghitung selisih H-21 dengan `gmdate('Y-m-d')` — WordPress memaksa timezone PHP ke UTC, jadi antara 00:00–07:00 WIB tanggalnya masih kemarin dan order H-20 lolos sebagai H-21. Pola sama di `:341` dan `:327`, padahal `masa-aktif.php:67` sudah memakai `wp_date()` dengan benar.
+  (b) `cetak.php:338-343` memakai `'limit' => 50` urutan menurun — begitu ada 50 order digital dalam sebulan (target wajar bila akuisisi berhasil), order cetak **terdorong keluar jendela** dan checkout menerima pesanan melewati kapasitas, diam-diam.
+  (c) `cetak.php:38-45` menggerbangkan seluruh alur cetak dari `!is_virtual()` padahal `cetak.php:15` menyatakan **SKU adalah sumber kebenaran** — produk digital yang dibuat manual di wp-admin bawaannya non-virtual, dan begitu itu terjadi pembeli Rp 99rb dapat form alamat, wajib isi tanggal acara, dan diblokir kuota cetak.
+  **Selesai bila:** `gmdate` → `wp_date` di tiga tempat · `'limit' => -1` (transient 10 menit sudah menahan biayanya) · `undangan_cart_ada_fisik()` memakai `undangan_jenis_produk()` sebagai otoritas dengan `is_virtual()` sebagai cadangan, plus notice admin bila SKU `HARIH-*` tidak virtual.
+
+- [ ] **C7** 🤖 `menit` — **WF-08 & WF-05: jaring pengaman yang buta dan nudge palsu**
+  (a) WF-08 mengambil 100 order terbaru dengan `status=any` lalu baru menyaring — checkout terbengkalai meninggalkan order pending/failed yang normal dalam volume besar, sehingga **order berbayar yang webhooknya gagal bisa terdorong keluar jendela**, dan justru di skenario itu `tertinggal` kosong sehingga `return []` mematikan **seluruh cabang alert**. Owner membaca kesunyian itu sebagai "sistem sehat". Catatan node menyebut multi-status tidak didukung, padahal WF-06 melakukannya persis.
+  (b) WF-05 memakai `MASA_AKTIF_HARI[row.paket]` tanpa mengupas sufiks → `premium+cetak` jatuh ke 7 hari (pasangan dari A1).
+  (c) Order cetak à la carte tetap menulis baris `MENUNGGU_DATA` meski komentarnya menyatakan tidak → pembelinya menerima nudge "isi data undanganmu" untuk undangan yang tidak pernah ia beli. Aktif begitu produk cetak dibuka dari `/shop/`.
+  **Selesai bila:** WF-08 memakai `status=processing,completed` dan mengeluarkan alert terpisah bila jendela penuh tapi tidak ada temuan · WF-05 mengupas sufiks `+cetak` · WF-01 menulis status `CETAK_SAJA` untuk `jenis_order=cetak_saja`.
+
+- [ ] **C6** 🤖 `menit` — **Daftar nama tamu berada di luar snapshot yang dipakai S&K §12.1**
+  `proof.php:38-44` mendaftar 19 kunci snapshot; `daftar_tamu` tidak ada, jadi `_proof_hash` tidak pernah mengunci nama tamu — sementara `page-tamu.php` menulis meta itu tanpa memeriksa `_proof_disetujui`. Amplop bernama adalah pembeda yang dijual, 50–150 keping per order, tanpa jejak versi mana yang disetujui. **Alasan mengerjakannya sekarang:** nol snapshot ada di produksi, jadi mengubah daftar kunci tidak membatalkan hash apa pun — nanti mahal.
+  **Selesai bila:** `daftar_tamu` masuk array `$kunci` (hash ikut otomatis karena `sort`), dan `page-tamu.php` mencatat `add_order_note()` bila daftar berubah setelah proof disetujui. **Jangan mengunci keras** — pemesan yang baru menemukan salah ketik satu nama akan terjebak, dan CS-nya cuma satu orang.
+
+- [ ] **C5** 🤖 `menit` — **Harga tiga paket digital di-hardcode di halaman depan**
+  `page-katalog.php` menulis "99", "179", "299" sebagai teks; `harih_url_beli()` hanya mengambil ID produk dari SKU dan tidak pernah membaca harganya. Bandingkan `page-satuan.php` yang menuliskan alasannya sendiri: "harga di halaman ini tidak akan pernah berbeda dari harga yang ditagihkan checkout". Halaman depan adalah satu-satunya etalase produk digital **dan** satu-satunya halaman harga yang tidak terhubung ke sumber harganya. Jendelanya sempit hari ini, tapi terbuka lebar pada hari owner memasang sale — dan drift ini **sudah pernah terjadi**.
+  **Selesai bila:** `harih_url_beli()` mengembalikan juga `get_price()` mentah, dirender dengan pembagian 1000; angka hardcode disisakan sebagai fallback pre-deploy. *Jebakan:* formatnya angka + `<span class="rb"> rb</span>`, jadi `wc_price()` tidak bisa dipasang begitu saja.
+
+- [ ] **C10** 🤖 `jam` — **Dokumen pemulihan berbohong**
+  `n8n/workflows/README.md:3-12` melompat dari WF-05 ke WF-07 dan baris 14 menegaskan "WF-06 bukan workflow n8n" karena label itu dipakai untuk script backup — sementara `WF-06-reminder-upsell.json` nyata dan aktif. Daftar impor melewatkannya. **Setelah rebuild VPS, orang yang mengikuti README akan mengimpor delapan, melihat delapan aktif, dan menganggap selesai** — yang hilang justru pengingat H+3/H+12 yang menjual paket cetak, tanpa satu error pun, hanya attach rate diam-diam nol yang disalahartikan "upsell tidak laku".
+  **Selesai bila:** README memuat WF-06 di tabel & daftar impor · script backup dinamai ulang (mis. `BACKUP-MINGGUAN`) di baris 14/91/114 · hitungan "9 workflow aktif" ditambahkan ke runbook §2 sebagai langkah SSH (bukan ke `cek-live.sh` yang berjalan dari mesin developer lewat HTTP).
+
+- [ ] **C8** 🤖 `hari` — **Janji retensi 90 hari & hak penghapusan tidak punya satu baris kode pun**
+  `kebijakan-privasi.md:53` berjanji data & foto dihapus paling lambat 90 hari setelah masa aktif berakhir, `:63` menjanjikan hak penghapusan ditanggapi ≤7 hari kerja. Satu-satunya penegakan (`masa-aktif.php:66-102`) hanya mengubah post jadi draft. **Tidak ada kode** yang menghapus post `ucapan`, meta `daftar_tamu`, berkas foto & QRIS di uploads, maupun kartu OG (`og.php` hanya bersih saat post dihapus permanen — yang tidak pernah terjadi). Jadi janji "halaman dinonaktifkan" hanya benar untuk HTML-nya; **medianya tetap publik**. Sekaligus masalah inode: Hostinger dibatasi 200rb inode.
+  Di P2 karena dengan nol pelanggan belum ada data yang harus dihapus — **tapi jangan melunakkan kalimat kebijakannya sebagai jalan pintas**; kalimat itu sudah tayang dan sudah dibaca.
+  **Selesai bila:** pass kedua di cron `masa-aktif.php` mencari draft dengan `nonaktif_sejak` > 90 hari lalu menghapus post ucapan terkait, meta `daftar_tamu`, attachment galeri + qris, dan `wp_delete_post($id, true)` agar hook `og.php` ikut membersihkan. Ada mode `--dry-run` dan jumlahnya dicatat ke `error_log` sebagai bukti kepatuhan.
+
+---
+
+## P3 — Digerbang skala atau menunggu data yang belum ada
+
+- [ ] **D1** 🤖 `jam` — **Rantai order upgrade: `/upsell/` membuat order BARU**
+  `page-upsell.php:103` memakai checkout biasa sehingga lahir order dengan ID baru, sementara `undangan_cari_undangan_order()` mencari post undangan lewat meta `order_id` milik order **asal**. Konsumennya: bekukan snapshot, hitung nama tamu, Antrean Cetak, `/tamu/`, `/rekap/`. Kerusakannya bukan "selamanya menunggu": WF-01 mengklasifikasi `UPG-*` sebagai hybrid sehingga **link `/isi-data/` baru tetap dikirim**, dan pembeli diminta mengisi ulang data yang halaman upsell janjikan tidak perlu diisi ulang; bila ia menurut, terbit **undangan kedua** dengan slug berbeda — link yang mungkin sudah ia sebar ke tamu bukan lagi yang dicetak.
+  Ditunda karena tiga SKU `UPG-*` sudah live sebagai keputusan terkunci dan upgrade pertama tetap ditangani manual.
+  **Selesai bila:** sampai upgrade nyata pertama muncul, runbook memuat langkah menyambungkan tangan (`update_post_meta(undangan_id,'order_id',order_baru)`). Setelah itu baru bangun rantai `_upgrade_dari`.
+
+- [ ] **D2** 🤝 `jam` — **Backup: `--delete` membuatnya replika, bukan cadangan**
+  Klaim terburuk yang beredar **keliru**: WordPress, DB, dan uploads hidup di Hostinger — VPS cuma memegang salinannya, jadi VPS lenyap ≠ data pelanggan lenyap. Yang benar-benar hanya ada di VPS: sesi WAHA (bisa scan ulang) dan volume n8n (workflow sudah di git).
+  Yang **justru lebih layak diperhatikan dan tidak disadari:** `rsync -az --delete` di `backup-harih.sh:73` membuat mirror uploads mengikuti sisi Hostinger — penghapusan atau ransomware di produksi ikut menghapus "backup"-nya. Baris 61 juga menaruh password DB di baris perintah remote sehingga tampil di daftar proses shared hosting. Dan gzip ≠ enkripsi, padahal `kebijakan-privasi.md:55` menyatakan backup "disimpan terenkripsi".
+  **Selesai bila:** `--delete` dicabut atau diganti mode bertanggal · satu langkah salin ke luar VPS (rsync balik ke Hostinger memakai SSH key yang sudah ada — nol biaya, nol kredensial baru) · password DB dipindah ke `--defaults-extra-file`. Bila enkripsi ditunda, **kalimat kebijakan privasi dilunakkan lebih dulu**.
+
+- [ ] **D3** 🤖 `hari` — **Ukuran gambar undangan: nol srcset, nol width/height**
+  Grep `srcset|sizes` di seluruh tema: 0 hasil; tidak satu `<img>` di `template-parts/undangan/*.php` punya width/height. Foto dikompresi ke 1600px untuk kolom 480px — paket Favorit dengan 10 foto membawa ~6–9 MB, dan foto sampul ber-`loading="eager"` adalah LCP yang tidak tertolong lazy. Kuota adalah keberatan nyata pembeli Indonesia dan biayanya ditanggung ratusan tamu yang tidak memesan apa pun.
+  Digerbang karena solusi termurahnya (turunkan `maxDim` ke 1280) **bukan perubahan bebas risiko**: foto yang sama adalah sumber untuk produk **cetak**, dan resolusi yang dibutuhkan cetak baru terjawab oleh sampel cetak pertama.
+  **Selesai bila:** yang gratis dikerjakan sekarang sebagai tumpangan — `aspect-ratio: 1/1` pada `.qris-panel img` (satu-satunya sumber CLS tersisa) dan atribut width/height di keenam template. srcset penuh menunggu WF-02 disentuh untuk hal lain; keputusan `maxDim` menunggu sampel cetak.
+
+- [ ] **D4** 🤝 `jam` — **Infrastruktur VPS: healthcheck WAHA, batas log & disk, satu nomor WA merangkap dua peran**
+  (a) `docker-compose.traefik.yml:81-104` memakai `restart: unless-stopped` **tanpa `healthcheck:`** pada engine WEBJS berbasis Chromium — yang khasnya menggantung sambil container tetap "up", jadi Docker tidak akan menyentuhnya.
+  (b) Kedua compose tidak memuat `logging:` maupun batas memori, dan volume `harih_waha_media` tidak punya pembersih, sementara `backup-harih.sh:97` sengaja tidak pernah menghapus mirror uploads — semua penumpuk tumbuh monoton di disk 25 GB yang dipakai bersama n8n produksi lain milik owner. (Pemakaian sekarang 0,8 GB — belum mendesak.)
+  (c) Satu nomor adalah sekaligus sesi WAHA 9 workflow **dan** satu-satunya CTA penjualan cetak — sementara `evaluasi-ide-genz.md:40` menolak RSVP-lewat-WA justru karena "ratusan nomor asing menghubungi satu nomor" adalah pola yang membuat sesi di-ban. **Rencana penjualan yang berhasil menciptakan beban itu.**
+  **Selesai bila:** `logging: {max-size: 10m, max-file: 3}` di kedua compose · cek disk dititipkan ke `backup-harih.sh` yang sudah punya cron host & jalur alert mandiri (`[ "$PAKAI" -lt 80 ] || alert_gagal disk`) · healthcheck WAHA dipasang **hanya setelah** endpoint `/health` dan ketersediaan `wget` diverifikasi di dalam container (healthcheck salah perintah = Docker membunuh container sehat) · auto-restart sesi hanya bila ada rem maks 1×/jam dan hanya untuk status `STOPPED`/`FAILED`. Pemisahan nomor menunggu keputusan owner.
+
+- [ ] **D5** 👤 `jam` — **Tidak ada titik masuk paket cetak di bawah Rp 1 juta**
+  Paket cetak termurah adalah Hormat Rp 1.190.000, dan pembelian satuan dipatok minimum Rp 1.000.000/transaksi — jadi tidak ada satu pun titik masuk di bawah sejuta, sementara artikel harga yang menguasai SERP menanamkan pagu jauh di bawah itu. Menunggu data closing rate nyata sebelum diubah.
+
+---
+
+## Jangan dikerjakan sekarang — dan kenapa
+
+| Hal | Alasan |
+|---|---|
+| CI/CD, unit test, TypeScript, APM | Nol pembeli, satu operator, satu deploy per sesi. Yang menutupi cacat WF-02 bukan tiadanya pipeline melainkan tiadanya **satu uji happy-path manual** (A3). Bangun ritual uji 10 menit, bukan infrastruktur. |
+| Auto-restart sesi WAHA tiap 10 menit | Loop restart otomatis pada sesi bermasalah **menaikkan** risiko ban — risiko yang dokumen sendiri sudah pakai untuk menolak ide lain. Email sudah jadi kanal utama dan kegagalan WA sudah diperlakukan non-fatal. |
+| Konfirmasi identitas sebelum tombol setujui proof | Menambah friksi di titik tenggat H-21 pada pembeli Rp 2,9 juta, demi sengketa yang belum pernah terjadi. **B9 sudah menyelesaikan masalah teknisnya.** |
+| Autosave penuh form `/isi-data/` | Yang benar-benar hilang saat tab dibuang adalah 10 foto hasil kompresi canvas — localStorage teks-saja **tidak menyelamatkannya** (butuh IndexedDB, pekerjaan jam-an). Cukup longgarkan `beforeunload` (C2). |
+| Turunkan `maxDim` kompresi 1600 → 1280 | Foto yang sama adalah sumber untuk produk **cetak**. Menukar mutu cetak dengan byte web sebelum sampel pertama dicetak = menebak ke arah yang tidak bisa dibatalkan. |
+| Hapus SKU Hemat / ubah H+7 jadi 1 tahun | Keputusan bisnis berjam-jam yang menyentuh WooCommerce, deskripsi produk, dan S&K §4. Yang merugikan hari ini cuma **satu baris copy** (C3b). ⚠️ Kunci `'hemat'` **tidak boleh** dihapus dari kode — `masa-aktif.php` memakainya sebagai default paket tak dikenal. |
+| Pecah kolom sheet `paket` jadi dua kolom | Benar secara desain, tapi mengubah skema sheet + JSON di banyak node sekaligus — tepat jenis pembongkaran yang mahal saat ritual import n8n sudah terbukti rawan. Kupas sufiksnya saja (A1, C7). |
+| Kejar paritas fitur dengan pemain digital besar | Mereka merekrut percetakan sebagai partner white-label mulai ±Rp 50rb/bulan. Sisi digital **tidak bisa dan tidak perlu** dimenangkan. Yang tidak bisa di-white-label siapa pun: mutu cetak, amplop bernama tercetak, tiga garansi tertulis. |
+
+---
+
+## 👤 Keputusan yang menunggu owner
+
+1. **Duitku** — sudah ada kabar sejak 2026-08-04? Bila belum, **apakah kita membuka jalur bayar manual** (invoice WA + transfer, order WooCommerce dibuat tangan lalu di-set `processing`) untuk paket digital Rp 99–299 ribu sekarang? Itu satu-satunya cara gerbang 10-penjualan bergerak minggu ini, dan mekanismenya **sudah Anda setujui** untuk order cetak Rp 2,9 juta. → A7
+
+2. **Reseller** — `/jadi-reseller/` hidup dan menerima pendaftar dengan janji komisi 30% tiap order, sedangkan keputusan terkunci membayar rupiah tetap untuk cetak. Pilih **sekarang**: (a) koreksi klaimnya, atau (b) tutup pendaftaran sampai reseller memang diinginkan. Arsip TASKS sudah mencabut "rekrut 3 reseller" tapi `panduan-manual.md` masih menyuruhnya. → B5
+
+3. **Garansi Tepat Waktu** — tidak punya satu klausul pun yang membatasi waktu **pelanggan**, padahal 3 dari 6 tahap antrean menunggu pelanggan. Setuju menambahkan *"jaminan bergeser hari-per-hari bila data/daftar tamu/persetujuan proof terlambat lebih dari 4 hari"*? Ini mengubah dokumen legal yang sudah tayang. → B7
+
+4. **Bobot paket** dicatat **tiga versi berbeda** di dokumen (2/5/9 kg vs 2/4/7 kg), sementara produk di WooCommerce memakai 2/4/7 dan ongkir dikunci Rp 150.000 se-Indonesia **tanpa sumber tercatat**. Angka mana yang benar, dan apakah Rp 150.000 pernah diuji ke tarif kurir nyata untuk 7 kg ke luar Jawa?
+
+5. **Backup tidak terenkripsi**, padahal Kebijakan Privasi yang tayang menyatakan "disimpan terenkripsi". Sementara enkripsi belum dipasang: lunakkan kalimat kebijakannya, atau langsung pasang enkripsi? → D2
+
+6. **Akuisisi** — mana yang diambil lebih dulu: mendekati 5 vendor/WO (sudah tertulis, nol biaya, sudah dinyatakan bisa paralel) atau daftar lapak di direktori pernikahan? **Saran: vendor dulu.** Keduanya butuh tangan Anda, bukan kode. → C9
+
+---
+
+## 👤 Aksi owner yang tetap berlaku dari rencana lama
+
+- **Cetak satu sampel lengkap** (undangan lipat + amplop bernama) — menjawab bobot nyata, waktu lipat per unit, uji pindai QR, mutu amplop, dan **apakah mesin creasing sanggup** (800 lipatan/bulan; kalau manual, hitungan marjin batal). Sekalian catat waktu untuk **50 unit**, bukan hanya 100 — paket Hormat menanggung setup yang sama dengan pendapatan terkecil.
+- **QA perangkat riil** — iPhone Safari & Android Chrome. Checklist di `panduan-manual.md` langkah 5, ditambah yang belum pernah disentuh tangan manusia: mode gelap · galeri kolase · tombol Waze · tombol WA mempelai setelah RSVP · penolakan foto resolusi rendah. ⚠️ WA meng-cache preview per URL — uji dengan `?x=1`.
+- **Review gaya bahasa** pesan otomatis di `copywriting-pesan.md` · **review visual tema-02 & tema-03 di HP** sebagai calon pembeli.
 - **Kebijakan nomor WA bisnis** — jangan logout, pakai wajar, jangan blast ke nomor tak dikenal. Sesi ter-ban = seluruh delivery mati.
-- **Vendor** *(F1.9)*: dekati 5 vendor pertama — bisa jalan **paralel sekarang**, tidak menyentuh kapasitas produksi sama sekali.
 
 ---
 
-## Yang belum dikerjakan (kode) — dan kenapa belum
+## ⚠️ Wajib dibaca sebelum menyentuh n8n / deploy
 
-### Tidak digerbang — bisa saya kerjakan kapan saja Anda minta
-- **FU.4 Sesi kedatangan tamu (shift)** — mempelai membagi tamu ke jam kedatangan (`?sesi=1` di link personal). Penghalangnya dulu (FU.6 link personal massal) **sudah selesai**, jadi ini sekarang bisa dikerjakan. Butuh **satu field baru** → satu ritual WF-02.
-- **Sisa F4.2** — batas panjang field & pembulatan kuantitas. Sengaja ditunda: keduanya menunggu template cetak benar-benar ada; menentukannya sekarang cuma menebak.
-
-### Digerbang F0.3 (10 pembeli asing) — fase G2
-- **G2.2 AI copywriter** — Gemini Flash lewat **OpenRouter** (keputusan owner). ⚠️ Slug model **wajib diverifikasi ke daftar OpenRouter** saat implementasi, simpan sebagai env `OPENROUTER_MODEL`. Wajib: tambahkan OpenRouter ke tabel pemroses data di Kebijakan Privasi **sebelum** fitur menyala.
-- **G2.1 Video cover Premium** — ⚠️ disk 25 GB bukan penghalangnya; yang menggerbang **bandwidth** (10 MB × 300 tamu = 3 GB per undangan). Kuota/wajar-pakai Hostinger harus dicek dulu.
-- **G2.3 Pratinjau langsung di form** · **G2.4 Section playlist Spotify (facade)**
-- **FU.7 QR check-in tamu di venue**
-
-### Menunggu order cetak nyata (F1.6/F1.7 dulu)
-**F4.3** engine render SVG→PDF (wajib di VPS — Hostinger tidak bisa Inkscape) · **F4.4** imposition + cut file · **F4.8** upsell otomatis penuh · **F1.7/F1.8** catat waktu-biaya nyata & protokol uji harga.
-
-### Fase F2 & F5 (digerbang uang masuk)
-**F2.1/F2.2** beli alat dari laba · **F5.1–F5.3** vendor & white-label.
-
-### Belum terverifikasi (bukan belum dikerjakan)
-Komponen **berdata** di `/tamu/`, `/proof/`, `/upsell/` belum pernah dilihat dalam mode gelap — ketiganya menuntut order WooCommerce yang benar-benar ada, dan membuat order `processing` akan memicu WF-01 lalu mengirim email + WA sungguhan. **Paling murah menumpang order uji F0.2** begitu Duitku disetujui: satu order menguji jalur uang DAN ketiga halaman ini sekaligus.
-
----
-
-## ⚠️ Wajib dibaca sebelum menyentuh n8n / deploy lagi
-
-1. **Import n8n bisa diam-diam memakai berkas BASI.** `scp` ke `/tmp` server gagal (uid lain + sticky bit) **tapi `import:workflow` tetap melaporkan sukses** — WF-02 live sempat mundur ke versi 6 Agustus tanpa satu pun pesan galat. Prosedur yang benar (unggah ke `/root/wf-import`, nama baru di container, **periksa isi dari dalam container**, verifikasi hasil ekspor) ada di [`../n8n/workflows/README.md`](../n8n/workflows/README.md).
+1. **Import n8n bisa diam-diam memakai berkas BASI.** `scp` ke `/tmp` server gagal (uid lain + sticky bit) **tapi `import:workflow` tetap melaporkan sukses** — WF-02 live sempat mundur tanpa satu pesan galat. Prosedur benar (unggah ke `/root/wf-import`, nama baru di container, **periksa isi dari dalam container**, verifikasi hasil ekspor) ada di [`../n8n/workflows/README.md`](../n8n/workflows/README.md). → lihat juga A2 & B3.
 2. **Container hariH bernama `harih-n8n`.** VPS yang sama menjalankan **`root-n8n-1`** — n8n produksi lain milik owner. Jangan pernah menjalankan perintah n8n tanpa menyebut container.
-3. **Jangan taruh node yang bisa menghasilkan NOL item di tengah rantai workflow.** Node HTTP n8n memecah respons array jadi satu item per elemen, jadi `[]` = nol item = seluruh cabang berikutnya tidak dijalankan, tanpa galat. Ini sempat mematikan seluruh reminder harian.
+3. **Jangan taruh node yang bisa menghasilkan NOL item di tengah rantai.** Node HTTP n8n memecah respons array jadi satu item per elemen, jadi `[]` = nol item = seluruh cabang berikutnya tidak dijalankan, **tanpa galat**. Ini sempat mematikan seluruh reminder harian, dan pola yang sama menyembunyikan alert di WF-08 (C7).
 4. **Restart n8n:** `docker restart harih-n8n`. Hindari bare `docker compose up -d` — berisiko me-recreate WAHA.
 5. **OPcache:** perubahan mu-plugin butuh sampai ±60 dtk sebelum web SAPI menyajikannya, dan `wp eval` **tidak** memperlihatkannya (CLI punya cache sendiri). Lihat [`runbook.md`](./runbook.md) §9d.
-6. **Menguji workflow bercron** & jebakan WAL SQLite: [`runbook.md`](./runbook.md) §9c.
-7. **Naikkan `HARIH_VERSION`** setiap menyentuh CSS/JS.
-
----
-
-## Kondisi produksi (bersih, diverifikasi 2026-08-07)
-
-0 ucapan · 3 undangan (semuanya demo) · 3 kartu OG · sheet `orders` hanya header · 0 order WooCommerce · 18 produk terkategori (`digital` 3 · `cetak` 15, semuanya `hidden` dari `/shop/` sesuai gerbang yang disengaja).
-
----
-
-## Kondisi sebelumnya (checkpoint sesi 2026-08-06)
-
-**Yang berubah paling besar sesi ini:** owner ternyata punya **percetakan & peralatan sendiri** → fase subkontrak gugur, dan produk cetak berubah dari kartu QR jadi **undangan lipat (A4→A5) + amplop bernama tamu** (50/100/150 per paket, harga tetap). Marjin per jam sudah diukur: percetakan reguler Rp 100–200rb/jam vs undangan hybrid **±Rp 580rb/jam** → gerbang kelayakan lulus 3–6× lipat, dengan ruang membengkak sampai ±13 jam/order.
-
-**Jalur cetak sudah lengkap secara kode & operasional** (F3 tuntas 11/11; F4.1, F4.5, F4.6, F4.7 selesai): produk & kategori, checkout beralamat + gratis ongkir se-Indonesia, gerbang H-21 & kuota 8/bulan, snapshot beku + persetujuan proof ber-hash, daftar tamu → amplop bernama + link personal massal, rekap RSVP + CSV, antrean produksi, komisi per jenis produk, upsell bertoken + pengingat H+3/H+12. **9 workflow n8n aktif.**
-
-**Yang menahan uang, semuanya di tangan owner:**
-1. **Approval Duitku production** — gerbang tunggal semua uang. ⚠️ profil merchant menyebut Rp 99–299 ribu, padahal paket cetak sampai Rp 5,9 juta — beri tahu Duitku.
-2. **Cetak satu sampel lengkap** — menjawab bobot nyata (sekarang masih tebakan 2/4/7 kg), waktu lipat, uji pindai QR, dan **apakah mesin creasing sanggup** (800 lipatan/bulan; kalau manual, hitungan marjin batal).
-3. **Cek mekanisme refund Duitku** — Garansi Tepat Waktu sudah mengikat sejak halaman harga tayang.
-
-**Catatan performa 2026-08-06 — SUDAH TERJAWAB, bukan masalah situs.** Sepanjang sesi, permintaan ke situs berkali-kali timeout. Dugaan pertama saya (kepadatan shared hosting) **KELIRU**; setelah diukur bertahap:
-- DNS selalu **0,002 dtk** · TCP tersambung normal · yang menggantung adalah **jabat tangan TLS**;
-- kegagalan mengenai **harih.id (Hostinger) DAN n8n.harih.id (VPS) serentak** — dua server, dua penyedia;
-- kontrol ke host luar (`google.com/generate_204`) **tidak pernah gagal** di jendela yang sama;
-- melewati DNS (langsung ke IP) tetap gagal.
-Kesimpulan: hambatan ada di **jalur jaringan lingkungan kerja saya**, bukan di situs atau VPS. Saat merespons, situs menjawab 0,2–0,5 dtk. **Jangan naikkan paket hosting atas dasar ini.** Konsekuensi praktis: hasil uji otomatis (`cek-live.sh`) bisa memunculkan `HTTP 000` palsu — **ulangi per URL sebelum menyimpulkan ada regresi**.
-
-**Gerbang yang masih dipasang sengaja:** produk cetak & satuan **disembunyikan dari `/shop/`** sampai satu order uji internal tuntas penuh; halaman `/harga/` & `/satuan/` tetap menampilkannya.
-
-**Yang belum dibangun & memang menunggu order nyata:** engine render SVG→PDF (F4.3), imposition (F4.4), upsell otomatis penuh (F4.8), fase vendor/white-label (F5). Membangunnya sekarang = menebak bagian mana dari produksi yang layak diotomasi.
-
-**Halaman bertoken (semua memakai HMAC yang sama, 403 tanpa token):** `/isi-data/` · `/upsell/` · `/proof/` · `/tamu/` · `/rekap/`.
-
----
-
-## Kondisi sebelumnya (diverifikasi langsung 2026-08-05)
-
-**Platform digital hidup dan terbukti end-to-end.** Checkout → pembayaran → undangan terbit otomatis → delivery WA+email, berjalan sendiri sejak 22 Juli. 8 workflow aktif, backup mingguan jalan, smoke test `scripts/cek-live.sh` 21/21 hijau, produksi bersih dari data uji (hanya 3 undangan demo).
-
-**Sudah selesai** *(ringkas — rinciannya di git log)*: infrastruktur & hardening · 3 tema + demo per tema · form isi data + kompresi foto · 8 workflow otomasi · halaman legal · masa aktif otomatis · aset visual berlisensi + kartu OG per tema · logo · pustaka musik 3 track · SEO dasar · GA4 · backup repo ke GitHub private · QA formal yang menemukan 3 cacat live (countdown tidak pernah jalan, atribut `hidden` dikalahkan CSS, daftar ucapan ter-cache 7 hari).
-
-**2026-08-05 — evaluasi desain owner (putaran 2) diterapkan** *(v1.4.0)*: **nuansa keagamaan** — undangan kini punya 7 pilihan (Islam · Kristen · Katolik · Hindu · Buddha · Konghucu · **tanpa unsur agama**), masing-masing dengan salam pembuka, kutipan, salam penutup, dan tampil-tidaknya tanggal Hijriah; ketiga teks bisa ditimpa per undangan lewat meta (`salam_teks`/`ayat_teks`/`ayat_sumber`) sehingga CS bisa menyesuaikan tanpa kode · tombol `.ics` **dihapus** (tidak lazim di Indonesia & tidak jalan di banyak peramban HP), tombol kalender diberi jarak 34px dan diganti jadi **"Catat Tanggalnya"** · tautan Instagram mempelai diberi gaya (sebelumnya mewarisi biru bawaan peramban dengan ikon kebesaran) · **`<meta name="format-detection" content="telephone=no">`** — akar masalah "nomor rekening biru muda hampir tak terbaca": iOS mengubah deret angka jadi tautan telepon, bukan salah warna tema · field WhatsApp di RSVP dihapus (undangan disebar via WA, kontak tamu sudah dipegang) · Kisah Kami: parser lini masa dilonggarkan (label bebas ≤22 karakter, minimal 2 baris) + tombol contoh "lini masa"/"paragraf" di form · nuansa **tidak melekat pada tema** (dua meta terpisah, template salam dipakai bersama; diverifikasi matriks 3 tema × 7 nuansa) — demo kembali memakai nuansa yang sama agar yang terbandingkan hanya temanya, dan `?nuansa=` pada **link demo saja** dipakai memperlihatkan nuansa lain di tema mana pun · **QRIS demo jadi aset lokal** — supaya etalase tidak menunggu domain pihak ketiga saat menampilkan fitur yang dijualnya. *(Koreksi 2026-08-06: alasan awal "layanan mengembalikan PNG kosong" KELIRU — QR-nya valid, 498 byte wajar untuk PNG 1-bit. Perubahannya tetap dipertahankan atas alasan kemandirian, bukan kerusakan.)*
-
-**2026-08-05 — pemilih nuansa di halaman demo** *(v1.5.2)*: kotak mengambang di kiri-bawah undangan demo (berpasangan dengan tombol musik di kanan) berisi 7 pilihan nuansa + kapsul "pratinjau demo" supaya jelas ia alat bantu, bukan bagian undangan tamu. Berpindah nuansa memuat ulang halaman dengan `?nuansa=…&buka=1` sehingga gerbang langsung terbuka dan halaman mendarat tepat di blok salam — tanpa itu pembanding harus menekan "Buka Undangan" dan menggulir ulang tiap kali. **Tidak pernah dirender di undangan pelanggan** (diverifikasi dengan undangan uji non-demo). Countdown juga dikembalikan ke **setelah halaman pembuka, sebelum salam** atas keputusan owner: kalimat salam yang berakhir "…pada pernikahan kami:" tetap bersambung ke nama mempelai, dan hitung mundur jadi kait di layar kedua.
-
-**2026-08-05 — urutan & hierarki dibetulkan** *(v1.4.2)*: **countdown dipindah ke SETELAH rangkaian acara**. Salam ditutup kalimat *"…mengundang Bapak/Ibu/Saudara/i pada pernikahan kami:"* — titik dua itu menjanjikan nama mempelai, bukan angka hitung mundur; urutan sekarang mengikuti pertanyaan pembaca: salam → **siapa** (mempelai) → **kapan & di mana** (acara) → tinggal berapa hari (countdown). Tanggal & jam acara juga diperbesar: tanggal `clamp(20px, 5.4vw, 25px)` font display (sebelumnya seukuran teks biasa) dan jam 17px ber-tracking (sebelumnya 14px, **lebih kecil dari nama gedung**) — pertanyaan pertama penerima undangan setelah "siapa" adalah "kapan", karena itu yang menentukan ia bisa hadir. Ukuran diukur di HP 375px agar nama bulan terpanjang tetap satu baris di ketiga tema, termasuk Prata yang paling lebar.
-
-**2026-08-06 — evaluasi desain eksternal diterapkan penuh** *(HARIH_VERSION 1.2.0)*: salam islami + QS. Ar-Rum 21 + tanggal Hijriah (Intl, sisi klien) · RSVP diperluas (jumlah tamu, sesi akad/resepsi/keduanya, WA opsional — **WA disimpan untuk mempelai, tidak pernah keluar di API publik**) · dinding ucapan scrollable · alamat kado + salin · urutan anak + tautan Instagram · dress code ber-swatch · turut mengundang · rundown per jam · tombol Apple/.ics · judul lagu di penutup & tombol musik · catatan maaf nama/gelar · embed YouTube → facade thumbnail (klik baru memuat iframe) · kontras gate + overflow nama panjang + WCAG `--c-ink-soft` tema-03 dibereskan. Sisa 4 poin evaluasi + cacat `og:image` (rasio salah → preview WA terpotong) dirinci di **FU**. Semua toggle-able per undangan (`salam_islami`, field opsional). Terverifikasi visual + fungsional live, smoke 21/21.
-
-**2026-08-05 — perbaikan positioning:** jangkar "Mulai Rp 99 ribu" dibuang dari **lima** lokasi (title, meta description, og:description, hero, **dan kartu OG** — yang terakhir ter-render ke dalam gambar yang muncul di preview WhatsApp) · FAQ berhenti mengajari pelanggan membuat kartu QR sendiri · pertanyaan "Perkiraan jumlah tamu?" dipasang sebelum tabel harga, di atas 200 tamu paket Hemat disembunyikan.
-
-| Sehat ✓ | Bermasalah / belum ✗ |
-|---|---|
-| Katalog, legal, landing reseller, 3 demo → 200 | **Belum ada satu pun pembeli asing** *(F0.3)* |
-| Musik 3 track + whitelist `musik_url` | Duitku production menunggu approval *(F0.1)* |
-| Masa aktif otomatis, demo dikecualikan | Checkout **menolak barang fisik** secara arsitektur *(F3.4–F3.6)* |
-| GA4 live; `/u/*` & `/isi-data/` sengaja tidak dilacak | WF-01 salah deteksi paket hybrid → bug tier *(F3.2)* |
-| Kode ter-backup + **restore backup terbukti berhasil** ✓ *(F0.5)* | — |
-| Docker terpin · rahasia di password manager | Monitor n8n hanya hidup di dalam n8n *(ditunda)* |
-| `xmlrpc` 403 · port WAHA tertutup · REST 401 | QA perangkat riil belum dijalankan *(F0.4)* |
-
-**2026-08-06 — PERUBAHAN BESAR: percetakan & alat milik sendiri, produk cetak jadi undangan lipat.** Owner ternyata sudah punya bisnis percetakan dengan peralatan lengkap, jadi **fase subkontrak (F1.2) gugur** — tidak ada modal alat yang perlu dikeluarkan dan tidak ada pihak ketiga yang perlu dicari. Produk cetak juga berubah dari kartu QR 55×85mm menjadi **undangan lipat dua (A4→A5) beserta amplop bernama tamu**: penerima undangan cetak umumnya orang tua & sesepuh, dan kartu yang isinya hanya QR menuntut mereka membuka HP dulu. Jumlah per paket **turun** (150/150/200 → 50/100/150) sementara harga paket tetap — mutu naik, jam mesin turun.
-
-> ⚠️ **DIPERSEMPIT 2026-08-07 — klaim "lulus 3–6× lipat" hanya berlaku untuk Resepsi & Grand, BUKAN seluruh lini.** Angka ±Rp 580rb/jam dihitung dari **Paket Resepsi saja**, lalu ditulis seolah memvalidasi "undangan hybrid" sebagai satu kesatuan. Setup mesin sama untuk 50 maupun 150 unit, jadi paket terkecil menanggung setup yang sama dengan pendapatan terkecil. Diturunkan dari struktur biaya yang tercatat di dokumen ini (ongkir 150rb; bahan+packaging ±Rp 1.500/unit, diturunkan dari marjin Resepsi 2,6 jt) dan estimasi 4,5 jam untuk 100 unit:
->
-> | Paket | unit | jam (est.) | Marjin harga penuh | per jam | Lewat upgrade | per jam |
-> |---|---|---|---|---|---|---|
-> | **Hormat** | 50 | ±3,0 | 965rb | **±322rb** | 665rb | **±222rb** |
-> | Resepsi | 100 | ±4,5 | 2,60jt | ±578rb | 2,30jt | ±511rb |
-> | Grand | 150 | ±6,0 | 5,53jt | ±921rb | 5,23jt | ±871rb |
->
-> Terhadap patokan **tertinggi** pekerjaan reguler (Rp 200rb/jam): Grand 4,6× · Resepsi 2,9× · **Hormat cuma 1,6× di harga penuh dan 1,1× lewat upgrade**. Hormat-lewat-upgrade praktis setara pekerjaan reguler — padahal ia membawa tenggat pernikahan, Garansi Tepat Waktu, dan risiko refund Rp 890.000. **Setelah disesuaikan risiko, order itu lebih buruk daripada tidak mengambilnya.** → jalur upgrade Hormat **dicabut** (lihat Keputusan Terkunci).
-> ⚠️ **Yang masih perlu diputuskan owner: marjin Hormat pada HARGA PENUH (±1,6×) juga tipis.** Apakah Hormat dipertahankan sebagai pintu masuk termurah, dinaikkan harganya, atau dihentikan — jangan diputuskan sebelum F1.1/F1.7 memberi waktu produksi yang sebenarnya.
-> ⚠️ Pemisahan setup/per-unit di atas adalah **model saya**, bukan pengukuran: repo hanya punya SATU titik data (4,5 jam untuk 100 unit) dan itu pun estimasi. Yang kokoh adalah arahnya (paket kecil selalu paling buruk per jam), bukan angka desimalnya.
->
-> Catatan asli 6 Agustus:
-> ⚠️ **Metrik pengendali berubah total.** Patokan lama "≥ Rp 600rb/jam" tidak lagi relevan; kapasitas bukan tak terbatas melainkan **jam mesin yang selama ini dipakai order percetakan reguler**. Undangan wajib **mengalahkan marjin per jam bisnis cetak yang sekarang** — kalau tidak, ini hanya memindahkan uang dari kantong kiri ke kanan sambil menambah risiko deadline pernikahan. **Angka itu belum ada dan harus dihitung lebih dulu** (F1.7a).
-
-**2026-08-06 — homepage diredesain (handoff "Gen-Z editorial", v2.0.1).** Front page ditulis ulang mengikuti berkas handoff: DM Serif Display beraksen italic berwarna + Figtree (keduanya **self-hosted**, bukan CDN Google), foto arch bersticker, strip marquee, kartu chunky, **carousel tema scroll-snap** (bukti visual produk di atas fold), band undangan cetak, dan CTA penutup. Responsif **tanpa satu pun media query** — `clamp()`, `auto-fit`, `flex-wrap`, `scroll-snap`. Lima temuan review UX ikut dieksekusi: bukti visual produk (A1), baris trust pembayaran di hero (A2), kontras teks **5,29–9,06:1** — semuanya lolos AA (A3), filter tamu **bisa di-reset dengan klik kedua** (A4), dan CTA penutup (A5). `katalog.css` dipakai 8 halaman, jadi paletnya dipusatkan di `:root` — `/harga/`, `/satuan/`, dan halaman bertoken ikut memakai tampilan baru tanpa perubahan markup. Gerak dimatikan penuh saat `prefers-reduced-motion`.
-
-**2026-08-06 (lanjutan) — konsep desain diseragamkan ke SEMUA halaman publik + identitas pribadi dilepas dari halaman kontak** *(v2.2.1)*. Halaman kontak & 3 halaman legal sebelumnya dirender tema induk Astra — satu-satunya bagian situs yang tampil beda dari brand, padahal justru ke sanalah pembeli pergi mencari kepastian sebelum membayar. Kini memakai template `page-teks.php` bergaya sama. Nav & footer diangkat jadi komponen bersama (`template-parts/toko/`) yang dipakai 5 halaman, supaya tidak pelan-pelan melenceng lagi seperti sebelumnya. Form `/isi-data/` ikut memakai token & font yang sama — pemesan yang baru membayar tidak boleh merasa berpindah situs. Google Fonts kini **hanya** dipakai halaman undangan; seluruh halaman toko self-hosted.
-  **Halaman kontak:** nama pribadi & alamat domisili dihapus (usaha berjalan online) — diganti identitas usaha, wilayah layanan, dan pernyataan bahwa tidak ada kantor tatap muka, dengan catatan bahwa data lengkap penanggung jawab tersedia bagi pihak berwenang & mitra pembayaran lewat email. ⚠️ **Perlu diingat saat mengurus merchant:** Duitku dan sebagian mitra biasanya meminta alamat usaha di dokumen aplikasi — yang dihapus di sini hanya tampilan publik, bukan data yang diberikan ke mitra.
-
-**Menunggu keputusan owner:** daftar lengkap + saran per poin ada di [`konfirmasi-owner.md`](./konfirmasi-owner.md) — dibuat 2026-08-06 setelah F3, dipimpin satu celah mendesak (paket cetak sudah bisa dibeli langsung tanpa konfirmasi slot).
-
-**2026-08-06 — evaluasi ide "konsep Gen Z" dari teman owner:** analisis 11 poin + rencana per perubahan ada di [`evaluasi-ide-genz.md`](./evaluasi-ide-genz.md). Ringkasnya: 2 poin sudah ada, **5 diterapkan** (fase **G1**, ±3–3,5 hari, nol rupiah, tidak menyentuh desain undangan yang dibekukan — dark mode halaman toko · self-host font undangan · "coba nama kalian" di beranda · galeri kolase · koordinat+Waze · tombol WA mempelai di RSVP · dompet digital di amplop), **3 digerbang F0.3** (fase **G2** — AI copywriter, video cover Premium, pratinjau langsung), dan **4 ditolak dengan pengganti**: Spotify sebagai musik latar (tidak bisa autoplay + menembus whitelist `musik_url`), RSVP masuk ke nomor WA bisnis (**risiko ban sesi WAHA = 9 workflow mati**), Supabase (datastore ketiga; migrasi Postgres sudah direncanakan), escrow amplop digital (perilaku agregator/PJP + risiko akun Duitku — gerbang tunggal semua uang). 👤 Empat keputusan owner tercantum di akhir dokumen itu.
-
-**Akses:** Hostinger `ssh -p 65002 u803921702@147.93.80.20` (`domains/harih.id/public_html`) · VPS `ssh root@31.97.50.197` (`/opt/harih`) · rahasia: `vps/.env` + `vps/google-sa.json` (lokal, gitignored) = cermin server · aksi owner: [`panduan-manual.md`](./panduan-manual.md) · operasional: [`runbook.md`](./runbook.md) · import n8n: [`../n8n/workflows/README.md`](../n8n/workflows/README.md).
+6. **Naikkan `HARIH_VERSION`** setiap menyentuh CSS/JS.
+7. **`cek-live.sh` bisa memunculkan `HTTP 000` palsu** — hambatan ada di jalur jaringan lingkungan kerja, bukan di situs (didiagnosis 2026-08-06: DNS 0,002 dtk, TCP normal, TLS menggantung, mengenai Hostinger **dan** VPS serentak, kontrol ke host luar tidak pernah gagal). **Ulangi per URL sebelum menyimpulkan ada regresi. Jangan naikkan paket hosting atas dasar ini.**
 
 ---
 
@@ -195,358 +271,42 @@ Kesimpulan: hambatan ada di **jalur jaringan lingkungan kerja saya**, bukan di s
 |---|---|
 | Tangga digital | Pertahankan tiga tingkat — yang rusak copy-nya, bukan tier-nya |
 | Attach rate | Diukur **per tingkat**, tidak pernah digabung. Hipotesis: Hemat 2–5% · Favorit 10–15% · Premium 30–40% |
-| Komisi | Digital tetap **30%**. Fisik **rupiah tetap**: Rp 150rb (Hormat) · Rp 300rb (Resepsi) · Rp 500rb (Grand) |
-| Reseller vs vendor | Satu orang **tidak boleh** jadi dua-duanya. Berlangganan vendor → akun reseller berhenti |
+| Komisi | Digital **30%**. Fisik **rupiah tetap**: Rp 150rb (Hormat) · Rp 300rb (Resepsi) · Rp 500rb (Grand). Satuan: nol |
+| Reseller vs vendor | Satu orang **tidak boleh** jadi dua-duanya |
 | Katalog | Tetap menjual **paket penuh** — pembeli resepsi gedung bisa langsung beli tanpa lewat digital |
-| Upsell pasca-bayar | **Tiga SKU upgrade berharga tetap.** Kredit berlaku **14 hari dengan hitung mundur tampil** |
-| À la carte | **Dilarang muncul di halaman upsell.** Tempatnya di katalog produk satuan |
-| Pengiriman | **Satu metode: gratis se-Indonesia.** Rencana zona dibatalkan |
-| Ongkir di struktur biaya | **Rp 150.000** (naik dari 50rb) → marjin Paket Resepsi **Rp 2,6 juta** |
-| Resi | Wajib dicatat di sistem; pakai layanan ber-SLA |
-| Minimum à la carte | **Rp 1.000.000 per transaksi**; minimum per produk tetap berlaku di atasnya |
-| Kredit upgrade | **Rp 300.000 rata** untuk semua tier — *dipertahankan*, tidak dibuat bertingkat (matriks 9 kombinasi sulit dijelaskan & justru mengecilkan dorongan bagi pembeli termurah) |
-| Halaman upgrade | **Hanya Resepsi & Grand.** Hormat dicabut dari jalur upgrade 2026-08-07 — marjinnya ±1,1× pekerjaan reguler, lebih buruk daripada tidak mengambilnya setelah disesuaikan risiko. Bonus: Rp 890rb di sebelah Rp 2,6 jt adalah jangkar yang bekerja MELAWAN kita. `CETAK-HORMAT` tetap dijual penuh di katalog |
-| Bingkai penawaran upgrade | **Kredit, bukan diskon.** "Paket digitalmu sudah dibayar — tinggal cetaknya." Rupiahnya identik; diskon mengundang orang membandingkan harga, kredit menutup lingkaran yang sudah ia mulai |
-| Urutan perbaikan bila attach rate jelek | Foto undangan lipat asli di dalam amplop bernama · salinan soal orang tua & sesepuh · garansi · hitung mundur. **Angka kredit paling akhir** — diskon 10% bukan alasan siapa pun membeli apa pun |
+| Upsell pasca-bayar | Tiga SKU upgrade berharga tetap. Kredit **Rp 300.000 rata**, berlaku **14 hari dengan hitung mundur tampil** |
+| Halaman upgrade | **Hanya Resepsi & Grand.** Hormat dicabut (marjin ±1,1× pekerjaan reguler — setelah disesuaikan risiko, lebih buruk daripada tidak mengambilnya). `CETAK-HORMAT` tetap dijual penuh di katalog |
+| Bingkai penawaran | **Kredit, bukan diskon.** "Paket digitalmu sudah dibayar — tinggal cetaknya" |
+| À la carte | **Dilarang muncul di halaman upsell.** Minimum **Rp 1.000.000/transaksi** |
+| Pengiriman | **Satu metode: gratis se-Indonesia.** Ongkir dalam struktur biaya: Rp 150.000 *(belum diuji ke tarif kurir nyata — lihat pertanyaan owner #4)* |
+| Kuota produksi | **8 order cetak/bulan.** ⚠️ Kuota per bulan **musim, bukan rata** — pernikahan menumpuk; 8×12 akan meleset jauh |
+| Gerbang `/shop/` | Produk cetak & satuan **disembunyikan** sampai satu order uji internal tuntas penuh |
+| Urutan perbaikan bila attach rate jelek | Foto undangan lipat asli di dalam amplop bernama · salinan soal orang tua & sesepuh · garansi · hitung mundur. **Angka kredit paling akhir** |
 
-**Konsekuensi angka yang perlu diingat:** pada marjin Rp 2,6 juta dan target ≥ Rp 600rb/jam, **batas waktu produksi adalah 4 jam 20 menit**. Lewat dari itu metrik pengendali gagal — itulah yang membuat pengukuran waktu nyata di F1.7 menentukan apakah harga Rp 2,9 juta bertahan.
+**Metrik pengendali** *(urutannya penting)*: marjin per jam produksi (target ≥ Rp 600rb/jam; pada marjin Rp 2,6 juta batasnya **4 jam 20 menit**) → closing rate → attach rate per tingkat → distribusi paket → tingkat reprint → pendapatan berulang vendor.
 
----
-
-## F0 — Bukti pasar 🔒 *gerbang keras untuk semua fase berikutnya*
-
-- [~] **F0.1** 👤 **Duitku production** *(eks-P0.1)* — **diajukan 2026-08-04, menunggu approval**
-  Blocker satu-satunya untuk menerima uang. Akun tetap di email pribadi owner (Duitku memakai struktur 1 akun → banyak project; akun perorangan secara hukum milik orangnya, dan email ber-domain produk berbahaya saat akun ini nanti menaungi SaaS lain). Nama Usaha `hariH`, URL `https://harih.id`.
-  **Setelah approval:** ganti kredensial plugin ke mode Production → beri tahu saya → lanjut F0.2.
-
-- [ ] **F0.2** **Uji order riil Rp 10.000** *(eks-P0.1 lanjutan)*
-  Produk uji tersembunyi, dipesan dari HP, verifikasi undangan sampai di WA < 15 menit, lalu produk ujinya dihapus.
-  ⚠️ **Ini bukti kabel tersambung, BUKAN bukti pasar.** Jangan diperlakukan sebagai validasi — order ke diri sendiri tidak memberi tahu apa pun tentang kesediaan orang membayar.
-  **Perlu diperhatikan:** lihat nama merchant yang **benar-benar tampil ke pembayar** di layar kanal pembayaran. Sebagian kanal menampilkan nama pemilik rekening, bukan nama usaha.
-
-- [ ] **F0.3** 🔒 👤 **10 penjualan digital berbayar dari orang yang tidak dikenal owner**
-  **Ini gerbang yang sesungguhnya.** Teman, keluarga, dan diri sendiri tidak dihitung — yang dicari adalah bukti funnel mengonversi orang asing.
-  **Yang dicatat per penjualan:** tier yang dibeli · dari mana datangnya (organik/reseller/WA) · apakah bertanya-tanya dulu atau langsung bayar.
-  **Selesai bila:** 10 pembayaran dari orang asing, dan distribusi tier-nya diketahui — itu basis attach rate per tingkat nanti.
-  > **Sebelum ini tercapai: nol rupiah untuk alat, nol baris kode cetak.**
-
-- [ ] **F0.4** 👤 **QA perangkat riil** *(eks-P2.2)*
-  iPhone Safari & Android Chrome: musik mulai setelah tap · countdown berjalan (baru diperbaiki) · tombol salin rekening · upload foto HEIC · preview share WA. Checklist lengkap di [`panduan-manual.md`](./panduan-manual.md) langkah 5.
-  ⚠️ WA meng-cache preview per URL — uji dengan `?x=1` supaya dianggap URL baru.
-
-- [x] **F0.5** **Uji restore backup 1×** *(eks-P1.2)* → **SELESAI 2026-08-05**
-  Backup sudah jalan 3× dan integritasnya terverifikasi, tapi belum pernah dibuktikan bisa dipulihkan — backup yang tak pernah diuji dianggap tidak ada.
-  **Cara uji:** MySQL container sementara di VPS, **produksi tidak tersentuh** sama sekali (container dihapus setelahnya, image ikut dibersihkan).
-  **Hasil dump 2026-08-01:** 56 tabel · `siteurl` = `https://harih.id` · 39 post · 3 undangan publish · 3 produk · 2 order HPOS · 2 user — persis kondisi produksi tanggal itu. Arsip WAHA terbaca (1.659 entri, `webjs/default/` utuh) · arsip n8n terbaca (`database.sqlite` ada) · export workflow JSON valid, 8 workflow lengkap dengan jumlah node benar.
-  **Temuan sampingan yang menenangkan:** backup mingguan meninggalkan jendela sampai 7 hari, tapi hampir semua isi yang hilang **bisa dibangun ulang dari repo** (halaman legal, undangan demo, produk, aset — semuanya punya generator). Yang benar-benar hanya ada di backup: data order & undangan pelanggan riil. Disiplin "semua reproducible dari repo" terbayar persis di sini.
-  Prosedur mengulang uji dicatat di [`runbook.md`](./runbook.md) §9.
+⚠️ **Klaim "marjin lulus 3–6× lipat" hanya berlaku untuk Resepsi & Grand.** Terhadap patokan tertinggi pekerjaan reguler (Rp 200rb/jam): Grand 4,6× · Resepsi 2,9× · **Hormat cuma 1,6× di harga penuh**. Setup mesin sama untuk 50 maupun 150 unit, jadi paket terkecil menanggung setup yang sama dengan pendapatan terkecil. Pemisahan setup/per-unit adalah **model, bukan pengukuran** — repo hanya punya satu titik data (4,5 jam untuk 100 unit) dan itu pun estimasi. Yang kokoh adalah arahnya, bukan angka desimalnya.
 
 ---
 
-## FU — Undangan: sisa evaluasi & preview WhatsApp *(produk digital, tanpa modal)*
+## Ditunda sampai ada pembeli / order cetak nyata
 
-*Sumber: evaluasi eksternal. Seluruh 17 poinnya diverifikasi baris-per-baris ke situs live pada 2026-08-05 — bukan diasumsikan.*
+**Digerbang 10 pembeli asing:** AI copywriter (Gemini Flash lewat OpenRouter — ⚠️ slug model wajib diverifikasi, dan OpenRouter **wajib** masuk tabel pemroses data di Kebijakan Privasi sebelum menyala) · video cover Premium (⚠️ penggerbangnya **bandwidth**, bukan disk: 10 MB × 300 tamu = 3 GB per undangan) · pratinjau langsung di form · section playlist Spotify (facade) · QR check-in tamu di venue.
 
-**Sudah live, 13 dari 17 poin** *(v1.2.0, dideploy 2026-08-05; bukti = HTML live demo tema-03)*: salam Assalamu'alaikum · ayat QS. Ar-Rum 21 · Wassalamu'alaikum penutup · tanggal Hijriah · RSVP jumlah tamu + sesi + WhatsApp · dinding ucapan yang bisa di-scroll · alamat kirim kado + tombol salin · "Putra kedua dari…" + ikon Instagram · dress code ber-swatch · turut mengundang · rundown per jam · tombol Apple/.ics · judul lagu · catatan maaf nama & gelar · state setelah countdown habis (`#countdown-done`, sudah ada sejak awal).
-> **Kenapa pengevaluasi tidak melihatnya:** WhatsApp meng-cache preview per URL dan LiteSpeed mengirim header cache panjang ke browser tamu. Saat menunjukkan ulang, **selalu tambahkan `?v=2`** di belakang link. Ini bukan kasus sekali ini saja — sudah dua kali terjadi (evaluasi harga "Rp 99 ribu" juga sudah diperbaiki saat dilaporkan).
+**Menunggu order cetak nyata:** engine render SVG→PDF (wajib di VPS — Hostinger tidak bisa Inkscape) · imposition + cut file · upsell otomatis penuh · catat waktu-biaya nyata per order · protokol uji harga.
 
-**Ditemukan saat verifikasi & langsung diperbaiki** *(v1.2.2)*: JS menyembunyikan tombol kalender lewat selektor `.cd-cal` yang sudah berganti nama jadi `.cd-cal-baris` saat tombol `.ics` ditambahkan — akibatnya setelah acara lewat, countdown hilang tapi tombol kalender tetap tampil. Regresi dari perubahan hari yang sama.
+**Tidak digerbang, bisa dikerjakan kapan saja diminta:** sesi kedatangan tamu (`?sesi=1` di link personal — penghalangnya sudah selesai; butuh satu field baru → satu ritual WF-02) · batas panjang field & pembulatan kuantitas (menunggu template cetak benar-benar ada).
 
-**Kenapa empat sisanya belum:** bukan terlewat, tapi beda kelas pekerjaan. Tiga belas yang selesai adalah *section template* — data sudah ada, tinggal dirender. Sisanya butuh hal yang belum ada: pembangkit gambar, halaman berautentikasi untuk mempelai/panitia, atau keputusan model data baru. Urutannya di bawah mengikuti disiplin uang dokumen ini: yang murah & langsung menaikkan konversi dikerjakan sekarang (justru itu yang dibutuhkan gerbang F0.3), yang berupa fitur jualan digerbang.
+**Belum terverifikasi (bukan belum dikerjakan):** komponen **berdata** di `/tamu/`, `/proof/`, `/upsell/` belum pernah dilihat dalam mode gelap — ketiganya menuntut order WooCommerce yang benar-benar ada. **Paling murah menumpang A3.**
 
-- [x] **FU.1** **Kartu `og:image` per undangan** *(poin 14)* → **SELESAI & LIVE 2026-08-05**
-  **Masalahnya:** undangan bergaleri memakai **foto pertama apa adanya** sebagai `og:image`. Foto pemesan hampir selalu potret (contoh produksi: 1073×1600, rasio 0,67) sementara WhatsApp memotongnya ke ±1,91:1 — yang tampil hanya pita tengah foto, tanpa nama, tanpa tanggal. *(Koreksi klaim awal saya: halaman undangan **tidak** mengirim `og:image:width/height` sama sekali — bukan salah angka, tapi tidak ada angka. Sekarang dikirim dan benar.)*
-  **Kenapa nomor satu:** ini gambar yang muncul **setiap kali pemesan menyebar undangannya** — pengganda paling langsung untuk klik, dan biayanya nol. Kartu berbrand 1200×630 yang sudah kita punya hanya dipakai bila galeri kosong, jadi justru undangan berbayar-berfoto yang tampil paling buruk.
-  **Yang dibangun:** `mu-plugins/undangan-core/og.php` — komposit 1200×630 dengan GD: foto di-cover-crop (**potret dipotong dari 28% atas**, bukan tengah — subjek foto pernikahan ada di paruh atas) + gradasi khas tema + nama mempelai, tanggal, dan wordmark memakai **font tema yang sebenarnya** (Cormorant · Karla · Prata+Manrope, ikut di `aset/font/`, lisensi OFL dicatat di `aset-lisensi.md`). Teks memakai bayangan lembut: gradasi saja gagal saat gaun/buket putih berada tepat di belakang nama.
-  **Invalidasi tanpa hook:** nama berkas memuat hash isi kartu (`{id}-{hash}.jpg`) — data berubah, berkas baru; berkas versi lama undangan itu dihapus otomatis. Ini disengaja karena WF-02 menulis meta lewat REST, jalur yang tidak lewat hook wp-admin.
-  **Terverifikasi:** ketiga tema + jalur tanpa galeri (paket Hemat → kartu berwarna tema, blok teks ditengahkan, bingkai rambut emas) menghasilkan 1200×630 (~45–90 KB, ±55 ms sekali per versi), `og:image:width/height/alt` kini dikirim dan benar, halaman live memuat URL kartu. Undangan uji tanpa foto sudah dihapus kembali.
-
-- [x] **FU.2** **Peta tersemat + info parkir/valet** *(poin 10)* → **SELESAI & LIVE 2026-08-05** *(v1.3.0)*
-  **Apa:** sekarang hanya tombol yang melempar tamu keluar ke aplikasi Maps. Tambahkan peta tersemat per lokasi (akad & resepsi bisa beda) + kolom catatan bebas untuk parkir/valet/pintu masuk.
-  **Kenapa:** tamu yang belum kenal gedung memutuskan berangkat berdasar dua hal — jauhnya dan parkirnya. Keluar aplikasi = keluar undangan.
-  **Yang dibangun:** facade peta per kartu acara (akad & resepsi punya petanya masing-masing) dengan pola yang sama seperti live streaming — `iframe` Google baru disuntik saat **diklik/Enter**; kueri dirakit dari nama+alamat venue (embed tanpa API key). Rasio dikunci 16/10 supaya tata letak tidak melompat saat iframe menggantikan facade. Field baru `catatan_lokasi` + `catatan_lokasi_akad` (cpt → form → WF-02 → demo).
-  **Terverifikasi:** muat segar = **nol permintaan ke Google** (dua kemunculan `maps.google.com` di HTML hanyalah `href` tombol, bukan request); klik → iframe muncul. Tombol luar diganti namanya jadi "Petunjuk Arah" karena tugasnya sekarang navigasi, bukan "lihat peta" — label lama membungkus dua baris di HP.
-
-- [x] **FU.3** **Kisah Kami sebagai lini masa bertanggal** *(poin 9)* → **SELESAI & LIVE 2026-08-05** *(v1.3.2)*
-  **Apa:** `love_story` sekarang satu blok teks (`love-story.php` merender `nl2br` apa adanya). Ubah jadi daftar bertanggal: "2019 — Pertama bertemu", "2023 — Lamaran".
-  **Kenapa:** timeline dibaca; paragraf panjang di HP dilewati — persis alasan italic panjang tadi dikeluhkan.
-  **Yang dibangun:** parser baris (`2019 — Pertama bertemu`, juga menerima `Mei 2019 · …`) → lini masa bergaris dengan titik emas per babak; **satu baris saja tanpa tahun → seluruhnya kembali jadi prosa**, jadi undangan lama tidak berubah tampilan tanpa diminta. Tanpa migrasi, tanpa field baru. Form mengajarkan formatnya lewat placeholder + catatan.
-  **Terverifikasi** dengan undangan uji terpisah (bukan demo): prosa → prosa · berformat tahun → 4 item lini masa · campur → prosa. Gutter diperbaiki setelah verifikasi visual: section ini tanpa padding samping (foto full-bleed) sehingga titik emas sempat terpotong tepi layar.
-
-- [ ] **FU.4** **Sesi kedatangan tamu (shift)** *(poin 8b)*
-  **Apa:** berbeda dari pilihan sesi di RSVP (yang sudah ada — tamu memilih akad/resepsi). Ini **mempelai membagi tamu ke jam kedatangan** ("Sesi 1: 11.00–13.00") supaya gedung tidak menumpuk.
-  **Kenapa ditunda di bawah FU.1–FU.3:** hanya relevan untuk resepsi besar, dan baru benar-benar berguna kalau link personal per tamu sudah bisa dibuat massal (FU.6) — tanpa itu mempelai harus menyalin link satu per satu.
-  **Langkah:** parameter link personal (`?sesi=1`) menimpa tampilan jam di kartu acara; daftar sesi disimpan sebagai field baru.
-  **Selesai bila:** satu link personal menampilkan jam kedatangan tamu tersebut, sementara halaman tanpa parameter tetap menampilkan jam umum.
-
-> **Gerbang: tiga di bawah dikerjakan setelah F0.3 (10 pembeli asing).** Ketiganya fitur yang *dijual*, bukan perbaikan tampilan — membangunnya sebelum ada yang membayar mengulang kesalahan urutan uang yang sudah dikoreksi penasihat bisnis. Ketiganya juga bahan Tier B rencana hybrid, jadi biayanya terbayar dua kali.
-
-- [x] **FU.5** **Rekap RSVP + ekspor** *(poin 16)* → **SELESAI & LIVE 2026-08-06**
-  **Apa:** halaman bertoken untuk mempelai: total tamu per sesi, daftar hadir/tidak/ragu, unduh CSV. **Satu-satunya tempat nomor WhatsApp tamu (`wa_rsvp`) boleh tampil** — endpoint publik sengaja tidak pernah mengembalikannya.
-  **Kenapa dikerjakan meski digerbang F0.3:** ini bukan fitur baru yang dijual, tapi **lubang pada fitur yang sudah dijual di semua paket**. RSVP ada sejak awal, tapi pembelinya tidak pernah punya cara memakainya — dinding ucapan di undangan hanya menampilkan pesan, tanpa hitungan, tanpa pembagian sesi, dan tidak bisa dibawa ke katering.
-  **Yang dibangun:** `/rekap/?order=&key=` bertoken. Angka besar dulu (mempelai membukanya untuk menjawab satu pertanyaan: berapa orang), lalu tabel. **Yang dihitung adalah jumlah tamu yang dibawa**, bukan jumlah pengisi form — dan dipecah jadi **hadir di akad** vs **hadir di resepsi** (yang memilih "keduanya" masuk ke dua-duanya), persis angka yang dipakai memesan porsi katering & kursi. CSV ekspor menyertakan **pesan tamu** meski tidak ditampilkan di tabel (di layar ia membuat baris jadi panjang, tapi mempelai sering ingin membacanya utuh). Bertaut dua arah dengan `/tamu/`.
-  **Catatan privasi:** kolom kontak sengaja **tidak ada** — sejak nomor WA tamu berhenti dikumpulkan di form RSVP (keputusan owner), tidak ada kontak yang perlu ditampilkan.
-  **Terverifikasi live** dengan 5 RSVP contoh bercampur status/jumlah/sesi: total 9 tamu · akad 7 · resepsi 6 · 5 responden · pil status 3/1/1 — semuanya cocok dengan hitungan manual. Data uji dihapus.
-
-- [x] **FU.6** **Daftar tamu → link personal massal + CSV** *(poin 15)* → **SELESAI & LIVE 2026-08-06**
-  **Apa:** mempelai menempel daftar nama → dapat tabel link `?to=Nama` siap kirim + teks broadcast yang sudah tersapa nama. Parameter `?to=` **sudah bekerja**; yang belum ada pembuat massalnya.
-  **Kenapa dikerjakan sekarang, bukan menunggu gerbang F0.3:** satu daftar ini melayani **tiga** hal sekaligus — **amplop bernama tamu** (pembeda paket cetak yang percetakan konvensional jual mahal, sementara bagi kita biayanya nol karena datanya sudah ada), link personal massal, dan kelak QR check-in. Begitu produk cetak berubah jadi undangan lipat + amplop, daftar tamu berhenti jadi fitur tambahan dan jadi **prasyarat produksi**.
-  **Yang dibangun:** halaman bertoken `/tamu/?order=&key=` (HMAC yang sama dengan `/isi-data/`, `/upsell/`, `/proof/`) — tempel nama satu per baris, hitungan langsung dibandingkan **jatah amplop paket** (Hormat 50 · Resepsi 100 · Grand 150; item satuan mengikuti kuantitas), **Salin semua link** (nama + link, dipisah tab — siap tempel ke aplikasi pengirim), dan **Unduh CSV** ber-BOM yang dipakai dua arah: mencetak nama di amplop **dan** kirim massal. Batas 600 nama, tampilan dipangkas 300 agar ringan di HP. Link daftar tamu + jumlah nama terkumpul tampil di halaman order, bersebelahan dengan proof.
-  **Terverifikasi live** dengan order + undangan uji: 5 nama tersimpan, link personal terbentuk benar termasuk nama ber-`&` (`?to=Bapak%20Hendra%20%26%20Ibu%20Sari`), tombol salin & CSV berfungsi. Data uji dihapus.
-
-- [ ] **FU.7** 🔒 **QR check-in tamu di venue** *(poin 7)*
-  **Apa:** tiap link personal membawa QR; panitia memindai di pintu → tercatat hadir. Pasangan alami kartu QR fisik di paket cetak (F1) — QR yang sama, dua wujud.
-  **Langkah:** halaman pemindai untuk panitia (berperan, bukan publik) + endpoint check-in + tampilan rekap di FU.5.
-  **Selesai bila:** satu tamu dipindai dua kali tidak terhitung dua; rekap kehadiran tampil di dashboard mempelai.
+**Backlog v2:** occasion baru (khitanan, aqiqah, wisuda, e-card Lebaran) · add-on WA blast · amplop digital ter-escrow via QRIS · migrasi log operasional Sheets → Postgres · tema premium eksklusif · arsip otomatis undangan kedaluwarsa (bertumpang dengan C8) · custom domain per undangan · multi-bahasa · tema builder.
 
 ---
 
-## F1 — Validasi hybrid: tanpa mesin, tanpa bedah checkout
+## Akses
 
-*Target fase ini: **5 order cetak nyata, disubkontrakkan, dengan biaya & waktu tercatat.*** Yang dicari bukan efisiensi — yang dicari angka pengganti tebakan.
+Hostinger `ssh -p 65002 u803921702@147.93.80.20` (`domains/harih.id/public_html`) · VPS `ssh root@31.97.50.197` (`/opt/harih`) · rahasia: `vps/.env` + `vps/google-sa.json` (lokal, gitignored, **tidak pernah masuk riwayat git** — diverifikasi) = cermin server.
 
-- [x] **F1.7a** **Marjin per jam bisnis cetak yang sekarang** → **TERJAWAB 2026-08-06**
-  **Percetakan reguler: Rp 100.000–200.000/jam marjin kotor. Undangan hybrid Rp 2,9 juta: ±Rp 580.000/jam.**
-  **Artinya gerbang kelayakan LULUS dengan jarak lebar — 3–6× lipat.** Ini bukan sekadar "untung", tapi lebih untung daripada pekerjaan yang jamnya ia rebut, yang memang satu-satunya pertanyaan yang relevan begitu mesinnya milik sendiri.
-  **Ruang aman yang dibeli angka itu:** pada marjin ±Rp 2,6 juta per Paket Resepsi, ±Rp 580rb/jam berarti waktu produksi ±4,5 jam/order. Supaya tetap **di atas** patokan tertinggi pekerjaan reguler (Rp 200rb/jam), waktu produksi boleh membengkak sampai **±13 jam/order** — hampir tiga kali lipat dari estimasi sekarang. Jadi meleset satu-dua jam tidak membatalkan apa pun; yang perlu diawasi hanya pembengkakan ekstrem (mis. lipat manual 800 lembar/bulan).
-  **Kuota 8/bulan konsisten dengan ini:** 8 × 4,5 jam ≈ **36 jam mesin per bulan** — porsi yang masuk akal diambil dari jadwal reguler, dan justru pemakaian jam yang paling menguntungkan.
-  ⚠️ **Yang tetap harus diukur (F1.7):** angka 4,5 jam masih estimasi. Yang membuatnya bisa runtuh cuma satu: **lipat manual**. Karena itu pemeriksaan mesin creasing di F1.1 tetap wajib sebelum kuota dinaikkan.
+Aksi owner: [`panduan-manual.md`](./panduan-manual.md) · operasional: [`runbook.md`](./runbook.md) · import n8n: [`../n8n/workflows/README.md`](../n8n/workflows/README.md) · riwayat & konteks lama: [`arsip/TASKS-2026-08-07.md`](./arsip/TASKS-2026-08-07.md).
 
-- [ ] **F1.1** 🔴 👤 **Cetak satu undangan lipat + amplop lengkap — hari ini**
-  Satu sampel menjawab empat hal sekaligus: **bobot nyata** (untuk ongkir yang kita tanggung), **waktu lipat per unit**, **uji pindai QR** (di A5 lipat, QR bisa dicetak jauh lebih besar dan tanpa laminasi doff — hampir pasti lolos), dan mutu amplop bernama.
-  ⚠️ **Yang paling menentukan: mesin creasing.** 100 lipatan × 8 order = 800 lipatan/bulan. Bila harus dilipat tangan, seluruh hitungan marjin per jam batal — periksa ini sebelum harga dikunci.
-
-- [x] ~~**F1.2** Cari & uji 2–3 percetakan subkontrak~~ → **GUGUR 2026-08-06** — owner punya percetakan & alat sendiri. Estimasi marjin subkontrak Rp 1,6–1,8 jt tidak lagi relevan; yang menggantikannya adalah F1.7a (marjin per jam pekerjaan yang jamnya direbut).
-
-- [x] **F1.3** 👤 **Tetapkan tiga harga SKU upgrade + besaran kredit** → **DIPUTUSKAN OWNER 2026-08-07: kredit tetap Rp 300.000** untuk semua tier (bukan Rp 299.000 seperti saran awal). Harga terkunci: `UPG-HORMAT` 890rb · `UPG-RESEPSI` 2,6jt · `UPG-GRAND` 5,6jt. Ketiganya sudah ada di WooCommerce dan `/upsell/` memakainya otomatis.
-  *Konsekuensi yang ikut ketahuan & diperbaiki:* begitu kredit jadi angka TETAP, ia berhenti sama dengan yang dibayar pembeli untuk digital — hero `/upsell/` sempat menjanjikan "Rp 179.000 dihitung sebagai kredit" (untuk pembeli Favorit) sementara kartu di bawahnya menulis "kredit Rp 300.000". Dua angka untuk hal yang sama di halaman yang tugasnya menutup penjualan Rp 2,9 juta. Hero kini menyebut kredit yang benar-benar berlaku, diambil dari tawaran yang dirender — bukan konstanta, jadi bila suatu saat kreditnya berbeda per tier kalimatnya otomatis jatuh ke bentuk netral.
-  Katalog menjual paket penuh; halaman upsell menjual **tiga SKU upgrade berharga tetap** untuk yang sudah membeli digital.
-  **Yang perlu diputuskan:** besaran kredit digital. Cara paling sederhana — kredit tetap Rp 299.000 untuk semua tier, sehingga harga upgrade = harga paket − 299rb, satu angka per SKU tanpa matriks. Konsekuensinya pembeli Hemat (bayar 99rb) mendapat kredit Rp 200rb lebih besar dari yang ia bayar; pada paket Rp 2,9 juta itu derau, dan justru mendorong pembeli Hemat naik kelas. **Perlu keputusan sadar, bukan diasumsikan.**
-
-- [x] **F1.4** **S&K + Refund + Privasi untuk barang fisik** → **SELESAI & LIVE 2026-08-05**
-  S&K §12 (proses & proof · batas H-21 + kuota · pengiriman gratis + resi · **tiga garansi sebagai klausul** · rusak/hilang di jalan) · Refund §4 produk cetak (refund 100% sebelum proof / kuota penuh / Garansi Tepat Waktu; penggantian barang; pengecualian) · Privasi (alamat kirim di data, kurir masuk tabel pemroses). Terbit via `publish-legal.py`, terverifikasi live.
-  S&K sekarang ditulis khusus produk digital (*"produk digital yang diproses otomatis"*, *"refund tidak tersedia setelah undangan diterbitkan"*). Tidak ada satu kata pun soal pengiriman, kerusakan di jalan, ongkir, atau retur salah cetak — sementara **Garansi Tepat Waktu menciptakan kewajiban refund 100% yang belum punya payung sama sekali**.
-  **Yang ditambahkan:** ruang lingkup produk fisik · pengiriman gratis se-Indonesia + tanggung jawab & resi · aturan proof (setelah disetujui pelanggan, salah ketik jadi tanggung jawab pelanggan) · **ketiga garansi sebagai klausul**, bukan sekadar copy pemasaran · retur/penggantian barang rusak · kuota bulanan sebagai pembatasan ketersediaan.
-  Terbit lewat `scripts/publish-legal.py` (repo = sumber kebenaran halaman legal).
-
-- [x] **F1.5** **Halaman harga hybrid — statis, CTA WhatsApp** → **TERBIT & LIVE di `/harga/` 2026-08-05**
-  `page-harga-hybrid.php` + blok `katalog.css` (v1.2.1) ter-deploy & teruji render via halaman pratinjau sementara (sudah dihapus): hero "satu desain dua wujud" · **tiga garansi di atas** · 4 kartu (Digital mulai 99rb → beranda · Hormat 1,19jt · Resepsi 2,9jt ⭐ + pill "hemat Rp 625.000" · Grand 5,9jt jangkar) · proses 4 langkah + H-21 · tabel satuan (8 item, min Rp 1jt/transaksi) · FAQ · CTA `wa.me` prefill per paket. **Diterbitkan atas keputusan owner 2026-08-05, mendahului gerbang F1.1/F1.2** ("alat cetak pasti akan tersedia"). Konsekuensinya tidak diabaikan tapi **dipindahkan ke alur pemesanan**: halaman ini tidak punya tombol bayar sama sekali — semua CTA ke WhatsApp, dan slot produksi + tanggal dikonfirmasi manual **sebelum ada uang berpindah**. Itu yang menjaga ketiga garansi (sudah jadi klausul S&K §12) tetap bisa ditepati. **Per 2026-08-06** produk cetak juga disembunyikan dari `/shop/` sampai **satu order uji internal tuntas penuh** — bukan lagi menunggu F1.2 (yang gugur), melainkan menunggu bukti bahwa kita sanggup memenuhi satu order dari ujung ke ujung. **Kuota produksi: 8 order/bulan** — cukup untuk mendapat data dalam satu bulan, cukup kecil untuk menyerap kesalahan. Beranda menautkannya lewat band "Undangan Cetak" setelah tangga harga digital + tautan footer; masuk sitemap.
-  ⚠️ **Yang berubah maknanya:** F1.1 & F1.2 tidak lagi menggerbang *penayangan halaman*, tapi kini menggerbang **penerimaan order pertama** — jangan menyanggupi tanggal ke pemesan sebelum ada percetakan terpilih dan ukuran QR yang terbukti terpindai.
-  Empat paket · **tiga garansi tampil di halaman harga**, bukan disembunyikan di FAQ (Rencana Bisnis §11.2 menempatkan ini sebagai penyebab nomor satu closing rate rendah) · Paket Grand sebagai jangkar · **angka penghematan paket vs à la carte ditampilkan eksplisit**.
-  Bahasa mengikuti §5.9: jual hasil, bukan gramatur. Spesifikasi teknis di bawah sebagai bukti.
-  **Belum ada produk WooCommerce di fase ini** — tombolnya mengarah ke WhatsApp. Pola sudah ada: `page-katalog.php` + `katalog.css`, token tema-01.
-  ⚠️ Klaim "kartu fisik" baru boleh muncul setelah F1.1 lolos dan ada percetakan terpilih. Menjanjikannya lebih awal mengulang kesalahan musik — tercantum di halaman harga berbulan-bulan sebelum barangnya ada.
-
-- [ ] **F1.6** 👤 **Jual & penuhi 5 order pertama sepenuhnya manual**
-  Invoice via WhatsApp · transfer manual · alamat & resi dicatat di Google Sheet · desain dari data yang **sudah ada di sheet** · cetak disubkontrakkan.
-  **Kenapa manual:** tidak melewati WooCommerce maupun WF-01, sehingga ketiga bug otomasi (F3.2, F3.3) tidak bisa terpicu — dan tidak ada satu jam pun dihabiskan membangun mesin untuk harga yang belum terbukti.
-
-- [ ] **F1.7** **Catat waktu & biaya nyata per order**
-  Per tahap: desain · koordinasi percetakan · QC & uji pindai · packing · pengiriman. Plus biaya nyata: cetak, packaging, ongkir.
-  **Task paling berharga di seluruh dokumen.** Menggantikan tebakan "4 jam". Kalau ternyata di atas **4 jam 20 menit** pada produksi sendiri nanti, marjin per jam jatuh di bawah target dan **seluruh tangga harga perlu dihitung ulang** — jauh lebih murah ketahuan sekarang daripada setelah mesin dibeli dan engine dibangun.
-
-- [ ] **F1.8** **Protokol uji harga** *(Rencana Bisnis §11)*
-  10 prospek di harga penuh, tanpa mencampur harga lama. Yang diukur **closing rate, bukan komentar** — orang yang bilang "mahal" tapi tetap membeli adalah pembeli.
-  Batas keputusan sudah ditetapkan di muka: >30% naikkan 20% · 15–30% kunci · 8–15% tahan & perkuat bukti sosial · <8% turunkan ke Rp 2,2 jt.
-  ⚠️ **Jangan menurunkan harga setelah dua-tiga penolakan.** Sepuluh prospek adalah sampel minimum; menurunkan lebih awal membuang informasi dan sulit dinaikkan kembali. Sebelum menurunkan, periksa dulu lima hal di §11.2 — empat di antaranya gratis.
-
-- [ ] **F1.9** 👤 **Dekati 5 vendor pertama** *(Rencana Bisnis §6.4)*
-  Tiga event digital gratis ditukar testimoni tertulis + izin memakai nama. Sudut penawaran: *"undangannya tampil dengan nama Anda, dan Anda ambil marjinnya."*
-  Bisa berjalan **paralel sejak sekarang** — sisi digital tidak menyentuh kapasitas produksi sama sekali. Pastikan menjelaskan aturan reseller-vs-vendor (tidak boleh dua-duanya) sejak percakapan pertama.
-
-> **Gerbang keluar F1:** 5 order terkirim tepat waktu · biaya & waktu nyata terukur · closing rate terkunci.
-
----
-
-## F2 — Beli alat, dibiayai laba 🔒
-
-- [ ] **F2.1** 👤 **Laminator + sample kit lebih dulu** — Rp 1–2 juta
-  Dua hal yang tidak boleh ditunda menurut Rencana Bisnis §8.5: laminator menentukan produk awet atau tidak, sample kit menentukan dapat klien atau tidak. Keduanya berguna bahkan selagi masih subkontrak.
-
-- [ ] **F2.2** 👤 **Cameo 5 + printer dari laba order keempat**
-  Bukan dari tabungan. Verifikasi ulang harga sebelum membeli (Rencana Bisnis §8.1 mencatat varian jebakan: listing Cameo Rp 3,6 jt bukan unit lengkap; Epson L8050 ada listing tanpa tinta; garansi hangus bila tidak didaftarkan di my.epson.co.id).
-  > **Gerbang masuk F2: ≥ 4 order cetak sudah terbayar.**
-
----
-
-## F3 — Masukkan ke WooCommerce *baru setelah harga terbukti laku*
-
-**Dikerjakan 2026-08-06.** Ringkasan hasil + tiga temuan yang tidak terduga:
-
-- **F3.1** kategori `digital`/`cetak` dibuat & dipasang ke 6 produk; kupon `RES-` dijaga **di kode** (`cetak.php`), bukan hanya di pengaturan kupon — guard berlaku otomatis untuk semua kupon berawalan `RES-`, jadi kebocoran Rp 870rb/order tidak bisa terjadi karena lupa mencentang kategori.
-- **F3.4/F3.5** `sold_individually` & pengosongan cart jadi kondisional lewat **konvensi SKU** (`HARIH-` digital · `CETAK-` hybrid · `SATUAN-` à la carte · `UPG-` upgrade). Paket saling menggantikan (1 order = 1 undangan), item satuan menumpuk & bebas kuantitas.
-- **F3.6** ⚠️ **Temuan besar:** halaman checkout memakai **blok `woocommerce/checkout`**, bukan shortcode klasik — sehingga filter `woocommerce_checkout_fields` (T1.17) **tidak pernah berlaku**: pembeli undangan Rp 99rb selama ini tetap dimintai alamat lengkap dari HP. Diperbaiki lewat jalur yang dihormati Blocks (`woocommerce_get_country_locale`, `hidden`+`required=false` saat keranjang tanpa barang fisik). Terverifikasi di browser: cart digital = email, nama, WA saja; cart cetak = alamat lengkap + pilihan pengiriman.
-- **F3.7** ⚠️ **Temuan kedua:** alamat dasar toko masih `US:CA` bawaan instalasi. Tidak pernah terasa selama produk virtual, tapi untuk barang fisik zona Indonesia tidak pernah cocok → *"No shipping options are available"* dan metode pembayaran ikut hilang. Diperbaiki jadi `ID:JK`, `default_customer_address=base`, zona Indonesia + gratis ongkir.
-- **F3.2/F3.3** WF-01 kini membaca **SKU**, bukan nama line item. Paket hybrid → tier **premium** (menutup bug pembeli Rp 2,9 jt menerima undangan Hemat), order à la carte murni → `jenis_order=cetak_saja` sehingga **tidak dikirimi link isi data** (pesan WA/email diganti "tim akan menghubungi untuk proof & jadwal"), komisi dihitung **per jenis**: digital 30%, hybrid rupiah tetap 150/300/500rb, satuan 0. Diuji 7 skenario di dalam container n8n sebelum dipasang.
-  *Catatan penyimpangan:* baris di sheet `orders` **tetap dibuat** untuk order cetak murni (rencana awal: tidak dibuat) — barisnya berguna sebagai catatan operasional dan menjaga logika dedup tetap utuh; kolom `paket` ditandai `cetak` supaya tidak pernah disalahartikan sebagai undangan yang menunggu data.
-- **F3.8** field kurir + nomor resi di halaman order (HPOS-aman) + kolom Resi di daftar pesanan.
-- **F3.9** 3 paket hybrid dibuat sebagai produk fisik (CETAK-HORMAT/RESEPSI/GRAND, non-virtual, berbobot, kategori `cetak`). **Sisa:** 3 SKU `UPG-*` menunggu keputusan harga & kredit di **F1.3**.
-- **F3.10** halaman upsell bertoken `/upsell/?order=&key=` (HMAC yang sama dengan `/isi-data/`, `noindex`, `no-referrer`, 403 tanpa token). Hitung mundur kredit **14 hari** tampil sebagai angka berjalan; à la carte **tidak muncul sama sekali** di halaman ini. Tiga status diuji dengan order sungguhan lalu dihapus: aktif (kredit Rp 179.000, "13 hari 23 jam lagi", 3 kartu paket), kedaluwarsa (>14 hari → tawaran hilang, diarahkan ke harga normal), dan order yang sudah memuat cetak (tidak ditawari lagi). Selama SKU `UPG-*` belum ada (menunggu F1.3), harga = harga paket − yang sudah dibayar dan penutupan lewat WhatsApp; begitu `UPG-*` dibuat, halaman otomatis memakainya tanpa perubahan kode.
-- **F3.11** 8 produk `SATUAN-*` + halaman `/satuan/` yang membaca harga & minimum **langsung dari WooCommerce** (harga di halaman tidak mungkin berbeda dari yang ditagihkan). Minimum ditegakkan dua lapis: per produk (`_min_qty`, kuantitas awal ikut menyesuaikan) dan **Rp 1.000.000 per transaksi** bila keranjang hanya berisi item satuan. Ditegakkan di jalur klasik **dan Store API** — pelajaran F3.6. Terbukti live: keranjang Rp 150.000 ditolak dengan pesan "kurang Rp 850.000 lagi", setelah ditambah jadi Rp 1.100.000 galat hilang.
-
-- ⚠️ **Temuan ketiga (dicatat, bukan bug baru):** `id` workflow tidak ada di JSON WF-01 sehingga `n8n import` gagal `SQLITE_CONSTRAINT`. Kini di-bake seperti WF-02.
-
-
-*Semua penghalang arsitektur yang ditemukan pada audit 2026-08-05 ditangani di fase ini.*
-
-- [x] **F3.1** **Kategori produk `digital` & `cetak` + batasi kupon `RES-` ke digital** → **SELESAI** *(diverifikasi 2026-08-07: kategori `digital` 3 produk & `cetak` 15 produk ada, seluruh 18 produk terkategori, guard kupon `RES-` ada di `cetak.php`)*
-  **Wajib sebelum produk cetak pertama masuk WooCommerce.** Kupon `RES-` yang sudah beredar mengikat 30% ke **seluruh nilai order**; begitu produk cetak jadi produk biasa, kupon itu otomatis berlaku ke sana — Rp 870.000 pada order Rp 2,9 juta, bocor tanpa pernah diputuskan.
-  Saat ini di server hanya ada satu kategori (`Uncategorized`, 3 produk), jadi tidak ada tempat menggantungkan pembatasan. Kategori dibuat lebih dulu.
-
-- [x] **F3.2** **WF-01: kenali jenis order** — *menutup bug tier*
-  WF-01 mendeteksi paket dengan `['hemat','favorit','premium'].find(p => namaItem.includes(p))`. Nama paket hybrid — *Hormat, Resepsi, Grand* — tidak memuat satu pun kata itu, jadi `paket` = `''` dan WF-02 jatuh ke fallback teraman **`hemat`**. Akibatnya **pembeli Paket Resepsi Rp 2,9 juta menerima undangan paket Hemat**: tanpa galeri, tanpa amplop, masa aktif H+7.
-  Sekaligus: order cetak murni (à la carte) tidak boleh dikirimi link form isi data dan tidak boleh membuat baris `orders` baru — pelanggannya sudah punya undangan.
-
-- [x] **F3.3** **WF-01: komisi per jenis produk**
-  Sekarang `dasarKomisi × 0.3` tanpa syarat. Ubah: 30% hanya untuk line item **digital**; produk fisik memakai tabel rupiah tetap (150/300/500rb).
-
-- [x] **F3.4** **`sold_individually` jadi kondisional per produk**
-  Sekarang `add_filter('woocommerce_is_sold_individually', '__return_true')` berlaku **global**. Kuantitas terkunci di 1 — à la carte 100 pcs tidak mungkin dipesan. Digital tetap satuan; produk cetak bebas kuantitas.
-
-- [x] **F3.5** **Pengosongan cart jadi kondisional**
-  `woocommerce_add_to_cart_validation` sekarang **mengosongkan cart** setiap penambahan produk. Aturan "1 order = 1 paket" hanya boleh berlaku antar produk digital, supaya digital + cetak bisa berada di satu keranjang.
-
-- [x] **F3.6** **Alamat + `shipping_*` muncul hanya bila cart memuat produk fisik**
-  `billing_address_1/2`, `city`, `state`, `postcode`, `country` semuanya di-`unset` sekarang — **tidak ada alamat kirim di mana pun**. Kembalikan **hanya** saat ada barang fisik di keranjang, supaya checkout digital tetap seramping sekarang (itu yang menjaga konversi mobile).
-
-- [x] **F3.7** **Satu metode pengiriman: gratis se-Indonesia**
-  Di server sekarang hanya ada zona fallback dan `ship_to_countries` kosong. Rencana zona **dibatalkan** — satu metode free shipping, dan "gratis ongkir se-Indonesia" dipakai sebagai nilai jual di halaman harga.
-
-- [x] **F3.8** **Field & pencatatan nomor resi**
-  Wajib per keputusan owner. Disimpan di order + ikut ke sheet, dan dikirimkan ke pelanggan saat paket berangkat.
-
-- [x] **F3.9** **Produk cetak + 3 SKU upgrade di WooCommerce** → **SELESAI 2026-08-07** — 3 paket `CETAK-*` + 3 SKU `UPG-*` ada, semuanya `catalog_visibility=hidden` sesuai gerbang `/shop/`. Harga upgrade terkunci setelah keputusan F1.3.
-
-- [x] **F3.10** **Halaman upsell pasca-bayar**
-  Bertoken seperti `/isi-data/` · **hitung mundur kredit 14 hari tampil** — tanpa batas waktu tidak ada alasan memutuskan hari ini · **à la carte dilarang muncul di halaman ini**.
-  Kedaluwarsa ditegakkan server-side, bukan hanya disembunyikan di tampilan.
-
-- [x] **F3.11** **Katalog produk satuan (à la carte)** — minimum **Rp 1.000.000/transaksi**, minimum per produk tetap berlaku di atasnya. Harga per unit sengaja tinggi: fungsinya pembanding yang membuat paket terlihat murah.
-
-> **Gerbang keluar F3:** order uji berisi produk fisik lolos checkout dengan alamat · WF-01 tidak salah kirim link form · komisi terhitung benar · kupon `RES-` tidak menyentuh produk cetak.
-
----
-
-## F4 — Otomasi cetak *setelah volume membenarkannya*
-
-*Perkiraan jujur: F4.3–F4.5 adalah 2–3 minggu kerja fokus sebagai satu kesatuan. Imposition dengan bleed/gutter/registration mark adalah bagian paling fiddly.*
-
-- [x] **F4.1** **Snapshot beku** → **SELESAI & LIVE 2026-08-06** — — fondasi semua yang lain. Saat order cetak dikonfirmasi, data dibekukan; seluruh produksi membaca snapshot, bukan data live. Pelanggan yang mengedit setelahnya diberi peringatan bahwa perubahan tidak berlaku untuk cetakan yang sudah diproses. Meta undangan sudah terstruktur rapi — snapshot cukup JSON beku + hash sebagai meta order.
-
-- [~] **F4.2** **Validasi wajib di FORM, bukan di proof** — *bagian QR (2026-08-06) & resolusi foto (2026-08-07) sudah dikerjakan:*
-
-  **Resolusi foto minimum — SELESAI & LIVE 2026-08-07.** Ditolak di titik unggah, bukan di tahap proof: makin telat ketahuan, makin mahal. **Dua ambang, bukan satu** — menolak semua yang tidak ideal akan menjebak pemesan yang memang hanya punya foto seadanya:
-  · sisi pendek **< 640 px → DITOLAK** (tidak layak layar maupun cetak)
-  · sisi pendek **640–900 px → diterima + peringatan lunak** (warna berbeda dari galat: merah untuk sesuatu yang berhasil diunggah hanya membuat pemesan mengira ada yang gagal)
-  **Pesannya menyebut SEBABNYA, bukan cuma gejalanya:** penyebab tersering di Indonesia bukan kamera jelek melainkan foto yang diterima/diteruskan lewat **WhatsApp**, yang mengecilkan gambar tiap kali — jadi pemesan diberi tahu harus minta apa ke fotografer. Halaman form juga menyetel ekspektasi di depan, plus menyebut bahwa foto pertama ikut jadi **gambar preview WhatsApp** (kartu og:image FU.1), supaya pilihannya disengaja.
-  **QRIS sengaja dikecualikan** — kode QR yang sah memang bisa kecil (diuji: 300×300 tetap diterima).
-  **Diverifikasi end-to-end** lewat handler asli (file sintetis disuntikkan ke input via `DataTransfer`): 400×600 ditolak · 800×1200 diterima dengan peringatan · 1500×2000 diterima bersih · QRIS 300×300 diterima.
-  ⚠️ Penegakan ini **client-side saja**. WF-02 memvalidasi mime & ukuran berkas, bukan dimensi. Itu memadai untuk pemesan yang jujur (dan mereka semua begitu); menambahkannya ke WF-02 menuntut ritual import→publish→restart yang tidak sepadan sekarang.
-
-  *Sisa F4.2:* batas panjang field untuk template cetak & pembulatan kuantitas — keduanya menunggu template cetak benar-benar ada; menentukannya sekarang = menebak.
-  **QR undangan kini `ecc=H` + `qzone=4`.** Sebelumnya tanpa keduanya: koreksi kesalahan level L (hanya ±7% modul boleh rusak) dan **quiet zone praktis nol** — pola menempel ke tepi gambar. Itu aman-aman saja sebagai lampiran email, tapi QR ini sekarang **dicetak di undangan lipat**: laminasi, lipatan, dan tinta yang sedikit meleber bisa mematikan pemindaian, dan pemindai sering gagal mengunci bila QR dicetak berdampingan dengan ornamen tanpa quiet zone.
-  ⚠️ **Jebakan yang terukur:** parameter `margin` pada generator dihitung dalam **piksel** (`margin=4` = 4px, nyaris nol pada gambar 600px). Yang benar `qzone`, dihitung dalam **modul** — terukur 59px ≈ 4 modul. Diverifikasi dengan membandingkan lebar baris putih di ketiga varian, bukan dengan melihat sekilas.
-  *Sisa F4.2:* resolusi foto minimum, batas panjang field untuk template cetak, pembulatan kuantitas.
-
-- [ ] **F4.2-lama** **Validasi wajib di FORM, bukan di proof** — hari vs tanggal harus cocok — **hanya relevan untuk template cetak**. Diperiksa 2026-08-05: di sisi digital ini mustahil terjadi, karena nama hari **diturunkan** dari tanggal lewat `wp_date('l, j F Y')` dan formnya memakai `<input type="date">`, bukan teks bebas. Baru jadi risiko bila template cetak menerima tanggal yang diketik manual · batas panjang field · resolusi foto minimum ±650×1000px ditolak di titik upload · QR error correction H + quiet zone + short URL sendiri agar slug bisa diubah tanpa cetak ulang · pembulatan kuantitas ("tambah 9 pcs gratis" saat 90→99 sama-sama 11 lembar).
-
-- [ ] **F4.3** **Engine render SVG → PDF** — template diisi data snapshot, dirender via Inkscape/librsvg CLI, teks tetap vektor.
-  ⚠️ **Wajib di VPS.** Hostinger shared hosting tidak bisa memasang Inkscape/librsvg. Konsekuensi: PDF siap cetak berisi data pribadi pelanggan → butuh aturan retensi & akses, sejajar dengan Kebijakan Privasi.
-  Warna **sRGB**, bukan CMYK — driver Epson desktop adalah driver RGB; file CMYK justru dikonversi balik dan warnanya kusam. CMYK hanya untuk order yang disubkontrakkan.
-
-- [ ] **F4.4** **Imposition + cut file** — N kartu di area efektif ±190×270mm, bleed 3mm, gutter, registration mark 4 sudut; cut file sebagai layer terpisah.
-  **Batas yang harus disadari:** Silhouette Studio tidak punya API/CLI. Otomasi berhenti di PDF + cut file; impor ke Studio dan operasional mesin tetap manual. Yang realistis: **waktu desain jadi nol menit**, bukan "sepenuhnya otomatis".
-
-- [x] **F4.5** **Proof + persetujuan ber-hash** → **SELESAI & LIVE 2026-08-06** — — render preview, wajib disetujui sebelum masuk antrean, **simpan timestamp + hash file yang disetujui**. Tanpa tahap ini setiap typo jadi biaya perusahaan; dengan tahap ini, pembagian tanggung jawab di S&K punya bukti.
-
-**F4.1 + F4.5 dikerjakan 2026-08-06, mendahului engine render (F4.3).** Alasannya sama seperti F4.6: S&K §12.1 sudah menyatakan *"setelah proof Anda setujui, kebenaran seluruh teks menjadi tanggung jawab Anda"* — klausul itu tayang, tapi sistemnya belum bisa membuktikan apa pun. Selama kosong, tiap sengketa typo otomatis jadi biaya kita.
-- **Snapshot** (`_snapshot` + `_snapshot_hash`): data undangan dibekukan jadi JSON berurutan tetap saat proof dibuat, sehingga hash-nya stabil. Produksi membaca snapshot, bukan data live. **Snapshot yang sudah disetujui tidak bisa ditimpa** — diuji: percobaan bekukan ulang ditolak.
-- **Halaman `/proof/?order=&key=`** bertoken (HMAC yang sama dengan `/isi-data/` & `/upsell/`): menampilkan berkas proof + tabel data beku, dan konsekuensi persetujuan ditulis **terang di atas tombol**, bukan disembunyikan di tautan S&K. Ada jalan keluar "ada yang perlu diperbaiki" ke WhatsApp supaya pemesan tidak merasa terpojok menyetujui.
-- **Persetujuan tercatat**: waktu, IP, hash berkas proof **dan** hash snapshot dikunci jadi satu — salah satunya berubah, hash berbeda. Catatan order ditulis lengkap dengan rujukan §12.1.
-- **Halaman order**: kolom URL proof, tombol bekukan snapshot, status persetujuan, dan link siap salin untuk dikirim ke pemesan.
-- Diuji end-to-end dengan order + undangan sungguhan (dibuat, disetujui lewat halaman publik, diverifikasi di meta & catatan order, lalu dihapus).
-
-- [x] **F4.6** **Deadline H-21 + kuota bulanan di checkout** → **SELESAI & LIVE 2026-08-06** *(dikerjakan mendahului urutan F4)*
-  **Kenapa didahulukan:** dua janji di S&K §12 sudah mengikat sejak halaman harga tayang. Order yang mustahil dikerjakan harus ditolak **sebelum uang berpindah** — menolak sesudah dibayar berarti refund, dan refund atas order Rp 2,9 juta bukan kerugian kecil.
-  **Yang dibangun:** field **tanggal acara di checkout** khusus keranjang berisi cetak (Additional Checkout Fields API, WooCommerce 10.9) — pesanan digital tidak terpengaruh, tanggalnya tetap diisi belakangan di `/isi-data/` karena di sana tidak ada tenggat produksi · **tenggat H-21** ditegakkan di **Store API** (jalur yang benar-benar dipakai checkout blok) + jalur klasik sebagai cadangan · **kuota 8 pesanan cetak/bulan** dihitung dari order berjalan, dan kuota penuh diberitahukan **sejak di keranjang** — bukan setelah pembeli mengisi alamat dan memilih pembayaran · tanggal acara + sisa hari tampil di halaman order bersebelahan dengan resi.
-  **Diuji end-to-end lewat Store API sungguhan:** acara 10 hari lagi → ditolak (pesannya menyebut Garansi H-14 secara eksplisit) · tanggal kosong → ditolak · format salah → ditolak · tanggal sah → lolos gerbang. Order draft sisa uji dibersihkan.
-  *Sisa yang belum:* menampilkan **sisa slot** secara jujur di halaman harga (sekarang hanya disebut "kuota terbatas") — menunggu F1.7a memastikan angka 8 memang realistis.
-  ⚠️ **Kuota per bulan musim, bukan rata.** Pernikahan Indonesia menumpuk di bulan tertentu; kapasitas 20/bulan yang laku hanya 5 bulan setahun = **±100 order setahun, bukan 240**. Proyeksi 20×12 akan meleset jauh.
-
-- [x] **F4.7** **Antrean produksi** → **SELESAI & LIVE 2026-08-06** — halaman admin **WooCommerce → Antrean Cetak**. Diurutkan **berdasarkan tenggat acara, bukan tanggal pesanan** (pesanan yang masuk belakangan bisa saja acaranya lebih dulu). Tiap baris hanya menampilkan yang mengubah keputusan hari ini: sisa hari (memerah di bawah 14), jumlah nama tamu terkumpul, **satu langkah penghambat** (Menunggu data undangan → Menunggu daftar tamu → Siapkan proof → Menunggu persetujuan → SIAP CETAK → Terkirim), dan resi. Kuota bulan berjalan tampil di kepala halaman. Diuji dengan 3 order pada tahap berbeda: urutan tenggat & label tahap tepat, lalu data uji dihapus.
-- [~] **F4.7-lama** **Antrean produksi** — diurutkan berdasarkan **deadline, bukan tanggal order**; batch dikelompokkan berdasarkan **bahan & finishing, bukan per pelanggan**.
-
-- [x] **F4.8a** **Pengingat upsell otomatis (WF-06)** → **SELESAI & LIVE 2026-08-06** — workflow terjadwal 09:00 WIB, **9 workflow aktif** sekarang. Menyapu order 40 hari terakhir lewat WC REST, memilih **pembeli digital murni yang belum pernah memesan cetak** (dicek lintas riwayat by nomor WA **dan** email — satu orang bisa memesan dengan email berbeda), lalu mengirim WA tepat di **H+3** ("bagaimana dengan orang tua yang kurang terbiasa HP?") dan **H+12** (kredit tinggal 2 hari). Dua ketukan saja; lebih dari itu berubah jadi gangguan. Gagal kirim ke satu orang tidak menghentikan penerima lain. Logika pemilihannya diuji 7 skenario di dalam container sebelum dipasang — termasuk kasus orang yang sudah beli cetak belakangan (tidak ditawari) dan order tanpa nomor WA valid.
-- [x] **Perbaikan pesan pengiriman 2026-08-06** — cacat yang saya buat sendiri sehari sebelumnya: pembeli **paket cetak** ikut menerima ajakan *"mau undangan cetaknya juga?"*. Sekarang WF-01 menandai order hybrid di kolom `paket` yang sudah ada (`premium+cetak`, **tanpa menambah kolom** — skema Sheets ikut dibake di JSON dan sheet-nya milik owner), WF-02 mengupas tier-nya, lalu pesan bercabang: pembeli digital → tawaran upsell · **pembeli cetak → link daftar tamu + penjelasan proof menyusul**. Itu memang langkah berikutnya yang ia butuhkan, bukan tawaran baru.
-
-- [ ] **F4.8** **Upsell otomatis penuh** menggantikan versi manual — baru dibangun setelah F3.10 memberi tahu keberatan apa yang sebenarnya muncul.
-
----
-
-## F5 — Vendor & white-label (pendapatan berulang)
-
-- [ ] **F5.1** **Tiga tingkat vendor sebagai produk** — Per-event Rp 349rb · Starter Rp 990rb/bln · Pro Rp 2,9jt/bln.
-  Prinsipnya: **langganan menjual akses digital (kapasitas tak terbatas); produk fisik dibeli terpisah berdiskon dan tetap dihitung terhadap kuota yang sama.** Ini yang memperbaiki kontradiksi rencana v1 (satu vendor Pro menghabiskan seluruh kapasitas hanya dengan Rp 1,5 juta).
-  Butuh langganan berulang — cek dukungan Duitku, atau tagih manual per bulan dulu.
-
-- [ ] **F5.2** **White-label + subdomain vendor** — pekerjaan terbesar di F5. Sistem tema bertoken yang sudah ada adalah fondasinya; yang perlu ditambah lapisan identitas per vendor. *(Menyerap rencana "dashboard reseller" dari backlog lama.)*
-
-- [ ] **F5.3** **Prioritas antrean vendor Pro** — bernilai tinggi justru karena kuota terbatas, dan biayanya nol.
-
----
-
-## Metrik pengendali *(urutannya penting)*
-
-1. **Marjin per jam produksi** — target ≥ Rp 600.000/jam. Setiap keputusan produk & harga diuji ke angka ini. Pada marjin Rp 2,6 juta, batasnya 4 jam 20 menit.
-2. **Closing rate di harga baru** — menentukan harga dikunci, dinaikkan, atau diturunkan.
-3. **Attach rate — dipecah per tingkat**, tidak pernah digabung. Angka campuran akan melaporkan "20%" dan menyesatkan setiap keputusan berikutnya.
-4. **Distribusi paket** — apakah Paket Resepsi benar-benar paling laku. Kalau Hormat yang mendominasi, jangkar harganya kurang kuat.
-5. **Tingkat reprint** — dan karena kesalahan siapa. Ini biaya langsung dari garansi.
-6. **Pendapatan berulang vendor** — target Rp 10 juta/bulan pada bulan 6.
-
----
-
-## Risiko yang perlu diawasi lebih ketat dari dokumen bisnis
-
-- **Eksposur garansi terkonsentrasi di musim ramai.** Rencana memperkirakan 5% order gagal Garansi Tepat Waktu, tapi kegagalan tidak acak — ia berkorelasi dengan bulan tersibuk, persis saat kapasitas paling tertekan. Perkiraan 5% kemungkinan optimistis tepat ketika biayanya paling menyakitkan. Mitigasi: kuota lebih ketat di bulan puncak.
-- **Mekanisme refund Rp 2,9 juta lewat Duitku belum diperiksa.** Garansi Tepat Waktu menjanjikan refund 100%. Pastikan kanal pembayarannya mendukung refund, berapa lama, dan siapa menanggung fee-nya — **sebelum** garansinya dipasang di halaman harga.
-- **Musim menumpuk, bukan terdiversifikasi.** Digital dan cetak ramai di bulan yang sama dan sepi di bulan yang sama. Ini konsentrasi risiko. Siapkan kas untuk bulan sepi.
-- **Tinta dye L8050 tidak tahan air dan rentan pudar** — laminasi keharusan, bukan opsi. Pada kertas uncoated seperti kraft hasilnya kusam.
-- **Monitor n8n hidup di dalam n8n** *(eks-P1.3, ditunda atas keputusan owner)* — kalau n8n mati, WF-07 & WF-08 mati bersamanya. Spesifikasi 3 monitor UptimeRobot siap pakai di [`panduan-manual.md`](./panduan-manual.md) langkah 4.
-
----
-
-## Sisa jalur digital (tetap berlaku, prioritas rendah)
-
-- [ ] 👤 Review gaya bahasa pesan otomatis di [`copywriting-pesan.md`](./copywriting-pesan.md) *(eks-P3.2)*
-- [ ] 👤 Review visual tema-02 & tema-03 di HP sebagai calon pembeli *(eks-P2.7)*
-- [ ] 👤 Kebijakan nomor WA bisnis — jangan logout, pakai wajar, jangan blast ke nomor tak dikenal. Sesi terbanned = seluruh kanal delivery WA mati *(eks-P3.3)*
-
----
-
-## Backlog v2
-
-- [ ] Occasion baru dengan duplikasi tema: khitanan, aqiqah, wisuda (musiman Mei–September), e-card Lebaran
-- [ ] Add-on WA blast ke daftar tamu — Rp 50rb/200 tamu
-- [ ] Amplop digital ter-escrow via QRIS dengan fee platform 2–5% *(perubahan model bisnis paling bernilai)*
-- [ ] Migrasi log operasional Google Sheets → Postgres *(makin diperlukan begitu order cetak, resi, dan status produksi ikut dicatat)*
-- [ ] Tema premium eksklusif Premium *(sudah dijanjikan "menyusul" di deskripsi produk)*
-- [ ] Arsip otomatis undangan kedaluwarsa: hapus media H+90 untuk Hemat/Favorit
-- [ ] Custom domain per undangan · multi-bahasa · tema builder drag-and-drop
-
----
-
-## Dihapus dari rencana, dengan alasan
-
-| Dihapus | Alasan |
-|---|---|
-| **P2.6** Polish katalog + FAQ | Katalog dirombak untuk hybrid di F1.5. Memoles versi digital-saja = kerja terbuang |
-| **P3.1** Rekrut 3 reseller | Ekonominya berubah (komisi fisik rupiah tetap) dan kupon `RES-` belum dibatasi — merekrut sekarang justru mencetak kebocoran. Digantikan F1.9: vendor dulu |
-| **Rencana zona pengiriman** | Dibatalkan: satu metode gratis se-Indonesia |
-| **Backlog** buku tamu QR check-in | Bukan lagi ide v2 — itu produk Tier B di rencana hybrid |
-| **Backlog** dashboard reseller | Diserap F5.2 (white-label vendor) |
-| **Checklist QA tambahan** | Sudah lulus di putaran QA formal 2026-08-04; yang benar-benar belum diuji dipindah ke F0.4 |
-
----
-
-**Known limitation (diterima):** idempotency Google Sheets tidak atomik — dimitigasi topic Action `woocommerce_order_status_processing` + pola append-then-verify di WF-01. Sisa risiko race sangat kecil dan hilang total saat migrasi Postgres.
+**Known limitation (diterima):** idempotency Google Sheets tidak atomik — dimitigasi topic Action `woocommerce_order_status_processing` + pola append-then-verify di WF-01. Sisa risiko race kecil dan hilang total saat migrasi Postgres. *(Catatan: penjaga verifikasinya saat ini tidak bisa menyala — lihat B4.)*
