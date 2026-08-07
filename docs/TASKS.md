@@ -18,73 +18,92 @@
 
 ---
 
-## ⏸ CHECKPOINT SESI 2026-08-07 — fase G1 berjalan (5 dari 8 selesai & live)
+## ⏸ CHECKPOINT SESI 2026-08-07 — fase G1 TUNTAS (8/8), produksi bersih
 
-**Mulai dari sini di sesi berikutnya.** Konteks lengkap + alasan tiap keputusan: [`evaluasi-ide-genz.md`](./evaluasi-ide-genz.md).
+**Mulai dari sini di sesi berikutnya.** `HARIH_VERSION 2.8.0` · 9 workflow aktif · smoke 21/21 · WAHA 2026.7.2 (sesi `WORKING`).
 
-**Selesai & terverifikasi live** (`HARIH_VERSION 2.6.0`):
+---
 
-- **G1.7 baseline performa** — dicatat di [`runbook.md`](./runbook.md) §9b. ⚠️ PSI API tanpa kunci kena kuota harian; pakai UI pagespeed.web.dev. Jangan mengukur dari mesin developer (diagnosis jaringan 2026-08-06).
-- **G1.2 font undangan di-selfhost** — menghapus rantai serial `HTML → CSS googleapis (0,34 dtk) → woff2 gstatic (0,33 dtk)`. Sumbernya ternyata **variable font**, jadi satu berkas menutup weight 400/500/600. Dipecah latin/latin-ext per `unicode-range`. Dua face **italic** ditambahkan (OFL) karena `undangan.css` memakai italic di empat tempat — tanpa itu ampersand 46px jadi oblique sintetis. Generator: `scripts/buat-font-web.py`.
-- **G1.1 mode gelap** — 9 halaman toko + `/isi-data/`. **21 pasangan kontras diukur**, terendah 5,23:1. `--c-accent` dipecah jadi peran latar + `--c-accent-teks` (satu warna mustahil ≥4,5:1 di dua sisi). Anti-kedip lewat script inline `data-no-optimize` di `<head>`. **Halaman undangan sengaja tidak ikut** — temanya barang yang dibeli.
-- **G1.3 "coba nama kalian"** — form di beranda → demo terbuka dengan nama pengunjung. Sisi klien, **demo saja** (`window.UNDANGAN.demo`), diuji dengan undangan uji non-demo bahwa parameternya diabaikan total.
-- **G1.6 tombol konfirmasi RSVP ke WA mempelai** — arah tamu → mempelai, **nomor bisnis hariH tidak tersentuh** (sesi WAHA tidak berisiko).
-- **Bonus, temuan sampingan:** menghapus undangan meninggalkan kartu `og:image`-nya di uploads selamanya — memuat nama mempelai + potongan foto, tetap bisa diakses publik. Ditutup dengan `before_delete_post` di `og.php`.
+## 👤 YANG PERLU OWNER LAKUKAN — diurutkan dari yang paling menghambat
 
-**Fase G1 SELESAI 8/8** — paket terakhir (G1.4 · G1.5 · G1.8 · G1.9 · rekap WF-05) dikerjakan 2026-08-07, `HARIH_VERSION 2.7.1`, 9 workflow tetap aktif:
+**Semuanya menunggu tangan owner. Tidak ada satu pun yang bisa saya kerjakan sendiri.**
 
-- **G1.4 galeri kolase** — meta `galeri_tata` (`slider` bawaan | `kolase`). Grid mozaik tanpa media query; foto pertama mengambil dua kolom. Lightbox dipakai bersama kedua tata letak.
-- **G1.5 koordinat + Waze** — meta `koordinat`/`koordinat_akad`, divalidasi **rentangnya** (bukan cuma bentuknya) + tolak `0,0`. Peta tersemat memakai koordinat bila ada; tombol Waze hanya muncul bila koordinatnya ada — tombol navigasi yang menyesatkan lebih buruk daripada tidak ada.
-- **G1.8 dompet digital** — meta `dompet` (`Nama|URL` per baris), **host di-whitelist** (GoPay/DANA/OVO/ShopeePay/LinkAja, https saja). Terbukti: host asing & `http://` dibuang diam-diam.
-- **G1.9 WF-02** — keempat field diteruskan dalam **satu kali** import.
-- **Rekap RSVP harian** — endpoint baru `undangan/v1/rekap-harian` (butuh `edit_posts`) + node `Ambil Rekap RSVP` di WF-05. Dikirim ke **nomor pembeli** (kontak yang sudah berkorespondensi), hanya bila ada RSVP baru 24 jam terakhir.
-- **Resolusi koordinat otomatis** dari `gmaps_url` dikerjakan **di WP saat meta ditulis**, bukan di WF-02 — menghindari bedah node bercabang, dan tamu pertama tidak menunggu permintaan ke Google. Host pemendek di-whitelist (anti-SSRF), nilai yang sudah ada tidak pernah ditimpa, gagal apa pun tidak fatal.
+### 1. 🔴 Approval Duitku production *(F0.1)* — gerbang TUNGGAL semua uang
+Diajukan 2026-08-04, masih menunggu. Selama ini belum keluar, **tidak ada satu rupiah pun bisa masuk** — digital maupun cetak.
+⚠️ Profil merchant menyebut Rp 99–299 ribu, padahal paket cetak sampai Rp 5,9 juta — **beri tahu Duitku**, kalau tidak pembayaran besar bisa ditolak di langkah terakhir.
+⚠️ Sekalian tanyakan: **mekanisme refund** (Garansi Tepat Waktu menjanjikan uang kembali 100% atas order Rp 2,9 juta — berapa lama, siapa menanggung fee kanal) dan **batas nominal per kanal** (e-wallet/QRIS sering punya plafon di bawah Rp 5,9 juta).
+**Setelah approve:** ganti kredensial plugin ke Production → beri tahu saya → F0.2 jalan.
 
-**Bug yang ketemu & ditutup saat mengujinya:** section amplop hanya dirender bila ada rekening/QRIS — pasangan yang **hanya** mengisi dompet digital (atau hanya alamat kado) kehilangan seluruh amplopnya.
+### 2. Konfirmasi harga 3 SKU upgrade *(F1.3 / F3.9)* — ⚠️ SUDAH LIVE, tinggal dikonfirmasi
+Ketiganya **sudah ada di WooCommerce dengan harga sungguhan**, dan halaman `/upsell/` otomatis memakainya:
 
-### Audit mode gelap lintas halaman (2026-08-07) — menutup celah verifikasi G1.1
+| SKU | Harga paket | Harga upgrade | Kredit tersirat |
+|---|---|---|---|
+| `UPG-HORMAT` | 1.190.000 | **890.000** | 300.000 |
+| `UPG-RESEPSI` | 2.900.000 | **2.600.000** | 300.000 |
+| `UPG-GRAND` | 5.900.000 | **5.600.000** | 300.000 |
 
-Saat G1.1 dikerjakan, mode gelap hanya diverifikasi di beranda & `/harga/`. Tujuh halaman lain memakai `katalog.css` — termasuk halaman bertoken yang justru dilihat **pembeli yang sudah membayar**. Audit dijalankan di peramban dengan pengukuran kontras yang mengompositkan alpha berlapis:
+Kreditnya **Rp 300.000 rata**, sementara saran di [`konfirmasi-owner.md`](./konfirmasi-owner.md) B1 adalah Rp 299.000. Selisihnya kecil, tapi **angka ini sudah tayang ke pembeli** yang membuka link upsell. Jawab satu kata: "300rb sudah benar" → saya centang F1.3 & F3.9. Kalau bukan, sebutkan angkanya.
 
-- **Diperiksa runtime & bersih:** `/satuan/` · `/jadi-reseller/` · `/kontak/` · `/rekap/` · `/isi-data/` (input, textarea, select semuanya 12,58:1).
-- **Diperiksa statis:** 56 aturan komponen `.rekap-*` (13) · `.tamu-*` (23) · `.proof-*` (16) · `.upsell-*` (4) — **nol warna literal**, semuanya token. Jadi komponen berdata di halaman itu akan mengikuti palet gelap dengan benar.
-- **BELUM diverifikasi runtime:** komponen *berdata* di `/tamu/`, `/proof/`, `/upsell/` — ketiganya menuntut order WooCommerce yang benar-benar ada. Membuat order berstatus `processing` akan **memicu WF-01** dan mengirim email + WhatsApp sungguhan, jadi sengaja tidak dilakukan. Cek berikutnya paling murah dilakukan **menumpang order uji F0.2** begitu Duitku disetujui.
+### 3. 🔴 Cetak satu sampel lengkap *(F1.1)* — undangan lipat + amplop bernama
+Satu sampel menjawab empat hal sekaligus: **bobot nyata** (ongkir yang kita tanggung — sekarang masih tebakan 2/5/9 kg), **waktu lipat per unit**, **uji pindai QR**, dan mutu amplop.
+⚠️ Yang paling menentukan: **apakah mesin creasing sanggup**. 100 lipatan × 8 order = 800 lipatan/bulan. Kalau harus dilipat tangan, seluruh hitungan marjin per jam batal.
 
-**Dua "temuan" yang ternyata cacat alat ukur, bukan cacat CSS** — dicatat supaya tidak diulang:
-1. Kontras dihitung tanpa mengompositkan alpha → `.paket-badge` terbaca 1,37:1 (padahal 6,13:1). Latar `rgba(...,.12)` harus dikomposit ke latar opaque di atasnya lebih dulu.
-2. Parser warna tidak mengenal sintaks `color(srgb r g b / a)` yang komponennya **0–1**, bukan 0–255 → terbaca 7,72:1 (padahal 5,86:1).
+### 4. QA perangkat riil *(F0.4)* — iPhone Safari & Android Chrome
+Checklist di [`panduan-manual.md`](./panduan-manual.md) langkah 5: musik mulai setelah tap · countdown jalan · tombol salin rekening · upload foto HEIC · preview share WA.
+**Tambahan dari sesi ini** yang belum pernah disentuh tangan manusia di HP asli: **mode gelap** (tombol ☾/☀ di nav, dan apakah mengikuti setelan HP) · **galeri kolase** · **tombol Waze** · **tombol "beri tahu mempelai lewat WhatsApp"** setelah RSVP · **penolakan foto beresolusi rendah** di form.
+⚠️ WA meng-cache preview per URL — uji dengan `?x=1` supaya dianggap URL baru.
 
-**Satu perbaikan nyata:** dua `rgba()` literal di `isi-data.css` memakai nilai palet **mode terang** sehingga tidak ikut token saat gelap — diganti `color-mix()`. Kontrasnya memang sudah aman sejak awal; ini soal konsistensi palet, dan disebutkan supaya tidak terbaca sebagai perbaikan aksesibilitas.
+### 5. 10 penjualan dari orang asing *(F0.3)* 🔒 — gerbang sesungguhnya
+Teman, keluarga, dan diri sendiri **tidak dihitung**. Ini yang menggerbang seluruh fase G2 dan F1 berikutnya. Catat per penjualan: tier · dari mana datangnya · bertanya dulu atau langsung bayar.
 
-### 🔴 Regresi yang saya buat sendiri di WF-05 — sudah ditutup, tapi polanya wajib diingat
+### 6. Keputusan & tinjauan yang tidak mendesak
+- **Naikkan pin WAHA lagi?** Sekarang `latest-2026.7.2`. Upgrade berikutnya berpotensi menuntut scan QR ulang → jadwalkan saat tidak ada order berjalan.
+- **Review gaya bahasa** pesan otomatis di [`copywriting-pesan.md`](./copywriting-pesan.md).
+- **Review visual tema-02 & tema-03 di HP** sebagai calon pembeli.
+- **Kebijakan nomor WA bisnis** — jangan logout, pakai wajar, jangan blast ke nomor tak dikenal. Sesi ter-ban = seluruh delivery mati.
+- **Vendor** *(F1.9)*: dekati 5 vendor pertama — bisa jalan **paralel sekarang**, tidak menyentuh kapasitas produksi sama sekali.
 
-Node `Ambil Rekap RSVP` diletakkan **di tengah rantai** WF-05. Endpoint-nya mengembalikan `[]` saat tidak ada RSVP baru — dan **node HTTP n8n memecah respons array jadi satu item per elemen**, jadi `[]` = **nol item**, dan node berikutnya **tidak dijalankan sama sekali**. Artinya: di hari tanpa RSVP baru (yaitu hampir setiap hari), SELURUH reminder harian ikut mati — nudge belum-isi-data, pengingat H-3, dan peringatan masa aktif. Tidak ada pesan galat; workflow-nya cuma berhenti diam-diam.
+---
 
-Ditutup dua lapis: endpoint kini **selalu** membalas objek `{"data": {...}}` (tidak pernah array telanjang), dan node diberi **`alwaysOutputData: true`**. **Aturan umum: jangan pernah menaruh node yang bisa menghasilkan nol item di tengah rantai** — taruh di ujung, atau pastikan bentuk responsnya selalu satu item.
+## Yang belum dikerjakan (kode) — dan kenapa belum
 
-**Diverifikasi empiris**, bukan diasumsikan: jadwal diubah sementara jadi tiap menit, dan eksekusi `4121` menunjukkan `Baca Orders → Ambil Rekap RSVP → Susun Pesan Harian` ketiganya berjalan dengan rekap kosong, workflow `status=success`. Jadwal `0 8 * * *` sudah dipulihkan & diverifikasi; 9 workflow aktif. Cara mengujinya dicatat di [`runbook.md`](./runbook.md) §9c.
+### Tidak digerbang — bisa saya kerjakan kapan saja Anda minta
+- **FU.4 Sesi kedatangan tamu (shift)** — mempelai membagi tamu ke jam kedatangan (`?sesi=1` di link personal). Penghalangnya dulu (FU.6 link personal massal) **sudah selesai**, jadi ini sekarang bisa dikerjakan. Butuh **satu field baru** → satu ritual WF-02.
+- **Sisa F4.2** — batas panjang field & pembulatan kuantitas. Sengaja ditunda: keduanya menunggu template cetak benar-benar ada; menentukannya sekarang cuma menebak.
 
-### ✅ Google Sheet `orders` dibersihkan 2026-08-07 — sebelumnya ia MEMICU kiriman WhatsApp
+### Digerbang F0.3 (10 pembeli asing) — fase G2
+- **G2.2 AI copywriter** — Gemini Flash lewat **OpenRouter** (keputusan owner). ⚠️ Slug model **wajib diverifikasi ke daftar OpenRouter** saat implementasi, simpan sebagai env `OPENROUTER_MODEL`. Wajib: tambahkan OpenRouter ke tabel pemroses data di Kebijakan Privasi **sebelum** fitur menyala.
+- **G2.1 Video cover Premium** — ⚠️ disk 25 GB bukan penghalangnya; yang menggerbang **bandwidth** (10 MB × 300 tamu = 3 GB per undangan). Kuota/wajar-pakai Hostinger harus dicek dulu.
+- **G2.3 Pratinjau langsung di form** · **G2.4 Section playlist Spotify (facade)**
+- **FU.7 QR check-in tamu di venue**
 
-Klaim "produksi bersih dari data uji" selama ini benar untuk WordPress (3 undangan demo) tapi **tidak untuk Google Sheet**: kelima barisnya sisa uji 6 Agustus (`uji@`, `b@`, `proof@`, `tamu@`, `rekap@example.com`, semuanya `MENUNGGU_DATA`, dua di antaranya bernomor `628123456789`) — sementara WooCommerce punya **nol order**.
+### Menunggu order cetak nyata (F1.6/F1.7 dulu)
+**F4.3** engine render SVG→PDF (wajib di VPS — Hostinger tidak bisa Inkscape) · **F4.4** imposition + cut file · **F4.8** upsell otomatis penuh · **F1.7/F1.8** catat waktu-biaya nyata & protokol uji harga.
 
-Konsekuensinya nyata, bukan sekadar kotor: saat WF-05 diuji, ia membangun pesan `nudge #82` dan **benar-benar mencoba mengirim WhatsApp** ke nomor palsu itu; WAHA membalas `500 · No LID for user`. Mengirim berulang ke nomor tak dikenal adalah persis pola yang catatan kebijakan kita sendiri larang, karena itulah yang membuat sesi WhatsApp Web di-ban — dan sesi itu memikul seluruh kanal delivery.
+### Fase F2 & F5 (digerbang uang masuk)
+**F2.1/F2.2** beli alat dari laba · **F5.1–F5.3** vendor & white-label.
 
-**Dihapus atas permintaan owner** (baris 2–6 dalam satu `deleteDimension`, dengan penjagaan: batal bila ada satu saja baris non-`example.com`). Tab `orders` kini **hanya header**; `resellers` & `komisi` memang sudah kosong. Klaim "produksi bersih" sekarang benar untuk kedua sisi.
+### Belum terverifikasi (bukan belum dikerjakan)
+Komponen **berdata** di `/tamu/`, `/proof/`, `/upsell/` belum pernah dilihat dalam mode gelap — ketiganya menuntut order WooCommerce yang benar-benar ada, dan membuat order `processing` akan memicu WF-01 lalu mengirim email + WA sungguhan. **Paling murah menumpang order uji F0.2** begitu Duitku disetujui: satu order menguji jalur uang DAN ketiga halaman ini sekaligus.
 
-**Konsekuensi yang perlu diketahui:** dengan sheet kosong, `Baca Orders` menghasilkan nol item sehingga **WF-05 jadi no-op** — itu benar dan tidak berbahaya (tidak ada order = tidak ada yang perlu diingatkan), dan sembuh sendiri begitu order asli pertama masuk.
+---
 
-*Catatan desain untuk nanti:* WF-01 memverifikasi nomor lewat WAHA `check-exists` sebelum mengirim; **WF-05 tidak**. Menambahkannya akan mencegah kiriman ke nomor tidak terdaftar sama sekali — layak dipertimbangkan, meski penyebab sesungguhnya kali ini adalah data uji yang tertinggal.
+## ⚠️ Wajib dibaca sebelum menyentuh n8n / deploy lagi
 
-### ⚠️ Dua temuan operasional dari sesi ini — baca sebelum menyentuh n8n lagi
+1. **Import n8n bisa diam-diam memakai berkas BASI.** `scp` ke `/tmp` server gagal (uid lain + sticky bit) **tapi `import:workflow` tetap melaporkan sukses** — WF-02 live sempat mundur ke versi 6 Agustus tanpa satu pun pesan galat. Prosedur yang benar (unggah ke `/root/wf-import`, nama baru di container, **periksa isi dari dalam container**, verifikasi hasil ekspor) ada di [`../n8n/workflows/README.md`](../n8n/workflows/README.md).
+2. **Container hariH bernama `harih-n8n`.** VPS yang sama menjalankan **`root-n8n-1`** — n8n produksi lain milik owner. Jangan pernah menjalankan perintah n8n tanpa menyebut container.
+3. **Jangan taruh node yang bisa menghasilkan NOL item di tengah rantai workflow.** Node HTTP n8n memecah respons array jadi satu item per elemen, jadi `[]` = nol item = seluruh cabang berikutnya tidak dijalankan, tanpa galat. Ini sempat mematikan seluruh reminder harian.
+4. **Restart n8n:** `docker restart harih-n8n`. Hindari bare `docker compose up -d` — berisiko me-recreate WAHA.
+5. **OPcache:** perubahan mu-plugin butuh sampai ±60 dtk sebelum web SAPI menyajikannya, dan `wp eval` **tidak** memperlihatkannya (CLI punya cache sendiri). Lihat [`runbook.md`](./runbook.md) §9d.
+6. **Menguji workflow bercron** & jebakan WAL SQLite: [`runbook.md`](./runbook.md) §9c.
+7. **Naikkan `HARIH_VERSION`** setiap menyentuh CSS/JS.
 
-1. **Import n8n bisa diam-diam memakai berkas BASI.** `scp` ke `/tmp` server gagal (`Permission denied` — ada berkas milik uid lain + sticky bit) **tapi `import:workflow` tetap melaporkan sukses**, memakai berkas 6 Agustus yang tergeletak di sana. WF-02 live sempat mundur ke versi lama tanpa satu pun pesan galat. Prosedur yang benar sekarang ada di [`n8n/workflows/README.md`](../n8n/workflows/README.md) — unggah ke `/root/wf-import/`, nama berkas baru di container, **periksa isinya dari dalam container sebelum import**, lalu verifikasi hasil ekspor yang HIDUP. Sudah dipulihkan & diverifikasi identik dengan repo.
-2. **✅ Pin WAHA dibetulkan & dinaikkan ke 2026.7.2 (2026-08-07).** `docker compose up -d` sempat **selalu gagal** karena pin `devlikeapro/waha:2026.6.2`. **Koreksi atas diagnosis awal saya:** tag itu bukan dihapus — skema tag WAHA adalah `<varian>-<versi>` (`latest-2026.6.2`, `chrome-2026.6.2`, `noweb-*`, `gows-*`, `arm-*`), jadi **versi polos tidak pernah ada** dan pin itu tidak pernah resolve sejak ditulis; container sebenarnya berjalan dari tag bergerak `latest`. Varian kita: **`latest-*`** (Chromium + engine WEBJS).
-   **Upgrade dijalankan atas permintaan owner**, dengan urutan yang bisa dibalik: volume sesi (331 MB) dicadangkan ke `/opt/harih/backups/waha-preupgrade/` → image ditarik lebih dulu → `docker compose up -d --no-deps waha` (n8n tidak disentuh). Hasil: **versi 2026.7.2, engine/tier/browser sama, sesi `default` kembali `WORKING` dalam ±25 detik TANPA scan QR ulang.** Uji fungsional `check-exists` benar (nomor owner ada + ber-LID; nomor palsu `numberExists:false`). Retag lokal sementara sudah dihapus. Pin n8n (`2.29.10`) sah dan cocok dengan versi berjalan.
+---
 
-**Keputusan owner 2026-08-07:** AI copywriter (G2.2) memakai **Gemini Flash lewat OpenRouter**, bukan Claude — slug model wajib diverifikasi ke daftar OpenRouter saat implementasi, simpan sebagai env `OPENROUTER_MODEL`; **disk 25 GB bebas** (tapi yang masih harus dicek untuk G2.1 adalah **bandwidth**, bukan disk); **escrow tidak jadi**; **rekap RSVP harian dipasang**.
+## Kondisi produksi (bersih, diverifikasi 2026-08-07)
 
-**Kebersihan produksi — TUNTAS 2026-08-07.** Ucapan lama `ID 55` ("ryan / amin", 2026-08-05) di buku tamu demo tema-02 sudah dihapus atas permintaan owner; ia satu-satunya `ucapan` di seluruh produksi, dan tampil ke calon pembeli yang membuka demo. Sekarang: **0 ucapan · 3 undangan (semuanya demo) · 3 kartu OG · sheet `orders` hanya header · 0 order WooCommerce.** Dinding ucapan di demo diverifikasi kosong lewat REST dan lewat peramban; form RSVP & tombol WA mempelai tetap berfungsi.
+0 ucapan · 3 undangan (semuanya demo) · 3 kartu OG · sheet `orders` hanya header · 0 order WooCommerce · 18 produk terkategori (`digital` 3 · `cetak` 15, semuanya `hidden` dari `/shop/` sesuai gerbang yang disengaja).
 
 ---
 
@@ -353,7 +372,7 @@ Kesimpulan: hambatan ada di **jalur jaringan lingkungan kerja saya**, bukan di s
 
 *Semua penghalang arsitektur yang ditemukan pada audit 2026-08-05 ditangani di fase ini.*
 
-- [ ] **F3.1** **Kategori produk `digital` & `cetak` + batasi kupon `RES-` ke digital**
+- [x] **F3.1** **Kategori produk `digital` & `cetak` + batasi kupon `RES-` ke digital** → **SELESAI** *(diverifikasi 2026-08-07: kategori `digital` 3 produk & `cetak` 15 produk ada, seluruh 18 produk terkategori, guard kupon `RES-` ada di `cetak.php`)*
   **Wajib sebelum produk cetak pertama masuk WooCommerce.** Kupon `RES-` yang sudah beredar mengikat 30% ke **seluruh nilai order**; begitu produk cetak jadi produk biasa, kupon itu otomatis berlaku ke sana — Rp 870.000 pada order Rp 2,9 juta, bocor tanpa pernah diputuskan.
   Saat ini di server hanya ada satu kategori (`Uncategorized`, 3 produk), jadi tidak ada tempat menggantungkan pembatasan. Kategori dibuat lebih dulu.
 
