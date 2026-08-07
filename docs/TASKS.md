@@ -20,7 +20,7 @@
 
 ## ⏸ CHECKPOINT SESI 2026-08-07 — fase G1 TUNTAS (8/8), produksi bersih
 
-**Mulai dari sini di sesi berikutnya.** `HARIH_VERSION 2.8.1` · 9 workflow aktif · smoke 21/21 · WAHA 2026.7.2 (sesi `WORKING`).
+**Mulai dari sini di sesi berikutnya.** `HARIH_VERSION 2.9.0` · 9 workflow aktif · smoke 21/21 · WAHA 2026.7.2 (sesi `WORKING`).
 
 ---
 
@@ -37,6 +37,7 @@ Diajukan 2026-08-04, masih menunggu. Selama ini belum keluar, **tidak ada satu r
 ### 2. 🔴 Cetak satu sampel lengkap *(F1.1)* — undangan lipat + amplop bernama
 Satu sampel menjawab empat hal sekaligus: **bobot nyata** (ongkir yang kita tanggung — sekarang masih tebakan 2/5/9 kg), **waktu lipat per unit**, **uji pindai QR**, dan mutu amplop.
 ⚠️ Yang paling menentukan: **apakah mesin creasing sanggup**. 100 lipatan × 8 order = 800 lipatan/bulan. Kalau harus dilipat tangan, seluruh hitungan marjin per jam batal.
+**Sekalian catat waktu untuk 50 unit, bukan hanya 100.** Analisis 2026-08-07 menunjukkan paket terkecil menanggung setup yang sama dengan pendapatan terkecil — **Hormat di harga penuh cuma ±1,6× pekerjaan reguler**, dan jalur upgrade-nya sudah dicabut karena hanya ±1,1×. Apakah Hormat dipertahankan, dinaikkan harganya, atau dihentikan **menunggu angka waktu dari sampel ini** — jangan diputuskan sebelum itu.
 
 ### 3. QA perangkat riil *(F0.4)* — iPhone Safari & Android Chrome
 Checklist di [`panduan-manual.md`](./panduan-manual.md) langkah 5: musik mulai setelah tap · countdown jalan · tombol salin rekening · upload foto HEIC · preview share WA.
