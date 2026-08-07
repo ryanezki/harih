@@ -152,4 +152,20 @@ find "$BASE/db" "$BASE/waha" "$BASE/n8n" -type f -mtime +"$RETENSI_HARI" -delete
 find "$BASE/uploads-loteng" -type f -mtime +"$RETENSI_HARI" -delete 2>/dev/null || true
 find "$BASE/uploads-loteng" -type d -empty -delete 2>/dev/null || true
 
+# 7) Pemeriksaan disk — D4.
+#
+# Ditumpangkan di sini, bukan di cek-live.sh maupun n8n, karena skrip ini satu-
+# satunya yang punya DUA hal sekaligus: cron di host (jadi tetap jalan meski
+# seluruh Docker mati) dan jalur alert Brevo yang mandiri dari n8n.
+#
+# Disk VPS 193 GB dan baru terpakai ±12% (diukur 2026-08-08) — jadi ini
+# pencegahan, bukan pemadam kebakaran. Yang tumbuh monoton: cermin uploads,
+# lotengnya, arsip mingguan, dan volume media WAHA.
+PAKAI=$(df --output=pcent / | tail -1 | tr -dc '0-9')
+echo "Disk: ${PAKAI}% terpakai"
+if [ "${PAKAI:-0}" -ge 80 ]; then
+  echo "PERINGATAN: disk ${PAKAI}% — di atas ambang 80%"
+  alert_gagal "disk ${PAKAI}%"
+fi
+
 echo "=== Selesai $(date '+%T') ==="

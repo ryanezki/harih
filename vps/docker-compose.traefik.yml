@@ -24,6 +24,14 @@ services:
     image: n8nio/n8n:2.29.10
     container_name: harih-n8n
     restart: unless-stopped
+    # D4 — batas log. Docker `json-file` tumbuh TANPA batas bawaan; sekali ada
+    # loop galat, satu container bisa memenuhi disk dan menyeret seluruh host —
+    # termasuk n8n produksi lain milik owner yang berbagi VPS ini.
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     environment:
       - N8N_HOST=${N8N_DOMAIN}
       - N8N_PROTOCOL=https
@@ -86,6 +94,14 @@ services:
     image: devlikeapro/waha:latest-2026.7.2   # skema tag `<varian>-<versi>` — lihat catatan di docker-compose.yml
     container_name: harih-waha
     restart: unless-stopped
+    # D4 — batas log. Docker `json-file` tumbuh TANPA batas bawaan; sekali ada
+    # loop galat, satu container bisa memenuhi disk dan menyeret seluruh host —
+    # termasuk n8n produksi lain milik owner yang berbagi VPS ini.
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     ports:
       - "127.0.0.1:3000:3000"   # dashboard via SSH tunnel; JANGAN publik
     environment:
@@ -97,6 +113,27 @@ services:
       - WAHA_ENGINE=${WAHA_ENGINE:-WEBJS}
       - WAHA_RESTART_ALL_SESSIONS=True
       - TZ=Asia/Jakarta
+    # D4 — healthcheck menguji SESI, bukan sekadar port hidup.
+    #
+    # Mode gagal khas engine WEBJS: Chromium menggantung sementara container
+    # tetap "up" dan HTTP tetap menjawab — jadi `/ping` maupun `/health` LOLOS
+    # padahal WhatsApp sudah mati. Diperiksa langsung 2026-08-08: `/health`
+    # ternyata hanya melaporkan ruang disk, sama sekali bukan status engine.
+    # Satu-satunya sinyal yang benar adalah status sesi di `/api/sessions`.
+    #
+    # start_period 4 menit: Chromium butuh waktu boot + menyambung ulang sesi
+    # setelah restart, dan tanpa jeda ini container sehat akan tampak unhealthy
+    # tiap kali di-restart.
+    #
+    # Docker TIDAK me-restart container hanya karena unhealthy — ini sinyal,
+    # bukan pemicu. Itu disengaja: auto-restart sesi WhatsApp menaikkan risiko
+    # ban, dan alasan itu sudah dipakai menolak ide lain (lihat TASKS).
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- --timeout=5 --header=\"X-Api-Key: $$WAHA_API_KEY\" http://localhost:3000/api/sessions | grep -q '\"status\":\"WORKING\"'"]
+      interval: 2m
+      timeout: 15s
+      retries: 3
+      start_period: 4m
     volumes:
       - harih_waha_sessions:/app/.sessions
       - harih_waha_media:/app/.media
