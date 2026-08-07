@@ -398,9 +398,39 @@ Empat halaman bertoken tidak memanggil `nocache_headers()` sementara produksi me
 | Gerbang `/shop/` | Produk cetak & satuan **disembunyikan** sampai satu order uji internal tuntas penuh |
 | Urutan perbaikan bila attach rate jelek | Foto undangan lipat asli di dalam amplop bernama · salinan soal orang tua & sesepuh · garansi · hitung mundur. **Angka kredit paling akhir** |
 
-**Metrik pengendali** *(urutannya penting)*: marjin per jam produksi (target ≥ Rp 600rb/jam; pada marjin Rp 2,6 juta batasnya **4 jam 20 menit**) → closing rate → attach rate per tingkat → distribusi paket → tingkat reprint → pendapatan berulang vendor.
+**Metrik pengendali** *(urutannya penting)*: marjin per **jam tangan** → closing rate → attach rate per tingkat → distribusi paket → tingkat reprint → pendapatan berulang vendor.
 
-⚠️ **Klaim "marjin lulus 3–6× lipat" hanya berlaku untuk Resepsi & Grand.** Terhadap patokan tertinggi pekerjaan reguler (Rp 200rb/jam): Grand 4,6× · Resepsi 2,9× · **Hormat cuma 1,6× di harga penuh**. Setup mesin sama untuk 50 maupun 150 unit, jadi paket terkecil menanggung setup yang sama dengan pendapatan terkecil. Pemisahan setup/per-unit adalah **model, bukan pengukuran** — repo hanya punya satu titik data (4,5 jam untuk 100 unit) dan itu pun estimasi. Yang kokoh adalah arahnya, bukan angka desimalnya.
+### 📏 DIUKUR 2026-08-08 — menggantikan seluruh estimasi sebelumnya
+
+Sampel `TEST-173` dicetak & dilipat sungguhan. Angka di bawah **pengukuran, bukan model** — semua estimasi lama (4,5 jam/100 unit, bahan Rp 1.500/unit, bobot 2/4/7 kg) dicabut.
+
+**Temuan yang mengubah cara membaca kapasitas: pisahkan jam DINDING dari jam TANGAN.** Dari ±118 detik per unit, **±90 detik printer jalan sendiri** — batch berikutnya bisa dicetak sambil batch sebelumnya dilipat. Estimasi lama menghitung semuanya sebagai waktu owner, dan itu yang membuat paket kecil terlihat jauh lebih buruk daripada kenyataannya.
+
+Setup per pesanan **±40 menit** (muat kertas + cetak uji registrasi · set posisi creaser · QC lembar pertama · packing & label kurir). Bahan **Rp 3.200/unit** (kertas 900 · amplop 1.500 · label 150 · tinta 500 · gagal 5% 150).
+
+| Paket | Unit | Jam dinding | **Jam tangan** | Marjin | per jam dinding | **per jam tangan** |
+|---|---|---|---|---|---|---|
+| Hormat | 50 | 2,3 | **1,2** | Rp 855rb | Rp 372rb | **Rp 713rb** |
+| Resepsi | 100 | 4,0 | **1,7** | Rp 2,40 jt | Rp 599rb | **Rp 1,41 jt** |
+| Grand | 150 | 5,7 | **2,2** | Rp 5,18 jt | Rp 908rb | **Rp 2,35 jt** |
+
+Pembanding pekerjaan cetak reguler: **Rp 100–200rb/jam**. Terhadap patokan tertinggi, per jam dinding: Grand 4,5× · Resepsi 3,0× · Hormat **1,9×**.
+
+**Mesin creasing bukan hambatan.** ±8 detik/lembar termasuk lipat → 800 lipatan/bulan = **±1,8 jam**. Pertanyaan terbesar di rencana lama gugur.
+
+**Bobot jauh lebih ringan dari yang tercatat** — 1 set = 22 gram (A4 220gsm 14g + amplop 8g). Sudah diperbarui di WooCommerce; ketiga SKU `UPG-*` ternyata **tidak punya bobot sama sekali** dan kini terisi.
+
+| Paket | Bobot terukur | Tercatat sebelumnya |
+|---|---|---|
+| Hormat | **1,4 kg** | 2 kg |
+| Resepsi | **2,6 kg** | 4 kg |
+| Grand | **3,8 kg** | 7 kg |
+
+**Alokasi ongkir Rp 150.000 aman, dengan slack besar.** Terburuk (Grand ke Indonesia Timur) ±Rp 200rb; mayoritas pesanan di Jawa ±Rp 35–50rb. Ada ruang **Rp 80–100rb per pesanan** yang selama ini tidak terhitung.
+
+**QR 31 mm cukup, jangan diperbesar** — tanpa laminasi, pada `ecc=H` modulnya ±0,9 mm, terbaca nyaman di 15–25 cm. Diperiksa juga di berkas sampel: QR duduk **58,8 mm dari garis lipatan**, jadi risiko retak-lipatan tidak berlaku pada tata letak ini.
+
+**Kuota 8/bulan jauh di bawah kapasitas** (8 × 1,7 jam tangan ≈ 14 jam) — **tetap ditahan di 8** untuk bulan pertama. Batasnya sekarang bukan kapasitas mesin, melainkan belum pernah satu pesanan pun dikirim tepat waktu.
 
 ---
 

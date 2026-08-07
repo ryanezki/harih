@@ -1,4 +1,46 @@
-# Sampel cetak TEST-173 — lembar pencatatan
+# Sampel cetak TEST-173 — **TERISI 8 Agustus 2026**
+
+> ✅ **Pengukuran selesai.** Ringkasan hasilnya ada di bawah; angka lengkapnya
+> sudah masuk ke [`TASKS.md`](./TASKS.md) dan menggantikan seluruh estimasi lama.
+> Lembar kosong di bawahnya disimpan sebagai template untuk pengukuran berikutnya.
+
+## Hasil
+
+| | |
+|---|---|
+| **Mesin creasing** | **SANGGUP** — ±8 dtk/lembar termasuk lipat. 800 lipatan/bulan = ±1,8 jam. Bukan hambatan. |
+| **Setup per pesanan** | ±40 menit (muat kertas, cetak uji registrasi, set creaser, QC, packing & label) |
+| **Per unit** | ±118 dtk jam dinding · **±28 dtk jam tangan** — ±90 dtk printer jalan sendiri |
+| **Bobot 1 set** | **22 g** (A4 220gsm 14 g + amplop 8 g) |
+| **Bahan per unit** | **Rp 3.200** (kertas 900 · amplop 1.500 · label 150 · tinta 500 · gagal 5% 150) |
+| **QR 31 mm** | **cukup** — modul ±0,9 mm pada ecc=H, terbaca 15–25 cm. Jangan diperbesar. |
+| **QR vs lipatan** | aman — **58,8 mm** dari garis lipat |
+
+**Pemisahan jam dinding vs jam tangan adalah temuan terpentingnya** dan tidak ada
+di lembar ini waktu dibuat: dari ±2 menit per unit, 1,5 menit printer bekerja
+sendiri. Batch berikutnya bisa dicetak sambil batch sebelumnya dilipat — jadi
+kapasitas nyata jauh di atas yang diperkirakan.
+
+| Paket | Jam dinding | **Jam tangan** | Marjin | **per jam tangan** |
+|---|---|---|---|---|
+| Hormat 50 | 2,3 | **1,2** | Rp 855rb | **Rp 713rb** |
+| Resepsi 100 | 4,0 | **1,7** | Rp 2,40 jt | **Rp 1,41 jt** |
+| Grand 150 | 5,7 | **2,2** | Rp 5,18 jt | **Rp 2,35 jt** |
+
+**Bobot terukur jauh di bawah catatan lama** — Grand hampir setengahnya:
+
+| Paket | Terukur | Tercatat sebelumnya | Sudah diperbarui di WooCommerce |
+|---|---|---|---|
+| Hormat | 1,4 kg | 2 kg | ✅ |
+| Resepsi | 2,6 kg | 4 kg | ✅ |
+| Grand | 3,8 kg | 7 kg | ✅ |
+
+**Ongkir Rp 150.000 aman.** Terburuk (Grand ke Indonesia Timur) ±Rp 200rb;
+mayoritas pesanan di Jawa ±Rp 35–50rb. Slack **Rp 80–100rb per pesanan**.
+
+---
+
+# Lembar kosong (template pengukuran berikutnya)
 
 **Berkas:** `sampel-cetak-TEST-173.pdf` (3 halaman, A4 lanskap)
 **Dibangkitkan:** 7 Agustus 2026 dari snapshot beku pesanan #173
