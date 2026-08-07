@@ -13,3 +13,6 @@ vps/google-sa.json
 # SERTIFIKAT LISENSINYA justru wajib ikut — itu satu-satunya bukti kepemilikan.
 music/*.mp3
 music/siap/
+
+# Berkas sampel cetak — dibangkitkan ulang dari snapshot, tidak perlu di git
+sampel-cetak-*.pdf
