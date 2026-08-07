@@ -397,7 +397,17 @@ Kesimpulan: hambatan ada di **jalur jaringan lingkungan kerja saya**, bukan di s
 
 - [x] **F4.1** **Snapshot beku** → **SELESAI & LIVE 2026-08-06** — — fondasi semua yang lain. Saat order cetak dikonfirmasi, data dibekukan; seluruh produksi membaca snapshot, bukan data live. Pelanggan yang mengedit setelahnya diberi peringatan bahwa perubahan tidak berlaku untuk cetakan yang sudah diproses. Meta undangan sudah terstruktur rapi — snapshot cukup JSON beku + hash sebagai meta order.
 
-- [~] **F4.2** **Validasi wajib di FORM, bukan di proof** — *bagian QR sudah dikerjakan 2026-08-06:*
+- [~] **F4.2** **Validasi wajib di FORM, bukan di proof** — *bagian QR (2026-08-06) & resolusi foto (2026-08-07) sudah dikerjakan:*
+
+  **Resolusi foto minimum — SELESAI & LIVE 2026-08-07.** Ditolak di titik unggah, bukan di tahap proof: makin telat ketahuan, makin mahal. **Dua ambang, bukan satu** — menolak semua yang tidak ideal akan menjebak pemesan yang memang hanya punya foto seadanya:
+  · sisi pendek **< 640 px → DITOLAK** (tidak layak layar maupun cetak)
+  · sisi pendek **640–900 px → diterima + peringatan lunak** (warna berbeda dari galat: merah untuk sesuatu yang berhasil diunggah hanya membuat pemesan mengira ada yang gagal)
+  **Pesannya menyebut SEBABNYA, bukan cuma gejalanya:** penyebab tersering di Indonesia bukan kamera jelek melainkan foto yang diterima/diteruskan lewat **WhatsApp**, yang mengecilkan gambar tiap kali — jadi pemesan diberi tahu harus minta apa ke fotografer. Halaman form juga menyetel ekspektasi di depan, plus menyebut bahwa foto pertama ikut jadi **gambar preview WhatsApp** (kartu og:image FU.1), supaya pilihannya disengaja.
+  **QRIS sengaja dikecualikan** — kode QR yang sah memang bisa kecil (diuji: 300×300 tetap diterima).
+  **Diverifikasi end-to-end** lewat handler asli (file sintetis disuntikkan ke input via `DataTransfer`): 400×600 ditolak · 800×1200 diterima dengan peringatan · 1500×2000 diterima bersih · QRIS 300×300 diterima.
+  ⚠️ Penegakan ini **client-side saja**. WF-02 memvalidasi mime & ukuran berkas, bukan dimensi. Itu memadai untuk pemesan yang jujur (dan mereka semua begitu); menambahkannya ke WF-02 menuntut ritual import→publish→restart yang tidak sepadan sekarang.
+
+  *Sisa F4.2:* batas panjang field untuk template cetak & pembulatan kuantitas — keduanya menunggu template cetak benar-benar ada; menentukannya sekarang = menebak.
   **QR undangan kini `ecc=H` + `qzone=4`.** Sebelumnya tanpa keduanya: koreksi kesalahan level L (hanya ±7% modul boleh rusak) dan **quiet zone praktis nol** — pola menempel ke tepi gambar. Itu aman-aman saja sebagai lampiran email, tapi QR ini sekarang **dicetak di undangan lipat**: laminasi, lipatan, dan tinta yang sedikit meleber bisa mematikan pemindaian, dan pemindai sering gagal mengunci bila QR dicetak berdampingan dengan ornamen tanpa quiet zone.
   ⚠️ **Jebakan yang terukur:** parameter `margin` pada generator dihitung dalam **piksel** (`margin=4` = 4px, nyaris nol pada gambar 600px). Yang benar `qzone`, dihitung dalam **modul** — terukur 59px ≈ 4 modul. Diverifikasi dengan membandingkan lebar baris putih di ketiga varian, bukan dengan melihat sekilas.
   *Sisa F4.2:* resolusi foto minimum, batas panjang field untuk template cetak, pembulatan kuantitas.

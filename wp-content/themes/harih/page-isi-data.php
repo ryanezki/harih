@@ -185,7 +185,8 @@ $webhook = harih_form_webhook_url();
 
             <section class="kartu">
                 <h2>5. Galeri Foto <span class="paket-badge">Favorit+</span></h2>
-                <p class="kartu-note">Maksimal 10 foto. Foto pertama menjadi sampul undangan. Foto dikompresi otomatis di perangkat Anda sebelum dikirim — aman untuk kuota.</p>
+                <p class="kartu-note">Maksimal 10 foto. Foto pertama menjadi sampul undangan <strong>dan gambar preview saat undangan dibagikan di WhatsApp</strong> — pilih yang terbaik. Foto dikompresi otomatis di perangkat Anda sebelum dikirim, jadi aman untuk kuota.</p>
+                <p class="kartu-note"><strong>Pakai file asli dari fotografer.</strong> Foto yang diterima atau diteruskan lewat WhatsApp sudah dikecilkan sistem WhatsApp — hasilnya buram saat dipakai sebagai sampul.</p>
                 <div class="foto-grid" id="foto-grid"></div>
                 <label class="btn-file" for="input-foto">＋ Pilih foto</label>
                 <input type="file" id="input-foto" accept="image/jpeg,image/png,image/webp" multiple hidden>

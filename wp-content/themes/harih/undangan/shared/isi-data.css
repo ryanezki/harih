@@ -228,7 +228,11 @@ fieldset:disabled { opacity: .6; }
     padding: 11px 18px;
     border-radius: 999px;
 }
-.pesan-file { min-height: 1.1em; margin: 8px 0 0; font-size: 12px; color: var(--error); }
+.pesan-file { min-height: 1.1em; margin: 8px 0 0; font-size: 12px; color: var(--error); line-height: 1.5; }
+/* Peringatan LUNAK (resolusi pas-pasan, F4.2): fotonya tetap dipakai, jadi
+   warnanya harus beda dari penolakan — merah untuk sesuatu yang berhasil
+   diunggah hanya membuat pemesan mengira ada yang gagal. */
+.pesan-file.pesan-lunak { color: var(--warn-ink); }
 
 /* Petunjuk di bawah field — untuk aturan yang tidak muat di placeholder
    (format koordinat, daftar dompet yang diterima). Ditambahkan G1 2026-08-07. */

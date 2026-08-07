@@ -40,16 +40,50 @@
         });
     }
 
+    /* ================= Ambang resolusi foto (F4.2) =================
+
+       Kenapa ada: foto pertama galeri BUKAN cuma tampil di undangan — ia juga
+       jadi kartu og:image 1200×630 yang muncul tiap kali pemesan menyebarkan
+       undangannya (FU.1). Foto kecil berarti undangan buram DAN preview
+       WhatsApp buram, di pengganda klik paling langsung yang kita punya.
+
+       Penyebab paling sering di Indonesia bukan kamera jelek — melainkan foto
+       yang DITERIMA LEWAT WHATSAPP lalu diteruskan lagi: WhatsApp mengecilkan
+       gambar tiap kali. Karena itu pesannya menyebut sebabnya, bukan sekadar
+       "foto terlalu kecil" — pemesan perlu tahu harus minta apa ke fotografer.
+
+       Ditolak di titik unggah (bukan di tahap proof) sesuai F4.2: makin telat
+       ketahuan, makin mahal. Dua ambang, bukan satu — menolak semua yang tidak
+       ideal akan menjebak pemesan yang memang hanya punya foto seadanya. */
+    var MIN_SISI_TOLAK = 640;   // di bawah ini tidak layak cetak maupun layar
+    var MIN_SISI_IDEAL = 900;   // di bawah ini masih dipakai, tapi diberi tahu
+
+    function pesanResolusi(nama, w, h) {
+        return 'Foto "' + nama + '" terlalu kecil (' + w + '×' + h + ' piksel). '
+             + 'Biasanya ini foto yang diterima lewat WhatsApp — WhatsApp mengecilkan gambar. '
+             + 'Minta file aslinya ke fotografer (lewat Google Drive/email), atau pilih dari galeri HP yang memotretnya.';
+    }
+
     /**
      * Re-encode gambar: skala maksimal maxDim px, format keluaran `type`.
      * JPEG untuk foto; PNG untuk QRIS (kode QR rusak oleh artefak JPEG).
      */
-    async function kompres(file, maxDim, type, namaBaru) {
+    async function kompres(file, maxDim, type, namaBaru, minSisiPendek) {
         var url = URL.createObjectURL(file);
         try {
             var img = await loadImage(url);
             var w = img.naturalWidth, h = img.naturalHeight;
             if (!w || !h) throw new Error('gambar tidak terbaca');
+
+            // Ambang resolusi (F4.2). Hanya untuk FOTO — QRIS sengaja tidak
+            // dibatasi karena kode QR yang sah memang bisa kecil.
+            if (minSisiPendek && Math.min(w, h) < minSisiPendek) {
+                var e = new Error('resolusi rendah');
+                e.kode = 'RESOLUSI';
+                e.lebar = w;
+                e.tinggi = h;
+                throw e;
+            }
 
             var scale = Math.min(1, maxDim / Math.max(w, h));
             var canvas = document.createElement('canvas');
@@ -63,7 +97,12 @@
                 blob = await toBlob(canvas, type, 0.65); // foto sangat detail → turunkan kualitas
             }
             var ext = type === 'image/png' ? '.png' : '.jpg';
-            return new File([blob], namaBaru + ext, { type: type });
+            var keluar = new File([blob], namaBaru + ext, { type: type });
+            // Ukuran ASLI (sebelum diskalakan) — dipakai pemanggil untuk
+            // memutuskan apakah perlu peringatan lunak.
+            keluar.asliLebar = w;
+            keluar.asliTinggi = h;
+            return keluar;
         } finally {
             URL.revokeObjectURL(url);
         }
@@ -121,16 +160,30 @@
                 }
                 try {
                     if (pesanFoto) pesanFoto.textContent = 'Memproses foto ' + (i + 1) + '/' + files.length + '…';
-                    var hasil = await kompres(f, 1600, 'image/jpeg', 'foto-' + Date.now() + '-' + i);
+                    var hasil = await kompres(f, 1600, 'image/jpeg', 'foto-' + Date.now() + '-' + i, MIN_SISI_TOLAK);
                     if (hasil.size > cfg.maxSizeMB * 1024 * 1024) {
                         if (pesanFoto) pesanFoto.textContent = 'Foto terlalu besar setelah dikompresi: ' + f.name;
                         continue;
                     }
                     state.foto.push({ file: hasil, url: URL.createObjectURL(hasil) });
                     renderFoto();
-                    if (pesanFoto) pesanFoto.textContent = '';
+                    if (pesanFoto) {
+                        pesanFoto.classList.remove('pesan-lunak');
+                        var pendek = Math.min(hasil.asliLebar || 0, hasil.asliTinggi || 0);
+                        if (pendek && pendek < MIN_SISI_IDEAL) {
+                            pesanFoto.classList.add('pesan-lunak');
+                            pesanFoto.textContent = 'Foto "' + f.name + '" resolusinya pas-pasan ('
+                                + hasil.asliLebar + '×' + hasil.asliTinggi + ') — tetap kami pakai, '
+                                + 'tapi hasilnya akan terlihat lebih lembut. File asli dari fotografer akan jauh lebih tajam.';
+                        } else {
+                            pesanFoto.textContent = '';
+                        }
+                    }
                 } catch (e) {
-                    if (pesanFoto) pesanFoto.textContent = 'Gagal memproses ' + f.name + ' — coba foto lain.';
+                    if (pesanFoto) pesanFoto.textContent = e && e.kode === 'RESOLUSI'
+                        ? pesanResolusi(f.name, e.lebar, e.tinggi)
+                        : 'Gagal memproses ' + f.name + ' — coba foto lain.';
+                    if (pesanFoto) pesanFoto.classList.remove('pesan-lunak');
                 }
             }
             inputFoto.value = '';
