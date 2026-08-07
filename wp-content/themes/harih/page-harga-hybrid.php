@@ -146,7 +146,7 @@ $harih_satuan = [
 
             <article class="paket-card paket-digital">
                 <h3>Digital</h3>
-                <p class="paket-harga-full">mulai <strong>Rp 99 rb</strong></p>
+                <p class="paket-harga-full">mulai <strong>Rp <?php echo esc_html(function_exists('harih_harga_mulai') ? harih_harga_mulai() : 99); ?> rb</strong></p>
                 <p class="paket-sub">Undangan digital saja — jadi otomatis dalam hitungan menit.</p>
                 <ul class="paket-fitur">
                     <li>3 pilihan paket: Hemat, Favorit, Premium</li>

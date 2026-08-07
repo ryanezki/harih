@@ -133,7 +133,7 @@ $harih_aset         = get_stylesheet_directory_uri() . '/aset';
         </div>
         <?php /* Baris trust (temuan review A2): kanal pembayaran disebut sebelum
                  pengunjung menekan apa pun — keberatan "aman tidak?" dijawab di muka. */ ?>
-        <p class="hero-trust"><strong>Mulai Rp 99rb</strong>, sekali bayar · QRIS, VA &amp; e-wallet — gateway berlisensi</p>
+        <p class="hero-trust"><strong>Mulai Rp <?php echo esc_html(harih_harga_mulai()); ?>rb</strong>, sekali bayar · QRIS, VA &amp; e-wallet — gateway berlisensi</p>
     </div>
     <div class="hero-visual">
         <div class="hero-panggung">
@@ -144,7 +144,7 @@ $harih_aset         = get_stylesheet_directory_uri() . '/aset';
                 <img src="<?php echo esc_url($harih_aset . '/demo/harih-gaun-detail.jpg'); ?>" alt="" width="600" height="800" loading="lazy" decoding="async">
             </div>
             <span class="stiker stiker-1">±5 Menit Jadi</span>
-            <span class="stiker stiker-2">Mulai 99rb</span>
+            <span class="stiker stiker-2">Mulai <?php echo esc_html(harih_harga_mulai()); ?>rb</span>
             <span class="stiker stiker-3">langsung ke WA ✦</span>
         </div>
     </div>
@@ -152,7 +152,7 @@ $harih_aset         = get_stylesheet_directory_uri() . '/aset';
 
 <?php
 /* Marquee: konten diduplikasi 2× agar loop translateX(-50%) mulus. */
-$harih_marquee = 'jadi dalam hitungan menit ✦ mulai Rp 99rb sekali bayar ✦ langsung terkirim ke WhatsApp ✦ RSVP &amp; ucapan tamu ✦ amplop digital ✦ nama tamu otomatis di link ✦ ';
+$harih_marquee = 'jadi dalam hitungan menit ✦ mulai Rp ' . harih_harga_mulai() . 'rb sekali bayar ✦ langsung terkirim ke WhatsApp ✦ RSVP &amp; ucapan tamu ✦ amplop digital ✦ nama tamu otomatis di link ✦ ';
 $harih_marquee = str_replace('✦', '<i>✦</i>', $harih_marquee);
 ?>
 <div class="marquee" aria-hidden="true">
@@ -259,7 +259,9 @@ $harih_marquee = str_replace('✦', '<i>✦</i>', $harih_marquee);
             <article class="paket-card<?php echo $unggulan ? ' unggulan' : ''; ?>" data-paket="<?php echo esc_attr(strtolower($p['nama'])); ?>">
                 <?php if ($unggulan) : ?><p class="paket-badge"><?php echo esc_html($p['badge']); ?></p><?php endif; ?>
                 <p class="paket-label"><?php echo esc_html(strtoupper($p['nama'])); ?></p>
-                <p class="paket-harga"><?php echo esc_html($p['harga']); ?><span class="rb"> rb</span></p>
+                <?php /* C5 — harga dibaca dari WooCommerce; angka di definisi paket di atas
+                         tinggal cadangan pre-deploy. Lihat harih_harga_tampil(). */ ?>
+                <p class="paket-harga"><?php echo harih_harga_tampil($p['sku'], $p['harga']); ?></p>
                 <p class="paket-sub"><?php echo $p['sub']; ?></p>
                 <ul class="paket-fitur">
                     <?php foreach ($p['fitur'] as $f) : ?><li><span class="fitur-cek" aria-hidden="true">✓</span><?php echo $f; ?></li><?php endforeach; ?>
@@ -304,7 +306,7 @@ $harih_marquee = str_replace('✦', '<i>✦</i>', $harih_marquee);
              dibiarkan buntu tanpa ajakan. */ ?>
     <section class="cta-penutup">
         <h2>Hari bahagiamu, <em class="aksen-emas-muda">diundang dengan indah</em>.</h2>
-        <p>Mulai Rp 99 ribu, sekali bayar — jadi dalam hitungan menit.</p>
+        <p>Mulai Rp <?php echo esc_html(harih_harga_mulai()); ?> ribu, sekali bayar — jadi dalam hitungan menit.</p>
         <a class="btn btn-terang" href="#paket">Pilih Paket Sekarang →</a>
     </section>
 </main>

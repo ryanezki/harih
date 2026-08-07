@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) exit;
  * pengunjung & LiteSpeed tetap menyajikan berkas lama meski file di server
  * sudah baru, dan perbaikan tampilan terlihat "tidak berpengaruh".
  */
-const HARIH_VERSION = '2.19.0';
+const HARIH_VERSION = '2.20.0';
 
 add_action('after_setup_theme', function () {
     add_theme_support('title-tag');
@@ -510,6 +510,76 @@ add_action('wp_head', function () {
  * `/shop/` duplikat katalog front page dan bersaing untuk kata kunci yang sama
  * (halaman produk tetap boleh terindeks — itu bisa punya nilai cari sendiri).
  */
+/* =========================================================================
+ * Harga paket digital — SATU sumber: WooCommerce.
+ *
+ * Sebelumnya angka 99/179/299 ditulis sebagai teks di SEMBILAN tempat lintas
+ * tiga halaman. `/satuan/` sudah lama melakukannya dengan benar dan menuliskan
+ * alasannya sendiri: "harga di halaman ini tidak akan pernah berbeda dari harga
+ * yang ditagihkan checkout" — katalog justru satu-satunya etalase produk
+ * digital yang tidak terhubung ke sumber harganya.
+ *
+ * Jendelanya sempit hari ini (harga terkunci, tidak ada promo) tapi terbuka
+ * lebar pada hari promo dipasang: kartu paket ikut berubah sementara lima
+ * kalimat "mulai Rp 99rb" tetap menyebut angka lama. Drift semacam ini sudah
+ * pernah terjadi di proyek ini.
+ * ========================================================================= */
+
+/** Harga aktif sebuah SKU dalam satuan RIBU, atau null bila tidak tersedia. */
+function harih_harga_ribu(string $sku): ?int {
+    if (!function_exists('wc_get_product_id_by_sku')) return null;
+    $id = (int) wc_get_product_id_by_sku($sku);
+    $p  = $id ? wc_get_product($id) : null;
+    if (!$p) return null;
+    $harga = (float) $p->get_price();               // sudah memperhitungkan harga promo
+    if ($harga <= 0 || fmod($harga, 1000) !== 0.0) return null;
+    return (int) round($harga / 1000);
+}
+
+/**
+ * Markup harga untuk kartu paket. Mengembalikan HTML yang sudah aman.
+ *
+ * Bila harga BUKAN kelipatan seribu (mis. promo Rp 89.500), format "rb" tidak
+ * lagi jujur — jadi ditampilkan penuh lewat `wc_price()`. Lebih baik tampilan
+ * yang sedikit berbeda daripada angka yang salah.
+ */
+function harih_harga_tampil(string $sku, string $cadangan): string {
+    $rb = harih_harga_ribu($sku);
+    if ($rb !== null) {
+        return esc_html((string) $rb) . '<span class="rb"> rb</span>';
+    }
+    if (function_exists('wc_get_product_id_by_sku') && function_exists('wc_price')) {
+        $id = (int) wc_get_product_id_by_sku($sku);
+        $p  = $id ? wc_get_product($id) : null;
+        if ($p && (float) $p->get_price() > 0) {
+            return wp_kses_post(wc_price($p->get_price()));
+        }
+    }
+    // Pre-deploy (produk belum dibuat): pakai angka di definisi paket.
+    return esc_html($cadangan) . '<span class="rb"> rb</span>';
+}
+
+/**
+ * Harga paket digital TERMURAH dalam satuan ribu — untuk kalimat "mulai Rp …".
+ *
+ * ⚠️ SENGAJA TIDAK memakai `harih_harga_ribu()`: fungsi itu menolak harga yang
+ * bukan kelipatan seribu, dan menolaknya di sini justru berbahaya. Diuji dengan
+ * promo Rp 89.500 — Hemat terlempar dari hitungan dan kalimatnya berubah jadi
+ * "mulai Rp 179rb", yaitu MELEBIHKAN harga masuk dua kali lipat. Yang benar:
+ * pakai harga termurah apa adanya lalu bulatkan KE BAWAH, bentuk lazim untuk
+ * klaim "mulai dari" dan tidak pernah melebihkan.
+ */
+function harih_harga_mulai(int $cadangan = 99): int {
+    if (!function_exists('wc_get_product_id_by_sku')) return $cadangan;
+    $harga = [];
+    foreach (['HARIH-HEMAT', 'HARIH-FAVORIT', 'HARIH-PREMIUM'] as $sku) {
+        $id = (int) wc_get_product_id_by_sku($sku);
+        $p  = $id ? wc_get_product($id) : null;
+        if ($p && (float) $p->get_price() > 0) $harga[] = (float) $p->get_price();
+    }
+    return $harga ? max(1, (int) floor(min($harga) / 1000)) : $cadangan;
+}
+
 /**
  * Gerbang pembayaran sudah bisa menerima uang SUNGGUHAN?
  *
