@@ -54,9 +54,11 @@ Empat halaman bertoken tidak memanggil `nocache_headers()` sementara produksi me
   (b) `const paket = ['hemat','favorit','premium'].includes(...)` sementara **WF-01 menulis kolom sheet `premium+cetak`** untuk order hybrid (`Append Baris Order`: `$json.paket + '+cetak'`) → begitu (a) diperbaiki, pembeli Rp 2,9 juta jatuh ke tier **Hemat**: galeri hilang, love story kosong, masa aktif 7 hari.
   **Selesai bila:** node memuat `const raw = String(row.paket||'').toLowerCase(); const adaCetak = raw.endsWith('+cetak') || raw === 'cetak'; const tier = raw.replace('+cetak',''); const paket = ['hemat','favorit','premium'].includes(tier) ? tier : 'hemat';` — dan uji dengan baris sheet `paket=premium+cetak` menghasilkan undangan tier premium dengan blok **daftar tamu** (bukan blok upsell) di pesan delivery.
 
-- [ ] **A2** 🤝 `menit` — **Tarik WF-01 & WF-02 dari container SEBELUM import**
-  Repo belum tentu sama dengan yang hidup — insiden 2026-08-07 menunjukkan `import:workflow` diam-diam memakai berkas basi. Kalau live ternyata sudah benar dan repo yang rusak, import A1 justru **merusak yang hidup**.
-  **Selesai bila:** `docker exec harih-n8n n8n export:workflow --id=XLtEUPxG3aeI48IP` dijalankan, isinya dibandingkan dengan repo, selisihnya dicatat di sini. Import hanya setelah selisihnya dipahami.
+- [x] **A2** 🤝 `menit` — **Tarik WF-01 & WF-02 dari container SEBELUM import** → **SELESAI 2026-08-07**
+  **Hasil: repo IDENTIK dengan yang hidup — nol drift.** Diekspor dari container `harih-n8n` lalu dibandingkan per node: WF-01 29/29 node, WF-02 41/41 node, **0 parameter berbeda** di keduanya. `updatedAt` live WF-01 `2026-08-06T00:32:47Z`, WF-02 `2026-08-06T21:32:39Z` (= 07-08 04:32 WIB, konsisten dengan landing-nya paket G1).
+  **Konsekuensi:** aman meng-import A1 — tidak ada pekerjaan live yang akan tertimpa. Dan **bug A1 terkonfirmasi ada di produksi**, bukan hanya di repo: ekspor live menunjukkan `adaCetak` dipakai di baris 115 tanpa satu pun deklarasi, dan whitelist tier tetap tidak mengupas sufiks.
+  **Temuan sampingan yang memperburuk A1:** `settings` WF-01 & WF-02 live = `{"executionOrder":"v1","timezone":"Asia/Jakarta"}` — **tidak ada `errorWorkflow`**. Jadi saat `ReferenceError` itu terjadi pada pembeli sungguhan, WF-00 tidak menyala dan tidak ada satu pun alert. Gagal senyap, persis seperti diduga B3.
+  **9 workflow hidup, tidak ada duplikat** (`n8n list:workflow`) — jadi kerusakan yang ditakutkan B3 belum terjadi; ia baru akan terjadi pada import berikutnya atas kelima berkas tanpa `id`.
 
 - [ ] **A3** 🤝 `jam` — **Uji happy-path end-to-end: satu order dari nol sampai undangan terbit**
   Ini akar sebenarnya dari A1. Semua uji yang ada adalah uji **negatif** — `cek-live.sh:93` hanya menguji token salah → 403. Jalur `route:'ok'`, satu-satunya jalur pembeli sah, belum pernah dieksekusi sekali pun. Tanpa uji ini, perbaikan A1 pun cuma keyakinan.
@@ -98,7 +100,18 @@ Empat halaman bertoken tidak memanggil `nocache_headers()` sementara produksi me
 
 - [ ] **B3** 🤝 `menit` — **errorWorkflow tidak terikat, dan 5 JSON tanpa `id` akan membuat workflow DUPLIKAT**
   Hanya WF-06 punya `errorWorkflow`, dan isinya **nama** ("WF-00") bukan ID — ikatan itu tidak menunjuk apa pun. Akibatnya `runbook.md:20` ("kalau tidak ada alert, sistem sehat") jadi janji kosong. Lebih tajam: **WF-00, WF-03, WF-04, WF-07, WF-08 tidak punya `id` sama sekali** — import atas berkas itu membuat workflow baru alih-alih menimpa, meninggalkan duplikat sementara versi lama tetap aktif. WF-06 juga kehilangan `timezone: Asia/Jakarta` padahal ia cron 09:00 WIB.
-  **Selesai bila:** ID live diambil (`n8n list:workflow`), ditanam di lima JSON · `errorWorkflow: <ID-WF-00>` di kesembilan blok settings · timezone WF-06 dikembalikan · diverifikasi dari yang **hidup** lewat `export:workflow` + grep, dan sekali dipaksa error untuk membuktikan alertnya sampai.
+  **Terkonfirmasi 2026-08-07 (A2):** `settings` WF-01 & WF-02 live memang tanpa `errorWorkflow` — alert tidak akan pernah sampai. `n8n list:workflow` menunjukkan 9 workflow, **belum ada duplikat**; kerusakan itu baru terjadi pada import berikutnya atas kelima berkas tanpa `id`.
+  **ID live sudah diambil — tinggal ditanam ke JSON:**
+
+  | Berkas | `id` live |
+  |---|---|
+  | WF-00-error-handler | `sJ0vsHhFyPotbxMg` ← ini yang dipakai sebagai `errorWorkflow` |
+  | WF-03-onboarding-reseller | `k6LyfYoYds47al38` |
+  | WF-04-rekap-komisi | `539zvR4mzQ5PObJ6` |
+  | WF-07-monitor-waha | `AbxU2iCdYmKRx5G0` |
+  | WF-08-rekonsiliasi-order | `AI0ofPRSqBhbLbwO` |
+
+  **Selesai bila:** kelima `id` di atas ditanam · `errorWorkflow: "sJ0vsHhFyPotbxMg"` di kesembilan blok settings · timezone WF-06 dikembalikan · diverifikasi dari yang **hidup** lewat `export:workflow` + grep, dan sekali dipaksa error untuk membuktikan alertnya sampai.
 
 - [ ] **B4** 🤖 `menit` — **WF-01 `Baca Ulang Orders` tanpa `alwaysOutputData`**
   Node punya `retryOnFail` tapi tidak `alwaysOutputData`, sementara node berikutnya dibuka dengan `throw new Error('Verifikasi idempotency gagal...')` yang jelas ditulis untuk kasus nol baris. Bila lookup mengembalikan 0 item, n8n tidak menjalankan node hilir sama sekali — throw itu **tidak pernah dieksekusi**, eksekusi berakhir SUKSES, email & WA tidak terkirim, dan barisnya tetap ada di sheet sehingga WF-08 tidak menganggapnya tertinggal. Baru berguna setelah B3 beres.
@@ -204,6 +217,7 @@ Empat halaman bertoken tidak memanggil `nocache_headers()` sementara produksi me
 
 - [ ] **D4** 🤝 `jam` — **Infrastruktur VPS: healthcheck WAHA, batas log & disk, satu nomor WA merangkap dua peran**
   (a) `docker-compose.traefik.yml:81-104` memakai `restart: unless-stopped` **tanpa `healthcheck:`** pada engine WEBJS berbasis Chromium — yang khasnya menggantung sambil container tetap "up", jadi Docker tidak akan menyentuhnya.
+  (a2) **Image n8n tidak terpin** — `docker ps` 2026-08-07 menunjukkan `n8nio/n8n:latest`, sementara WAHA justru terpin rapi (`devlikeapro/waha:latest-2026.7.2`). Klaim "Docker terpin" di dokumen lama hanya benar untuk WAHA. Satu `docker compose pull` yang tidak disengaja bisa memindahkan n8n ke versi mayor baru di server yang menjalankan 9 workflow produksi.
   (b) Kedua compose tidak memuat `logging:` maupun batas memori, dan volume `harih_waha_media` tidak punya pembersih, sementara `backup-harih.sh:97` sengaja tidak pernah menghapus mirror uploads — semua penumpuk tumbuh monoton di disk 25 GB yang dipakai bersama n8n produksi lain milik owner. (Pemakaian sekarang 0,8 GB — belum mendesak.)
   (c) Satu nomor adalah sekaligus sesi WAHA 9 workflow **dan** satu-satunya CTA penjualan cetak — sementara `evaluasi-ide-genz.md:40` menolak RSVP-lewat-WA justru karena "ratusan nomor asing menghubungi satu nomor" adalah pola yang membuat sesi di-ban. **Rencana penjualan yang berhasil menciptakan beban itu.**
   **Selesai bila:** `logging: {max-size: 10m, max-file: 3}` di kedua compose · cek disk dititipkan ke `backup-harih.sh` yang sudah punya cron host & jalur alert mandiri (`[ "$PAKAI" -lt 80 ] || alert_gagal disk`) · healthcheck WAHA dipasang **hanya setelah** endpoint `/health` dan ketersediaan `wget` diverifikasi di dalam container (healthcheck salah perintah = Docker membunuh container sehat) · auto-restart sesi hanya bila ada rem maks 1×/jam dan hanya untuk status `STOPPED`/`FAILED`. Pemisahan nomor menunggu keputusan owner.
