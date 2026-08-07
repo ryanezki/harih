@@ -1,5 +1,6 @@
 {
   "name": "WF-04 — Rekap Komisi (hariH)",
+  "id": "539zvR4mzQ5PObJ6",
   "nodes": [
     {
       "parameters": {
@@ -294,7 +295,8 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "timezone": "Asia/Jakarta"
+    "timezone": "Asia/Jakarta",
+    "errorWorkflow": "sJ0vsHhFyPotbxMg"
   },
   "pinData": {}
 }

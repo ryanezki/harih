@@ -70,6 +70,8 @@ ssh root@31.97.50.197 'docker exec harih-n8n n8n export:workflow --id=<ID> --out
 # tarik & bandingkan jsCode-nya dengan berkas repo
 ```
 
+**Jebakan ketiga — `import:workflow` MENONAKTIFKAN workflow yang diimpor.** Terukur 2026-08-07: sebelum import 9 aktif, sesudah import **0 aktif** — tanpa satu pun pesan peringatan, dan `list:workflow` tetap menampilkan kesembilannya seolah tidak ada yang berubah. Selama jendela itu webhook `wc-order` & `form-undangan` mati: order yang masuk **hilang tanpa jejak**. Karena itu `publish:workflow` bukan langkah opsional dan **wajib dijalankan untuk SETIAP id yang diimpor**, bukan hanya yang isinya berubah. Urutan aman: import semua → publish semua → `docker restart harih-n8n` → **hitung ulang** `list:workflow --active=true` (harus kembali ke 9) → baru verifikasi isi. Kerjakan saat tidak ada order berjalan.
+
 **Jebakan yang memakan waktu 2026-08-07 — import diam-diam memakai berkas BASI.** `scp` ke `/tmp` server gagal (`Permission denied`: di sana masih ada berkas milik uid lain dari sesi sebelumnya, dan `/tmp` ber-sticky-bit), **tapi perintah import tetap sukses** — memakai berkas 6 Agustus yang tergeletak di sana. Akibatnya WF-02 live sempat mundur ke versi lama tanpa satu pun pesan galat. Karena itu: unggah ke `/root/wf-import/`, pakai nama berkas baru di container, dan **selalu periksa isinya dari dalam container sebelum import**.
 
 **Jebakan kedua — `EACCES` saat import dari `/root` di dalam container.** Proses n8n berjalan sebagai user `node`; ia tidak bisa membaca `/root/*` di dalam container. Salin ke `/tmp` **di dalam container** (bukan di host).

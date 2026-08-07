@@ -48,11 +48,19 @@ Empat halaman bertoken tidak memanggil `nocache_headers()` sementara produksi me
 
 > Semuanya harus tuntas **sebelum** Duitku production dinyalakan. Jangan sampai order berbayar pertama yang jadi alat ujinya.
 
-- [ ] **A1** 🤖 `menit` — **WF-02: deklarasikan `adaCetak` + kupas sufiks `+cetak` sebelum whitelist tier**
-  **Dua bug, satu node, satu ronde import** (ritual import→publish→restart mahal dan terbukti rawan).
-  (a) `ada_cetak: adaCetak` memakai identifier tak dideklarasikan → `ReferenceError` di jalur `route:'ok'` → pembeli dapat HTTP 500, tidak ada undangan terbit.
-  (b) `const paket = ['hemat','favorit','premium'].includes(...)` sementara **WF-01 menulis kolom sheet `premium+cetak`** untuk order hybrid (`Append Baris Order`: `$json.paket + '+cetak'`) → begitu (a) diperbaiki, pembeli Rp 2,9 juta jatuh ke tier **Hemat**: galeri hilang, love story kosong, masa aktif 7 hari.
-  **Selesai bila:** node memuat `const raw = String(row.paket||'').toLowerCase(); const adaCetak = raw.endsWith('+cetak') || raw === 'cetak'; const tier = raw.replace('+cetak',''); const paket = ['hemat','favorit','premium'].includes(tier) ? tier : 'hemat';` — dan uji dengan baris sheet `paket=premium+cetak` menghasilkan undangan tier premium dengan blok **daftar tamu** (bukan blok upsell) di pesan delivery.
+- [x] **A1** 🤖 `menit` — **WF-02: deklarasikan `adaCetak` + kupas sufiks `+cetak`** → **SELESAI & LIVE 2026-08-07**
+  Diimpor bersama B3 dalam satu ronde. **Terverifikasi dari ekspor live** (bukan dari yang dikirim): `const adaCetak = raw.endsWith('+cetak') || raw === 'cetak'` ada di baris 22, `const tier = raw.replace('+cetak', '')` di baris 23, dan seluruh 41 node WF-02 + 29 node WF-01 kini identik dengan repo. Smoke test 21/21.
+  Logikanya diuji lebih dulu **di runtime n8n yang sebenarnya** (`docker exec -i harih-n8n node`) atas 10 kasus: `premium+cetak`→premium · `favorit+cetak`→favorit · `hemat+cetak`→hemat · `PREMIUM+CETAK`→premium (huruf besar) · `cetak`/`''`/`null`→hemat. `adaCetak` benar di kesepuluhnya.
+  ⚠️ **Belum dibuktikan end-to-end** — yang diuji adalah logika tier dan bahwa webhook merespons, bukan satu order utuh sampai undangan terbit. **A3 masih wajib**; sampai itu lewat, perbaikan ini masih keyakinan yang beralasan, bukan bukti.
+  <details><summary>Isi perubahan (untuk rujukan)</summary>
+
+  ```js
+  const raw = String(row.paket || '').toLowerCase();
+  const adaCetak = raw.endsWith('+cetak') || raw === 'cetak';
+  const tier = raw.replace('+cetak', '');
+  const paket = ['hemat', 'favorit', 'premium'].includes(tier) ? tier : 'hemat';
+  ```
+  </details>
 
 - [x] **A2** 🤝 `menit` — **Tarik WF-01 & WF-02 dari container SEBELUM import** → **SELESAI 2026-08-07**
   **Hasil: repo IDENTIK dengan yang hidup — nol drift.** Diekspor dari container `harih-n8n` lalu dibandingkan per node: WF-01 29/29 node, WF-02 41/41 node, **0 parameter berbeda** di keduanya. `updatedAt` live WF-01 `2026-08-06T00:32:47Z`, WF-02 `2026-08-06T21:32:39Z` (= 07-08 04:32 WIB, konsisten dengan landing-nya paket G1).
@@ -98,20 +106,14 @@ Empat halaman bertoken tidak memanggil `nocache_headers()` sementara produksi me
   `functions.php:459-461` hanya mengecualikan undangan dan `/isi-data/`, sementara `functions.php:442-450` menulis alasannya sendiri: URL halaman ini memuat token order — sebuah bearer credential — dan GA4 mengirim URL lengkap sebagai `page_location`. Keempat halaman lain memakai token yang sama dan sama-sama memasang `<meta name="referrer" content="no-referrer">`: penulisnya tahu tokennya sensitif, hanya lupa pengecualian GA4-nya. Kebijakan Privasi **sudah tayang** berjanji halaman bertoken "tidak boleh dikirim ke pihak ketiga mana pun".
   **Selesai bila:** helper `harih_halaman_bertoken()` berisi kelima template, dipakai di blok GA4, filter `wp_robots`, dan `harih_halaman_utilitas()` — supaya halaman bertoken berikutnya otomatis ikut terlindungi.
 
-- [ ] **B3** 🤝 `menit` — **errorWorkflow tidak terikat, dan 5 JSON tanpa `id` akan membuat workflow DUPLIKAT**
-  Hanya WF-06 punya `errorWorkflow`, dan isinya **nama** ("WF-00") bukan ID — ikatan itu tidak menunjuk apa pun. Akibatnya `runbook.md:20` ("kalau tidak ada alert, sistem sehat") jadi janji kosong. Lebih tajam: **WF-00, WF-03, WF-04, WF-07, WF-08 tidak punya `id` sama sekali** — import atas berkas itu membuat workflow baru alih-alih menimpa, meninggalkan duplikat sementara versi lama tetap aktif. WF-06 juga kehilangan `timezone: Asia/Jakarta` padahal ia cron 09:00 WIB.
-  **Terkonfirmasi 2026-08-07 (A2):** `settings` WF-01 & WF-02 live memang tanpa `errorWorkflow` — alert tidak akan pernah sampai. `n8n list:workflow` menunjukkan 9 workflow, **belum ada duplikat**; kerusakan itu baru terjadi pada import berikutnya atas kelima berkas tanpa `id`.
-  **ID live sudah diambil — tinggal ditanam ke JSON:**
+- [x] **B3** 🤝 `menit` — **errorWorkflow terikat + 5 `id` ditanam** → **SELESAI & LIVE 2026-08-07**
+  Diimpor bersama A1. **Terverifikasi dari ekspor live kesembilan workflow:** delapan memuat `"errorWorkflow":"sJ0vsHhFyPotbxMg"`, WF-06 mendapat `timezone: Asia/Jakarta` kembali, dan **9 workflow tetap 9 — nol duplikat**, karena kelima `id` sudah tertanam sebelum import.
+  **Keputusan yang menyimpang dari rencana:** `errorWorkflow` **tidak** dipasang di WF-00 (rencana semula menyebut "kesembilan"). Error handler yang menunjuk dirinya sendiri berisiko loop saat WF-00 sendiri yang gagal. Delapan sisanya cukup.
+  ⚠️ **Belum dibuktikan alertnya benar-benar sampai** — ikatannya ada, tapi belum pernah dipaksa error. Uji itu digabungkan ke A3.
+  <details><summary>ID live yang ditanam (untuk rujukan)</summary>
 
-  | Berkas | `id` live |
-  |---|---|
-  | WF-00-error-handler | `sJ0vsHhFyPotbxMg` ← ini yang dipakai sebagai `errorWorkflow` |
-  | WF-03-onboarding-reseller | `k6LyfYoYds47al38` |
-  | WF-04-rekap-komisi | `539zvR4mzQ5PObJ6` |
-  | WF-07-monitor-waha | `AbxU2iCdYmKRx5G0` |
-  | WF-08-rekonsiliasi-order | `AI0ofPRSqBhbLbwO` |
-
-  **Selesai bila:** kelima `id` di atas ditanam · `errorWorkflow: "sJ0vsHhFyPotbxMg"` di kesembilan blok settings · timezone WF-06 dikembalikan · diverifikasi dari yang **hidup** lewat `export:workflow` + grep, dan sekali dipaksa error untuk membuktikan alertnya sampai.
+  WF-00 `sJ0vsHhFyPotbxMg` · WF-03 `k6LyfYoYds47al38` · WF-04 `539zvR4mzQ5PObJ6` · WF-07 `AbxU2iCdYmKRx5G0` · WF-08 `AI0ofPRSqBhbLbwO`
+  </details>
 
 - [ ] **B4** 🤖 `menit` — **WF-01 `Baca Ulang Orders` tanpa `alwaysOutputData`**
   Node punya `retryOnFail` tapi tidak `alwaysOutputData`, sementara node berikutnya dibuka dengan `throw new Error('Verifikasi idempotency gagal...')` yang jelas ditulis untuk kasus nol baris. Bila lookup mengembalikan 0 item, n8n tidak menjalankan node hilir sama sekali — throw itu **tidak pernah dieksekusi**, eksekusi berakhir SUKSES, email & WA tidak terkirim, dan barisnya tetap ada di sheet sehingga WF-08 tidak menganggapnya tertinggal. Baru berguna setelah B3 beres.
@@ -217,7 +219,7 @@ Empat halaman bertoken tidak memanggil `nocache_headers()` sementara produksi me
 
 - [ ] **D4** 🤝 `jam` — **Infrastruktur VPS: healthcheck WAHA, batas log & disk, satu nomor WA merangkap dua peran**
   (a) `docker-compose.traefik.yml:81-104` memakai `restart: unless-stopped` **tanpa `healthcheck:`** pada engine WEBJS berbasis Chromium — yang khasnya menggantung sambil container tetap "up", jadi Docker tidak akan menyentuhnya.
-  (a2) **Image n8n tidak terpin** — `docker ps` 2026-08-07 menunjukkan `n8nio/n8n:latest`, sementara WAHA justru terpin rapi (`devlikeapro/waha:latest-2026.7.2`). Klaim "Docker terpin" di dokumen lama hanya benar untuk WAHA. Satu `docker compose pull` yang tidak disengaja bisa memindahkan n8n ke versi mayor baru di server yang menjalankan 9 workflow produksi.
+  (a2) **Container n8n tidak dibuat dari pin-nya** — kedua compose menulis `n8nio/n8n:2.29.10`, tapi `docker inspect` 2026-08-07 menunjukkan container dibuat dari **`n8nio/n8n:latest`**. Versi yang berjalan kebetulan **memang** 2.29.10 (`n8n --version`), jadi tidak ada masalah hari ini — tapi yang melindunginya kebetulan, bukan pin: satu `docker pull n8nio/n8n:latest` + recreate memindahkan n8n ke versi mayor baru tanpa menyentuh compose. WAHA tidak punya masalah ini (dibuat dari tag terpin). Perbaikan: recreate n8n dari compose (`docker compose up -d --no-deps n8n` — **jangan** bare `up -d`, berisiko me-recreate WAHA) supaya container terikat ke tag yang tertulis.
   (b) Kedua compose tidak memuat `logging:` maupun batas memori, dan volume `harih_waha_media` tidak punya pembersih, sementara `backup-harih.sh:97` sengaja tidak pernah menghapus mirror uploads — semua penumpuk tumbuh monoton di disk 25 GB yang dipakai bersama n8n produksi lain milik owner. (Pemakaian sekarang 0,8 GB — belum mendesak.)
   (c) Satu nomor adalah sekaligus sesi WAHA 9 workflow **dan** satu-satunya CTA penjualan cetak — sementara `evaluasi-ide-genz.md:40` menolak RSVP-lewat-WA justru karena "ratusan nomor asing menghubungi satu nomor" adalah pola yang membuat sesi di-ban. **Rencana penjualan yang berhasil menciptakan beban itu.**
   **Selesai bila:** `logging: {max-size: 10m, max-file: 3}` di kedua compose · cek disk dititipkan ke `backup-harih.sh` yang sudah punya cron host & jalur alert mandiri (`[ "$PAKAI" -lt 80 ] || alert_gagal disk`) · healthcheck WAHA dipasang **hanya setelah** endpoint `/health` dan ketersediaan `wget` diverifikasi di dalam container (healthcheck salah perintah = Docker membunuh container sehat) · auto-restart sesi hanya bila ada rem maks 1×/jam dan hanya untuk status `STOPPED`/`FAILED`. Pemisahan nomor menunggu keputusan owner.
@@ -270,12 +272,13 @@ Empat halaman bertoken tidak memanggil `nocache_headers()` sementara produksi me
 ## ⚠️ Wajib dibaca sebelum menyentuh n8n / deploy
 
 1. **Import n8n bisa diam-diam memakai berkas BASI.** `scp` ke `/tmp` server gagal (uid lain + sticky bit) **tapi `import:workflow` tetap melaporkan sukses** — WF-02 live sempat mundur tanpa satu pesan galat. Prosedur benar (unggah ke `/root/wf-import`, nama baru di container, **periksa isi dari dalam container**, verifikasi hasil ekspor) ada di [`../n8n/workflows/README.md`](../n8n/workflows/README.md). → lihat juga A2 & B3.
-2. **Container hariH bernama `harih-n8n`.** VPS yang sama menjalankan **`root-n8n-1`** — n8n produksi lain milik owner. Jangan pernah menjalankan perintah n8n tanpa menyebut container.
-3. **Jangan taruh node yang bisa menghasilkan NOL item di tengah rantai.** Node HTTP n8n memecah respons array jadi satu item per elemen, jadi `[]` = nol item = seluruh cabang berikutnya tidak dijalankan, **tanpa galat**. Ini sempat mematikan seluruh reminder harian, dan pola yang sama menyembunyikan alert di WF-08 (C7).
-4. **Restart n8n:** `docker restart harih-n8n`. Hindari bare `docker compose up -d` — berisiko me-recreate WAHA.
-5. **OPcache:** perubahan mu-plugin butuh sampai ±60 dtk sebelum web SAPI menyajikannya, dan `wp eval` **tidak** memperlihatkannya (CLI punya cache sendiri). Lihat [`runbook.md`](./runbook.md) §9d.
-6. **Naikkan `HARIH_VERSION`** setiap menyentuh CSS/JS.
-7. **`cek-live.sh` bisa memunculkan `HTTP 000` palsu** — hambatan ada di jalur jaringan lingkungan kerja, bukan di situs (didiagnosis 2026-08-06: DNS 0,002 dtk, TCP normal, TLS menggantung, mengenai Hostinger **dan** VPS serentak, kontrol ke host luar tidak pernah gagal). **Ulangi per URL sebelum menyimpulkan ada regresi. Jangan naikkan paket hosting atas dasar ini.**
+2. **`import:workflow` MENONAKTIFKAN workflow yang diimpor — tanpa peringatan.** Terukur 2026-08-07: sebelum import 9 aktif, sesudah **0 aktif**, sementara `list:workflow` tetap menampilkan kesembilannya seolah tidak ada yang berubah. Selama jendela itu webhook `wc-order` & `form-undangan` mati — **order yang masuk hilang tanpa jejak**. Jadi `publish:workflow` wajib dijalankan untuk **setiap** id yang diimpor, bukan hanya yang isinya berubah, lalu `docker restart harih-n8n`, lalu **hitung ulang** `list:workflow --active=true` (harus kembali ke 9). Kerjakan saat tidak ada order berjalan.
+3. **Container hariH bernama `harih-n8n`.** VPS yang sama menjalankan **`root-n8n-1`** — n8n produksi lain milik owner. Jangan pernah menjalankan perintah n8n tanpa menyebut container.
+4. **Jangan taruh node yang bisa menghasilkan NOL item di tengah rantai.** Node HTTP n8n memecah respons array jadi satu item per elemen, jadi `[]` = nol item = seluruh cabang berikutnya tidak dijalankan, **tanpa galat**. Ini sempat mematikan seluruh reminder harian, dan pola yang sama menyembunyikan alert di WF-08 (C7).
+5. **Restart n8n:** `docker restart harih-n8n`. Hindari bare `docker compose up -d` — berisiko me-recreate WAHA.
+6. **OPcache:** perubahan mu-plugin butuh sampai ±60 dtk sebelum web SAPI menyajikannya, dan `wp eval` **tidak** memperlihatkannya (CLI punya cache sendiri). Lihat [`runbook.md`](./runbook.md) §9d.
+7. **Naikkan `HARIH_VERSION`** setiap menyentuh CSS/JS.
+8. **`cek-live.sh` bisa memunculkan `HTTP 000` palsu** — hambatan ada di jalur jaringan lingkungan kerja, bukan di situs (didiagnosis 2026-08-06: DNS 0,002 dtk, TCP normal, TLS menggantung, mengenai Hostinger **dan** VPS serentak, kontrol ke host luar tidak pernah gagal). **Ulangi per URL sebelum menyimpulkan ada regresi. Jangan naikkan paket hosting atas dasar ini.**
 
 ---
 

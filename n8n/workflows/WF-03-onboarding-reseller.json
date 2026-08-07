@@ -1,5 +1,6 @@
 {
   "name": "WF-03 — Onboarding Reseller (hariH)",
+  "id": "k6LyfYoYds47al38",
   "nodes": [
     {
       "parameters": {
@@ -1555,7 +1556,8 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "timezone": "Asia/Jakarta"
+    "timezone": "Asia/Jakarta",
+    "errorWorkflow": "sJ0vsHhFyPotbxMg"
   },
   "pinData": {}
 }

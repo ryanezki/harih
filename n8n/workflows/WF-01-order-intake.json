@@ -1,6 +1,6 @@
 {
-  "id": "3N6P6sNMFlSrcXBV",
   "name": "WF-01 — Order Intake (hariH)",
+  "id": "3N6P6sNMFlSrcXBV",
   "nodes": [
     {
       "parameters": {
@@ -1378,7 +1378,8 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "timezone": "Asia/Jakarta"
+    "timezone": "Asia/Jakarta",
+    "errorWorkflow": "sJ0vsHhFyPotbxMg"
   },
   "pinData": {}
 }
