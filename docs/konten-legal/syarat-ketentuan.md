@@ -2,11 +2,11 @@
 
 > Dipublikasikan sebagai halaman situs pada 22 Juli 2026.
 
-Terakhir diperbarui: 7 Agustus 2026
+Terakhir diperbarui: 8 Agustus 2026
 
 ## 1. Tentang Layanan
 
-hariH (harih.id) adalah layanan pembuatan undangan digital berbasis web, serta — untuk paket tertentu — **produk cetak fisik pendukung acara** (misalnya kartu QR akses, label souvenir, kartu terima kasih, stiker segel). Undangan digital dibuat otomatis berdasarkan data yang Anda isi dan dikirimkan melalui email serta WhatsApp; produk cetak diproduksi berdasarkan data yang sama setelah Anda menyetujui pratinjau (proof). Dengan melakukan pemesanan, Anda menyetujui Syarat & Ketentuan ini.
+hariH (harih.id) adalah layanan pembuatan undangan digital berbasis web, serta — untuk paket tertentu — **produk cetak fisik**: **undangan cetak lipat (A4 dilipat menjadi A5) beserta amplop bernama tamu** sebagai produk utamanya, dan produk pendukung acara seperti label souvenir, kartu terima kasih, stiker segel, hangtag, kartu ber-QR, set label seserahan, serta ID card panitia — tersedia di dalam paket maupun sebagai item satuan. Undangan digital dibuat otomatis berdasarkan data yang Anda isi dan dikirimkan melalui email serta WhatsApp; produk cetak diproduksi berdasarkan data yang sama setelah Anda menyetujui pratinjau (proof). Dengan melakukan pemesanan, Anda menyetujui Syarat & Ketentuan ini.
 
 Ketentuan ini berlaku untuk semua pesanan; **§12 (Produk Cetak Fisik) hanya berlaku bila pesanan Anda memuat produk cetak.**
 
@@ -96,7 +96,7 @@ Ketiganya adalah kewajiban kontraktual kami, bukan sekadar materi pemasaran:
 
 | Garansi | Janji kami |
 |---|---|
-| **Garansi QR Terbaca** | Setiap batch kartu QR diuji pindai sebelum dikirim. Bila ada QR yang gagal terbaca (bukan karena kerusakan fisik setelah diterima), **seluruh batch kami ganti tanpa biaya**. |
+| **Garansi QR Terbaca** | Setiap cetakan ber-QR — baik **QR pada undangan cetak lipat** maupun **kartu ber-QR** — diuji pindai sebelum dikirim. Bila ada QR yang gagal terbaca (bukan karena kerusakan fisik setelah diterima), **unit yang bermasalah kami cetak ulang dan kirim ulang tanpa biaya**; bila kegagalannya bersifat sistemik (menimpa sebagian besar cetakan dalam satu pesanan), **seluruh batch kami ganti**. |
 | **Garansi Tepat Waktu** | Produk cetak tiba paling lambat **H-14 sebelum tanggal acara** (dengan pemesanan ≤ H-21, dan terhitung sejak data undangan, daftar nama tamu, serta persetujuan pratinjau lengkap kami terima — §12.2). Bila lewat karena kesalahan kami, **uang produk cetak kembali 100% dan barang tetap dikirim**. |
 | **Garansi Cetak Benar** | Kesalahan dari pihak kami — hasil cetak berbeda dari proof yang Anda setujui — **dicetak ulang gratis dan dikirim ekspres, tanpa pertanyaan**. |
 

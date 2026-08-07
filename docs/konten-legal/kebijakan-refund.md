@@ -2,9 +2,9 @@
 
 > Dipublikasikan sebagai halaman situs pada 22 Juli 2026.
 
-Terakhir diperbarui: 5 Agustus 2026
+Terakhir diperbarui: 8 Agustus 2026
 
-Undangan digital hariH adalah **produk digital yang diproses otomatis**; sebagian paket juga memuat **produk cetak fisik** yang diproduksi khusus per pesanan. Bagian 1–4 mengatur produk digital; **bagian 5 mengatur produk cetak fisik**.
+Undangan digital hariH adalah **produk digital yang diproses otomatis**; sebagian paket juga memuat **produk cetak fisik** yang diproduksi khusus per pesanan. Bagian 1–3 mengatur produk digital; **bagian 4 mengatur produk cetak fisik**.
 
 ## 1. Sebelum Data Diisi (Undangan Belum Dibuat)
 
@@ -30,7 +30,7 @@ Karena undangan telah dibuat dan diserahkan, **refund tidak tersedia**, kecuali 
 
 ## 4. Produk Cetak Fisik
 
-Produk cetak (kartu QR akses, label souvenir, kartu terima kasih, dsb.) dicetak khusus memuat nama dan data acara Anda, sehingga aturannya berbeda dari produk digital:
+Produk cetak (undangan cetak lipat & amplop bernama tamu, label souvenir, kartu terima kasih, stiker segel, kartu ber-QR, dan sejenisnya) dicetak khusus memuat nama dan data acara Anda, sehingga aturannya berbeda dari produk digital:
 
 **Refund 100% tersedia bila:**
 - Anda membatalkan **sebelum menyetujui proof** (produksi belum berjalan). Biaya kanal pembayaran dapat mengurangi jumlah yang dikembalikan.
