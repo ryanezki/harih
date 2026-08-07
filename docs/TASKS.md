@@ -100,6 +100,7 @@ Empat halaman bertoken tidak memanggil `nocache_headers()` sementara produksi me
   · nonce sah → *"Tersimpan — 300 nama"*, tanpa galat
   · nonce mati di `/proof/` → *"…persetujuanmu BELUM tercatat"*
   **Smoke test 21 → 30.** Sembilan pemeriksaan baru: kelima halaman bertoken diuji 403 **dan** `Cache-Control`, sehingga regresi setelan LiteSpeed ketahuan sendiri.
+  *Ikut diperbaiki:* pemeriksaan WF-03 kini menerima **429** sebagai lulus. Endpoint `daftar-reseller` dibatasi 5 pendaftaran/jam/IP, jadi menjalankan smoke test lebih dari 5× dalam sejam — hal biasa saat sedang mengerjakan sesuatu — membuatnya **gagal palsu**. Yang menandakan workflow mati adalah 404; 429 justru bukti ia hidup dan rate limiter-nya bekerja.
 
 - [ ] **A7** 🤝 `jam` — **Buka jalur bayar manual untuk paket digital — berhenti menunggu Duitku**
   Dokumen lama menyebut Duitku "gerbang tunggal", tapi F1.6 **sudah merestui** invoice WA + transfer manual untuk order Rp 2,9 juta. Jalur yang sah untuk produk 30× lebih mahal belum pernah diterapkan ke produk Rp 99–299 ribu yang 10 penjualannya adalah gerbang sesungguhnya. **Tidak butuh satu baris kode baru:** owner kirim rekening/QRIS → buat order WooCommerce → set `processing` → WF-01 menyala persis seperti biasa. Setiap hari menunggu adalah hari tanpa data attach rate, closing rate, dan distribusi tier.

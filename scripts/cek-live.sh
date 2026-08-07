@@ -106,7 +106,16 @@ if [ "$kode" = 200 ]; then hijau "WF-01 aktif (ping wc-order → 200)"; else mer
 kode=$(curl -sS -m 20 -o "$BODY" -w '%{http_code}' -X POST "$N8N/webhook/form-undangan" -F 'order=1' -F 'key=salah' 2>/dev/null)
 if [ "$kode" = 403 ]; then hijau "WF-02 aktif (token salah → 403)"; else merah "WF-02 webhook form-undangan → HTTP $kode (harus 403; 404 = belum Active)"; fi
 kode=$(curl -sS -m 20 -o "$BODY" -w '%{http_code}' -X POST "$N8N/webhook/daftar-reseller" -d 'nama=' 2>/dev/null)
-if [ "$kode" = 422 ]; then hijau "WF-03 aktif (data kosong → 422)"; else merah "WF-03 webhook daftar-reseller → HTTP $kode (harus 422; 404 = belum Active)"; fi
+# 429 ikut dihitung LULUS. Endpoint ini dibatasi 5 pendaftaran/jam/IP (T3.10),
+# jadi menjalankan smoke test >5× dalam sejam — hal yang wajar saat sedang
+# mengerjakan sesuatu — membuat pemeriksaan ini gagal PALSU. Yang benar-benar
+# menandakan workflow mati adalah 404, bukan 429: 429 justru bukti ia hidup
+# DAN rate limiter-nya bekerja.
+case "$kode" in
+  422) hijau "WF-03 aktif (data kosong → 422)" ;;
+  429) hijau "WF-03 aktif (429 — kuota 5/jam/IP habis, bukan kegagalan)" ;;
+  *)   merah "WF-03 webhook daftar-reseller → HTTP $kode (harus 422/429; 404 = belum Active)" ;;
+esac
 
 # --- 10. Port WAHA tidak terekspos publik (QA T1.7) ---
 if curl -sS -m 6 -o /dev/null "http://31.97.50.197:3000/" 2>/dev/null; then
