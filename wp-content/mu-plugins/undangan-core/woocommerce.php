@@ -91,3 +91,68 @@ add_action('woocommerce_after_checkout_validation', function ($data, $errors) {
 add_action('woocommerce_checkout_create_order', function ($order) {
     $order->set_billing_phone(undangan_normalize_phone((string) $order->get_billing_phone()));
 });
+
+/* =========================================================================
+ * A4 (2026-08-07) — nomor WhatsApp pada checkout BLOK.
+ *
+ * KETIGA mekanisme di atas — `woocommerce_checkout_fields`,
+ * `woocommerce_after_checkout_validation`, `woocommerce_checkout_create_order`
+ * — hanya difire oleh checkout SHORTCODE. Halaman checkout situs ini memakai
+ * blok `woocommerce/checkout` (temuan F3.6b, lihat cetak.php), dan perbaikan
+ * F3.6 waktu itu hanya menambal field ALAMAT — `phone` tidak pernah ikut.
+ *
+ * Akibatnya, terukur 2026-08-07: `woocommerce_checkout_phone_field` bernilai
+ * `optional`, jadi nomor WA boleh KOSONG, tanpa validasi format, tanpa
+ * normalisasi. Di hilir WF-01 node `Nomor WA Valid?` menolaknya → status
+ * TIDAK_VALID → link `/isi-data/` hanya berangkat lewat email. Pembeli yang
+ * sudah membayar tidak pernah menerima undangannya, dan tidak ada yang tahu.
+ *
+ * Nomor ini bukan sekadar kolom kontak: ia SATU-SATUNYA kanal pengiriman.
+ * ========================================================================= */
+
+// Wajib, bukan opsional. Difilter di KODE — bukan hanya disimpan sebagai opsi —
+// supaya ikut berpindah bersama repo dan tidak diam-diam kembali ke `optional`
+// saat database dipulihkan dari backup. Opsinya tetap ikut diset di server agar
+// tampilan wp-admin tidak berbohong; filter inilah yang mengikat.
+add_filter('option_woocommerce_checkout_phone_field', fn() => 'required');
+add_filter('default_option_woocommerce_checkout_phone_field', fn() => 'required');
+
+// Label & penjelasan. Blok checkout menghormati aturan locale negara — pola
+// yang sama dipakai F3.6b untuk menyembunyikan field alamat. Prioritas 25 agar
+// berjalan setelah filter locale di cetak.php (20); filter ini tidak menyentuh
+// keranjang sama sekali, jadi tidak ada risiko rekursi seperti di sana.
+// Penjelasannya ditaruh di LABEL, bukan `description` atau `placeholder`:
+// diperiksa langsung di checkout live 2026-08-07 — blok TIDAK merender keduanya
+// untuk field inti (input keluar tanpa `placeholder` dan tanpa
+// `aria-describedby`). Label satu-satunya slot yang pasti tampil, dan justru
+// alasan "kenapa" itulah yang membuat pembeli menulis nomor WhatsApp aktif,
+// bukan nomor rumah. Placeholder tetap diatur untuk jalur shortcode di
+// `woocommerce_checkout_fields` di atas.
+add_filter('woocommerce_get_country_locale', function ($locale) {
+    foreach (array_keys($locale) as $negara) {
+        $locale[$negara]['phone'] = array_merge($locale[$negara]['phone'] ?? [], [
+            'label'    => 'Nomor WhatsApp — link undangan dikirim ke sini',
+            'required' => true,
+        ]);
+    }
+    return $locale;
+}, 25);
+
+// Gerbang yang sesungguhnya: Store API — jalur yang benar-benar dipakai blok.
+// Hook yang sama sudah terbukti bekerja untuk gerbang H-21 di cetak.php.
+// Prioritas 5 supaya nomor WA diperiksa lebih dulu daripada gerbang cetak:
+// syarat ini berlaku untuk SEMUA pesanan, gerbang cetak hanya sebagian.
+add_action('woocommerce_store_api_checkout_update_order_from_request', function ($order) {
+    $normal = undangan_normalize_phone((string) $order->get_billing_phone());
+    if (!undangan_is_valid_wa($normal)) {
+        if (class_exists('\Automattic\WooCommerce\StoreApi\Exceptions\RouteException')) {
+            throw new \Automattic\WooCommerce\StoreApi\Exceptions\RouteException(
+                'undangan_wa_tidak_valid',
+                'Nomor WhatsApp belum benar — tulis dalam format 08xxxxxxxxxx. Link pengisian data dan undangan jadi dikirim ke nomor ini.',
+                400
+            );
+        }
+        return;
+    }
+    $order->set_billing_phone($normal);
+}, 5, 1);
