@@ -100,7 +100,14 @@ foreach ([['RESEPSI', 'Resepsi'], ['GRAND', 'Grand']] as [$kode, $label]) {
         'harga_bayar' => $p_upg ? (float) $p_upg->get_price() : max(0, (float) $p_penuh->get_price() - $dibayar_digital),
         'kredit'      => $p_upg ? max(0, (float) $p_penuh->get_price() - (float) $p_upg->get_price()) : $dibayar_digital,
         'ringkas'     => wp_strip_all_tags($p_penuh->get_short_description()),
-        'beli'        => $p_upg ? add_query_arg('add-to-cart', $upg, wc_get_checkout_url()) : '',
+        // D1 — bawa ID order ASAL. Tanpa ini, pembelian upgrade melahirkan order
+        // baru yang tidak punya hubungan apa pun dengan undangan yang sudah
+        // terbit, dan seluruh produksi (snapshot, proof, daftar tamu, antrean)
+        // mencarinya lewat order lama lalu tidak menemukan apa-apa.
+        'beli'        => $p_upg ? add_query_arg(
+            ['add-to-cart' => $upg, 'upgrade_dari' => $order_id],
+            wc_get_checkout_url()
+        ) : '',
     ];
 }
 

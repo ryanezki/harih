@@ -22,16 +22,84 @@ if (!defined('ABSPATH')) exit;
 
 /** Undangan milik sebuah order (dibuat WF-02 dengan meta `order_id`). */
 function undangan_cari_undangan_order(int $order_id): int {
-    $q = get_posts([
-        'post_type'      => 'undangan',
-        'post_status'    => ['publish', 'draft', 'pending'],
-        'posts_per_page' => 1,
-        'fields'         => 'ids',
-        'meta_key'       => 'order_id',
-        'meta_value'     => (string) $order_id,
-    ]);
-    return $q ? (int) $q[0] : 0;
+    $cari = static function (int $id): int {
+        $q = get_posts([
+            'post_type'      => 'undangan',
+            'post_status'    => ['publish', 'draft', 'pending'],
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
+            'meta_key'       => 'order_id',
+            'meta_value'     => (string) $id,
+        ]);
+        return $q ? (int) $q[0] : 0;
+    };
+
+    $uid = $cari($order_id);
+    if ($uid) return $uid;
+
+    /* D1 — IKUTI RANTAI UPGRADE.
+     *
+     * Pembelian upgrade (`UPG-*`) lahir sebagai order BARU lewat checkout biasa,
+     * sementara undangannya melekat pada order ASAL lewat meta `order_id`.
+     * Tanpa penelusuran ini, seluruh konsumennya gagal diam-diam pada order
+     * upgrade: snapshot tidak bisa dibekukan, `/tamu/` bilang "undangan belum
+     * dibuat", `/rekap/` kosong, dan Antrean Cetak menampilkan "Menunggu data
+     * undangan" selamanya — pada pesanan yang justru sudah dibayar.
+     *
+     * Batas 5 langkah: upgrade bertingkat tidak dilarang, tapi rantai yang
+     * melingkar (meta salah isi) tidak boleh berubah jadi loop tak berujung.
+     */
+    if (!function_exists('wc_get_order')) return 0;
+    $kunjungi = [$order_id => true];
+    $kini = $order_id;
+    for ($langkah = 0; $langkah < 5; $langkah++) {
+        $o = wc_get_order($kini);
+        if (!$o) return 0;
+        $asal = (int) $o->get_meta('_upgrade_dari');
+        if (!$asal || isset($kunjungi[$asal])) return 0;
+        $kunjungi[$asal] = true;
+        $uid = $cari($asal);
+        if ($uid) return $uid;
+        $kini = $asal;
+    }
+    return 0;
 }
+
+/* D1 — `upgrade_dari` dibawa dari halaman upsell lewat query string saat
+ * add-to-cart, disimpan di sesi WooCommerce, lalu dituliskan ke meta order.
+ * Lewat sesi karena checkout memakai BLOK: parameter URL tidak ikut sampai ke
+ * permintaan Store API yang akhirnya membuat ordernya. */
+add_action('woocommerce_add_to_cart', function () {
+    $asal = absint($_GET['upgrade_dari'] ?? 0);
+    if ($asal && function_exists('WC') && WC()->session) {
+        WC()->session->set('harih_upgrade_dari', $asal);
+    }
+}, 10, 0);
+
+/** Jalur BLOK (yang benar-benar dipakai checkout). */
+add_action('woocommerce_store_api_checkout_update_order_from_request', function ($order) {
+    if (!function_exists('WC') || !WC()->session) return;
+    $asal = absint(WC()->session->get('harih_upgrade_dari'));
+    if ($asal && $asal !== $order->get_id()) {
+        $order->update_meta_data('_upgrade_dari', $asal);
+        $order->add_order_note(sprintf('Upgrade dari pesanan #%d — undangan & daftar tamu mengikuti pesanan itu.', $asal));
+    }
+}, 20, 1);
+
+/** Jalur klasik, bila checkout suatu saat dikembalikan ke shortcode. */
+add_action('woocommerce_checkout_create_order', function ($order) {
+    if (!function_exists('WC') || !WC()->session) return;
+    $asal = absint(WC()->session->get('harih_upgrade_dari'));
+    if ($asal) $order->update_meta_data('_upgrade_dari', $asal);
+}, 20, 1);
+
+/** Bersihkan sesi setelah order jadi — supaya pembelian berikutnya tidak ikut tertandai. */
+add_action('woocommerce_checkout_order_created', function () {
+    if (function_exists('WC') && WC()->session) WC()->session->__unset('harih_upgrade_dari');
+});
+add_action('woocommerce_store_api_checkout_order_processed', function () {
+    if (function_exists('WC') && WC()->session) WC()->session->__unset('harih_upgrade_dari');
+});
 
 /** Isi undangan yang relevan untuk cetak, dalam urutan tetap agar hash stabil. */
 function undangan_data_snapshot(int $undangan_id): array {
