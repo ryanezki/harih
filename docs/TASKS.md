@@ -51,7 +51,7 @@ Empat halaman bertoken tidak memanggil `nocache_headers()` sementara produksi me
 - [x] **A1** 🤖 `menit` — **WF-02: deklarasikan `adaCetak` + kupas sufiks `+cetak`** → **SELESAI & LIVE 2026-08-07**
   Diimpor bersama B3 dalam satu ronde. **Terverifikasi dari ekspor live** (bukan dari yang dikirim): `const adaCetak = raw.endsWith('+cetak') || raw === 'cetak'` ada di baris 22, `const tier = raw.replace('+cetak', '')` di baris 23, dan seluruh 41 node WF-02 + 29 node WF-01 kini identik dengan repo. Smoke test 21/21.
   Logikanya diuji lebih dulu **di runtime n8n yang sebenarnya** (`docker exec -i harih-n8n node`) atas 10 kasus: `premium+cetak`→premium · `favorit+cetak`→favorit · `hemat+cetak`→hemat · `PREMIUM+CETAK`→premium (huruf besar) · `cetak`/`''`/`null`→hemat. `adaCetak` benar di kesepuluhnya.
-  ⚠️ **Belum dibuktikan end-to-end** — yang diuji adalah logika tier dan bahwa webhook merespons, bukan satu order utuh sampai undangan terbit. **A3 masih wajib**; sampai itu lewat, perbaikan ini masih keyakinan yang beralasan, bukan bukti.
+  **Dibuktikan end-to-end oleh A3** — dua order uji menghasilkan undangan tier premium yang identik, dengan `ada_cetak` benar di kedua cabang.
   <details><summary>Isi perubahan (untuk rujukan)</summary>
 
   ```js
@@ -68,9 +68,19 @@ Empat halaman bertoken tidak memanggil `nocache_headers()` sementara produksi me
   **Temuan sampingan yang memperburuk A1:** `settings` WF-01 & WF-02 live = `{"executionOrder":"v1","timezone":"Asia/Jakarta"}` — **tidak ada `errorWorkflow`**. Jadi saat `ReferenceError` itu terjadi pada pembeli sungguhan, WF-00 tidak menyala dan tidak ada satu pun alert. Gagal senyap, persis seperti diduga B3.
   **9 workflow hidup, tidak ada duplikat** (`n8n list:workflow`) — jadi kerusakan yang ditakutkan B3 belum terjadi; ia baru akan terjadi pada import berikutnya atas kelima berkas tanpa `id`.
 
-- [ ] **A3** 🤝 `jam` — **Uji happy-path end-to-end: satu order dari nol sampai undangan terbit**
-  Ini akar sebenarnya dari A1. Semua uji yang ada adalah uji **negatif** — `cek-live.sh:93` hanya menguji token salah → 403. Jalur `route:'ok'`, satu-satunya jalur pembeli sah, belum pernah dieksekusi sekali pun. Tanpa uji ini, perbaikan A1 pun cuma keyakinan.
-  **Selesai bila:** satu baris uji `MENUNGGU_DATA` di sheet (sekali `paket=premium`, sekali `paket=premium+cetak`) + curl multipart ke `/webhook/form-undangan` menghasilkan: undangan terbit dengan tier benar · email terkirim · WA terkirim dengan blok benar · status sheet jadi `SUDAH_JADI`. Langkahnya ditulis ke `cek-live.sh` atau runbook supaya bisa diulang.
+- [x] **A3** 🤝 `jam` — **Uji happy-path end-to-end** → **LULUS 2026-08-07**
+  **Jalur `route:'ok'` akhirnya dieksekusi — pertama kali sejak proyek berdiri.** Dua kasus, keduanya tuntas:
+
+  | | HTTP | sheet | wa_status | undangan | tier |
+  |---|---|---|---|---|---|
+  | `paket=premium` | 200 (1,5 dtk) | `SUDAH_JADI` 15 dtk | `TERKIRIM` | terbit, 3 foto | premium ✓ |
+  | `paket=premium+cetak` | 200 (1,2 dtk) | `SUDAH_JADI` 10 dtk | `TERKIRIM` | terbit, 3 foto | **premium ✓** |
+
+  **Bukti A1 benar-benar menutup kedua bug:** kedua undangan identik **38.099 byte** — galeri, kisah kami, amplop, RSVP, kedua lokasi. Meta post order 900002 berbunyi `paket=premium` padahal baris sheet-nya `premium+cetak`; sebelum A1 nilainya `hemat`. Dan data eksekusi n8n menunjukkan `ada_cetak=false` untuk kasus 1, `ada_cetak=true` untuk kasus 2 — identifier yang dulu melempar `ReferenceError` kini punya nilai yang benar di kedua cabang.
+  **Bonus — B3 ikut terbukti tanpa error buatan.** Node `Set Order Completed (WC)` gagal di kedua eksekusi (`NodeApiError: ID tidak valid, 400`) karena skrip uji hanya membuat baris **sheet**, bukan order WooCommerce. Kegagalan itu terjadi **setelah** delivery sehingga tidak membatalkan apa pun — tapi ia menandai eksekusi `error` dan **memicu WF-00 dua kali** (id 4253 & 4255, keduanya `success`, isi alert menyebut *"Workflow GAGAL · WF-02"*). Ikatan `errorWorkflow` yang baru dipasang B3 terbukti bekerja pada error sungguhan.
+  **Dijadikan bisa diulang:** [`../scripts/uji-happy-path.py`](../scripts/uji-happy-path.py) — `python3 scripts/uji-happy-path.py 628xxx` (jalankan + bersihkan) atau `--bersihkan` saja. Nama field di dalamnya diturunkan dari `body.*` yang benar-benar dibaca WF-02 dan atribut `name=` di `page-isi-data.php`, bukan tebakan — tebakan pertama saya salah di 6 field dan akan menghasilkan kegagalan palsu.
+  **Produksi dikembalikan bersih:** 2 undangan + 6 media + 2 kartu OG dihapus permanen, 2 baris sheet dihapus. Sisa: 3 undangan demo · 0 ucapan · 0 order · sheet 0 baris · 9 workflow aktif · smoke 21/21.
+  ⚠️ **Yang tetap belum diuji:** jalur dari WooCommerce (WF-01) — uji ini menyuntik baris sheet langsung, jadi checkout → webhook → intake belum tersentuh. Itu baru bisa diuji dengan order sungguhan, yakni saat F0.2/A7 berjalan.
 
 - [ ] **A4** 🤖 `jam` — **Nomor WhatsApp wajib & tervalidasi di checkout blok**
   `woocommerce.php` memasang label, validasi, dan normalisasi nomor WA lewat hook yang **hanya difire checkout shortcode**. `cetak.php` sudah mencatat sendiri bahwa checkout yang dipakai adalah blok, tapi perbaikan F3.6 hanya menambal field **alamat** — `phone` tidak pernah ikut. Akibatnya nomor WA boleh kosong → WF-01 menolaknya → status `TIDAK_VALID` → link `/isi-data/` hanya lewat email. Pembeli yang sudah bayar tidak pernah menerima undangannya.
@@ -109,7 +119,7 @@ Empat halaman bertoken tidak memanggil `nocache_headers()` sementara produksi me
 - [x] **B3** 🤝 `menit` — **errorWorkflow terikat + 5 `id` ditanam** → **SELESAI & LIVE 2026-08-07**
   Diimpor bersama A1. **Terverifikasi dari ekspor live kesembilan workflow:** delapan memuat `"errorWorkflow":"sJ0vsHhFyPotbxMg"`, WF-06 mendapat `timezone: Asia/Jakarta` kembali, dan **9 workflow tetap 9 — nol duplikat**, karena kelima `id` sudah tertanam sebelum import.
   **Keputusan yang menyimpang dari rencana:** `errorWorkflow` **tidak** dipasang di WF-00 (rencana semula menyebut "kesembilan"). Error handler yang menunjuk dirinya sendiri berisiko loop saat WF-00 sendiri yang gagal. Delapan sisanya cukup.
-  ⚠️ **Belum dibuktikan alertnya benar-benar sampai** — ikatannya ada, tapi belum pernah dipaksa error. Uji itu digabungkan ke A3.
+  **Terbukti bekerja 2026-08-07 lewat A3** — dua error sungguhan di WF-02 memicu WF-00 (eksekusi 4253 & 4255, keduanya `success`, alert menyebut *"Workflow GAGAL · WF-02"*). Tidak perlu error buatan.
   <details><summary>ID live yang ditanam (untuk rujukan)</summary>
 
   WF-00 `sJ0vsHhFyPotbxMg` · WF-03 `k6LyfYoYds47al38` · WF-04 `539zvR4mzQ5PObJ6` · WF-07 `AbxU2iCdYmKRx5G0` · WF-08 `AI0ofPRSqBhbLbwO`
