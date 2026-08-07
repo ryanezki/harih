@@ -116,9 +116,10 @@ Empat halaman bertoken tidak memanggil `nocache_headers()` sementara produksi me
   **Smoke test 21 → 30.** Sembilan pemeriksaan baru: kelima halaman bertoken diuji 403 **dan** `Cache-Control`, sehingga regresi setelan LiteSpeed ketahuan sendiri.
   *Ikut diperbaiki:* pemeriksaan WF-03 kini menerima **429** sebagai lulus. Endpoint `daftar-reseller` dibatasi 5 pendaftaran/jam/IP, jadi menjalankan smoke test lebih dari 5× dalam sejam — hal biasa saat sedang mengerjakan sesuatu — membuatnya **gagal palsu**. Yang menandakan workflow mati adalah 404; 429 justru bukti ia hidup dan rate limiter-nya bekerja.
 
-- [ ] **A7** 🤝 `jam` — **Buka jalur bayar manual untuk paket digital — berhenti menunggu Duitku**
+- [x] **A7** 🤝 `jam` — **Buka jalur bayar manual untuk paket digital — berhenti menunggu Duitku**
   Dokumen lama menyebut Duitku "gerbang tunggal", tapi F1.6 **sudah merestui** invoice WA + transfer manual untuk order Rp 2,9 juta. Jalur yang sah untuk produk 30× lebih mahal belum pernah diterapkan ke produk Rp 99–299 ribu yang 10 penjualannya adalah gerbang sesungguhnya. **Tidak butuh satu baris kode baru:** owner kirim rekening/QRIS → buat order WooCommerce → set `processing` → WF-01 menyala persis seperti biasa. Setiap hari menunggu adalah hari tanpa data attach rate, closing rate, dan distribusi tier.
   **Selesai bila:** tombol "Pesan lewat WhatsApp" di samping tombol checkout di katalog · runbook memuat langkah membuat order manual + set processing · satu penjualan uji tuntas sampai undangan terbit (menumpang A3).
+  → **SELESAI 2026-08-07.** Seluruh CTA beranda & `/satuan/` mengarah ke WhatsApp (nol tombol add-to-cart), `harih_bayar_online_siap()` mengembalikannya otomatis begitu Duitku production dipasang, dan langkah pesanan manual + template pesan lengkap ada di [`runbook.md`](./runbook.md) §7c.
 
 - [ ] **A8** 👤 `menit` — **Tindak lanjuti Duitku: profil nominal, mekanisme refund, plafon per kanal**
   Diajukan 2026-08-04, belum keluar. Tiga hal yang bisa menggagalkan pembayaran di langkah terakhir: profil merchant menyebut Rp 99–299 ribu padahal paket cetak sampai Rp 5,9 juta · mekanisme refund (Garansi Tepat Waktu menjanjikan 100% — berapa lama, siapa menanggung fee kanal) · plafon per kanal (e-wallet/QRIS sering di bawah Rp 5,9 juta). Jawabannya juga menentukan bentuk akhir A5.
@@ -163,9 +164,10 @@ Empat halaman bertoken tidak memanggil `nocache_headers()` sementara produksi me
   `alwaysOutputData: true` pada `Baca Ulang Orders`, sehingga `throw new Error('Verifikasi idempotency gagal…')` di node berikutnya benar-benar dieksekusi saat lookup mengembalikan nol baris. Sebelumnya n8n melewati seluruh node hilir, eksekusi berakhir **SUKSES**, email & WA tidak terkirim, dan barisnya tetap ada di sheet sehingga WF-08 tidak menganggapnya tertinggal. `Append Baris Order` — satu-satunya node Sheets di jalur uang tanpa retry — diberi `retryOnFail`, `maxTries: 3`, `waitBetweenTries: 3000`.
   Baru bermakna setelah B3: tanpa ikatan `errorWorkflow`, `throw` pun tetap senyap.
 
-- [ ] **B5** 🤝 `jam` — **`/jadi-reseller/` & WF-03 menjanjikan komisi 30% "tiap order"**
+- [x] **B5** 🤝 `jam` — **`/jadi-reseller/` & WF-03 menjanjikan komisi 30% "tiap order"**
   Ditulis di h1, hero-sub, langkah 3, daftar syarat, meta description, og:description, dan tagline kaki — hanya baris kaki memakai kata "digital". Berhadapan dengan keputusan terkunci: digital 30%, fisik rupiah tetap Rp 150/300/500rb. Reseller yang menjual Paket Resepsi mengharapkan Rp 870.000 dan menerima Rp 300.000 — **selisih Rp 570.000 per order** di kanal yang seluruh nilainya kepercayaan. Lebih cepat lagi: kupon `RES-` **ditolak di keranjang cetak** sehingga order terbesar berhenti di langkah terakhir. **Halaman ini live dan menerima pendaftar hari ini.**
   **Selesai bila:** setiap klaim 30% dikualifikasi jadi "30% untuk paket digital · Rp 150/300/500rb untuk paket cetak · item satuan tanpa komisi" di ketujuh titik + teks WF-03. Bila owner memilih menutup pendaftaran (lihat pertanyaan owner), halaman diturunkan sebagai gantinya. Kontradiksi rekrut-vs-tidak antara arsip TASKS dan `panduan-manual.md:159` ikut diselesaikan.
+  → **SELESAI 2026-08-07 — halaman DITURUNKAN**, bukan dikoreksi (keputusan owner). Komisi 30% dari paket digital Rp 179rb hanya Rp 54.000; tidak menggerakkan siapa pun, sementara untuk cetak kuponnya memang diblokir. Nol pendaftar, jadi tidak ada yang perlu dihubungi. Kode & WF-03 tidak dihapus — menghidupkan kembali cukup menerbitkan halamannya.
 
 - [x] **B6** 🤖 `menit` — **Kebijakan Privasi menyebut data yang benar-benar dikumpulkan** → **TERBIT & LIVE 2026-08-07**
   Yang paling telanjang adalah **nomor rekening**: formulir publik `/jadi-reseller/` mengumpulkan nama, WA, bank, dan norek; WF-03 mengirimkannya lewat WhatsApp + email ke owner lalu menyimpannya di tab `resellers` Google Sheets — kategori data keuangan tanpa satu kalimat pun dasar pemrosesan maupun retensi.
@@ -207,10 +209,6 @@ Empat halaman bertoken tidak memanggil `nocache_headers()` sementara produksi me
 ## P2 — Naikkan konversi & keandalan
 
 > Tidak ada yang gagal hari ini karena nol pengunjung dan nol order. Yang masuk di sini dibenarkan oleh **biayanya** (menit, di berkas yang toh sudah dibuka), bukan besarnya dampak. **C3 dan C9 layak lebih dulu** — keduanya menyentuh alasan orang datang & membeli.
-
-- [ ] **C9** 👤 `hari` — **Isi hulu akuisisi** *(lubang terbesar dalam rencana)*
-  Grep `tiktok|iklan|marketplace|blog` di seluruh docs: **nol rencana**. Dari 104 commit: **nol menyentuh akuisisi**. Tema tidak punya template artikel sama sekali, sementara SERP untuk kata kunci niat-beli dikuasai blog vendor pesaing — artikel merekalah yang menanamkan pagu "Rp 500rb–1jt" ke kepala pembeli yang lalu membuka halaman Hormat Rp 1,19 juta.
-  **Selesai bila:** tiga aksi berjalan, tanpa kode — (1) **5 vendor/WO pertama didekati** (sudah tertulis sebagai F1.9, sudah dinyatakan bisa paralel, nol biaya — **naikkan ke urutan 2 daftar owner, di atas QA perangkat**); (2) 3 halaman statis ber-SEO lewat `page-teks.php` yang sudah ada ("harga undangan cetak vs digital 2026", "berapa undangan cetak yang sebenarnya dibutuhkan") — di sinilah harga per lembar dibenarkan di depan orang yang sedang membandingkan; (3) lapak di satu direktori pernikahan dengan harga tercantum, CTA tetap WhatsApp sehingga tidak menunggu payment gateway.
 
 - [x] **C3** 🤖 `menit` — **Empat kalimat copy yang melawan penjualan sendiri** → **SELESAI & LIVE 2026-08-07** *(v2.14.0)*
   **(a) "8 dari 8 slot masih tersedia" berhenti disiarkan.** Pada nol order kalimat itu memberi tahu calon pembeli bahwa **belum ada seorang pun yang memesan** — di halaman yang tugasnya menutup Rp 2,9 juta. Kelangkaan hanya bekerja bila sebagian sudah terpakai. Ambangnya jadi konstanta `UNDANGAN_SLOT_TAMPIL = 4` bersebelahan dengan `UNDANGAN_KUOTA_BULAN`, dan angka `8` yang tadinya hardcode di template kini dibaca dari konstanta itu. Cabang "slot penuh" **dipertahankan** — itu justru kabar yang menaikkan urgensi. Diuji untuk kesembilan nilai: sisa 8–5 diam · 4–1 tampil *"Tinggal N dari 8 slot"* · 0 tampil *"sudah penuh"*.
@@ -319,8 +317,28 @@ Empat halaman bertoken tidak memanggil `nocache_headers()` sementara produksi me
   (c) Satu nomor adalah sekaligus sesi WAHA 9 workflow **dan** satu-satunya CTA penjualan cetak — sementara `evaluasi-ide-genz.md:40` menolak RSVP-lewat-WA justru karena "ratusan nomor asing menghubungi satu nomor" adalah pola yang membuat sesi di-ban. **Rencana penjualan yang berhasil menciptakan beban itu.**
   **Selesai bila:** `logging: {max-size: 10m, max-file: 3}` di kedua compose · cek disk dititipkan ke `backup-harih.sh` yang sudah punya cron host & jalur alert mandiri (`[ "$PAKAI" -lt 80 ] || alert_gagal disk`) · healthcheck WAHA dipasang **hanya setelah** endpoint `/health` dan ketersediaan `wget` diverifikasi di dalam container (healthcheck salah perintah = Docker membunuh container sehat) · auto-restart sesi hanya bila ada rem maks 1×/jam dan hanya untuk status `STOPPED`/`FAILED`. Pemisahan nomor menunggu keputusan owner.
 
-- [ ] **D5** 👤 `jam` — **Tidak ada titik masuk paket cetak di bawah Rp 1 juta**
+---
+
+## 🚫 Dikeluarkan dari rencana — keputusan owner 2026-08-08
+
+**Akuisisi & penetapan pasar dikeluarkan dari daftar kerja.** Owner memilih fokus ke pengembangan platform lebih dulu; kedua poin di bawah dinilai terlalu jauh masuk ke sisi bisnis. Analisisnya disimpan sebagai **catatan keputusan, bukan tugas terbuka** — jangan dimunculkan lagi sebagai daftar kerja.
+
+<details><summary><strong>C9</strong> — hulu akuisisi <em>(analisis asli, tidak dikerjakan)</em></summary>
+
+~~**C9**~~ 👤 `hari` — **Isi hulu akuisisi** *(lubang terbesar dalam rencana)*
+  Grep `tiktok|iklan|marketplace|blog` di seluruh docs: **nol rencana**. Dari 104 commit: **nol menyentuh akuisisi**. Tema tidak punya template artikel sama sekali, sementara SERP untuk kata kunci niat-beli dikuasai blog vendor pesaing — artikel merekalah yang menanamkan pagu "Rp 500rb–1jt" ke kepala pembeli yang lalu membuka halaman Hormat Rp 1,19 juta.
+  **Selesai bila:** tiga aksi berjalan, tanpa kode — (1) **5 vendor/WO pertama didekati** (sudah tertulis sebagai F1.9, sudah dinyatakan bisa paralel, nol biaya — **naikkan ke urutan 2 daftar owner, di atas QA perangkat**); (2) 3 halaman statis ber-SEO lewat `page-teks.php` yang sudah ada ("harga undangan cetak vs digital 2026", "berapa undangan cetak yang sebenarnya dibutuhkan") — di sinilah harga per lembar dibenarkan di depan orang yang sedang membandingkan; (3) lapak di satu direktori pernikahan dengan harga tercantum, CTA tetap WhatsApp sehingga tidak menunggu payment gateway.
+
+</details>
+
+<details><summary><strong>D5</strong> — titik masuk di bawah Rp 1 juta <em>(analisis asli, tidak dikerjakan)</em></summary>
+
+~~**D5**~~ 👤 `jam` — **Tidak ada titik masuk paket cetak di bawah Rp 1 juta**
   Paket cetak termurah adalah Hormat Rp 1.190.000, dan pembelian satuan dipatok minimum Rp 1.000.000/transaksi — jadi tidak ada satu pun titik masuk di bawah sejuta, sementara artikel harga yang menguasai SERP menanamkan pagu jauh di bawah itu. Menunggu data closing rate nyata sebelum diubah.
+
+</details>
+
+> Penilaian saya tetap tercatat apa adanya: selama hulu kosong, perbaikan platform tidak mengubah angka penjualan. Itu **catatan, bukan bantahan** — keputusan cakupan ada di owner, dan platform yang rapi tetap punya nilainya sendiri saat hulunya nanti diisi.
 
 ---
 
