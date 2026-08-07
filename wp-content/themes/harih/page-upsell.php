@@ -57,9 +57,36 @@ $tgl_bayar = $order->get_date_paid() ?: $order->get_date_created();
 $tenggat   = $tgl_bayar ? (clone $tgl_bayar)->modify('+14 days') : null;
 $kedaluwarsa = !$tenggat || $tenggat->getTimestamp() < time();
 
-/** Paket yang ditawarkan: UPG-* bila ada, jika belum → CETAK-* + kredit. */
+/**
+ * Paket yang ditawarkan: UPG-* bila ada, jika belum → CETAK-* + kredit.
+ *
+ * ⚠️ HORMAT SENGAJA TIDAK ADA DI SINI (keputusan owner 2026-08-07).
+ *
+ * Bukan karena kreditnya kemahalan — kredit rata Rp 300.000 dipertahankan.
+ * Alasannya marjin per jam: setup mesin sama saja untuk 50 maupun 150 unit,
+ * jadi paket terkecil menanggung setup yang sama dengan pendapatan paling
+ * kecil. Diturunkan dari struktur biaya yang tercatat (ongkir 150rb, bahan
+ * ±Rp 1.500/unit) dan estimasi waktu 4,5 jam untuk 100 unit:
+ *
+ *   Hormat  lewat upgrade → ±Rp 222rb/jam  (percetakan reguler: 100–200rb/jam)
+ *   Resepsi lewat upgrade → ±Rp 511rb/jam
+ *   Grand   lewat upgrade → ±Rp 871rb/jam
+ *
+ * Hormat-lewat-upgrade cuma ±1,1× pekerjaan reguler — padahal ia datang
+ * membawa tenggat pernikahan, Garansi Tepat Waktu, dan risiko refund
+ * Rp 890.000. Setelah disesuaikan risiko, order itu lebih buruk daripada tidak
+ * mengambilnya sama sekali.
+ *
+ * Efek sampingnya menguntungkan: Rp 890rb di sebelah Rp 2,6 juta menjadikan
+ * Hormat pilihan aman yang otomatis dipilih — jangkar yang bekerja MELAWAN
+ * kita. Halaman ini kini punya dua pilihan, bukan tiga.
+ *
+ * `CETAK-HORMAT` TETAP dijual penuh di katalog & halaman /harga/ — yang dicabut
+ * hanya jalur upgrade-nya. ⚠️ Marjin Hormat pada harga penuh (±1,6× reguler)
+ * juga tipis dan perlu ditinjau terpisah — lihat TASKS F1.7a.
+ */
 $harih_tawaran = [];
-foreach ([['HORMAT', 'Hormat'], ['RESEPSI', 'Resepsi'], ['GRAND', 'Grand']] as [$kode, $label]) {
+foreach ([['RESEPSI', 'Resepsi'], ['GRAND', 'Grand']] as [$kode, $label]) {
     $upg   = function_exists('wc_get_product_id_by_sku') ? wc_get_product_id_by_sku('UPG-' . $kode) : 0;
     $penuh = function_exists('wc_get_product_id_by_sku') ? wc_get_product_id_by_sku('CETAK-' . $kode) : 0;
     if (!$penuh) continue;
@@ -76,24 +103,6 @@ foreach ([['HORMAT', 'Hormat'], ['RESEPSI', 'Resepsi'], ['GRAND', 'Grand']] as [
         'beli'        => $p_upg ? add_query_arg('add-to-cart', $upg, wc_get_checkout_url()) : '',
     ];
 }
-
-/*
- * Kredit yang BENAR-BENAR berlaku.
- *
- * Sebelum SKU `UPG-*` ada, kredit = jumlah yang dibayar pembeli untuk digital,
- * jadi hero dan kartu paket selalu menyebut angka yang sama. Sejak harga
- * `UPG-*` dikunci (F1.3, kredit tetap Rp 300.000 — dikonfirmasi owner
- * 2026-08-07), keduanya berpisah: pembeli Favorit yang membayar Rp 179.000
- * melihat hero menjanjikan "Rp 179.000" sementara kartu di bawahnya menulis
- * "kredit Rp 300.000". Dua angka untuk hal yang sama, di halaman yang tugasnya
- * menutup penjualan Rp 2,9 juta.
- *
- * Diambil dari tawaran yang benar-benar dirender, bukan dari konstanta — kalau
- * suatu saat kreditnya berbeda per tier, kalimatnya otomatis jatuh ke bentuk
- * netral alih-alih menyebut satu angka yang cuma benar untuk sebagian.
- */
-$harih_kredit_list  = array_values(array_unique(array_map(static fn($t) => (float) $t['kredit'], $harih_tawaran)));
-$harih_kredit_sama  = count($harih_kredit_list) === 1 ? $harih_kredit_list[0] : null;
 
 $wa_cs = static fn(string $paket, int $oid): string =>
     'https://wa.me/6282251975575?text=' . rawurlencode("Halo hariH, saya mau naik ke Paket {$paket} untuk pesanan #{$oid}.");
@@ -121,13 +130,14 @@ $wa_cs = static fn(string $paket, int $oid): string =>
         </div>
     <?php else : ?>
         <h1>Kartu fisiknya, untuk yang paling kamu hormati</h1>
-        <p class="hero-sub">Undangan digitalmu sudah dibayar.
-            <?php if ($harih_kredit_sama !== null) : ?>
-                Kalau naik ke paket cetak, harganya kami potong <strong><?php echo esc_html(strip_tags(wc_price($harih_kredit_sama))); ?></strong>.
-            <?php else : ?>
-                Kalau naik ke paket cetak, pembayaran itu kami hitung sebagai <strong>kredit</strong> — besarnya tertera di tiap paket.
-            <?php endif; ?>
-            Data undanganmu dipakai ulang; tidak ada pengisian dobel.</p>
+        <?php /* Bingkainya KREDIT, bukan diskon (keputusan owner 2026-08-07).
+                 Rupiahnya identik, tapi "potongan" mengundang orang membanding
+                 -bandingkan harga, sementara "sudah dibayar, tinggal cetaknya"
+                 menutup lingkaran yang memang sudah ia mulai. Besaran kreditnya
+                 tetap tampil — di kartu tiap paket, tempat ia jadi alasan, bukan
+                 di sini tempat ia jadi tawar-menawar. */ ?>
+        <p class="hero-sub">Paket digitalmu sudah dibayar. <strong>Tinggal cetaknya.</strong>
+            Data undanganmu dipakai ulang — tidak ada pengisian dobel, tidak mulai dari nol.</p>
         <div class="upsell-hitung" data-tenggat="<?php echo esc_attr($tenggat->format(DATE_ATOM)); ?>">
             <p class="upsell-hitung-label">Kredit berlaku sampai <?php echo esc_html(wp_date('j F Y', $tenggat->getTimestamp())); ?></p>
             <p class="upsell-hitung-angka" id="upsell-mundur">—</p>

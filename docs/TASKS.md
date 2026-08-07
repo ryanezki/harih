@@ -46,6 +46,16 @@ Checklist di [`panduan-manual.md`](./panduan-manual.md) langkah 5: musik mulai s
 ### 4. 10 penjualan dari orang asing *(F0.3)* 🔒 — gerbang sesungguhnya
 Teman, keluarga, dan diri sendiri **tidak dihitung**. Ini yang menggerbang seluruh fase G2 dan F1 berikutnya. Catat per penjualan: tier · dari mana datangnya · bertanya dulu atau langsung bayar.
 
+
+> **Kredit upgrade DIKUNCI sampai gerbang ini lewat.** Tidak ada lagi optimasi angka sebelum ada data — attach rate masih hipotesis (Hemat 2–5% · Favorit 10–15% · Premium 30–40%). Tinjau dengan tabel ini, bukan dengan perasaan:
+>
+> | Temuan setelah 10 penjualan | Tindakan |
+> |---|---|
+> | Attach rate Premium ≥ 30% | **Jangan sentuh apa pun** |
+> | Attach rate Premium < 15% | Perbaiki foto produk, salinan, garansi — **bukan kredit** |
+> | Masih < 15% setelah itu | Baru naikkan kredit ke Rp 500rb, **khusus Resepsi** |
+> | Yang laku hanya Hormat | Marjin Hormat harga penuh diperiksa ulang **sebelum order berikutnya diterima** |
+
 ### 5. Keputusan & tinjauan yang tidak mendesak
 - **Naikkan pin WAHA lagi?** Sekarang `latest-2026.7.2`. Upgrade berikutnya berpotensi menuntut scan QR ulang → jadwalkan saat tidak ada order berjalan.
 - **Review gaya bahasa** pesan otomatis di [`copywriting-pesan.md`](./copywriting-pesan.md).
@@ -150,7 +160,19 @@ Kesimpulan: hambatan ada di **jalur jaringan lingkungan kerja saya**, bukan di s
 
 **2026-08-06 — PERUBAHAN BESAR: percetakan & alat milik sendiri, produk cetak jadi undangan lipat.** Owner ternyata sudah punya bisnis percetakan dengan peralatan lengkap, jadi **fase subkontrak (F1.2) gugur** — tidak ada modal alat yang perlu dikeluarkan dan tidak ada pihak ketiga yang perlu dicari. Produk cetak juga berubah dari kartu QR 55×85mm menjadi **undangan lipat dua (A4→A5) beserta amplop bernama tamu**: penerima undangan cetak umumnya orang tua & sesepuh, dan kartu yang isinya hanya QR menuntut mereka membuka HP dulu. Jumlah per paket **turun** (150/150/200 → 50/100/150) sementara harga paket tetap — mutu naik, jam mesin turun.
 
-> ✅ **Metrik pengendali sudah terjawab (F1.7a, 6 Agu):** percetakan reguler Rp 100–200rb/jam, undangan hybrid ±Rp 580rb/jam — **lulus 3–6× lipat**, dengan ruang membengkak sampai ±13 jam/order sebelum kalah dari pekerjaan reguler. Catatan aslinya:
+> ⚠️ **DIPERSEMPIT 2026-08-07 — klaim "lulus 3–6× lipat" hanya berlaku untuk Resepsi & Grand, BUKAN seluruh lini.** Angka ±Rp 580rb/jam dihitung dari **Paket Resepsi saja**, lalu ditulis seolah memvalidasi "undangan hybrid" sebagai satu kesatuan. Setup mesin sama untuk 50 maupun 150 unit, jadi paket terkecil menanggung setup yang sama dengan pendapatan terkecil. Diturunkan dari struktur biaya yang tercatat di dokumen ini (ongkir 150rb; bahan+packaging ±Rp 1.500/unit, diturunkan dari marjin Resepsi 2,6 jt) dan estimasi 4,5 jam untuk 100 unit:
+>
+> | Paket | unit | jam (est.) | Marjin harga penuh | per jam | Lewat upgrade | per jam |
+> |---|---|---|---|---|---|---|
+> | **Hormat** | 50 | ±3,0 | 965rb | **±322rb** | 665rb | **±222rb** |
+> | Resepsi | 100 | ±4,5 | 2,60jt | ±578rb | 2,30jt | ±511rb |
+> | Grand | 150 | ±6,0 | 5,53jt | ±921rb | 5,23jt | ±871rb |
+>
+> Terhadap patokan **tertinggi** pekerjaan reguler (Rp 200rb/jam): Grand 4,6× · Resepsi 2,9× · **Hormat cuma 1,6× di harga penuh dan 1,1× lewat upgrade**. Hormat-lewat-upgrade praktis setara pekerjaan reguler — padahal ia membawa tenggat pernikahan, Garansi Tepat Waktu, dan risiko refund Rp 890.000. **Setelah disesuaikan risiko, order itu lebih buruk daripada tidak mengambilnya.** → jalur upgrade Hormat **dicabut** (lihat Keputusan Terkunci).
+> ⚠️ **Yang masih perlu diputuskan owner: marjin Hormat pada HARGA PENUH (±1,6×) juga tipis.** Apakah Hormat dipertahankan sebagai pintu masuk termurah, dinaikkan harganya, atau dihentikan — jangan diputuskan sebelum F1.1/F1.7 memberi waktu produksi yang sebenarnya.
+> ⚠️ Pemisahan setup/per-unit di atas adalah **model saya**, bukan pengukuran: repo hanya punya SATU titik data (4,5 jam untuk 100 unit) dan itu pun estimasi. Yang kokoh adalah arahnya (paket kecil selalu paling buruk per jam), bukan angka desimalnya.
+>
+> Catatan asli 6 Agustus:
 > ⚠️ **Metrik pengendali berubah total.** Patokan lama "≥ Rp 600rb/jam" tidak lagi relevan; kapasitas bukan tak terbatas melainkan **jam mesin yang selama ini dipakai order percetakan reguler**. Undangan wajib **mengalahkan marjin per jam bisnis cetak yang sekarang** — kalau tidak, ini hanya memindahkan uang dari kantong kiri ke kanan sambil menambah risiko deadline pernikahan. **Angka itu belum ada dan harus dihitung lebih dulu** (F1.7a).
 
 **2026-08-06 — homepage diredesain (handoff "Gen-Z editorial", v2.0.1).** Front page ditulis ulang mengikuti berkas handoff: DM Serif Display beraksen italic berwarna + Figtree (keduanya **self-hosted**, bukan CDN Google), foto arch bersticker, strip marquee, kartu chunky, **carousel tema scroll-snap** (bukti visual produk di atas fold), band undangan cetak, dan CTA penutup. Responsif **tanpa satu pun media query** — `clamp()`, `auto-fit`, `flex-wrap`, `scroll-snap`. Lima temuan review UX ikut dieksekusi: bukti visual produk (A1), baris trust pembayaran di hero (A2), kontras teks **5,29–9,06:1** — semuanya lolos AA (A3), filter tamu **bisa di-reset dengan klik kedua** (A4), dan CTA penutup (A5). `katalog.css` dipakai 8 halaman, jadi paletnya dipusatkan di `:root` — `/harga/`, `/satuan/`, dan halaman bertoken ikut memakai tampilan baru tanpa perubahan markup. Gerak dimatikan penuh saat `prefers-reduced-motion`.
@@ -181,6 +203,10 @@ Kesimpulan: hambatan ada di **jalur jaringan lingkungan kerja saya**, bukan di s
 | Ongkir di struktur biaya | **Rp 150.000** (naik dari 50rb) → marjin Paket Resepsi **Rp 2,6 juta** |
 | Resi | Wajib dicatat di sistem; pakai layanan ber-SLA |
 | Minimum à la carte | **Rp 1.000.000 per transaksi**; minimum per produk tetap berlaku di atasnya |
+| Kredit upgrade | **Rp 300.000 rata** untuk semua tier — *dipertahankan*, tidak dibuat bertingkat (matriks 9 kombinasi sulit dijelaskan & justru mengecilkan dorongan bagi pembeli termurah) |
+| Halaman upgrade | **Hanya Resepsi & Grand.** Hormat dicabut dari jalur upgrade 2026-08-07 — marjinnya ±1,1× pekerjaan reguler, lebih buruk daripada tidak mengambilnya setelah disesuaikan risiko. Bonus: Rp 890rb di sebelah Rp 2,6 jt adalah jangkar yang bekerja MELAWAN kita. `CETAK-HORMAT` tetap dijual penuh di katalog |
+| Bingkai penawaran upgrade | **Kredit, bukan diskon.** "Paket digitalmu sudah dibayar — tinggal cetaknya." Rupiahnya identik; diskon mengundang orang membandingkan harga, kredit menutup lingkaran yang sudah ia mulai |
+| Urutan perbaikan bila attach rate jelek | Foto undangan lipat asli di dalam amplop bernama · salinan soal orang tua & sesepuh · garansi · hitung mundur. **Angka kredit paling akhir** — diskon 10% bukan alasan siapa pun membeli apa pun |
 
 **Konsekuensi angka yang perlu diingat:** pada marjin Rp 2,6 juta dan target ≥ Rp 600rb/jam, **batas waktu produksi adalah 4 jam 20 menit**. Lewat dari itu metrik pengendali gagal — itulah yang membuat pengukuran waktu nyata di F1.7 menentukan apakah harga Rp 2,9 juta bertahan.
 
