@@ -43,6 +43,12 @@
 }
 
 :root {
+
+    /* C1a — kunci ke satu skema. Tanpa ini mode gelap PAKSA
+       (Samsung Internet, Chrome Android) membalik warna undangan
+       sendiri: krem jadi abu, dan kontras yang sudah dihitung batal. */
+    color-scheme: only light;
+
     /* KONSEP: modern hangat — SATU keluarga sans untuk seluruh halaman.
        Sengaja tanpa serif sama sekali: ini tema untuk pasangan yang menginginkan
        undangan kontemporer & bersih, bukan klasik. Kehangatannya datang dari
@@ -55,7 +61,7 @@
     --c-bg: #fbf6f0;
     --c-surface: #ffffff;
     --c-ink: #3a2e26;
-    --c-ink-soft: #8d7c6e;
+    --c-ink-soft: #77685a; /* C1b — 3,73 → 5,00:1, lolos WCAG AA. Token ini mewarnai .lokasi-alamat 14px */
     --c-line: #ecdccd;
     --c-accent: #a15436;      /* terakota */
     --c-accent-ink: #faf3ea;  /* krem */

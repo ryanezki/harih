@@ -129,6 +129,10 @@
     var gate = $('#gate');
     var openBtn = $('#buka-undangan');
     if (openBtn) {
+        // C1c — penanda "gerbang BISA dibuka", bukan sekadar "JS jalan".
+        // Dipasang tepat setelah handler terpasang; arloji penjaga di
+        // single-undangan.php membuka paksa bila penanda ini tak pernah datang.
+        document.body.classList.add('js-siap');
         openBtn.addEventListener('click', function () {
             if (gate) gate.classList.add('terbuka');
             document.body.classList.remove('is-locked');

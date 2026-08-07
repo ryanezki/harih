@@ -50,6 +50,12 @@
 }
 
 :root {
+
+    /* C1a — kunci ke satu skema. Tanpa ini mode gelap PAKSA
+       (Samsung Internet, Chrome Android) membalik warna undangan
+       sendiri: krem jadi abu, dan kontras yang sudah dihitung batal. */
+    color-scheme: only dark;
+
     /* KONSEP: dramatis mewah — kontras TINGGI yang disengaja antara didone
        tebal (Prata) dan sans sangat ringan (Manrope 300). Pasangan ini kosakata
        majalah mode: huruf display berat sebagai bintang, teks tipis sebagai

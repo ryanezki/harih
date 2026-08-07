@@ -109,7 +109,36 @@ $undangan = [
 <meta name="format-detection" content="telephone=no">
 <?php wp_head(); ?>
 </head>
-<body class="undangan-body is-locked">
+<body class="undangan-body">
+<?php /* C1c — `is-locked` & `js-gate` TIDAK lagi ditulis di markup.
+
+   Sebelumnya keduanya melekat sejak awal dan hanya JS yang bisa mencabutnya:
+   satu kegagalan JS (4G putus di tengah unduhan, galat runtime, pemblokir
+   skrip) = overlay layar penuh dengan tombol mati DAN halaman tak bisa
+   digulir. Nol persen isi undangan terbaca — pada satu-satunya produk yang
+   dilihat calon pembeli sebelum membeli.
+
+   Script sinkron di bawah menyalakan gerbang (tanpa kedip, sama seperti
+   kelas statis dulu), lalu ARLOJI PENJAGA mencabutnya bila `undangan.js`
+   tidak pernah sempat memasang handler tombol.
+
+   Kenapa memakai arloji padahal rencana awal melarangnya: keberatannya adalah
+   "halaman menggulir di belakang overlay fixed = tampak hang" — dan itu benar
+   bila yang dilepas HANYA kunci scroll. Di sini `js-gate` ikut dicabut,
+   sehingga `.gate` kembali jadi blok biasa dalam alir dokumen dan undangan
+   terbaca utuh dengan menggulir. Tanpa arloji, mustahil punya dua-duanya:
+   tampil terkunci seketika (tanpa kedip) DAN pulih sendiri saat JS tak datang.
+   <noscript> tidak menolong: ia hanya menangkap "skrip dimatikan", bukan
+   skrip yang gagal diunduh atau melempar galat — dan justru itu kasusnya. */ ?>
+<script data-no-optimize="1" data-cfasync="false">
+(function () {
+    var b = document.body;
+    b.classList.add('is-locked', 'js-gate');
+    setTimeout(function () {
+        if (!b.classList.contains('js-siap')) b.classList.remove('is-locked', 'js-gate');
+    }, 8000);
+})();
+</script>
 <main class="undangan" id="top">
 <?php
 get_template_part('template-parts/undangan/cover', null, $undangan);

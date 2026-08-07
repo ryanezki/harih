@@ -73,7 +73,9 @@ body.undangan-body {
 }
 
 /* Terkunci sampai tamu menekan "Buka Undangan" */
-body.undangan-body.is-locked { overflow: hidden; height: 100dvh; }
+/* C1c — kunci scroll menuntut `js-gate`: tanpa itu gerbang bukan overlay,
+   jadi mengunci scroll hanya akan memenjarakan pembaca. */
+body.undangan-body.is-locked.js-gate { overflow: hidden; height: 100dvh; }
 
 img { max-width: 100%; }
 
@@ -202,6 +204,10 @@ img { max-width: 100%; }
 /* ---- 1a. Gate pembuka (standar acuan §2.3) ----
    Overlay layar penuh; scroll terkunci sampai dibuka (body.is-locked sudah
    ada sejak awal). Saat dibuka: naik dengan easing dramatis dan TIDAK kembali. */
+/* C1c — TANPA `js-gate` (undangan.js gagal dimuat / melempar galat), gerbang
+   turun jadi blok biasa setinggi satu layar: undangan tetap terbaca penuh
+   dengan menggulir, tombol "Buka Undangan" sekadar tidak berfungsi. */
+body:not(.js-gate) .gate { position: relative; height: 100dvh; }
 .gate {
     position: fixed;
     inset: 0;
