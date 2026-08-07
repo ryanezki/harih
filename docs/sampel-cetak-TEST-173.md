@@ -124,11 +124,19 @@ Ditandai `TEST-` supaya mudah dikenali. Jangan dihapus sebelum pengukuran selesa
 | Pesanan WooCommerce | **#173** — `TEST-Sampel Cetak`, status `processing` |
 | Undangan | **ID 174** — `/u/test-rangga-sekar/` |
 | Baris sheet `orders` | order_id 173, `paket=premium+cetak`, `SUDAH_JADI` |
-| Kuota bulan berjalan | ikut terhitung: **1 dari 8** |
+| Kuota bulan berjalan | **tidak dihitung** — lihat di bawah |
 
-⚠️ **Pesanan ini ikut menghitung kuota produksi Agustus.** Kalau ada pesanan
-sungguhan bulan ini, hapus baris ini dulu atau kuotanya akan terlihat lebih
-penuh daripada kenyataannya.
+✅ **Pesanan ini TIDAK menghitung kuota produksi.** Ditandai meta `_harih_uji=1`,
+dan `undangan_kuota_terpakai()` melewatinya. Kuota Agustus tetap **0 dari 8**,
+jadi delapan slot sungguhan masih utuh.
+
+Di **Antrean Produksi Cetak** ia tetap tampil — justru supaya kelihatan sedang
+ada di jalur — tapi berlabel **"UJI INTERNAL · SIAP CETAK"** berwarna berbeda,
+supaya tidak ada yang mencetaknya untuk pelanggan.
+
+> Penandanya meta eksplisit, **bukan pencocokan nama**: pesanan pelanggan yang
+> kebetulan memuat kata "TEST" tidak akan ikut terlewat dari hitungan kuota.
+> Pesanan uji berikutnya cukup diberi meta yang sama.
 
 ⚠️ Saat pesanan diset `processing`, **WF-01 menyala dan benar-benar mengirim**
 satu WhatsApp ke 0815-1910-8008 dan satu email ke hi@harih.id. Itu memang jalur

@@ -238,13 +238,19 @@ function undangan_render_antrean(): void {
         elseif ($tamu === 0)                      $tahap = ['Menunggu daftar tamu', 'tunggu'];
         else                                      $tahap = ['Siapkan proof', 'aksi'];
 
+        // Pesanan uji TETAP tampil di antrean — justru supaya kelihatan sedang
+        // ada di jalur produksi — tapi ditandai terang supaya tidak ada yang
+        // mencetaknya untuk pelanggan. Ia tidak menghitung kuota (cetak.php).
+        if (function_exists('undangan_pesanan_uji') && undangan_pesanan_uji($o)) {
+            $tahap = ['UJI INTERNAL · ' . $tahap[0], 'uji'];
+        }
         $baris[] = compact('o', 'acara', 'sisa', 'tamu', 'tahap') + ['uid' => $uid];
     }
 
     // Tenggat terdekat di atas; yang tanpa tanggal ditaruh paling bawah.
     usort($baris, static fn($a, $b) => ($a['sisa'] ?? PHP_INT_MAX) <=> ($b['sisa'] ?? PHP_INT_MAX));
 
-    $warna = ['gagal' => '#b32d2e', 'tunggu' => '#996800', 'aksi' => '#2271b1', 'siap' => '#1e7e34', 'ok' => '#646970'];
+    $warna = ['gagal' => '#b32d2e', 'tunggu' => '#996800', 'aksi' => '#2271b1', 'siap' => '#1e7e34', 'ok' => '#646970', 'uji' => '#8c5e00'];
 
     echo '<div class="wrap"><h1>Antrean Produksi Cetak</h1>';
     printf(

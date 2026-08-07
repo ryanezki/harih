@@ -418,6 +418,20 @@ function undangan_sisa_slot(): int {
     return (int) $sisa;
 }
 
+/**
+ * Pesanan UJI internal? Ditandai meta `_harih_uji`, bukan dicocokkan dari nama.
+ *
+ * Pesanan uji menembus jalur produksi yang sama persis dengan pesanan
+ * sungguhan — itu memang gunanya. Tapi ia TIDAK BOLEH ikut menghabiskan kuota
+ * produksi bulan berjalan: kuota adalah janji kapasitas kepada pelanggan, dan
+ * slot yang termakan uji internal akan menolak pesanan sungguhan tanpa alasan
+ * yang benar. Sengaja memakai meta eksplisit supaya tidak ada pesanan pelanggan
+ * yang kebetulan namanya mengandung "TEST" ikut terlewat dari hitungan.
+ */
+function undangan_pesanan_uji(WC_Order $order): bool {
+    return (string) $order->get_meta('_harih_uji') === '1';
+}
+
 /** Jumlah pesanan cetak yang sudah masuk pada bulan berjalan. */
 function undangan_kuota_terpakai(): int {
     $orders = wc_get_orders([
@@ -433,6 +447,7 @@ function undangan_kuota_terpakai(): int {
     ]);
     $n = 0;
     foreach ($orders as $o) {
+        if (undangan_pesanan_uji($o)) continue; // uji internal tidak makan kapasitas
         foreach ($o->get_items() as $item) {
             if (in_array(undangan_jenis_produk($item->get_product()), ['hybrid', 'satuan'], true)) { $n++; break; }
         }
