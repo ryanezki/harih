@@ -2,7 +2,9 @@
 
 > Hal yang **hanya bisa Anda kerjakan**: butuh tangan di mesin, akun pihak ketiga, HP nomor bisnis, atau keputusan bisnis. Sisanya sudah otomatis atau bisa saya kerjakan.
 >
-> **Ditulis ulang 7 Agustus 2026** setelah audit menyeluruh + diskusi strategi. Urutannya berubah total: dulu semuanya menunggu approval Duitku, sekarang tidak — pintu masuknya pelanggan percetakan & WO yang sudah kenal Anda, dan pembayarannya lewat transfer manual seperti lazimnya vendor pernikahan.
+> **Ditulis ulang 7 Agustus, diperbarui 8 Agustus** setelah pengukuran sampel selesai. Urutannya berubah total dari versi lama: dulu semuanya menunggu approval Duitku, sekarang tidak — pintu masuknya pelanggan percetakan & WO yang sudah kenal Anda, dan pembayarannya transfer manual seperti lazimnya vendor pernikahan.
+>
+> **Yang tersisa sekarang tinggal satu hal yang benar-benar menghambat: bicara ke lima orang.** Sisanya pendukung.
 >
 > Operasional harian: [`runbook.md`](./runbook.md) · daftar kerja teknis: [`TASKS.md`](./TASKS.md)
 
@@ -10,41 +12,28 @@
 
 ---
 
-# HARI INI
+# ✅ SUDAH SELESAI — pengukuran sampel (8 Agustus)
 
-## 🔴 1. Cek mesin creasing — *satu jam, dan ia menentukan segalanya*
+Sampel `TEST-173` dicetak & dilipat sungguhan. **Tidak perlu diulang.** Hasil lengkap: [`sampel-cetak-TEST-173.md`](./sampel-cetak-TEST-173.md).
 
-Berkas sampelnya **sudah ada di tangan Anda**: `sampel-cetak-TEST-173.pdf`, dibangkitkan dari data pesanan uji yang sudah menembus seluruh jalur produksi.
+| Pertanyaan | Jawaban |
+|---|---|
+| **Mesin creasing sanggup?** | **YA** — ±8 dtk/lembar termasuk lipat. 800 lipatan/bulan = ±1,8 jam. **Hambatan terbesar di seluruh rencana gugur.** |
+| Waktu per pesanan | Resepsi **1,7 jam tangan** (4,0 jam dinding) — printer jalan sendiri ±90 dtk dari 118 dtk per unit |
+| Bobot 1 set | **22 g** → Hormat 1,4 kg · Resepsi 2,6 kg · Grand 3,8 kg. Sudah diperbarui di WooCommerce. |
+| Ongkir Rp 150.000 | **aman**, slack Rp 80–100rb/pesanan. Terburuk (Grand ke Indonesia Timur) ±Rp 200rb. |
+| QR 31 mm | **cukup**, jangan diperbesar. Jaraknya 58,8 mm dari garis lipat — aman dari retak. |
+| Bahan per unit | Rp 3.200 |
 
-**Kenapa ini nomor satu.** 100 lipatan × 8 pesanan = **800 lipatan per bulan**. Kalau harus dilipat tangan, hitungan marjin **ketiga paket** batal — bukan cuma Hormat. Ini bukan riset; ini jalan kaki ke bengkel sendiri.
+**Marjin per jam tangan:** Hormat Rp 713rb · Resepsi **Rp 1,41 jt** · Grand **Rp 2,35 jt**. Pembanding cetak reguler Rp 100–200rb/jam.
 
-**Langkah:**
-1. Cetak **halaman 1 & 2 bolak-balik** pada satu lembar A4 — orientasi **lanskap**, skala **100%** (jangan "fit to page"), **flip on short edge**.
-2. Lipat vertikal di tengah mengikuti tik kecil di tepi atas & bawah → jadi A5 potret.
-3. Cetak **halaman 3** untuk menguji nama amplop — ke amplop sungguhan bila bisa.
-4. Isi tabel di [`sampel-cetak-TEST-173.md`](./sampel-cetak-TEST-173.md): waktu per tahap (1 unit **dan** 10 unit), kesanggupan mesin, bobot, uji pindai QR.
-
-**Selesai bila:** tabel bagian A–D terisi, dan Anda tahu jawaban "mesin sanggup atau tidak".
-
-> ⚠️ Kalau **tidak** sanggup: berhenti dulu, jangan menyanggupi pesanan apa pun. Beri tahu saya — seluruh tangga harga perlu dihitung ulang.
-
-## 🔴 2. Timbang & cek ongkir nyata — *nempel di langkah 1*
-
-Ongkir **Rp 150.000 gratis se-Indonesia** dipakai di struktur biaya, dan angka itulah yang menghasilkan marjin Rp 2,6 juta untuk Paket Resepsi. **Tidak ada catatan dari mana angka itu berasal.** Bobot bahkan tercatat tiga versi berbeda di dokumen.
-
-Anda sudah mengirim barang selama ini — jadi jawabannya ada di tarif kurir Anda sendiri, bukan di riset.
-
-1. Timbang **1 set lengkap** (undangan lipat + amplop).
-2. Kalikan ke 50 / 100 / 150 set + packaging.
-3. Cek tarif ke **tiga tujuan**: dalam Jawa, Sumatera, Indonesia Timur.
-
-**Selesai bila:** bagian C & E di lembar pencatatan terisi. Kirimkan angkanya ke saya — bobot produk di sistem masih tebakan.
+**Kuota tetap 8/bulan** untuk bulan pertama meski kapasitas jauh di atas itu — batasnya bukan mesin, melainkan belum pernah satu pesanan pun dikirim tepat waktu.
 
 ---
 
 # MINGGU INI
 
-## 🔴 3. Hubungi 5 WO + pelanggan percetakan Anda — *inilah akuisisinya*
+## 🔴 1. Hubungi 5 WO + pelanggan percetakan Anda — *inilah akuisisinya*
 
 **Kenapa ini, bukan iklan atau SEO.** Anda tidak mulai dari nol. Yang sudah pernah membayar Anda sudah percaya Anda bisa mengirim tepat waktu — dan **kepercayaan itulah bagian tersulit dari jualan Rp 2,9 juta.**
 
@@ -58,7 +47,7 @@ Anda sudah mengirim barang selama ini — jadi jawabannya ada di tarif kurir And
 **Langkah:**
 1. Daftar **pelanggan percetakan** yang menikah, atau punya anak/saudara yang menikah tahun ini.
 2. Daftar **WO** yang pernah mencetak di tempat Anda.
-3. Tunjukkan **sampel fisik** dari langkah 1 — itu yang menjual, bukan link.
+3. Tunjukkan **sampel fisik** yang sudah Anda cetak — itu yang menjual, bukan link.
 4. Sudut penawaran untuk WO: *"undangannya tampil dengan nama Anda, dan Anda ambil marjinnya."*
 
 **Satu pagar supaya tidak menipu diri sendiri:** teman yang beli karena kasihan **tidak dihitung**. Pelanggan yang sudah pernah bayar — dihitung.
@@ -67,9 +56,9 @@ Anda sudah mengirim barang selama ini — jadi jawabannya ada di tarif kurir And
 
 **Selesai bila:** 5 percakapan terjadi. Bukan 5 penjualan — 5 percakapan.
 
-## 🔴 4. Duitku — kejar approval + tanyakan tiga hal
+## 🔴 2. Duitku — kejar approval + tanyakan tiga hal
 
-Diajukan **4 Agustus**, belum keluar. Tidak lagi menghalangi penjualan (lihat langkah 5), tapi tiga hal ini bisa menggagalkan pembayaran **tepat di langkah terakhir**, dan hanya Anda yang bisa menanyakannya:
+Diajukan **4 Agustus**, belum keluar. Tidak lagi menghalangi penjualan (lihat langkah 3), tapi tiga hal ini bisa menggagalkan pembayaran **tepat di langkah terakhir**, dan hanya Anda yang bisa menanyakannya:
 
 1. **Profil merchant menyebut Rp 99–299 ribu**, padahal paket cetak sampai Rp 5,9 juta. Beri tahu mereka — kalau tidak, transaksi besar bisa ditolak.
 2. **Mekanisme refund.** Garansi Tepat Waktu menjanjikan uang kembali 100% atas pesanan Rp 2,9 juta. Bisa dari dashboard sendiri atau harus tiket? Berapa lama? Fee kanal ikut kembali?
@@ -79,7 +68,7 @@ Diajukan **4 Agustus**, belum keluar. Tidak lagi menghalangi penjualan (lihat la
 
 > Begitu kredensial production dipasang, situs **otomatis** kembali ke tombol bayar online — tidak perlu minta saya deploy apa pun.
 
-## 🟠 5. Latih sekali alur pesanan manual — *sebelum pelanggan pertama*
+## 🟠 3. Latih sekali alur pesanan manual — *sebelum pelanggan pertama*
 
 Sekarang seluruh tombol "Pesan" di situs mengarah ke WhatsApp. Alasannya: gerbang Duitku masih **sandbox**, jadi tombol bayar lama mengarah ke halaman pembayaran uji — pembeli tidak mungkin benar-benar membayar.
 
@@ -101,7 +90,7 @@ konfirmasi slot & tanggal **dulu** → pastikan acara **≥ H-21** → DP masuk 
 
 # SEBELUM PESANAN PERTAMA
 
-## 🟠 6. Buka undangan di HP sungguhan — *20 menit*
+## 🟠 4. Buka undangan di HP sungguhan — *20 menit*
 
 Satu-satunya produk yang dilihat calon pembeli sebelum membeli, dan belum pernah disentuh tangan manusia di HP asli.
 
@@ -118,7 +107,7 @@ Buka **iPhone Safari** dan **Android Chrome**, salah satu demo (`harih.id/u/demo
 
 **Selesai bila:** keenamnya lolos, atau yang gagal Anda sebutkan ke saya.
 
-## 🟡 7. Pasang monitor uptime eksternal — *15 menit*
+## 🟡 5. Pasang monitor uptime eksternal — *15 menit*
 
 WF-07 & WF-08 mengawasi sistem, tapi **keduanya hidup di dalam n8n** — kalau n8n mati, pengawasnya ikut mati.
 
@@ -132,7 +121,7 @@ Daftar gratis di [uptimerobot.com](https://uptimerobot.com), buat 3 monitor HTTP
 
 **Selesai bila:** ketiganya hijau, dan Anda pernah menerima satu alert uji.
 
-## 🟡 8. Dua rahasia ke password manager — *5 menit*
+## 🟡 6. Dua rahasia ke password manager — *5 menit*
 
 `vps/.env` dan `vps/google-sa.json` **hanya ada di disk laptop Anda dan di server**. Tidak ada di git (disengaja), tidak ada backup lain. Laptop hilang + server bermasalah = pipeline harus dibangun ulang dari nol.
 
@@ -140,7 +129,7 @@ Simpan isi keduanya sebagai secure note di password manager.
 
 **Selesai bila:** keduanya bisa Anda buka dari HP.
 
-## 🟢 9. Baca sekali & putuskan
+## 🟢 7. Baca sekali & putuskan
 
 - **Gaya bahasa pesan otomatis** — [`copywriting-pesan.md`](./copywriting-pesan.md). Ini yang dibaca pelanggan Anda; pastikan terdengar seperti Anda.
 - **Tema 02 & 03 di HP** sebagai calon pembeli — ada yang tidak enak dilihat?
