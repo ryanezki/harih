@@ -21,7 +21,11 @@
     var form = $('#isi-data-form');
     if (!form) return;
 
-    var state = { foto: [], qris: null, uploading: false };
+    // `kotor` = pemesan sudah mengetik/memilih sesuatu. Dipakai beforeunload:
+    // sebelumnya peringatan hanya muncul saat SEDANG mengunggah, padahal
+    // kehilangan yang paling menyakitkan justru terjadi sebelum itu — form ini
+    // ±10 menit pengisian, dan menutup tab membuang semuanya tanpa sepatah kata.
+    var state = { foto: [], qris: null, uploading: false, kotor: false };
 
     /* ================= Kompresi gambar ================= */
 
@@ -121,6 +125,7 @@
             fotoGrid.appendChild(buatThumb(item, function () {
                 URL.revokeObjectURL(item.url);
                 state.foto.splice(i, 1);
+                state.kotor = true;
                 renderFoto();
             }));
         });
@@ -251,8 +256,14 @@
         kirimMsg.classList.toggle('error', !!error);
     }
 
+    // Tandai kotor pada interaksi apa pun dengan form. `capture` supaya ikut
+    // menangkap elemen yang menghentikan perambatan event.
+    ['input', 'change'].forEach(function (ev) {
+        form.addEventListener(ev, function () { state.kotor = true; }, true);
+    });
+
     window.addEventListener('beforeunload', function (e) {
-        if (state.uploading) { e.preventDefault(); e.returnValue = ''; }
+        if (state.uploading || state.kotor) { e.preventDefault(); e.returnValue = ''; }
     });
 
     /* ---- Contoh isi Kisah Kami (evaluasi owner: sediakan template) ---- */
@@ -328,6 +339,7 @@
         xhr.onload = function () {
             if (xhr.status >= 200 && xhr.status < 300) {
                 state.uploading = false;
+                state.kotor = false; // terkirim — jangan lagi menahan pemesan pergi
                 progressBar.style.width = '100%';
                 form.hidden = true;
                 var sukses = $('#panel-sukses');

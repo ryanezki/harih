@@ -500,26 +500,50 @@
 
     /* ---- Salin rekening ---- */
     document.querySelectorAll('.btn-copy').forEach(function (btn) {
+        /* C2 — label asli disimpan SEKALI, di luar handler klik. Sebelumnya
+           dibaca tiap klik dari `btn.textContent`, jadi ketukan kedua dalam
+           1800 ms menyimpan "Tersalin ✓" sebagai teks asli dan label
+           tersangkut permanen. Ini tidak butuh kegagalan apa pun — cukup dua
+           ketukan cepat, dan terjadi di semua peramban. */
+        btn.dataset.label = btn.textContent;
+
         btn.addEventListener('click', function () {
             var teks = btn.dataset.copy || '';
-            var selesai = function () {
-                var asli = btn.textContent;
-                btn.textContent = 'Tersalin ✓';
-                btn.classList.add('copied');
+            var pulih = function () {
                 setTimeout(function () {
-                    btn.textContent = asli;
-                    btn.classList.remove('copied');
+                    btn.textContent = btn.dataset.label;
+                    btn.classList.remove('copied', 'gagal-salin');
                 }, 1800);
             };
+            var selesai = function () {
+                btn.textContent = 'Tersalin ✓';
+                btn.classList.add('copied');
+                pulih();
+            };
+            /* C2 — kegagalan HARUS punya jalur sendiri. Sebelumnya
+               `.then(selesai, selesai)`: argumen kedua itu handler PENOLAKAN,
+               diisi fungsi sukses. Di WebView WhatsApp — dari mana mayoritas
+               tamu Indonesia membuka undangan — `writeText` bisa menolak, dan
+               justru di kondisi itu tombolnya berbohong: tamu menempel isi
+               clipboard LAMA ke aplikasi m-banking, lalu mengira sudah benar. */
+            var gagal = function () {
+                btn.textContent = 'Gagal menyalin — tekan lama nomornya';
+                btn.classList.add('gagal-salin');
+                pulih();
+            };
             if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(teks).then(selesai, selesai);
+                navigator.clipboard.writeText(teks).then(selesai, gagal);
             } else {
                 var ta = document.createElement('textarea');
                 ta.value = teks;
                 document.body.appendChild(ta);
                 ta.select();
-                try { document.execCommand('copy'); selesai(); } catch (e) { /* abaikan */ }
+                // `execCommand` mengembalikan false saat gagal TANPA melempar,
+                // jadi `try/catch` saja tidak cukup — harus periksa nilainya.
+                var ok = false;
+                try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
                 document.body.removeChild(ta);
+                (ok ? selesai : gagal)();
             }
         });
     });
@@ -547,7 +571,10 @@
         head.appendChild(badge);
         var SESI_LABEL = { akad: 'Akad', resepsi: 'Resepsi', keduanya: 'Akad & Resepsi' };
         var info = [];
-        if (u.jumlah > 1) info.push(u.jumlah + ' tamu');
+        // Jumlah tamu hanya bermakna bila yang bersangkutan HADIR — tanpa
+        // syarat ini buku tamu publik menampilkan "Berhalangan · 3 tamu".
+        // Pemeriksaan yang sama sudah dipakai baris berikutnya untuk sesi.
+        if (u.hadir === 'hadir' && u.jumlah > 1) info.push(u.jumlah + ' tamu');
         if (u.hadir === 'hadir' && SESI_LABEL[u.sesi]) info.push(SESI_LABEL[u.sesi]);
         if (info.length) {
             var inf = document.createElement('span');

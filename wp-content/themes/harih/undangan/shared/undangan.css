@@ -956,6 +956,14 @@ body.is-locked .pratinjau-nama { display: none; } /* gerbang tetap sinematik */
     border-radius: var(--radius-btn);
 }
 .btn-copy.copied { background: var(--c-accent); color: var(--c-accent-ink); }
+/* C2 — keadaan GAGAL menyalin. Sengaja TIDAK memakai warna aksen seperti
+   `.copied`: menampilkan keadaan sukses saat penyalinan gagal justru kebohongan
+   yang sedang diperbaiki. Memakai token yang memang ada di CSS undangan
+   (`--c-ink-soft`, `--c-ink`) — token peringatan hanya hidup di katalog.css,
+   yang tidak dimuat halaman undangan, jadi mengimpornya akan tabrakan di
+   tema-03 yang gelap. Font diperkecil agar kalimatnya tetap satu baris di
+   HP 375px. */
+.btn-copy.gagal-salin { border-color: var(--c-ink-soft); color: var(--c-ink); font-size: .78em; letter-spacing: 0; }
 
 /* ---- 9. RSVP ---- */
 #rsvp-form { display: flex; flex-direction: column; gap: 14px; text-align: left; }
