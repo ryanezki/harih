@@ -271,6 +271,30 @@ add_filter('woocommerce_add_to_cart_quantity', function ($qty, $product_id) {
  * ========================================================================= */
 const UNDANGAN_AMBANG_VA = 2000000;
 
+/**
+ * Kanal yang aman untuk nominal besar: virtual account + gerai retail.
+ *
+ * Pencocokan substring, bukan daftar ID tetap — disengaja. Diverifikasi ke
+ * gateway Duitku yang benar-benar terdaftar (37 buah, 2026-08-07): pola `_va_`
+ * sendirian menangkap sepuluh VA (`va_bca`, `va_bni`, `va_permata`,
+ * `va_mandiri_h2h`, `va_bsi`, `va_cimb_niaga`, `va_maybank`, `va_artha`,
+ * `va_sampoerna`, `va_atm_bersama`, `va_danamon_h2h`, `va_ritel`), sehingga VA
+ * bank baru yang diaktifkan owner **ikut lolos otomatis** tanpa menyentuh kode
+ * ini. Daftar ID tetap justru akan diam-diam membuangnya.
+ * `briva` & `indomaret` ada padanan gateway-nya; `alfamart` belum — dibiarkan
+ * sebagai jaring untuk gateway Alfamart bila kelak diaktifkan.
+ *
+ * Yang SENGAJA tidak lolos, dan memang itu maksud keputusan owner: e-wallet
+ * (`duitku_ovo`, `duitku_dana`, `duitku_shopeepay_applink`) dan QRIS
+ * (`duitku_nobu_qris`) — plafon per transaksinya di bawah Rp 5,9 juta.
+ */
+function undangan_gateway_nominal_besar(string $id): bool {
+    return str_contains($id, '_va_')
+        || str_contains($id, 'briva')
+        || str_contains($id, 'indomaret')
+        || str_contains($id, 'alfamart');
+}
+
 add_filter('woocommerce_available_payment_gateways', function ($gateways) {
     if (is_admin() || !function_exists('WC') || !WC()->cart) return $gateways;
     // Hanya di halaman keranjang/checkout. `get_total('edit')` memicu
@@ -281,12 +305,28 @@ add_filter('woocommerce_available_payment_gateways', function ($gateways) {
     $total = (float) WC()->cart->get_total('edit');
     if ($total <= UNDANGAN_AMBANG_VA) return $gateways;
 
-    // Yang dipertahankan: semua VA + gerai retail (nominal besar aman).
-    foreach (array_keys($gateways) as $id) {
-        $aman = str_contains($id, '_va_') || str_contains($id, 'briva') || str_contains($id, 'indomaret') || str_contains($id, 'alfamart');
-        if (!$aman) unset($gateways[$id]);
+    $disaring = array_filter(
+        $gateways,
+        fn($id) => undangan_gateway_nominal_besar((string) $id),
+        ARRAY_FILTER_USE_KEY
+    );
+
+    // A5 — PENJAGA ANTI-CHECKOUT-KOSONG. Filter ini membuang berdasarkan pola
+    // nama; kalau suatu saat semua VA & gerai kebetulan nonaktif (atau Duitku
+    // mengganti skema penamaan gateway-nya), hasilnya NOL gateway dan pembeli
+    // melihat "no payment methods available" pada order Rp 2,9–5,9 juta —
+    // gagal total di langkah terakhir, tepat setelah semua gesekan dilewati.
+    // Menawarkan kanal ber-plafon rendah jauh lebih baik daripada tidak
+    // menawarkan apa pun: yang pertama mungkin gagal, yang kedua pasti gagal.
+    if (!$disaring) {
+        error_log(sprintf(
+            'hariH A5: saringan VA membuang SELURUH %d gateway pada keranjang Rp %s — daftar asli dikembalikan. Periksa gateway Duitku yang aktif.',
+            count($gateways),
+            number_format($total, 0, ',', '.')
+        ));
+        return $gateways;
     }
-    return $gateways;
+    return $disaring;
 }, 20);
 
 /* =========================================================================
