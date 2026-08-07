@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) exit;
  * pengunjung & LiteSpeed tetap menyajikan berkas lama meski file di server
  * sudah baru, dan perbaikan tampilan terlihat "tidak berpengaruh".
  */
-const HARIH_VERSION = '2.11.0';
+const HARIH_VERSION = '2.12.0';
 
 add_action('after_setup_theme', function () {
     add_theme_support('title-tag');
@@ -443,13 +443,42 @@ add_action('wp_head', function () {
 const HARIH_GA4_ID = 'G-WZ2K77HHY8';
 
 /**
+ * Template halaman bertoken — URL-nya memuat **token order**, sebuah bearer
+ * credential yang membuka data pemesan.
+ *
+ * SATU daftar, dipakai setiap tempat yang harus memperlakukan halaman ini
+ * secara khusus. Sebelumnya tiap tempat menulis daftarnya sendiri, dan yang
+ * terjadi persis seperti yang bisa ditebak dari pola itu (B1 2026-08-07): blok
+ * GA4 hanya mengecualikan `/isi-data/`, sementara `/proof/`, `/tamu/`, dan
+ * `/rekap/` — memakai token yang sama, memasang `no-referrer` yang sama —
+ * memuat gtag dan mengirim URL berikut tokennya ke Google. Terbukti dengan
+ * memeriksa HTML ketiganya di produksi, bukan dari membaca kode saja.
+ * (`/upsell/` lolos pengamatan hanya karena order ujinya membalas 403 sebelum
+ * halaman sempat dirender — ia sama terdampaknya.)
+ *
+ * Menambah halaman bertoken berikutnya cukup di sini.
+ */
+function harih_template_bertoken(): array {
+    return ['page-isi-data.php', 'page-upsell.php', 'page-proof.php', 'page-tamu.php', 'page-rekap.php'];
+}
+
+function harih_halaman_bertoken(): bool {
+    foreach (harih_template_bertoken() as $template) {
+        if (is_page_template($template)) return true;
+    }
+    return false;
+}
+
+/**
  * GA4 sengaja TIDAK dimuat di dua tempat:
  *
- * 1. `/isi-data/` — URL halaman ini memuat **token order**, sebuah bearer
- *    credential. GA4 mengirim URL lengkap sebagai `page_location`, jadi
- *    memasangnya di sana berarti menyerahkan token pelanggan ke Google —
- *    sekaligus membatalkan `Referrer-Policy: no-referrer` yang dipasang khusus
- *    untuk mencegah kebocoran token itu (T2.9).
+ * 1. **Semua halaman bertoken** (lihat `harih_template_bertoken()`). GA4
+ *    mengirim URL lengkap sebagai `page_location`, jadi memasangnya di sana
+ *    berarti menyerahkan token pelanggan ke Google — sekaligus membatalkan
+ *    `Referrer-Policy: no-referrer` yang dipasang khusus untuk mencegah
+ *    kebocoran token itu (T2.9). Kebijakan Privasi yang sudah tayang juga
+ *    menyatakan token halaman ini tidak dikirim ke pihak ketiga mana pun;
+ *    janji tertulis yang tidak ditepati jauh lebih mahal daripada analitiknya.
  *
  * 2. Halaman undangan `/u/*` — pengunjungnya adalah **tamu customer**, bukan
  *    customer kita; mereka tidak punya hubungan apa pun dengan hariH dan tidak
@@ -461,7 +490,7 @@ const HARIH_GA4_ID = 'G-WZ2K77HHY8';
  */
 add_action('wp_head', function () {
     if (HARIH_GA4_ID === '') return;
-    if (is_singular('undangan') || is_page_template('page-isi-data.php')) return;
+    if (is_singular('undangan') || harih_halaman_bertoken()) return;
 
     $id = esc_js(HARIH_GA4_ID);
     echo "\n<!-- GA4 (P2.5) -->\n";
@@ -551,10 +580,13 @@ add_filter('show_admin_bar', function ($show) {
     return (is_singular('undangan') || is_page_template('page-isi-data.php')) ? false : $show;
 });
 
-// Form isi data: jangan diindeks — URL berisi token order (T2.9 pelengkap).
+// Halaman bertoken: jangan diindeks DAN jangan diikuti — URL berisi token order
+// (T2.9 pelengkap). Sebelumnya hanya `/isi-data/` yang dapat `nofollow`;
+// keempat halaman bertoken lain cuma kebagian `noindex` lewat daftar utilitas
+// di bawah, padahal tokennya sama persis.
 // Halaman utilitas lain (cart/checkout/akun/shop) ikut di-noindex — P2.4.
 add_filter('wp_robots', function ($robots) {
-    if (is_page_template('page-isi-data.php')) {
+    if (harih_halaman_bertoken()) {
         $robots['noindex']  = true;
         $robots['nofollow'] = true;
         return $robots;
