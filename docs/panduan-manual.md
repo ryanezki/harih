@@ -1,262 +1,207 @@
 # Panduan Aksi Manual Owner — hariH
 
-> Daftar hal yang **hanya bisa Anda kerjakan**: butuh akun pihak ketiga, kartu identitas, HP nomor bisnis, keputusan bisnis, atau password. Semua hal lain di platform ini sudah otomatis atau bisa saya kerjakan dari CLI.
+> Hal yang **hanya bisa Anda kerjakan**: butuh tangan di mesin, akun pihak ketiga, HP nomor bisnis, atau keputusan bisnis. Sisanya sudah otomatis atau bisa saya kerjakan.
 >
-> Disusun 2026-08-04, menggantikan `panduan-go-live.md`. **Diperbarui 2026-08-06**: proyek berubah jadi hybrid (digital + cetak milik sendiri), jadi ditambahkan **bagian 10 — menjalankan pesanan cetak dari awal sampai kirim**, yang isinya alat-alat yang sudah jadi tapi belum pernah Anda pakai. Untuk operasional harian, pegangannya [`runbook.md`](./runbook.md).
+> **Ditulis ulang 7 Agustus 2026** setelah audit menyeluruh + diskusi strategi. Urutannya berubah total: dulu semuanya menunggu approval Duitku, sekarang tidak — pintu masuknya pelanggan percetakan & WO yang sudah kenal Anda, dan pembayarannya lewat transfer manual seperti lazimnya vendor pernikahan.
+>
+> Operasional harian: [`runbook.md`](./runbook.md) · daftar kerja teknis: [`TASKS.md`](./TASKS.md)
 
-> **Status per 6 Agustus 2026:** owner melaporkan **sebagian besar langkah 1–9 sudah dikerjakan**. Rinciannya belum dikonfirmasi satu per satu — dikonfirmasi di sesi berikutnya, lalu yang selesai dicoret dari daftar ini. Bagian **10 (alur pesanan cetak)** dan **11 (tiga hal yang menunggu)** masih berlaku penuh.
-
-**Cara pakai:** kerjakan berurutan dari atas. Tiap langkah punya **verifikasi** — kalau verifikasinya lolos, langkah itu benar-benar selesai. Kalau tersendat, sebut nomornya saja ke saya.
-
----
-
-## 🔴 1. Ajukan merchant Duitku production — *blocker satu-satunya*
-
-**Kenapa duluan:** ini satu-satunya hal yang menghalangi hariH menerima uang sungguhan. Semua yang sudah dibangun — katalog, 3 tema, otomasi, undangan otomatis — belum menghasilkan satu rupiah pun sampai ini beres. Approval-nya juga makan waktu berhari-hari, jadi makin cepat diajukan makin baik; sisa daftar di bawah bisa dikerjakan sambil menunggu.
-
-**Langkah** (±30 menit + masa tunggu):
-
-1. Login dashboard Duitku (akun production, **bukan** sandbox) → menu pendaftaran merchant.
-2. Isi formulir aplikasi merchant **perorangan**. Siapkan: KTP, NPWP (bila diminta), rekening bank atas nama sendiri, dan URL situs `https://harih.id`.
-3. Saat ditanya jenis usaha/produk: *jasa pembuatan undangan pernikahan digital **dan cetak***, sekali bayar **Rp 99.000–Rp 5.900.000**.
-   ⚠️ **Rentang nilainya berubah sejak paket cetak ada.** Kalau aplikasi Anda sudah terlanjur menyebut "Rp 99.000–299.000", **beri tahu Duitku** — kanal pembayaran punya batas nominal, dan merchant yang tiba-tiba menerima transaksi Rp 2,9 juta di luar profil yang didaftarkan bisa kena tahan. Sistem kita sudah membatasi order di atas Rp 2 juta ke virtual account & gerai retail saja, tapi profil merchantnya tetap harus cocok.
-4. Kirim, lalu pantau statusnya. Duitku biasanya mereview situs — situs Anda sudah siap: katalog dengan harga jelas, 4 halaman legal live, 3 demo produk yang bisa dibuka, kontak yang bisa dihubungi.
-
-**Setelah approval keluar** — beri tahu saya, lalu:
-
-5. wp-admin → WooCommerce → Settings → Payments → Duitku → ubah mode **Sandbox → Production**, isi Merchant Code + API Key production, Save.
-6. Bilang ke saya **"Duitku production sudah aktif"** — saya buat produk uji tersembunyi Rp 10.000, Anda pesan dari HP, dan kita verifikasi undangannya sampai di WhatsApp < 15 menit. Produk ujinya saya hapus setelah lolos.
-
-**Verifikasi:** 1 order Rp 10.000 dari HP lolos penuh (bayar → link form → isi → undangan terbit → WA masuk) **dan** dananya benar-benar masuk ke rekening merchant Anda.
+**Cara pakai:** kerjakan berurutan. Tiap langkah punya **cara memastikan ia benar-benar selesai**. Kalau tersendat, sebut nomornya saja.
 
 ---
 
-## 🟠 2. Pilih musik latar — fitur yang sudah dijual tapi belum ada
+# HARI INI
 
-**Kenapa:** "musik latar instrumental" tercantum di **ketiga** paket di katalog, di deskripsi produk WooCommerce, dan diatur di S&K §7 — tapi pustakanya masih kosong. Sekarang form isi data hanya menulis "akan ditambahkan tim kami", artinya tiap order jadi kerja manual CS. Ini janji yang belum ditepati sejak hari pertama.
+## 🔴 1. Cek mesin creasing — *satu jam, dan ia menentukan segalanya*
 
-**Langkah** (±45 menit):
+Berkas sampelnya **sudah ada di tangan Anda**: `sampel-cetak-TEST-173.pdf`, dibangkitkan dari data pesanan uji yang sudah menembus seluruh jalur produksi.
 
-1. Pilih **5–10 track instrumental** dari sumber berlisensi komersial. Rekomendasi, dari yang paling mudah:
-   - **Pixabay Music** — gratis, lisensi komersial, tanpa atribusi.
-   - **Uppbeat** — gratis dengan atribusi, atau berlangganan murah tanpa atribusi.
-   - **Artlist / Epidemic Sound** — berlangganan, kualitas paling konsisten.
-2. Kriteria praktis: instrumental murni (tanpa vokal berbahasa apa pun), tenang, 2–4 menit, dan **enak saat di-loop** — tamu bisa membuka undangan lama-lama.
-3. Unduh versi MP3-nya, lalu **simpan bukti lisensinya**: screenshot halaman lisensi atau invoice, satu per track. Simpan di Google Drive Anda, jangan di repo.
-4. Kirim file-file MP3 + bukti lisensinya ke saya.
-
-**Yang saya kerjakan setelah itu:** unggah ke server, isi `harih_musik_library()`, catat provenance-nya di `docs/aset-lisensi.md`, dan dropdown pilihan musik otomatis muncul di form isi data.
-
-**Verifikasi:** buka form isi data → ada dropdown "Pilih musik instrumental" berisi daftar track; satu undangan uji memutar musiknya di HP setelah tombol *Buka Undangan* ditekan.
-
----
-
-## 🟠 3. Simpan dua rahasia ke password manager — *5 menit, risiko besar*
-
-**Kenapa:** `N8N_ENCRYPTION_KEY` adalah kunci yang mengenkripsi seluruh credential n8n di dalam arsip backup. Nilainya **sekarang cuma ada di VPS yang sama dengan backup-nya**. Kalau VPS itu hilang, backup n8n-nya ikut jadi tidak berguna — tidak bisa di-restore sama sekali. Ini persis skenario yang bikin backup terasa aman padahal tidak.
+**Kenapa ini nomor satu.** 100 lipatan × 8 pesanan = **800 lipatan per bulan**. Kalau harus dilipat tangan, hitungan marjin **ketiga paket** batal — bukan cuma Hormat. Ini bukan riset; ini jalan kaki ke bengkel sendiri.
 
 **Langkah:**
+1. Cetak **halaman 1 & 2 bolak-balik** pada satu lembar A4 — orientasi **lanskap**, skala **100%** (jangan "fit to page"), **flip on short edge**.
+2. Lipat vertikal di tengah mengikuti tik kecil di tepi atas & bawah → jadi A5 potret.
+3. Cetak **halaman 3** untuk menguji nama amplop — ke amplop sungguhan bila bisa.
+4. Isi tabel di [`sampel-cetak-TEST-173.md`](./sampel-cetak-TEST-173.md): waktu per tahap (1 unit **dan** 10 unit), kesanggupan mesin, bobot, uji pindai QR.
 
-1. Ambil nilainya (jalankan di Terminal, dari folder project):
-   ```bash
-   grep -E 'N8N_ENCRYPTION_KEY|WAHA_API_KEY' vps/.env
-   ```
-2. Simpan di password manager (1Password/Bitwarden/iCloud Keychain) sebagai entri **"hariH — kunci infrastruktur"**.
-3. Sekalian simpan **seluruh isi** `vps/.env` sebagai catatan aman di entri yang sama — file itu tidak ada di GitHub (memang sengaja) dan satu-satunya salinannya ada di Mac ini + VPS.
+**Selesai bila:** tabel bagian A–D terisi, dan Anda tahu jawaban "mesin sanggup atau tidak".
 
-**Verifikasi:** buka password manager di HP Anda, kedua nilai terbaca.
+> ⚠️ Kalau **tidak** sanggup: berhenti dulu, jangan menyanggupi pesanan apa pun. Beri tahu saya — seluruh tangga harga perlu dihitung ulang.
 
----
+## 🔴 2. Timbang & cek ongkir nyata — *nempel di langkah 1*
 
-## 🟡 4. Pasang uptime monitor eksternal — *15 menit*
+Ongkir **Rp 150.000 gratis se-Indonesia** dipakai di struktur biaya, dan angka itulah yang menghasilkan marjin Rp 2,6 juta untuk Paket Resepsi. **Tidak ada catatan dari mana angka itu berasal.** Bobot bahkan tercatat tiga versi berbeda di dokumen.
 
-**Kenapa:** monitor yang ada sekarang (WF-07 untuk sesi WhatsApp, WF-08 untuk webhook) **berjalan di dalam n8n**. Kalau n8n sendiri yang mati, kedua monitor mati bersamanya dan tidak ada yang memberi tahu siapa pun. Butuh satu pengawas dari luar. Akun harus Anda yang buat.
+Anda sudah mengirim barang selama ini — jadi jawabannya ada di tarif kurir Anda sendiri, bukan di riset.
 
-**Langkah:** daftar gratis di [uptimerobot.com](https://uptimerobot.com), lalu buat 3 monitor:
+1. Timbang **1 set lengkap** (undangan lipat + amplop).
+2. Kalikan ke 50 / 100 / 150 set + packaging.
+3. Cek tarif ke **tiga tujuan**: dalam Jawa, Sumatera, Indonesia Timur.
 
-| # | Tipe | URL | Setelan tambahan |
-|---|---|---|---|
-| 1 | HTTP(s) — Keyword | `https://harih.id/` | Keyword: `paket` · harus **ada** |
-| 2 | HTTP(s) | `https://n8n.harih.id/healthz` | interval 5 menit |
-| 3 | HTTP(s) — Keyword | `https://harih.id/u/demo-tema-01/` | Keyword: `Buka Undangan` · harus **ada** |
-
-Alert dikirim ke **hi@harih.id** dan (kalau UptimeRobot mendukung di paket gratis) nomor WA/Telegram Anda.
-
-**Kenapa monitor #3 pakai keyword:** situs bisa membalas 200 tapi isinya halaman error WordPress. Keyword memastikan halaman undangan benar-benar ter-render, bukan sekadar "server hidup".
-
-**Verifikasi:** ketiganya berstatus hijau di dashboard UptimeRobot.
+**Selesai bila:** bagian C & E di lembar pencatatan terisi. Kirimkan angkanya ke saya — bobot produk di sistem masih tebakan.
 
 ---
 
-## 🟡 5. Uji undangan di HP sungguhan — *20 menit*
+# MINGGU INI
 
-**Kenapa:** perilaku Safari iOS kerap berbeda dari emulator, dan tiga hal di bawah tidak bisa saya uji dari sini sama sekali. Semuanya fitur yang dijual.
+## 🔴 3. Hubungi 5 WO + pelanggan percetakan Anda — *inilah akuisisinya*
 
-Buka **https://harih.id/u/demo-tema-01/** dari **iPhone (Safari)** dan **Android (Chrome)**, lalu cek:
+**Kenapa ini, bukan iklan atau SEO.** Anda tidak mulai dari nol. Yang sudah pernah membayar Anda sudah percaya Anda bisa mengirim tepat waktu — dan **kepercayaan itulah bagian tersulit dari jualan Rp 2,9 juta.**
 
-- [ ] Tekan **Buka Undangan** → halaman ter-scroll & **musik mulai** (musik baru ada setelah langkah 2; sebelum itu cukup pastikan tidak error)
-- [ ] **Countdown berjalan** dan angkanya masuk akal (baru saja saya perbaiki — sebelumnya diam di 0)
-- [ ] Scroll ke *Amplop Digital* → tekan **Salin** → tempel di aplikasi lain, nomor rekeningnya benar
-- [ ] Isi **RSVP** → ucapan Anda muncul di daftar
-- [ ] Tombol **Bagikan via WhatsApp** membuka WA dengan link benar
-- [ ] Coba ketiga tema: `/u/demo-tema-02/` dan `/u/demo-tema-03/`
+**Yang dijual: paket cetak, bukan digital Rp 179rb.** Aritmatikanya:
 
-**Uji preview share WhatsApp** (ini yang paling menentukan konversi reseller):
-
-- [ ] Kirim link `https://harih.id/` ke chat WA pribadi Anda → muncul **gambar kartu hariH** + judul, bukan link telanjang
-- [ ] Kirim link `https://harih.id/u/demo-tema-02/` → muncul gambar juga
-
-> ⚠️ WhatsApp **meng-cache preview per URL**. Kalau Anda pernah mengirim link ini sebelum hari ini, previewnya bisa masih yang lama/kosong. Uji dengan menambahkan `?x=1` di belakang link supaya WA menganggapnya URL baru.
-
-**Verifikasi:** semua kotak tercentang di kedua HP. Ada yang aneh → screenshot dan kirim ke saya.
-
----
-
-## 🟡 6. Baca runbook & putuskan angka kebijakan — *20 menit*
-
-**Kenapa:** [`runbook.md`](./runbook.md) adalah pegangan Anda saat sistem rusak di tengah malam. Kalau baru dibaca pertama kali saat panik, gunanya hilang. Beberapa angka di dalamnya juga masih default saya, bukan keputusan Anda.
-
-**Langkah:** baca dari atas ke bawah (±10 menit), lalu putuskan dan beri tahu saya:
-
-1. **Revisi paket Hemat** — berbayar berapa? (S&K sekarang menulis "berbayar, kebijakan CS" tanpa angka)
-2. **SLA revisi** — sekarang tertulis maksimal 1×24 jam kerja. Sanggup? Kalau tidak, ubah sekarang selagi belum ada customer.
-3. **Batas pengajuan refund** — sekarang 7 hari sejak pembayaran, diproses maksimal 7 hari kerja. Setuju?
-
-**Verifikasi:** Anda bisa menjawab tanpa membuka dokumen: "kalau WhatsApp mati, saya harus apa?" (jawabannya runbook §5.1).
-
----
-
-## 🟢 7. Pasang analytics & Search Console — *20 menit*
-
-**Kenapa:** sekarang **nol** data. Kalau nanti pengunjung datang tapi tidak ada yang membeli, tidak akan ada cara tahu mereka berhenti di mana — di katalog, di checkout, atau di form isi data. Keputusan perbaikan jadi tebak-tebakan.
+| | Marjin |
+|---|---|
+| 10 penjualan digital | ±Rp 1,8 juta |
+| **1 pesanan Paket Resepsi** | **±Rp 2,6 juta** |
 
 **Langkah:**
+1. Daftar **pelanggan percetakan** yang menikah, atau punya anak/saudara yang menikah tahun ini.
+2. Daftar **WO** yang pernah mencetak di tempat Anda.
+3. Tunjukkan **sampel fisik** dari langkah 1 — itu yang menjual, bukan link.
+4. Sudut penawaran untuk WO: *"undangannya tampil dengan nama Anda, dan Anda ambil marjinnya."*
 
-1. **Google Search Console** → [search.google.com/search-console](https://search.google.com/search-console) → tambah properti `harih.id` → pilih verifikasi **DNS TXT** (paling awet) atau tag HTML → kirim kodenya ke saya, saya pasang.
-2. Setelah terverifikasi: Sitemaps → kirim `https://harih.id/wp-sitemap.xml`.
-3. **Analytics** — pilih salah satu, beri tahu saya mana:
-   - **Plausible** (±$9/bulan) — ringan, tanpa cookie banner, cukup untuk kebutuhan ini.
-   - **GA4** (gratis) — lebih lengkap, tapi menambah beban halaman dan konsekuensi privasi (Kebijakan Privasi perlu disesuaikan).
+**Satu pagar supaya tidak menipu diri sendiri:** teman yang beli karena kasihan **tidak dihitung**. Pelanggan yang sudah pernah bayar — dihitung.
 
-**Verifikasi:** Search Console menampilkan sitemap "Success" dengan jumlah URL terbaca.
+**Catat per penjualan:** paket apa · dari mana datangnya · bertanya dulu atau langsung setuju.
+
+**Selesai bila:** 5 percakapan terjadi. Bukan 5 penjualan — 5 percakapan.
+
+## 🔴 4. Duitku — kejar approval + tanyakan tiga hal
+
+Diajukan **4 Agustus**, belum keluar. Tidak lagi menghalangi penjualan (lihat langkah 5), tapi tiga hal ini bisa menggagalkan pembayaran **tepat di langkah terakhir**, dan hanya Anda yang bisa menanyakannya:
+
+1. **Profil merchant menyebut Rp 99–299 ribu**, padahal paket cetak sampai Rp 5,9 juta. Beri tahu mereka — kalau tidak, transaksi besar bisa ditolak.
+2. **Mekanisme refund.** Garansi Tepat Waktu menjanjikan uang kembali 100% atas pesanan Rp 2,9 juta. Bisa dari dashboard sendiri atau harus tiket? Berapa lama? Fee kanal ikut kembali?
+3. **Plafon per kanal.** E-wallet & QRIS sering berplafon di bawah Rp 5,9 juta.
+
+**Selesai bila:** ketiganya terkirim dan jawabannya Anda kirimkan ke saya.
+
+> Begitu kredensial production dipasang, situs **otomatis** kembali ke tombol bayar online — tidak perlu minta saya deploy apa pun.
+
+## 🟠 5. Latih sekali alur pesanan manual — *sebelum pelanggan pertama*
+
+Sekarang seluruh tombol "Pesan" di situs mengarah ke WhatsApp. Alasannya: gerbang Duitku masih **sandbox**, jadi tombol bayar lama mengarah ke halaman pembayaran uji — pembeli tidak mungkin benar-benar membayar.
+
+DP transfer manual memang norma di pasar pernikahan Indonesia (WO, MUA, katering, dekorasi semuanya begitu), jadi ini bukan penurunan kelas.
+
+Langkah lengkapnya ada di **[`runbook.md`](./runbook.md) §7c**. Ringkasnya:
+
+**Digital (Rp 99–299 ribu) — lunas di muka:**
+kirim rekening → dana masuk → buat pesanan di wp-admin (nama, email, **nomor WhatsApp**, produk `HARIH-*`) → set **Processing** → otomasi menyala sendiri.
+
+**Cetak (Rp 1,19–5,9 juta) — DP 50%:**
+konfirmasi slot & tanggal **dulu** → pastikan acara **≥ H-21** → DP masuk → buat pesanan dengan alamat lengkap + tanggal acara → set **Processing** → pelunasan sebelum barang dikirim.
+
+**Selesai bila:** Anda pernah sekali membuat pesanan manual dan melihat WhatsApp otomatisnya masuk.
 
 ---
 
-## 🟢 8. Review visual tema di HP — *10 menit*
+# SEBELUM PESANAN PERTAMA
 
-Buka ketiganya dari HP dan nilai sebagai **calon pembeli**, bukan sebagai pemilik:
+## 🟠 6. Buka undangan di HP sungguhan — *20 menit*
 
-- https://harih.id/u/demo-tema-01/ — Botanical Elegan (sage & gading)
-- https://harih.id/u/demo-tema-02/ — Senja Terakota (terakota & tembaga)
-- https://harih.id/u/demo-tema-03/ — Langit Malam (navy & emas)
+Satu-satunya produk yang dilihat calon pembeli sebelum membeli, dan belum pernah disentuh tangan manusia di HP asli.
 
-Pertanyaannya cuma satu: **layakkah ini dibayar Rp 99–299 ribu?** Kalau ada yang terasa kurang, sebutkan spesifik (mis. "tema-03 terlalu gelap di HP saya", "jarak antar section terlalu renggang") — perbaikan tampilan itu murah.
+Buka **iPhone Safari** dan **Android Chrome**, salah satu demo (`harih.id/u/demo-tema-01/`):
 
----
+- [ ] Musik mulai setelah tap tombol
+- [ ] Hitung mundur berjalan
+- [ ] Tombol salin rekening — **dan cek isinya benar-benar tersalin**
+- [ ] Mode gelap (tombol ☾/☀, dan apakah ikut setelan HP)
+- [ ] Galeri kolase · tombol Waze · tombol "beri tahu mempelai lewat WhatsApp" setelah RSVP
+- [ ] Kirim linknya ke WA sendiri → preview-nya muncul dengan gambar & nama?
 
-## 🟢 9. Setelah semua di atas: soft launch
+⚠️ WhatsApp meng-cache preview per URL — uji dengan `?x=1` di belakang link supaya dianggap URL baru.
 
-1. ~~**Rekrut 3 reseller pertama**~~ — **DIHENTIKAN 2026-08-07.** Halaman `/jadi-reseller/` diturunkan: komisi 30% dari paket digital Rp 179rb hanya Rp 54.000, terlalu kecil untuk menggerakkan siapa pun, sementara untuk paket cetak kuponnya memang diblokir. Yang punya ekonomi nyata adalah **program vendor** — dekati WO yang sudah pernah mencetak di tempat Anda.
-2. **Review gaya bahasa** pesan otomatis di [`copywriting-pesan.md`](./copywriting-pesan.md) — ini yang akan dibaca customer Anda, pastikan terdengar seperti Anda.
-3. **Nomor WA bisnis:** jangan logout dari HP, pakai wajar, jangan blast ke nomor tak dikenal. Sesi terbanned = seluruh kanal pengiriman WA mati.
+**Selesai bila:** keenamnya lolos, atau yang gagal Anda sebutkan ke saya.
 
----
+## 🟡 7. Pasang monitor uptime eksternal — *15 menit*
 
----
+WF-07 & WF-08 mengawasi sistem, tapi **keduanya hidup di dalam n8n** — kalau n8n mati, pengawasnya ikut mati.
 
-## 🖨️ 10. Menjalankan pesanan cetak — dari masuk sampai terkirim
+Daftar gratis di [uptimerobot.com](https://uptimerobot.com), buat 3 monitor HTTP(s) interval 5 menit, alert ke email + WhatsApp:
 
-Bagian ini **baru** (6 Agustus 2026). Semua alat di bawah sudah jadi dan sudah live, tapi belum pernah Anda pakai karena belum ada order. Baca sekali sekarang; saat order pertama masuk, Anda tinggal mengikuti.
-
-### Layar utama Anda: **WooCommerce → Antrean Cetak**
-
-Satu halaman yang menjawab "hari ini saya kerjakan apa". Diurutkan berdasarkan **tenggat acara**, bukan tanggal pesanan — pesanan yang masuk belakangan bisa saja acaranya lebih dulu, dan itu kesalahan penjadwalan yang paling mahal. Sisa hari **memerah otomatis di bawah 14 hari**.
-
-Kolom **"Langkah berikutnya"** selalu berisi satu kalimat — itulah yang menghambat pesanan itu:
-
-| Yang tertulis | Artinya | Yang Anda lakukan |
+| Monitor | URL | Sehat bila |
 |---|---|---|
-| Menunggu data undangan | Pembeli belum mengisi form | Tunggu; ingatkan lewat WA bila > 3 hari |
-| Menunggu daftar tamu | Data undangan ada, nama tamu belum | Kirim ulang link daftar tamu (ada di halaman order) |
-| Siapkan proof | Semua bahan lengkap | **Giliran Anda** — lihat langkah di bawah |
-| Menunggu persetujuan pelanggan | Proof sudah dikirim | Tunggu; ingatkan bila > 2 hari |
-| **SIAP CETAK** | Sudah disetujui, terkunci | **Cetak sekarang** |
-| Terkirim | Resi sudah diisi | Selesai |
+| Situs | `https://harih.id/` | 200 |
+| n8n | `https://n8n.harih.id/healthz` | 200 |
+| Webhook order | `https://n8n.harih.id/webhook/wc-order` | 200 |
 
-### Alur satu pesanan
+**Selesai bila:** ketiganya hijau, dan Anda pernah menerima satu alert uji.
 
-**1. Pesanan masuk.** Sistem sudah menolak duluan yang mustahil dikerjakan: acara kurang dari H-21 ditolak di checkout, dan kalau kuota bulan ini (8 pesanan) penuh, pembeli diberi tahu sejak di keranjang. Jadi apa pun yang lolos sampai ke Anda, secara jadwal memang bisa dikerjakan.
+## 🟡 8. Dua rahasia ke password manager — *5 menit*
 
-**2. Pembeli mengisi data undangan** lewat link yang otomatis dikirim ke WhatsApp-nya. Undangan digitalnya terbit sendiri.
+`vps/.env` dan `vps/google-sa.json` **hanya ada di disk laptop Anda dan di server**. Tidak ada di git (disengaja), tidak ada backup lain. Laptop hilang + server bermasalah = pipeline harus dibangun ulang dari nol.
 
-**3. Pembeli mengisi daftar tamu.** Link-nya ikut terkirim otomatis di pesan "undangan sudah jadi", dan juga tersedia di halaman order. **Tanpa daftar ini amplop bernama tidak bisa dicetak** — itu sebabnya ia muncul sebagai penghambat di antrean. Halamannya menghitung sendiri apakah jumlah nama melebihi jatah paket.
+Simpan isi keduanya sebagai secure note di password manager.
 
-**4. Anda menyiapkan proof.** Buka halaman order, lalu:
-   - tempel **URL berkas proof** (satu per baris) — unggah gambarnya ke mana pun yang bisa diakses publik;
-   - centang **"Bekukan snapshot data undangan sekarang"** lalu Update.
-   Sejak dibekukan, produksi memakai salinan beku itu — kalau pembeli mengedit undangan digitalnya besok, yang dicetak **tidak ikut berubah**.
-   - salin **link persetujuan** yang muncul, kirim ke pembeli lewat WhatsApp.
+**Selesai bila:** keduanya bisa Anda buka dari HP.
 
-**5. Pembeli menyetujui.** Halaman persetujuan menyebut konsekuensinya terang-terangan, dan saat ia menekan tombol, sistem mencatat waktu, hash berkas proof, dan hash snapshot. **Ini bukti Anda** kalau kelak ada sengketa typo — S&K §12.1 menggantungkan pembagian tanggung jawab persis pada catatan ini.
-   ⚠️ Setelah disetujui, snapshot **tidak bisa ditimpa**. Kalau pembeli minta perubahan setelah menyetujui, itu revisi berbayar — dan memang begitu aturannya.
+## 🟢 9. Baca sekali & putuskan
 
-**6. Cetak, kirim, isi resi.** Di halaman order ada kolom **Kurir** dan **Nomor resi**. Isi keduanya; antrean langsung berubah jadi "Terkirim".
-
-### Yang otomatis berjalan tanpa Anda sentuh
-
-- Pembeli **digital** menerima tawaran naik ke paket cetak: sekali di pesan "undangan sudah jadi", lalu pengingat **H+3** dan **H+12** (kredit berlaku 14 hari). Berhenti sendiri kalau ia sudah membeli cetak.
-- Semua pembeli menerima link **rekap kehadiran** — jumlah tamu per sesi, bisa diunduh CSV untuk katering.
-- Halaman harga menampilkan **sisa slot bulan ini** apa adanya, dan menolak sendiri saat penuh.
+- **Gaya bahasa pesan otomatis** — [`copywriting-pesan.md`](./copywriting-pesan.md). Ini yang dibaca pelanggan Anda; pastikan terdengar seperti Anda.
+- **Tema 02 & 03 di HP** sebagai calon pembeli — ada yang tidak enak dilihat?
+- **Tiga angka kebijakan** yang sudah tayang di S&K: biaya revisi paket Hemat · SLA revisi 1×24 jam kerja (sanggup?) · batas pengajuan refund 7 hari.
 
 ---
 
-## 🔴 11. Tiga hal yang menunggu Anda sekarang
+# SAAT PESANAN CETAK MASUK
 
-1. **Cetak satu undangan lipat + amplop lengkap.** Satu sampel menjawab empat pertanyaan sekaligus: bobot nyata (untuk ongkir yang kita tanggung), waktu lipat per unit, hasil uji pindai QR, dan — yang paling menentukan — **apakah mesin creasing sanggup**. Kalau lipatnya manual, 100 lipatan × 8 order = 800 lipatan/bulan, dan seluruh hitungan marjin per jam batal. Timbang sampelnya, lalu beri tahu saya angkanya; bobot produk masih tebakan saya (2/4/7 kg).
-2. **Cek mekanisme refund di dashboard Duitku.** Garansi Tepat Waktu menjanjikan uang kembali 100% atas order sampai Rp 5,9 juta, dan janji itu **sudah mengikat sejak halaman harga tayang**. Yang perlu dipastikan: bisa dilakukan sendiri dari dashboard atau harus tiket, berapa lama, dan apakah fee kanal ikut kembali. Kebijakan Refund kita sudah menyediakan jalan keluar ("ke metode pembayaran asal **atau transfer bank**"), jadi kalaupun ribet, uangnya tetap bisa bergerak.
-3. **Kejar approval Duitku production.** Masih gerbang tunggal semua uang — digital maupun cetak.
+Layar utama Anda: **WooCommerce → Antrean Cetak**
+
+Diurutkan berdasarkan **tenggat acara**, bukan tanggal pesanan — pesanan yang masuk belakangan bisa saja acaranya lebih dulu. Tiap baris hanya menampilkan yang mengubah keputusan hari ini: sisa hari (memerah di bawah 14), jumlah nama tamu terkumpul, satu langkah penghambat, dan resi.
+
+**Urutan tahapnya:**
+
+| Tahap | Yang Anda lakukan |
+|---|---|
+| Menunggu data undangan | Pemesan belum isi form. Follow-up via WA. |
+| Menunggu daftar tamu | Kirimkan link `/tamu/` dari halaman pesanan. |
+| Siapkan proof | Bekukan snapshot (tombol di halaman pesanan), buat berkas proof, tempel URL-nya. |
+| Menunggu persetujuan | Kirim link `/proof/` ke pemesan. |
+| **SIAP CETAK** | Cetak. Data yang dipakai adalah **snapshot beku**, bukan data hidup. |
+| Terkirim | Isi nomor resi di halaman pesanan → pemesan diberi tahu otomatis. |
+
+**Yang berjalan tanpa Anda sentuh:** email & WA konfirmasi pembayaran · link isi data · undangan terbit otomatis · link daftar tamu & rekap RSVP · pengingat H-3 · rekap kehadiran harian · pengingat upsell H+3/H+12.
+
+⚠️ **Jaminan H-14 baru mulai berjalan** sejak data undangan, daftar tamu, **dan** persetujuan proof lengkap diterima (S&K §12.2). Beri tahu pemesan tanggal itu — bukan tanggal pesanan.
 
 ---
 
-## Ritme rutin setelah launch
+# RITME RUTIN
 
-| Kapan | Apa | Berapa lama |
-|---|---|---|
-| Tiap hari | Buka WA bisnis, balas CS. Cek ada alert masuk atau tidak — **tidak ada alert = sistem sehat** | 5 menit |
-| Tiap hari | Sekilas Google Sheet `orders`: ada `MENUNGGU_DATA` > 2 hari? follow-up manual | 2 menit |
-| Tiap Senin | WF-04 mengirim rekap komisi ±09:00 → transfer payout → ubah `UNPAID` → `PAID` di sheet | 15 menit |
-| Tiap bulan | Cek backup mingguan benar-benar ada di VPS (`/opt/harih/backups/`) | 5 menit |
-| Saat ada alert | Buka [`runbook.md`](./runbook.md) §3 — tiap alert ada tabel tindakannya | sesuai kasus |
+**Harian (±5 menit)** — [`runbook.md`](./runbook.md) §2:
+balas WA · cek alert · sekilas sheet `orders` · cek kolom `wa_status`.
+
+**Mingguan (10 detik):**
+```bash
+ssh root@31.97.50.197 'docker exec harih-n8n n8n list:workflow --active=true | grep -c "|"'
+```
+Harus **9**. Workflow yang mati diam-diam **tidak memicu alert apa pun**.
+
+**Nomor WA bisnis:** jangan logout dari HP, pakai wajar, jangan blast ke nomor tak dikenal. Sesi ter-ban = seluruh kanal pengiriman WA mati.
 
 ---
 
-**Sejak ada pesanan cetak, tambahkan ke ritme harian:** buka **Antrean Cetak** sekali sehari. Kalau tidak ada baris yang bertuliskan "Siapkan proof" atau "SIAP CETAK", tidak ada yang perlu Anda kerjakan hari itu.
+# YANG TIDAK PERLU ANDA LAKUKAN
 
-## Yang **tidak** perlu Anda lakukan
+**Sudah selesai & terverifikasi 7 Agustus:**
+musik 3 track hidup · GA4 aktif · cron dipindah ke hPanel · plugin lengkap (Duitku, FluentSMTP, LiteSpeed, Limit Login, Site Kit) · halaman legal tayang · backup mingguan jalan & restore-nya pernah diuji · 9 workflow aktif · pengecualian cache LiteSpeed untuk kelima halaman bertoken.
 
-Sudah otomatis, jangan dikerjakan manual:
+**Sudah dihentikan, jangan dikerjakan:**
+- ~~Rekrut reseller~~ — halaman `/jadi-reseller/` **diturunkan 7 Agustus**. Komisi 30% dari paket digital Rp 179rb hanya **Rp 54.000**; tidak menggerakkan siapa pun, sementara untuk paket cetak kuponnya memang diblokir. Yang punya ekonomi nyata adalah **program vendor/WO** (langkah 3).
+- ~~Beli alat baru~~ — tidak ada rupiah keluar sebelum ada pesanan berbayar.
+- ~~Naikkan paket hosting~~ — timeout yang pernah terlihat berasal dari jaringan lingkungan kerja, bukan dari situs.
 
-- Mencatat order, membuat token form, mengirim link form → WF-01
-- Membuat undangan, upload foto, QR code, kirim ke WA & email, set order `completed` → WF-02
-- Membuat kupon reseller & welcome kit → WF-03 (Anda cukup klik link approval)
-- Reminder H-3, ucapan H+1, nudge yang belum isi data, peringatan masa aktif → WF-05
-- Menonaktifkan undangan yang lewat masa aktif → cron WP harian
-- Backup mingguan (DB, uploads, sesi WA, workflow n8n) → script VPS
-- Mengawasi sesi WhatsApp & webhook WooCommerce → WF-07 & WF-08
-- Menangkap order yang lolos dari webhook → WF-08 rekonsiliasi, maksimal tertunda 15 menit
+**Yang saya kerjakan, bukan Anda:** semua kode, deploy, workflow n8n, halaman legal (sumbernya di repo), dan pemeriksaan teknis.
 
-Kalau salah satu di atas ternyata **tidak** jalan, itu insiden — lihat runbook, jangan dikerjakan manual diam-diam.
+---
 
-## Menunjukkan pilihan agama ke calon pemesan
+# CATATAN: data uji yang sengaja disimpan
 
-Nuansa keagamaan (**Islam · Kristen · Katolik · Hindu · Buddha · Konghucu · tanpa unsur agama**) **tidak melekat pada tema** — keduanya dua setelan terpisah, jadi tema mana pun bisa dipasangkan dengan nuansa mana pun. Undangan demo sengaja memakai nuansa yang sama supaya yang terbandingkan hanyalah temanya.
+Pesanan **TEST-173** & undangan **174** (`/u/test-rangga-sekar/`) sengaja **tidak dihapus** — itu sumber berkas sampel Anda.
 
-**Cara termudah:** buka undangan demo mana pun, lalu pakai **pemilih “Nuansa” yang mengambang di kiri-bawah** — calon pemesan bisa mencoba sendiri tiap agama tanpa dipandu. Pemilih ini hanya ada di halaman demo, tidak pernah muncul di undangan pelanggan.
+Ditandai `_harih_uji=1`, jadi **tidak menghitung kuota produksi** (Agustus tetap 0 dari 8). Di Antrean Cetak ia tampil berlabel **"UJI INTERNAL"** supaya tidak tercetak untuk pelanggan.
 
-Atau langsung lewat URL, tambahkan `?nuansa=` di belakang link demo:
-
-- `https://harih.id/u/demo-tema-01/?nuansa=kristen`
-- `https://harih.id/u/demo-tema-03/?nuansa=hindu`
-- `https://harih.id/u/demo-tema-02/?nuansa=umum` (tanpa unsur agama)
-
-Nilai yang tersedia: `islam`, `kristen`, `katolik`, `hindu`, `buddha`, `konghucu`, `umum`. Parameter ini **hanya bekerja pada undangan demo** — undangan pelanggan tidak bisa diubah lewat URL.
+Hapus setelah pengukuran selesai — beri tahu saya.
