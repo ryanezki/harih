@@ -42,6 +42,20 @@
 
 **Bug yang ketemu & ditutup saat mengujinya:** section amplop hanya dirender bila ada rekening/QRIS — pasangan yang **hanya** mengisi dompet digital (atau hanya alamat kado) kehilangan seluruh amplopnya.
 
+### Audit mode gelap lintas halaman (2026-08-07) — menutup celah verifikasi G1.1
+
+Saat G1.1 dikerjakan, mode gelap hanya diverifikasi di beranda & `/harga/`. Tujuh halaman lain memakai `katalog.css` — termasuk halaman bertoken yang justru dilihat **pembeli yang sudah membayar**. Audit dijalankan di peramban dengan pengukuran kontras yang mengompositkan alpha berlapis:
+
+- **Diperiksa runtime & bersih:** `/satuan/` · `/jadi-reseller/` · `/kontak/` · `/rekap/` · `/isi-data/` (input, textarea, select semuanya 12,58:1).
+- **Diperiksa statis:** 56 aturan komponen `.rekap-*` (13) · `.tamu-*` (23) · `.proof-*` (16) · `.upsell-*` (4) — **nol warna literal**, semuanya token. Jadi komponen berdata di halaman itu akan mengikuti palet gelap dengan benar.
+- **BELUM diverifikasi runtime:** komponen *berdata* di `/tamu/`, `/proof/`, `/upsell/` — ketiganya menuntut order WooCommerce yang benar-benar ada. Membuat order berstatus `processing` akan **memicu WF-01** dan mengirim email + WhatsApp sungguhan, jadi sengaja tidak dilakukan. Cek berikutnya paling murah dilakukan **menumpang order uji F0.2** begitu Duitku disetujui.
+
+**Dua "temuan" yang ternyata cacat alat ukur, bukan cacat CSS** — dicatat supaya tidak diulang:
+1. Kontras dihitung tanpa mengompositkan alpha → `.paket-badge` terbaca 1,37:1 (padahal 6,13:1). Latar `rgba(...,.12)` harus dikomposit ke latar opaque di atasnya lebih dulu.
+2. Parser warna tidak mengenal sintaks `color(srgb r g b / a)` yang komponennya **0–1**, bukan 0–255 → terbaca 7,72:1 (padahal 5,86:1).
+
+**Satu perbaikan nyata:** dua `rgba()` literal di `isi-data.css` memakai nilai palet **mode terang** sehingga tidak ikut token saat gelap — diganti `color-mix()`. Kontrasnya memang sudah aman sejak awal; ini soal konsistensi palet, dan disebutkan supaya tidak terbaca sebagai perbaikan aksesibilitas.
+
 ### 🔴 Regresi yang saya buat sendiri di WF-05 — sudah ditutup, tapi polanya wajib diingat
 
 Node `Ambil Rekap RSVP` diletakkan **di tengah rantai** WF-05. Endpoint-nya mengembalikan `[]` saat tidak ada RSVP baru — dan **node HTTP n8n memecah respons array jadi satu item per elemen**, jadi `[]` = **nol item**, dan node berikutnya **tidak dijalankan sama sekali**. Artinya: di hari tanpa RSVP baru (yaitu hampir setiap hari), SELURUH reminder harian ikut mati — nudge belum-isi-data, pengingat H-3, dan peringatan masa aktif. Tidak ada pesan galat; workflow-nya cuma berhenti diam-diam.

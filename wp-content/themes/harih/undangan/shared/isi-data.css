@@ -137,7 +137,10 @@ body.isidata-body {
     letter-spacing: .08em;
     text-transform: uppercase;
     color: var(--gold);
-    background: rgba(180, 146, 63, .12);
+    /* color-mix, bukan rgba literal: nilai literalnya adalah emas MODE TERANG,
+       jadi di mode gelap rona keping ini tidak ikut tokennya. Kontrasnya sendiri
+       aman (6,13:1 terukur), ini soal konsistensi palet. */
+    background: color-mix(in srgb, var(--gold) 12%, transparent);
     border-radius: 999px;
     padding: 5px 10px;
 }
@@ -189,7 +192,7 @@ fieldset:disabled { opacity: .6; }
 .tema-card input { position: absolute; opacity: 0; pointer-events: none; }
 .tema-card:has(input:checked) {
     border-color: var(--accent);
-    box-shadow: 0 0 0 2px rgba(63, 92, 79, .18);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent);
     background: var(--surface-3);
 }
 .tema-nama { font-weight: 600; font-size: 14px; }
@@ -334,4 +337,4 @@ fieldset:disabled { opacity: .6; }
     cursor: pointer;
     transition: background .2s ease, border-color .2s ease;
 }
-.btn-mini:hover { background: rgba(63, 92, 79, .07); border-color: var(--accent); }
+.btn-mini:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); border-color: var(--accent); }
