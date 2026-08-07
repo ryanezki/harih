@@ -41,6 +41,13 @@ function undangan_data_snapshot(int $undangan_id): array {
         'tanggal_akad', 'waktu_akad', 'lokasi_akad_nama', 'lokasi_akad_alamat',
         'tanggal_resepsi', 'waktu_resepsi', 'lokasi_nama', 'lokasi_alamat',
         'turut_mengundang', 'rundown', 'dresscode', 'alamat_kado',
+        // C6 — daftar nama tamu IKUT dibekukan. Amplop bernama adalah pembeda
+        // yang dijual, 50–150 keping per order, dan tanpa ini `_proof_hash`
+        // tidak pernah mengunci satu pun nama: tidak ada jejak versi mana yang
+        // pemesan setujui. Dikerjakan sekarang justru karena NOL snapshot ada
+        // di produksi — menambah kunci tidak membatalkan hash siapa pun. Nanti
+        // mahal. `sort()` di bawah menjaga urutan tetap, jadi hash tetap stabil.
+        'daftar_tamu',
     ];
     sort($kunci); // urutan tetap → hash tidak berubah hanya karena urutan
     $data = ['undangan_id' => $undangan_id, 'permalink' => get_permalink($undangan_id)];

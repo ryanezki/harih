@@ -81,8 +81,24 @@ if (($_POST['harih_simpan_tamu'] ?? '') === '1') {
         // Batas 600 nama: di atas itu hampir pasti salah tempel (kolom lain ikut
         // tersalin), dan halaman jadi berat di HP.
         $baris = array_slice(array_values(array_filter(array_map('trim', explode("\n", $isi)))), 0, 600);
-        update_post_meta($undangan_id, 'daftar_tamu', implode("\n", $baris));
+        $sebelum = (string) get_post_meta($undangan_id, 'daftar_tamu', true);
+        $sesudah = implode("\n", $baris);
+        update_post_meta($undangan_id, 'daftar_tamu', $sesudah);
         $pesan = sprintf('Tersimpan — %d nama tamu.', count($baris));
+
+        /* C6 — daftar tamu kini ikut dibekukan ke snapshot proof. Perubahan
+           SETELAH proof disetujui sengaja TIDAK dilarang: pemesan yang baru
+           menemukan satu nama salah ketik akan terjebak, dan CS-nya cuma satu
+           orang. Yang dilakukan: mencatatnya di order supaya sebelum masuk
+           mesin ketahuan bahwa yang dicetak mungkin bukan yang disetujui. */
+        if ($sebelum !== $sesudah && $order->get_meta('_proof_disetujui')) {
+            $order->add_order_note(sprintf(
+                'Daftar tamu DIUBAH pemesan setelah proof disetujui — sekarang %d nama (sebelumnya %d). Snapshot yang disetujui tidak ikut berubah; pastikan versi mana yang dicetak sebelum produksi.',
+                count($baris),
+                count(array_filter(array_map('trim', explode("\n", $sebelum))))
+            ));
+            $order->save();
+        }
     }
 }
 

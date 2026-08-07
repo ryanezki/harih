@@ -118,6 +118,20 @@ $harih_label = [
                     <div><dt><?php echo esc_html($label); ?></dt><dd><?php echo esc_html($snapshot[$k]); ?></dd></div>
                 <?php endif; ?>
             <?php endforeach; ?>
+            <?php
+            /* C6 — daftar tamu ikut dibekukan, tapi ditampilkan sebagai JUMLAH,
+               bukan 600 baris nama: tabel ini untuk memeriksa sekilas, dan
+               menumpahkan seluruh daftar ke sini justru mengubur data lain yang
+               harus diperiksa. Yang perlu diyakinkan pemesan adalah bahwa nama
+               tamunya memang ikut terkunci — bukan membaca ulang semuanya. */
+            $harih_tamu = array_filter(array_map('trim', explode("\n", (string) ($snapshot['daftar_tamu'] ?? ''))));
+            ?>
+            <?php if ($harih_tamu) : ?>
+                <div>
+                    <dt>Daftar tamu (amplop)</dt>
+                    <dd><?php printf('%d nama — ikut dibekukan', count($harih_tamu)); ?></dd>
+                </div>
+            <?php endif; ?>
         </dl>
         <p class="proof-kunci">Data ini <strong>dibekukan</strong> saat proof dibuat. Perubahan pada undangan digital setelah ini tidak ikut tercetak — beri tahu CS bila ada yang perlu diubah, sebelum Anda menyetujui.</p>
     </section>
