@@ -260,6 +260,31 @@ Empat halaman bertoken tidak memanggil `nocache_headers()` sementara produksi me
   **Terbukti dengan order uji:** `/rekap/` dengan token tersimpan (cara lama) → **403** · dengan token dihitung bercakup `rekap` (cara baru) → **200 terbuka**.
   Ritual import diikuti penuh: verifikasi dari dalam container · import (aktif 9 → 6) · publish kesembilannya · restart · hitung ulang **9** · diverifikasi dari ekspor **live**.
 
+- [x] **C6** 🤖 `menit` — **Daftar nama tamu ikut dibekukan ke snapshot proof** → **SELESAI & LIVE 2026-08-07** *(v2.17.0)*
+  `daftar_tamu` masuk ke 19 kunci snapshot (jadi 20). Sebelumnya `_proof_hash` tidak pernah mengunci satu pun nama tamu — padahal amplop bernama adalah **pembeda yang dijual**, 50–150 keping per order, dan tidak ada jejak versi mana yang pemesan setujui. `sort()` yang sudah ada menjaga urutan tetap, jadi hash tetap stabil.
+  **Dikerjakan sekarang justru karena nol snapshot ada di produksi** — menambah kunci tidak membatalkan hash siapa pun. Setelah ada order berjalan, perubahan ini mahal.
+  **Sengaja TIDAK mengunci keras.** Pemesan yang baru menemukan satu nama salah ketik akan terjebak, dan CS-nya cuma satu orang. Yang dilakukan: `add_order_note()` mencatat perubahan pasca-persetujuan berikut jumlah sebelum/sesudah, supaya sebelum masuk mesin ketahuan bahwa yang dicetak mungkin bukan yang disetujui.
+  Halaman proof menampilkan **jumlah** nama, bukan 600 baris — tabel itu untuk memeriksa sekilas, dan menumpahkan seluruh daftar justru mengubur data lain yang harus diperiksa.
+  **Terverifikasi end-to-end** dengan order + undangan uji (keduanya dihapus): `daftar_tamu` ada di snapshot (3 nama) · tambah satu nama → hash berubah `64682353b985f933` → `3af97c90b95cb4e4`, jadi nama tamu benar-benar terkunci · bekukan ulang setelah disetujui → **ditolak** · ubah daftar lewat `/tamu/` pasca-persetujuan → **tetap tersimpan** (tidak terjebak) dan catatan order terekam *"sekarang 5 nama (sebelumnya 4)"* · halaman proof menampilkan *"4 nama — ikut dibekukan"* (angka snapshot beku, bukan 5 yang hidup) dengan **nol** nama tumpah ke halaman.
+
+- [x] **C5** 🤖 `menit` — **Harga dibaca dari WooCommerce, bukan ditulis ulang** → **SELESAI & LIVE 2026-08-07** *(v2.20.0)*
+  **Enam tempat hidup, bukan tiga.** Rencana hanya mencatat kartu paket; angka `99` juga tertulis di hero, stiker, marquee, dan CTA penutup beranda, plus kartu Digital di `/harga/`. Kalau suatu hari Hemat didiskon, kartunya ikut berubah sementara **lima kalimat "mulai Rp 99rb" tetap menyebut angka lama** — halamannya jadi saling bertentangan, lebih buruk daripada keadaan sebelumnya.
+  **Tiga helper:** `harih_harga_ribu()` · `harih_harga_tampil()` (markup kartu) · `harih_harga_mulai()` (termurah, untuk kalimat "mulai Rp …"). Harga **bukan kelipatan seribu** tidak dipaksa ke format "rb" — ditampilkan penuh lewat `wc_price()`; tampilan yang sedikit berbeda lebih baik daripada angka yang salah.
+  🔴 **Cacat yang saya buat sendiri, ketahuan karena menguji kasus tepi.** Versi pertama `harih_harga_mulai()` memakai `harih_harga_ribu()` — yang **menolak** harga tak bulat. Diuji dengan promo Rp 89.500: Hemat terlempar dari hitungan dan kalimatnya jadi *"Mulai Rp 179rb"*, **melebihkan harga masuk dua kali lipat**. Dibetulkan: harga termurah apa adanya, dibulatkan **ke bawah**.
+  **Terverifikasi dengan mengubah harga sungguhan lalu dikembalikan**, bukan dengan membaca kode:
+
+  | harga Hemat | kartu | kalimat "mulai" |
+  |---|---|---|
+  | 79.000 (promo) | **79** | Mulai Rp **79**rb |
+  | 89.500 (tak bulat) | `wc_price()` penuh | Mulai Rp **89**rb |
+  | 99.000 (normal) | **99** | Mulai Rp **99**rb |
+
+  Ketiga produk dikembalikan ke harga reguler, nol promo tersisa.
+
+- [ ] **C10** 🤖 `jam` — **Dokumen pemulihan berbohong**
+  `n8n/workflows/README.md:3-12` melompat dari WF-05 ke WF-07 dan baris 14 menegaskan "WF-06 bukan workflow n8n" karena label itu dipakai untuk script backup — sementara `WF-06-reminder-upsell.json` nyata dan aktif. Daftar impor melewatkannya. **Setelah rebuild VPS, orang yang mengikuti README akan mengimpor delapan, melihat delapan aktif, dan menganggap selesai** — yang hilang justru pengingat H+3/H+12 yang menjual paket cetak, tanpa satu error pun, hanya attach rate diam-diam nol yang disalahartikan "upsell tidak laku".
+  **Selesai bila:** README memuat WF-06 di tabel & daftar impor · script backup dinamai ulang (mis. `BACKUP-MINGGUAN`) di baris 14/91/114 · hitungan "9 workflow aktif" ditambahkan ke runbook §2 sebagai langkah SSH (bukan ke `cek-live.sh` yang berjalan dari mesin developer lewat HTTP).
+
 - [ ] **C8** 🤖 `hari` — **Janji retensi 90 hari & hak penghapusan tidak punya satu baris kode pun**
   `kebijakan-privasi.md:53` berjanji data & foto dihapus paling lambat 90 hari setelah masa aktif berakhir, `:63` menjanjikan hak penghapusan ditanggapi ≤7 hari kerja. Satu-satunya penegakan (`masa-aktif.php:66-102`) hanya mengubah post jadi draft. **Tidak ada kode** yang menghapus post `ucapan`, meta `daftar_tamu`, berkas foto & QRIS di uploads, maupun kartu OG (`og.php` hanya bersih saat post dihapus permanen — yang tidak pernah terjadi). Jadi janji "halaman dinonaktifkan" hanya benar untuk HTML-nya; **medianya tetap publik**. Sekaligus masalah inode: Hostinger dibatasi 200rb inode.
   Di P2 karena dengan nol pelanggan belum ada data yang harus dihapus — **tapi jangan melunakkan kalimat kebijakannya sebagai jalan pintas**; kalimat itu sudah tayang dan sudah dibaca.
