@@ -74,7 +74,9 @@ ssh root@31.97.50.197 'docker exec harih-n8n n8n export:workflow --id=<ID> --out
 
 **Jebakan kedua — `EACCES` saat import dari `/root` di dalam container.** Proses n8n berjalan sebagai user `node`; ia tidak bisa membaca `/root/*` di dalam container. Salin ke `/tmp` **di dalam container** (bukan di host).
 
-**⚠️ Jangan pakai `docker compose up -d n8n` untuk merestart.** Tag `devlikeapro/waha:2026.6.2` sudah **dihapus dari Docker Hub** (tersedia sekarang: 2026.7.2), sehingga compose gagal me-resolve image dan seluruh perintah berhenti. Sudah dimitigasi 2026-08-07 dengan **retag lokal** (`docker tag <sha> devlikeapro/waha:2026.6.2`) sehingga pin resolve tanpa menarik dari registry — container tidak tersentuh. Untuk merestart n8n pakai **`docker restart harih-n8n`**, atau `docker compose up -d --no-deps n8n`. Bare `docker compose up -d` berisiko **me-recreate WAHA**, dan sesi WhatsApp adalah titik tunggal kegagalan seluruh kanal delivery.
+**Restart n8n: `docker restart harih-n8n`, atau `docker compose up -d --no-deps n8n`.** Hindari bare `docker compose up -d` — ia bisa ikut me-recreate WAHA, dan sesi WhatsApp adalah titik tunggal kegagalan seluruh kanal delivery. Pakai `--no-deps` supaya niatnya eksplisit.
+
+*Riwayat yang perlu diketahui (2026-08-07):* `docker compose up -d` sempat **selalu gagal** karena pin `devlikeapro/waha:2026.6.2`. Diagnosis awal saya — "tag-nya dihapus" — **keliru**: skema tag WAHA adalah `<varian>-<versi>` (`latest-2026.6.2`, `chrome-2026.6.2`, …), jadi versi polos **tidak pernah ada**, dan pin itu tidak pernah resolve sejak ditulis. Sekarang sudah dibetulkan ke `latest-2026.7.2` dan compose resolve normal. Pin n8n (`n8nio/n8n:2.29.10`) sah dan cocok dengan versi yang berjalan.
 
 ## Import (lewat UI)
 
