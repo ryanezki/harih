@@ -34,7 +34,7 @@ $harih_paket_cetak = [
         'fitur' => [
             'Undangan digital lengkap (setara paket Premium)',
             '50 undangan cetak lipat dua — detail acara terbaca tanpa HP',
-            '50 amplop dengan nama tamu tercetak, bukan tulis tangan',
+            '50 amplop bernama tamu — dicetak langsung pada amplopnya, bukan stiker yang ditempel',
             'QR menuju undangan digital, dicetak besar di halaman dalam',
             'Pratinjau (proof) disetujui dulu, baru dicetak',
             'Gratis ongkir ke seluruh Indonesia',
@@ -113,7 +113,7 @@ $harih_satuan = [
 <?php get_template_part('template-parts/toko/nav', null, ['beranda' => false]); ?>
 
 <header class="hero">
-    <h1>Satu desain, dua wujud:<br>di layar semua tamu, di tangan yang terhormat.</h1>
+    <h1>Nama tiap tamu tercetak di amplopnya &mdash;<br>tiba H-14, atau uang kembali.</h1>
     <p class="hero-sub">Undangan digital untuk semua tamu — dan <strong>undangan cetak lipat beserta amplop bernama</strong> untuk orang tua, sesepuh, dan atasan. Satu kali isi data, keduanya jadi, dengan desain yang sama.</p>
     <div class="hero-cta">
         <a class="btn btn-utama" href="#paket">Lihat Paket</a>
@@ -181,10 +181,17 @@ $harih_satuan = [
            pesanan yang tidak bisa dipenuhi tepat waktu. */
         $harih_sisa = function_exists('undangan_sisa_slot') ? undangan_sisa_slot() : null;
         ?>
-        <?php if ($harih_sisa !== null) : ?>
+        <?php
+        $harih_kuota  = defined('UNDANGAN_KUOTA_BULAN') ? UNDANGAN_KUOTA_BULAN : 8;
+        $harih_ambang = defined('UNDANGAN_SLOT_TAMPIL') ? UNDANGAN_SLOT_TAMPIL : 4;
+        // Tampilkan HANYA saat benar-benar menipis, atau saat sudah penuh.
+        // Sisa penuh (8 dari 8) diam — lihat alasannya di UNDANGAN_SLOT_TAMPIL.
+        $harih_tampil = $harih_sisa !== null && ($harih_sisa === 0 || $harih_sisa <= $harih_ambang);
+        ?>
+        <?php if ($harih_tampil) : ?>
         <p class="paket-slot-sisa">
             <?php if ($harih_sisa > 0) : ?>
-                <strong><?php echo esc_html($harih_sisa); ?> dari 8 slot produksi <?php echo esc_html(wp_date('F')); ?></strong> masih tersedia.
+                <strong>Tinggal <?php echo esc_html($harih_sisa); ?> dari <?php echo esc_html($harih_kuota); ?> slot produksi <?php echo esc_html(wp_date('F')); ?></strong> yang tersisa.
             <?php else : ?>
                 <strong>Slot produksi <?php echo esc_html(wp_date('F')); ?> sudah penuh.</strong> Hubungi kami untuk jadwal bulan berikutnya.
             <?php endif; ?>

@@ -33,7 +33,6 @@ $harih_paket = [
             'RSVP + ucapan tamu',
             'Nama tamu otomatis di link',
             '3 tema dasar',
-            'Masa aktif sampai H+7',
         ],
     ],
     [

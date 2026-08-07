@@ -345,6 +345,13 @@ add_filter('woocommerce_available_payment_gateways', function ($gateways) {
 const UNDANGAN_TENGGAT_HARI = 21;
 const UNDANGAN_KUOTA_BULAN  = 8;
 
+/* Ambang tampil sisa slot di halaman harga (C3). Kelangkaan hanya bekerja bila
+   sebagian sudah terpakai: pada 8 dari 8, kalimat "masih tersedia" justru
+   memberi tahu calon pembeli bahwa BELUM ADA SEORANG PUN yang memesan — di
+   halaman yang tugasnya menutup penjualan Rp 2,9 juta. Di atas ambang ini
+   angkanya disembunyikan; yang penuh tetap diumumkan apa adanya. */
+const UNDANGAN_SLOT_TAMPIL  = 4;
+
 add_action('woocommerce_init', function () {
     if (!function_exists('woocommerce_register_additional_checkout_field')) return;
     woocommerce_register_additional_checkout_field([

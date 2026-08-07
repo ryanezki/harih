@@ -7,9 +7,11 @@
  *
  * KENAPA SATU DAFTAR INI PENTING: ia melayani tiga hal sekaligus yang selama
  * ini terpisah —
- *   1. **amplop bernama tamu** yang jadi pembeda paket cetak (percetakan
- *      konvensional menjualnya mahal; bagi kami biayanya nol karena datanya
- *      sudah ada);
+ *   1. **amplop bernama tamu** yang jadi pembeda paket cetak. Premis lamanya
+ *      keliru dan sempat menular ke salinan penjualan: percetakan konvensional
+ *      justru sering memberi label nama GRATIS. Pembeda kami bukan harganya,
+ *      melainkan namanya **dicetak langsung pada amplop** — bukan stiker yang
+ *      ditempel — dan itu hanya mungkin karena datanya sudah ada di sini;
  *   2. **link personal `?to=`** yang selama ini harus disalin satu per satu —
  *      300 tamu berarti 300 salin-tempel, pekerjaan paling menjemukan bagi
  *      pemesan;
