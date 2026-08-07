@@ -2,7 +2,7 @@
 
 > Dipublikasikan sebagai halaman situs pada 22 Juli 2026.
 
-Terakhir diperbarui: 5 Agustus 2026
+Terakhir diperbarui: 7 Agustus 2026
 
 ## 1. Tentang Layanan
 
@@ -81,6 +81,7 @@ Bagian ini berlaku untuk pesanan yang memuat produk cetak fisik.
 
 - Pesanan produk cetak diterima paling lambat **21 hari (H-21) sebelum tanggal acara**. Sistem/CS kami berhak menolak pesanan yang melewati batas ini — justru demi Garansi Tepat Waktu.
 - Kapasitas produksi per bulan **berkuota**. Bila kuota bulan berjalan penuh, pesanan masuk jadwal berikutnya atau dapat dibatalkan penuh sebelum produksi.
+- **Jaminan H-14 mulai berlaku sejak data undangan, daftar nama tamu, dan persetujuan pratinjau lengkap kami terima.** Produksi tidak dapat dimulai sebelum ketiganya ada. Bila salah satunya menyusul, tanggal jaminan bergerak mengikuti tanggal terakhir kami menerimanya — kami selalu memberi tahu Anda tanggal barunya.
 
 ### 12.3 Pengiriman & Resi
 
@@ -96,7 +97,7 @@ Ketiganya adalah kewajiban kontraktual kami, bukan sekadar materi pemasaran:
 | Garansi | Janji kami |
 |---|---|
 | **Garansi QR Terbaca** | Setiap batch kartu QR diuji pindai sebelum dikirim. Bila ada QR yang gagal terbaca (bukan karena kerusakan fisik setelah diterima), **seluruh batch kami ganti tanpa biaya**. |
-| **Garansi Tepat Waktu** | Produk cetak tiba paling lambat **H-14 sebelum tanggal acara** (dengan pemesanan ≤ H-21). Bila lewat karena kesalahan kami, **uang produk cetak kembali 100% dan barang tetap dikirim**. |
+| **Garansi Tepat Waktu** | Produk cetak tiba paling lambat **H-14 sebelum tanggal acara** (dengan pemesanan ≤ H-21, dan terhitung sejak data undangan, daftar nama tamu, serta persetujuan pratinjau lengkap kami terima — §12.2). Bila lewat karena kesalahan kami, **uang produk cetak kembali 100% dan barang tetap dikirim**. |
 | **Garansi Cetak Benar** | Kesalahan dari pihak kami — hasil cetak berbeda dari proof yang Anda setujui — **dicetak ulang gratis dan dikirim ekspres, tanpa pertanyaan**. |
 
 Garansi tidak berlaku atas: kesalahan pada proof yang telah disetujui (§12.1), kerusakan akibat pemakaian/penyimpanan setelah diterima, dan keadaan kahar (bencana, gangguan logistik nasional) — untuk keadaan kahar kami tetap mengupayakan solusi tercepat bersama Anda.

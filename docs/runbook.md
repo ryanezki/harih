@@ -79,6 +79,42 @@ Halaman undangan otomatis dinonaktifkan (jadi `draft`) setelah masa aktif paketn
   ```
 - Aturan hari ada di `wp-content/mu-plugins/undangan-core/masa-aktif.php` (otoritas). Nilainya juga tersalin di WF-05 hanya untuk menghitung waktu peringatan.
 
+## 7c. Pesanan MANUAL lewat WhatsApp (berlaku selama Duitku masih sandbox)
+
+> **Kenapa manual.** `duitku_environment` masih `sandbox` — tombol bayar online
+> tidak bisa menerima uang sungguhan. Sejak 2026-08-07 seluruh CTA di beranda
+> dan `/satuan/` mengarah ke WhatsApp. **Begitu kredensial production dipasang,
+> situs kembali ke checkout otomatis** (`harih_bayar_online_siap()` membaca opsi
+> itu langsung) — tidak perlu deploy apa pun.
+
+**Untuk paket digital (Rp 99–299 ribu) — bayar lunas di muka:**
+
+1. Pembeli chat lewat tombol di situs; pesannya sudah menyebut paket yang dipilih.
+2. Kirim nomor rekening + nominal. Minta bukti transfer.
+3. Setelah dana masuk, buat pesanan di wp-admin → WooCommerce → Pesanan → Tambah:
+   - **Billing:** nama, email, **nomor WhatsApp** (wajib — link undangan dikirim ke sana)
+   - **Item:** tambahkan produk `HARIH-HEMAT` / `HARIH-FAVORIT` / `HARIH-PREMIUM`
+   - Simpan, lalu ubah status ke **Processing**
+4. Status `processing` itulah pemicunya — WF-01 menyala dan seluruh otomasi
+   berjalan persis seperti pesanan biasa: baris sheet, email, WA berisi link isi data.
+5. Catat di sheet `orders` kolom `kupon`: `MANUAL` (supaya nanti bisa dibedakan
+   dari pesanan yang lewat gerbang otomatis).
+
+**Untuk paket cetak (Rp 1,19–5,9 juta) — DP 50%:**
+
+1. **Konfirmasi slot & tanggal dulu, sebelum uang berpindah.** Cek sisa kuota
+   bulan berjalan di kepala halaman WooCommerce → Antrean Cetak.
+2. Pastikan acara **≥ H-21**. Di bawah itu jangan disanggupi — Garansi Tepat
+   Waktu tidak bisa ditepati dan refundnya penuh.
+3. Sepakati DP 50%. Buat pesanan seperti langkah 3 di atas dengan produk
+   `CETAK-*`, isi **alamat kirim lengkap** dan **tanggal acara**.
+4. Set status **Processing** hanya setelah DP masuk. Catat nominal DP dan sisa
+   tagihan di catatan pesanan.
+5. ⚠️ **Jaminan H-14 baru mulai berjalan** sejak data undangan, daftar nama
+   tamu, dan persetujuan proof lengkap diterima (S&K §12.2) — beri tahu pembeli
+   tanggal itu, jangan tanggal pesanan.
+6. Pelunasan sebelum barang dikirim.
+
 ## 8. Revisi manual (layanan sesuai paket)
 
 - Jatah: **Hemat berbayar Rp 25.000/pengajuan · Favorit 1× gratis · Premium 3× gratis + prioritas**; di luar jatah, Rp 25.000/pengajuan. Target pengerjaan **≤ 2×24 jam**; Premium didahulukan.

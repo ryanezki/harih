@@ -64,7 +64,10 @@ $harih_min_transaksi = defined('UNDANGAN_MIN_TRANSAKSI_SATUAN') ? UNDANGAN_MIN_T
         <div class="satuan-grid">
             <?php foreach ($harih_satuan as $p) :
                 $min  = max(1, (int) $p->get_meta('_min_qty'));
-                $beli = add_query_arg(['add-to-cart' => $p->get_id(), 'quantity' => $min], wc_get_cart_url());
+                // Sama seperti katalog: selama gerbang sandbox, arahkan ke WhatsApp.
+                $beli = harih_bayar_online_siap()
+                    ? add_query_arg(['add-to-cart' => $p->get_id(), 'quantity' => $min], wc_get_cart_url())
+                    : harih_wa_pesan($p->get_name() . ' (min. ' . $min . ' pcs)');
                 $subtotal_min = (float) $p->get_price() * $min;
             ?>
             <article class="satuan-kartu">

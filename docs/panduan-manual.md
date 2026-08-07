@@ -156,7 +156,7 @@ Pertanyaannya cuma satu: **layakkah ini dibayar Rp 99–299 ribu?** Kalau ada ya
 
 ## 🟢 9. Setelah semua di atas: soft launch
 
-1. **Rekrut 3 reseller pertama** — arahkan ke https://harih.id/jadi-reseller/. Anda menerima notifikasi WA berisi link approval; klik untuk mengaktifkan kupon mereka.
+1. ~~**Rekrut 3 reseller pertama**~~ — **DIHENTIKAN 2026-08-07.** Halaman `/jadi-reseller/` diturunkan: komisi 30% dari paket digital Rp 179rb hanya Rp 54.000, terlalu kecil untuk menggerakkan siapa pun, sementara untuk paket cetak kuponnya memang diblokir. Yang punya ekonomi nyata adalah **program vendor** — dekati WO yang sudah pernah mencetak di tempat Anda.
 2. **Review gaya bahasa** pesan otomatis di [`copywriting-pesan.md`](./copywriting-pesan.md) — ini yang akan dibaca customer Anda, pastikan terdengar seperti Anda.
 3. **Nomor WA bisnis:** jangan logout dari HP, pakai wajar, jangan blast ke nomor tak dikenal. Sesi terbanned = seluruh kanal pengiriman WA mati.
 

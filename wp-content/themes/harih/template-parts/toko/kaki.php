@@ -5,7 +5,7 @@
  */
 if (!defined('ABSPATH')) exit;
 $ada_harga    = (bool) get_page_by_path('harga');
-$ada_reseller = (bool) get_page_by_path('jadi-reseller');
+$ada_reseller = harih_reseller_aktif();
 ?>
 <footer class="kaki">
     <div class="kaki-atas">

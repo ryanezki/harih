@@ -95,7 +95,7 @@ $harih_tema_sifat = [
     'tema-03' => 'dramatis · navy &amp; emas',
 ];
 
-$harih_ada_reseller = (bool) get_page_by_path('jadi-reseller');
+$harih_ada_reseller = harih_reseller_aktif();
 $harih_ada_harga    = (bool) get_page_by_path('harga');
 $harih_aset         = get_stylesheet_directory_uri() . '/aset';
 ?><!DOCTYPE html>
@@ -264,10 +264,13 @@ $harih_marquee = str_replace('✦', '<i>✦</i>', $harih_marquee);
                 <ul class="paket-fitur">
                     <?php foreach ($p['fitur'] as $f) : ?><li><span class="fitur-cek" aria-hidden="true">✓</span><?php echo $f; ?></li><?php endforeach; ?>
                 </ul>
-                <?php if ($beli) : ?>
+                <?php /* Selama gerbang pembayaran masih sandbox, CTA mengarah ke WhatsApp —
+                         tombol yang membawa pembeli ke halaman pembayaran uji lebih buruk
+                         daripada tidak ada tombol. Kembali otomatis begitu Duitku production. */ ?>
+                <?php if (harih_bayar_online_siap() && $beli) : ?>
                     <a class="btn btn-blok <?php echo $unggulan ? 'btn-terang' : 'btn-garis-sage'; ?>" href="<?php echo esc_url($beli); ?>">Pesan <?php echo esc_html($p['nama']); ?></a>
                 <?php else : ?>
-                    <span class="btn btn-blok btn-nonaktif" aria-disabled="true">Segera tersedia</span>
+                    <a class="btn btn-blok <?php echo $unggulan ? 'btn-terang' : 'btn-garis-sage'; ?>" href="<?php echo esc_url(harih_wa_pesan('Paket ' . $p['nama'] . ' (undangan digital)')); ?>" target="_blank" rel="noopener">Pesan <?php echo esc_html($p['nama']); ?> lewat WhatsApp</a>
                 <?php endif; ?>
             </article>
             <?php endforeach; ?>

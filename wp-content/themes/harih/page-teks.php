@@ -19,7 +19,7 @@ if (!defined('ABSPATH')) exit;
 the_post();
 
 $harih_ada_harga    = (bool) get_page_by_path('harga');
-$harih_ada_reseller = (bool) get_page_by_path('jadi-reseller');
+$harih_ada_reseller = harih_reseller_aktif();
 ?><!DOCTYPE html>
 <html <?php language_attributes(); ?>>
 <head>

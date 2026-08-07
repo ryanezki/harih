@@ -114,10 +114,21 @@ kode=$(curl -sS -m 20 -o /dev/null -w '%{http_code}' -X POST "$BASE/xmlrpc.php" 
 if [ "$kode" = 403 ] || [ "$kode" = 404 ] || [ "$kode" = 405 ]; then hijau "xmlrpc.php ditolak ($kode)"; else merah "xmlrpc.php balas $kode (harus ditolak)"; fi
 
 # --- 8. Halaman toko lain ---
-for p in jadi-reseller kontak syarat-ketentuan kebijakan-privasi kebijakan-refund; do
+# `jadi-reseller` DIKELUARKAN 2026-08-07: program reseller diturunkan (keputusan
+# owner). Halamannya kini draft, jadi 404 adalah keadaan yang BENAR — bukan
+# regresi. Diperiksa terbalik di bawah supaya kalau suatu saat tayang lagi tanpa
+# disengaja, itu yang ketahuan.
+for p in kontak syarat-ketentuan kebijakan-privasi kebijakan-refund; do
   kode=$(curl -sS -m 20 -o /dev/null -w '%{http_code}' "$BASE/$p/" 2>/dev/null)
   if [ "$kode" = 200 ]; then hijau "/$p/ 200"; else kuning "/$p/ HTTP $kode (belum publish?)"; fi
 done
+
+kode=$(ambil "$BODY" "$HDR" "$BASE/jadi-reseller/")
+if [ "$kode" = 404 ]; then
+  hijau "/jadi-reseller/ diturunkan (404) — program reseller memang dihentikan"
+else
+  kuning "/jadi-reseller/ balas $kode — halaman tayang lagi? Komisi 30% di sana TIDAK sesuai keputusan komisi cetak"
+fi
 
 # --- 9. Webhook n8n aktif ---
 kode=$(curl -sS -m 20 -o "$BODY" -w '%{http_code}' -X POST "$N8N/webhook/wc-order" -d 'webhook_id=0' 2>/dev/null)

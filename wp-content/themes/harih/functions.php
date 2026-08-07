@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) exit;
  * pengunjung & LiteSpeed tetap menyajikan berkas lama meski file di server
  * sudah baru, dan perbaikan tampilan terlihat "tidak berpengaruh".
  */
-const HARIH_VERSION = '2.17.0';
+const HARIH_VERSION = '2.19.0';
 
 add_action('after_setup_theme', function () {
     add_theme_support('title-tag');
@@ -510,6 +510,50 @@ add_action('wp_head', function () {
  * `/shop/` duplikat katalog front page dan bersaing untuk kata kunci yang sama
  * (halaman produk tetap boleh terindeks — itu bisa punya nilai cari sendiri).
  */
+/**
+ * Gerbang pembayaran sudah bisa menerima uang SUNGGUHAN?
+ *
+ * Diperiksa 2026-08-07: `duitku_environment` bernilai `sandbox`, jadi tombol
+ * "Pesan" yang tayang selama ini mengarah ke halaman pembayaran UJI — pembeli
+ * tidak mungkin benar-benar membayar, dan tidak ada yang memberi tahu mereka.
+ *
+ * Selama sandbox, seluruh CTA beli dialihkan ke WhatsApp: DP transfer manual
+ * memang norma di pasar pernikahan Indonesia (WO, MUA, katering, dekorasi
+ * semuanya begitu), dan untuk paket besar ia justru memungkinkan DP 50% yang
+ * mempercepat closing.
+ *
+ * Sengaja dibaca dari OPSI, bukan dikunci di kode: begitu kredensial production
+ * dipasang, situs kembali ke checkout sendiri tanpa perlu deploy apa pun.
+ */
+function harih_bayar_online_siap(): bool {
+    return get_option('duitku_environment') === 'production';
+}
+
+/** Link WhatsApp berisi pesan siap kirim untuk satu paket. */
+function harih_wa_pesan(string $paket): string {
+    return 'https://wa.me/6282251975575?text=' . rawurlencode(
+        "Halo hariH, saya mau pesan {$paket}. Boleh info cara pembayarannya?"
+    );
+}
+
+/**
+ * Program reseller aktif? (keputusan owner 2026-08-07: DITURUNKAN)
+ *
+ * `get_page_by_path()` mengembalikan halaman apa pun statusnya, jadi menurunkan
+ * halaman ke draft TIDAK cukup untuk menghilangkan tautannya — footer & katalog
+ * akan tetap menaut ke 404. Penjaga ini memeriksa status terbit.
+ *
+ * Alasan program diturunkan: komisi 30% dari paket digital Rp 179rb = Rp 54.000.
+ * Tidak ada orang serius yang bergerak untuk angka itu, sementara untuk paket
+ * cetak kuponnya memang diblokir (komisi fisik rupiah tetap). Jadi program ini
+ * menarik orang yang tidak berguna sambil menciptakan utang kepercayaan.
+ * Menghidupkan kembali: terbitkan lagi halamannya — tidak ada kode yang dihapus.
+ */
+function harih_reseller_aktif(): bool {
+    $p = get_page_by_path('jadi-reseller');
+    return $p instanceof WP_Post && $p->post_status === 'publish';
+}
+
 function harih_halaman_utilitas(): array {
     $ids = [];
     // `/upsell/` bertoken (403 tanpa token) dan `/satuan/` adalah pembanding
