@@ -21,14 +21,11 @@ do_action('litespeed_control_set_nocache'); // no-op bila LSCWP tidak aktif
 $order = absint($_GET['order'] ?? 0);
 $key   = sanitize_text_field(wp_unslash($_GET['key'] ?? ''));
 
-$valid = false;
-if ($order && $key !== '' && defined('FORM_TOKEN_SECRET')) {
-    // Rumus sama dengan n8n WF-01 langkah 5 (§9) — jangan diubah sepihak.
-    $valid = hash_equals(
-        substr(hash_hmac('sha256', (string) $order, FORM_TOKEN_SECRET), 0, 16),
-        $key
-    );
-}
+// B9 — token DICAKUP per halaman. Rumusnya terpusat di
+// undangan_token_halaman(); padanannya di n8n ada di WF-01 (pembuat link ini)
+// dan WF-02 node `Verifikasi Token` (pemeriksa submit form) — jangan diubah
+// sepihak, ketiganya harus bergerak bersama.
+$valid = undangan_token_sah($order, 'isi-data', $key);
 if (!$valid) {
     wp_die(
         'Link tidak valid atau tidak lengkap. Silakan buka kembali link dari email/WhatsApp Anda, atau hubungi CS hariH.',

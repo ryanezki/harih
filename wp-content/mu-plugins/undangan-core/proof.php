@@ -114,7 +114,7 @@ add_action('woocommerce_admin_order_data_after_shipping_address', function ($ord
         printf('<p style="margin:6px 0">Link persetujuan untuk pelanggan:<br><input type="text" readonly value="%s" style="width:100%%" onclick="this.select()"></p>', esc_attr($link));
     }
     $tamu = add_query_arg(
-        ['order' => $order->get_id(), 'key' => substr(hash_hmac('sha256', (string) $order->get_id(), FORM_TOKEN_SECRET), 0, 16)],
+        ['order' => $order->get_id(), 'key' => undangan_token_halaman($order->get_id(), 'tamu')],
         home_url('/tamu/')
     );
     printf('<p style="margin:10px 0 0">Link daftar tamu (amplop bernama + link personal):<br><input type="text" readonly value="%s" style="width:100%%" onclick="this.select()"></p>', esc_attr($tamu));
@@ -143,13 +143,13 @@ add_action('woocommerce_process_shop_order_meta', function ($order_id) {
     }
 }, 30);
 
-/** Link persetujuan proof — token HMAC yang sama dengan /isi-data/ & /upsell/. */
+/** Link persetujuan proof — token bercakupan `proof` (B9). */
 function undangan_proof_link(WC_Order $order): string {
     if (!defined('FORM_TOKEN_SECRET')) return '';
     $id = $order->get_id();
     return add_query_arg([
         'order' => $id,
-        'key'   => substr(hash_hmac('sha256', (string) $id, FORM_TOKEN_SECRET), 0, 16),
+        'key'   => undangan_token_halaman($id, 'proof'),
     ], home_url('/proof/'));
 }
 

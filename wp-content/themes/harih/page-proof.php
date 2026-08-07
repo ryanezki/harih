@@ -3,7 +3,8 @@
  * Template Name: Persetujuan Proof hariH
  *
  * Halaman bertoken tempat pemesan menyetujui proof cetak (TASKS F4.5).
- * Token HMAC sama dengan `/isi-data/` & `/upsell/`; tanpa token → 403.
+ * Token HMAC BERCAKUP `proof` (B9); tanpa token → 403. Meneruskan link ini
+ * TIDAK ikut memberi akses ke halaman bertoken lain — itu inti perubahannya.
  *
  * Halaman ini yang membuat klausul S&K §12.1 punya bukti: waktu persetujuan,
  * hash berkas proof, dan hash snapshot data dicatat di order. Karena itu
@@ -22,10 +23,9 @@ do_action('litespeed_control_set_nocache'); // no-op bila LSCWP tidak aktif
 $order_id = absint($_GET['order'] ?? 0);
 $key      = sanitize_text_field((string) ($_GET['key'] ?? ''));
 
-$sah = $order_id && $key !== '' && defined('FORM_TOKEN_SECRET') && hash_equals(
-    substr(hash_hmac('sha256', (string) $order_id, FORM_TOKEN_SECRET), 0, 16),
-    $key
-);
+// B9 — token DICAKUP per halaman: token /proof/ tidak membuka halaman lain.
+// Rumusnya terpusat di undangan_token_halaman() (mu-plugins/undangan-core).
+$sah = undangan_token_sah($order_id, 'proof', $key);
 $order = $sah && function_exists('wc_get_order') ? wc_get_order($order_id) : null;
 if (!$order) {
     wp_die('Link persetujuan tidak valid. Hubungi CS bila kamu merasa ini keliru.', 'Link tidak valid', ['response' => 403]);

@@ -159,9 +159,9 @@ Empat halaman bertoken tidak memanggil `nocache_headers()` sementara produksi me
   WF-00 `sJ0vsHhFyPotbxMg` · WF-03 `k6LyfYoYds47al38` · WF-04 `539zvR4mzQ5PObJ6` · WF-07 `AbxU2iCdYmKRx5G0` · WF-08 `AI0ofPRSqBhbLbwO`
   </details>
 
-- [ ] **B4** 🤖 `menit` — **WF-01 `Baca Ulang Orders` tanpa `alwaysOutputData`**
-  Node punya `retryOnFail` tapi tidak `alwaysOutputData`, sementara node berikutnya dibuka dengan `throw new Error('Verifikasi idempotency gagal...')` yang jelas ditulis untuk kasus nol baris. Bila lookup mengembalikan 0 item, n8n tidak menjalankan node hilir sama sekali — throw itu **tidak pernah dieksekusi**, eksekusi berakhir SUKSES, email & WA tidak terkirim, dan barisnya tetap ada di sheet sehingga WF-08 tidak menganggapnya tertinggal. Baru berguna setelah B3 beres.
-  **Selesai bila:** `alwaysOutputData: true` di `Baca Ulang Orders`, dan `Append Baris Order` — satu-satunya node Sheets di jalur uang tanpa retry — diberi `retryOnFail: true, maxTries: 3, waitBetweenTries: 3000`.
+- [x] **B4** 🤖 `menit` — **Penjaga idempotency WF-01 akhirnya bisa menyala** → **SELESAI & LIVE 2026-08-07**
+  `alwaysOutputData: true` pada `Baca Ulang Orders`, sehingga `throw new Error('Verifikasi idempotency gagal…')` di node berikutnya benar-benar dieksekusi saat lookup mengembalikan nol baris. Sebelumnya n8n melewati seluruh node hilir, eksekusi berakhir **SUKSES**, email & WA tidak terkirim, dan barisnya tetap ada di sheet sehingga WF-08 tidak menganggapnya tertinggal. `Append Baris Order` — satu-satunya node Sheets di jalur uang tanpa retry — diberi `retryOnFail`, `maxTries: 3`, `waitBetweenTries: 3000`.
+  Baru bermakna setelah B3: tanpa ikatan `errorWorkflow`, `throw` pun tetap senyap.
 
 - [ ] **B5** 🤝 `jam` — **`/jadi-reseller/` & WF-03 menjanjikan komisi 30% "tiap order"**
   Ditulis di h1, hero-sub, langkah 3, daftar syarat, meta description, og:description, dan tagline kaki — hanya baris kaki memakai kata "digital". Berhadapan dengan keputusan terkunci: digital 30%, fisik rupiah tetap Rp 150/300/500rb. Reseller yang menjual Paket Resepsi mengharapkan Rp 870.000 dan menerima Rp 300.000 — **selisih Rp 570.000 per order** di kanal yang seluruh nilainya kepercayaan. Lebih cepat lagi: kupon `RES-` **ditolak di keranjang cetak** sehingga order terbesar berhenti di langkah terakhir. **Halaman ini live dan menerima pendaftar hari ini.**
@@ -176,14 +176,29 @@ Empat halaman bertoken tidak memanggil `nocache_headers()` sementara produksi me
   (b) §12.2 hanya mengikat tanggal **pemesanan**; tidak ada satu kewajiban waktu bagi pelanggan, padahal 3 dari 6 tahap antrean menunggu pelanggan. Order H-21 yang pelanggannya lambat 10 hari = barang terlambat, refund Rp 2,9 juta, bahan + ongkir tetap keluar.
   **Selesai bila:** daftar produk fisik di S&K §1 dan Refund §4 diperbarui · Garansi QR ditulis ulang dengan objek "QR pada undangan cetak" dan remedy proporsional · rujukan bagian di Refund:7 dibetulkan · klausul waktu pelanggan ditambahkan ke §12.2 **setelah owner menyetujui** · diterbitkan lewat `publish-legal.py`.
 
-- [ ] **B8** 🤖 `menit` — **Nama berkas foto & QRIS pelanggan bisa ditebak dari nomor order berurutan**
-  WF-02 membuat `undangan-${order_id}-foto-${i+1}.${ext}` dan `undangan-${order_id}-qris.png`. Ironisnya slug halaman undangan justru **sengaja diacak**. URL `/wp-content/uploads/2026/08/undangan-142-qris.png` bisa dicoba satu per satu. Yang bocor bukan cuma foto pranikah melainkan **gambar QRIS** — instrumen pembayaran mempelai — dan pemetaan nomor order ke identitas pasangan. Berkasnya tetap hidup setelah masa aktif habis karena `masa-aktif.php` hanya mendraft post.
-  **Selesai bila:** node `Pisahkan File` menyisipkan `crypto.randomBytes(4).toString('hex')` ke nama foto dan QRIS; A3 membuktikan berkasnya tetap tampil benar.
+- [x] **B8** 🤖 `menit` — **Nama berkas foto & QRIS diacak** → **SELESAI & LIVE 2026-08-07**
+  `undangan-${order_id}-${acak}-foto-N.png` dengan `crypto.randomBytes(4)` per order. Sebelumnya `undangan-142-qris.png` bisa ditebak dari nomor order yang berurutan — padahal slug halaman undangannya justru **sengaja** diacak. Yang bocor bukan cuma foto pranikah melainkan **gambar QRIS**, instrumen pembayaran mempelai, plus pemetaan nomor order ke identitas pasangan.
+  **Terverifikasi live:** dua undangan uji menghasilkan `undangan-900001-cee1e122-foto-1` dan `undangan-900002-a57ccb4e-foto-1` — berkas tetap tampil normal di halaman.
+  ⚠️ Berkasnya **tetap hidup** setelah masa aktif habis; itu bagian C8, belum ditutup di sini.
 
-- [ ] **B9** 🤖 `jam` — **Beri cakupan pada token: satu token seumur hidup membuka kelima halaman**
-  Rumusnya identik dan hanya dari `order_id`, tanpa komponen waktu maupun cakupan. Meneruskan link `/rekap/` ke wedding organizer untuk menghitung porsi katering — perilaku yang **pasti terjadi** karena halaman itu memang untuk dipakai bersama — otomatis menyerahkan wewenang menekan "setujui proof", dan `proof.php` mencatatnya sebagai bukti yang memindahkan tanggung jawab typo ke pemesan. Saat sengketa datang, bukti itu runtuh. Kriptografinya benar; **cakupannya yang salah**. Kerjakan sekarang selagi nol pelanggan — begitu link beredar, migrasi token jadi mahal.
-  **Luasnya:** 5 template + `proof.php` dua tempat + WF-01 + **tiga** perhitungan token di node `Siapkan Pesan Delivery` WF-02 → wajib satu ronde dengan A1 & B8.
-  **Selesai bila:** bahan HMAC memuat nama halaman (`$order_id . '|proof'`, `'|tamu'`, dst.) di seluruh titik; A3 membuktikan kelima link dari pesan delivery masih terbuka **dan** link `/rekap/` tidak bisa membuka `/proof/`.
+- [x] **B9** 🤖 `jam` — **Token bercakup per halaman** → **SELESAI & LIVE 2026-08-07** *(v2.13.0)*
+  Bahan HMAC berubah dari `order_id` jadi **`"{order_id}|{halaman}"`**. Meneruskan link `/rekap/` ke wedding organizer — perilaku yang **pasti** terjadi karena halaman itu memang untuk dipakai bersama — tidak lagi menyerahkan wewenang menekan "setujui proof".
+  **Cakupannya lebih luas dari yang diperkirakan: 13 titik, bukan 10.** Selain 5 template + `proof.php` (2×) + WF-01 + WF-02 (4×, bukan 3 — verifikasi submit form ikut), ada dua yang tidak tercatat di rencana dan akan mematikan link kalau terlewat:
+  · **WF-06** menghitung token `/upsell/` sendiri untuk pengingat H+3/H+12
+  · **dua tautan silang** di `page-tamu.php` → `/rekap/` dan `page-rekap.php` → `/tamu/` yang memakai ulang `$key` halaman asal — justru tautan inilah yang pertama patah oleh B9
+  **Rumusnya dipusatkan** di `undangan_token_halaman()` + `undangan_token_sah()` (gagal-tertutup: token/kunci kosong → selalu false). Nol rumus `hash_hmac` mentah tersisa di luar fungsi itu.
+  **Terverifikasi live dengan matriks 5×5** (token × halaman) — hanya diagonal yang membuka, seluruh 20 kombinasi silang lainnya **403**:
+
+  | token ↓ / halaman → | isi-data | upsell | proof | tamu | rekap |
+  |---|---|---|---|---|---|
+  | **isi-data** | BUKA | 403 | 403 | 403 | 403 |
+  | **proof** | 403 | 403 | BUKA | 403 | 403 |
+  | **tamu** | 403 | 403 | 403 | BUKA | 403 |
+  | **rekap** | 403 | 403 | 403 | 403 | BUKA |
+
+  *(baris `upsell` seluruhnya 403 karena order uji belum dibayar — penjaga `is_paid()`, bukan soal token.)*
+  Rantai penuh diuji ulang lewat [`../scripts/uji-happy-path.py`](../scripts/uji-happy-path.py): dua order → undangan terbit tier premium, WA terkirim. **Skrip ujinya sendiri ikut diperbarui** — rumus tokennya masih yang lama dan akan membalas 403 yang mudah disalahartikan sebagai pipeline rusak.
+
 
 ---
 

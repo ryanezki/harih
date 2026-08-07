@@ -31,13 +31,8 @@ do_action('litespeed_control_set_nocache'); // no-op bila LSCWP tidak aktif
 $order_id = absint($_GET['order'] ?? 0);
 $key      = sanitize_text_field((string) ($_GET['key'] ?? ''));
 
-$sah = false;
-if ($order_id && $key !== '' && defined('FORM_TOKEN_SECRET')) {
-    $sah = hash_equals(
-        substr(hash_hmac('sha256', (string) $order_id, FORM_TOKEN_SECRET), 0, 16),
-        $key
-    );
-}
+// B9 — token DICAKUP per halaman (lihat undangan_token_halaman()).
+$sah = undangan_token_sah($order_id, 'upsell', $key);
 $order = $sah && function_exists('wc_get_order') ? wc_get_order($order_id) : null;
 if (!$order || !$order->is_paid()) {
     wp_die(

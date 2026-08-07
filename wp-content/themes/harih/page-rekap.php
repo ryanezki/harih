@@ -27,10 +27,9 @@ do_action('litespeed_control_set_nocache'); // no-op bila LSCWP tidak aktif
 $order_id = absint($_GET['order'] ?? 0);
 $key      = sanitize_text_field((string) ($_GET['key'] ?? ''));
 
-$sah = $order_id && $key !== '' && defined('FORM_TOKEN_SECRET') && hash_equals(
-    substr(hash_hmac('sha256', (string) $order_id, FORM_TOKEN_SECRET), 0, 16),
-    $key
-);
+// B9 — token DICAKUP per halaman: token /rekap/ tidak membuka halaman lain.
+// Rumusnya terpusat di undangan_token_halaman() (mu-plugins/undangan-core).
+$sah = undangan_token_sah($order_id, 'rekap', $key);
 if (!$sah) {
     wp_die('Link rekap tidak valid. Hubungi CS bila kamu merasa ini keliru.', 'Link tidak valid', ['response' => 403]);
 }
@@ -120,7 +119,7 @@ $hadir_resepsi = $per_sesi['resepsi'] + $per_sesi['keduanya'];
     <section class="tamu-link">
         <div class="tamu-aksi">
             <button type="button" class="btn btn-garis" id="unduh-rekap">Unduh CSV</button>
-            <a class="btn btn-garis" href="<?php echo esc_url(add_query_arg(['order' => $order_id, 'key' => $key], home_url('/tamu/'))); ?>">Daftar tamu &amp; link personal</a>
+            <a class="btn btn-garis" href="<?php echo esc_url(add_query_arg(['order' => $order_id, 'key' => undangan_token_halaman($order_id, 'tamu')], home_url('/tamu/'))); ?>">Daftar tamu &amp; link personal</a>
         </div>
 
         <table class="rekap-tabel" id="rekap-tabel">

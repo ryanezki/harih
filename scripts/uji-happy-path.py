@@ -69,9 +69,16 @@ def baca():
     return hdr, [dict(zip(hdr, r + [''] * (len(hdr) - len(r)))) for r in v[1:]]
 
 
-def token(oid):
-    """Rumus identik page-isi-data.php, WF-01, dan node `Verifikasi Token` WF-02."""
-    return hmac.new(E['FORM_TOKEN_SECRET'].encode(), str(oid).encode(), hashlib.sha256).hexdigest()[:16]
+def token(oid, halaman='isi-data'):
+    """Rumus identik undangan_token_halaman() di PHP, WF-01, dan node
+    `Verifikasi Token` WF-02.
+
+    Bahan HMAC BERCAKUP sejak B9 (2026-08-07): `"{order_id}|{halaman}"`. Tanpa
+    sufiks halaman, submit form dibalas 403 — dan gejalanya mudah disalahartikan
+    sebagai pipeline yang rusak, padahal cuma rumus token yang tertinggal.
+    """
+    bahan = f'{oid}|{halaman}'.encode()
+    return hmac.new(E['FORM_TOKEN_SECRET'].encode(), bahan, hashlib.sha256).hexdigest()[:16]
 
 
 def sisip(oid, paket, wa):
@@ -181,7 +188,10 @@ def main():
         print(f'  status={hasil["status"]} wa_status={hasil["wa_status"]}')
         print(f'  {hasil["link_undangan"]}')
         h = requests.get(hasil['link_undangan'], params={'v': oid}, timeout=30).text
-        n = len(set(__import__('re').findall(rf'undangan-{oid}-foto-\d+', h)))
+        # Nama berkas memuat komponen acak 8 hex sejak B8 — jangan cocokkan
+        # `undangan-{oid}-foto-N` lagi, itu akan selalu nol dan melaporkan
+        # "tier salah" padahal galerinya baik-baik saja.
+        n = len(set(__import__('re').findall(r'undangan-%s-[0-9a-f]{8}-foto-\d+' % oid, h)))
         ok = n == 3
         print(f'  galeri: {n}/3 foto ter-render → tier {"premium ✓" if ok else "SALAH (jatuh ke hemat?)"}')
         gagal += 0 if ok else 1

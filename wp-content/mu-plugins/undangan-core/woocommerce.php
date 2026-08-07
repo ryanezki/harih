@@ -26,6 +26,36 @@ function undangan_is_valid_wa(string $normalized): bool {
     return (bool) preg_match('/^628\d{7,12}$/', $normalized);
 }
 
+/**
+ * Token akses halaman bertoken — DICAKUP per halaman (B9, 2026-08-07).
+ *
+ * Sebelumnya rumusnya `hmac(order_id)` saja, identik di kelima halaman, tanpa
+ * komponen waktu maupun cakupan. Akibatnya satu token membuka SEMUANYA — dan
+ * halaman-halaman itu memang dirancang untuk dibagikan: meneruskan link
+ * `/rekap/` ke wedding organizer supaya ia bisa menghitung porsi katering
+ * otomatis menyerahkan wewenang menekan "setujui proof", padahal persetujuan
+ * itulah yang memindahkan tanggung jawab salah ketik ke pemesan (S&K §12.1).
+ * Saat sengketa datang, buktinya runtuh.
+ *
+ * Kriptografinya tidak pernah salah; cakupannya yang salah. Bahan HMAC kini
+ * `"{order_id}|{halaman}"`, jadi token `/rekap/` tidak membuka `/proof/`.
+ *
+ * ⚠️ SATU-SATUNYA sumber rumus ini di sisi PHP. Padanannya di n8n ada di WF-01,
+ * WF-02 (empat tempat), dan WF-06 — kalau rumus di sini diubah, keenam titik itu
+ * WAJIB ikut. Nama halaman dipakai apa adanya sebagai bagian bahan HMAC, jadi
+ * jangan ganti ejaannya tanpa mengganti keduanya.
+ */
+function undangan_token_halaman(int $order_id, string $halaman): string {
+    if (!defined('FORM_TOKEN_SECRET') || !$order_id || $halaman === '') return '';
+    return substr(hash_hmac('sha256', $order_id . '|' . $halaman, FORM_TOKEN_SECRET), 0, 16);
+}
+
+/** Benar hanya bila token cocok DAN keduanya tidak kosong (gagal-tertutup). */
+function undangan_token_sah(int $order_id, string $halaman, string $key): bool {
+    $harap = undangan_token_halaman($order_id, $halaman);
+    return $harap !== '' && $key !== '' && hash_equals($harap, $key);
+}
+
 // T1.11 — WooCommerce menonaktifkan webhook secara permanen & senyap setelah
 // N delivery gagal (default 5). n8n restart beberapa menit tidak boleh
 // mematikan pipeline order; jaring pengaman lain: WF rekonsiliasi (T3.12).
