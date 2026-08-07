@@ -313,6 +313,9 @@ Empat halaman bertoken tidak memanggil `nocache_headers()` sementara produksi me
 
 ## 👤 Keputusan yang menunggu owner
 
+> 📄 **Versi siap diskusi ada di [`diskusi-owner-2026-08-07.md`](./diskusi-owner-2026-08-07.md)** — ditulis supaya bisa dibaca orang yang belum pernah melihat produk maupun kodenya, lengkap dengan duduk perkara, pilihan, dan bukti apa yang menyelesaikan tiap poin. Daftar di bawah adalah versi ringkasnya untuk kerja sehari-hari.
+
+
 1. **Duitku** — sudah ada kabar sejak 2026-08-04? Bila belum, **apakah kita membuka jalur bayar manual** (invoice WA + transfer, order WooCommerce dibuat tangan lalu di-set `processing`) untuk paket digital Rp 99–299 ribu sekarang? Itu satu-satunya cara gerbang 10-penjualan bergerak minggu ini, dan mekanismenya **sudah Anda setujui** untuk order cetak Rp 2,9 juta. → A7
 
 2. **Reseller** — `/jadi-reseller/` hidup dan menerima pendaftar dengan janji komisi 30% tiap order, sedangkan keputusan terkunci membayar rupiah tetap untuk cetak. Pilih **sekarang**: (a) koreksi klaimnya, atau (b) tutup pendaftaran sampai reseller memang diinginkan. Arsip TASKS sudah mencabut "rekrut 3 reseller" tapi `panduan-manual.md` masih menyuruhnya. → B5
