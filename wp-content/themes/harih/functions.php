@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) exit;
  * pengunjung & LiteSpeed tetap menyajikan berkas lama meski file di server
  * sudah baru, dan perbaikan tampilan terlihat "tidak berpengaruh".
  */
-const HARIH_VERSION = '2.10.0';
+const HARIH_VERSION = '2.11.0';
 
 add_action('after_setup_theme', function () {
     add_theme_support('title-tag');
@@ -287,6 +287,9 @@ add_action('wp_enqueue_scripts', function () {
 
     $cfg = [
         'id'      => $id,
+        // B1 — endpoint RSVP dikunci ke slug. `id` tetap dikirim karena dipakai
+        // hal lain di undangan.js, tapi ia TIDAK LAGI jadi kunci akses data tamu.
+        'slug'    => get_post_field('post_name', $id),
         'restUrl' => esc_url_raw(rest_url('undangan/v1')),
         'target'  => harih_target_countdown($id),
         'musik'   => esc_url_raw((string) get_post_meta($id, 'musik_url', true)),

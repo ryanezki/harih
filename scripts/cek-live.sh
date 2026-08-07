@@ -58,6 +58,25 @@ else
   kuning "Listing REST balas $kode tanpa meta sensitif — pastikan memang kosong"
 fi
 
+# B1 — endpoint RSVP dikunci ke slug, bukan ID berurutan. Sampai 2026-08-07
+# `/rsvp/<id>` membalas 200 berisi nama tamu, pesan, kehadiran, jumlah, dan sesi
+# untuk SEMUA undangan, tanpa autentikasi dan tanpa tahu satu link pun — celah
+# yang dibuktikan dengan panen sungguhan, bukan diasumsikan. Kedua pemeriksaan
+# di bawah harus lulus BERSAMA: yang pertama membuktikan lubangnya tertutup,
+# yang kedua membuktikan buku tamu tidak ikut mati karena menutupnya.
+kode=$(ambil "$BODY" "$HDR" "$BASE/wp-json/undangan/v1/rsvp/13")
+if [ "$kode" = 404 ]; then
+  hijau "RSVP per-ID ditolak (404) — enumerasi tamu tertutup"
+else
+  merah "RSVP /rsvp/13 balas $kode — ENUMERASI TAMU TERBUKA, endpoint harus berbasis slug"
+fi
+kode=$(ambil "$BODY" "$HDR" "$BASE/wp-json/undangan/v1/rsvp/demo-tema-01")
+if [ "$kode" = 200 ]; then
+  hijau "RSVP per-slug melayani (200) — buku tamu tetap hidup"
+else
+  merah "RSVP /rsvp/demo-tema-01 balas $kode (harus 200) — buku tamu mati di semua undangan"
+fi
+
 # --- 5. Sitemap: bebas undangan (QA T1.10) & tidak membocorkan username (P0.4) ---
 kode=$(ambil "$BODY" "$HDR" "$BASE/wp-sitemap.xml")
 if [ "$kode" = 200 ]; then

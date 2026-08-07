@@ -569,8 +569,8 @@
     }
 
     function muatUcapan() {
-        if (!list || !cfg.restUrl || !cfg.id) return;
-        fetch(cfg.restUrl + '/rsvp/' + cfg.id)
+        if (!list || !cfg.restUrl || !cfg.slug) return;
+        fetch(cfg.restUrl + '/rsvp/' + encodeURIComponent(cfg.slug))
             .then(function (r) { return r.ok ? r.json() : []; })
             .then(function (items) {
                 list.textContent = '';
@@ -619,7 +619,7 @@
             var btn = $('#rsvp-submit');
             var msg = $('#rsvp-msg');
             var data = {
-                undangan_id: cfg.id,
+                slug: cfg.slug,
                 nama: ($('#rsvp-nama').value || '').trim(),
                 hadir: $('#rsvp-hadir').value,
                 jumlah: parseInt(($('#rsvp-jumlah') || {}).value || '1', 10),

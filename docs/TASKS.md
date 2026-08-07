@@ -130,9 +130,17 @@ Empat halaman bertoken tidak memanggil `nocache_headers()` sementara produksi me
 
 > Tidak menghambat rupiah pertama, tapi bila terjadi biayanya reputasi atau hukum — jenis kerugian yang tidak bisa ditambal belakangan. **B8 dan B9 menumpang ronde import WF-02 yang sama dengan A1** — jangan menyentuh WF-02 dua kali.
 
-- [ ] **B1** 🤖 `jam` — **Endpoint RSVP publik bisa dipanen dengan loop nomor**
-  `rest.php:19-23` mendaftarkan `/rsvp/(?P<id>\d+)` dengan `permission_callback => '__return_true'`, dan `undangan_rsvp_list()` mengembalikan nama, pesan, hadir, jumlah, sesi, waktu untuk 50 ucapan **tanpa memeriksa** bahwa post itu ada, bertipe `undangan`, atau berstatus publish. Seluruh strategi privasi bertumpu pada "slug tidak bisa ditebak" — dan endpoint ini justru memakai **ID post berurutan**. Satu loop `1..5000` memanen nama tamu & ucapan pribadi semua pelanggan tanpa pernah tahu satu link undangan. Ironis: file yang sama berjuang menutup semua jalur enumerasi lain.
-  **Selesai bila:** endpoint dikunci ke slug (`get_page_by_path($slug, OBJECT, 'undangan')`), menolak 404 bila tipe bukan `undangan` atau status bukan `publish`; `undangan.js` diberi `cfg.slug`; pemeriksaan sama diterapkan di `undangan_rsvp_create`.
+- [x] **B1** 🤖 `jam` — **Endpoint RSVP dikunci ke slug** → **SELESAI & LIVE 2026-08-07** *(v2.11.0)*
+  **Dibuktikan dulu, bukan diasumsikan.** Sebelum menyentuh kode: dua RSVP dikirim ke undangan demo lewat endpoint publik, lalu `for id in 1 12 13 43 44 90 999` dijalankan dari luar — `id 13` mengembalikan **nama tamu, pesan, kehadiran, jumlah tamu, sesi, dan waktu**, tanpa autentikasi dan tanpa pernah tahu satu link undangan pun. ID post berurutan, sementara seluruh model privasi undangan bertumpu pada "slug tidak bisa ditebak". (`wa_rsvp` memang tidak pernah ikut — bagian itu dirancang benar sejak awal.)
+  **Yang diperbaiki, dan ternyata ada tiga lubang, bukan satu:**
+  · rute `GET /rsvp/(?P<id>\d+)` → `/rsvp/(?P<slug>[a-z0-9-]+)`, diresolusi lewat `undangan_dari_slug()`
+  · `POST` berhenti menerima `undangan_id` — dengan ID berurutan siapa pun bisa **membanjiri buku tamu semua undangan** lewat satu loop
+  · status `publish` **ditegakkan di kueri**. Sebelumnya hanya tipe post yang diperiksa, jadi undangan yang sudah kedaluwarsa — `masa-aktif.php` menonaktifkannya dengan mengubah jadi `draft` — tetap menyerahkan daftar tamunya **dan** tetap menerima RSVP baru.
+  Undangan tak ditemukan membalas **404, bukan daftar kosong**: daftar kosong memberi tahu penebak bahwa slug-nya benar dan undangannya sekadar belum punya ucapan.
+  **Tanpa masa transisi, dan itu aman:** `13` cocok dengan pola slug, tidak ada undangan ber-slug itu, jadi permintaan lama jatuh ke 404 sendirinya — dan `undangan.js` sudah lama memperlakukan non-200 sebagai daftar kosong.
+  **Terverifikasi live:** `/rsvp/{13,43,44,1,999}` → semuanya **404** · `/rsvp/demo-tema-01` → 2 entri · slug tak dikenal → 404 · POST slug sah → `ok` · POST `undangan_id` cara lama → 400 · POST ke undangan draft → 400 · GET undangan draft → 404. Buku tamu diperiksa di undangan sungguhan lewat browser: `cfg.slug` terpakai, 2 ucapan ter-render normal.
+  **Smoke test 30 → 32.** Dua pemeriksaan berpasangan yang harus lulus bersama: `/rsvp/13` → 404 (lubang tertutup) **dan** `/rsvp/demo-tema-01` → 200 (buku tamu tidak ikut mati). Yang pertama sendirian bisa dipuaskan dengan mematikan seluruh fitur.
+  Data uji dibersihkan: 3 ucapan + 1 undangan draft dihapus permanen.
 
 - [ ] **B2** 🤖 `menit` — **GA4 mengirim token HMAC pelanggan ke Google dari empat halaman bertoken**
   `functions.php:459-461` hanya mengecualikan undangan dan `/isi-data/`, sementara `functions.php:442-450` menulis alasannya sendiri: URL halaman ini memuat token order — sebuah bearer credential — dan GA4 mengirim URL lengkap sebagai `page_location`. Keempat halaman lain memakai token yang sama dan sama-sama memasang `<meta name="referrer" content="no-referrer">`: penulisnya tahu tokennya sensitif, hanya lupa pengecualian GA4-nya. Kebijakan Privasi **sudah tayang** berjanji halaman bertoken "tidak boleh dikirim ke pihak ketiga mana pun".

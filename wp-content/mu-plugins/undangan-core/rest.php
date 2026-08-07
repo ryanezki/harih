@@ -16,18 +16,57 @@ add_action('rest_api_init', function () {
         'callback'            => 'undangan_rsvp_create',
     ]);
 
-    register_rest_route('undangan/v1', '/rsvp/(?P<id>\d+)', [
+    // B1 (2026-08-07) — dikunci ke SLUG, bukan ID.
+    //
+    // Rute lama `/rsvp/(?P<id>\d+)` memakai ID post yang BERURUTAN, sementara
+    // seluruh model privasi undangan bertumpu pada "slug tidak bisa ditebak".
+    // Dibuktikan dengan panen sungguhan sebelum diperbaiki: `for id in 1..N`
+    // mengembalikan nama tamu, pesan, kehadiran, jumlah, dan sesi untuk SEMUA
+    // undangan pelanggan, tanpa autentikasi dan tanpa pernah tahu satu link pun.
+    // Ironis karena file ini berjuang menutup semua jalur enumerasi lain
+    // (listing wp/v2, REST search, sitemap, feed, oEmbed).
+    //
+    // Permintaan lama ke `/rsvp/13` tidak perlu ditangani khusus: `13` cocok
+    // dengan pola slug, tidak ada undangan ber-slug itu, jadi jatuh ke 404 —
+    // dan `undangan.js` memang sudah memperlakukan non-200 sebagai daftar kosong.
+    register_rest_route('undangan/v1', '/rsvp/(?P<slug>[a-z0-9\-]+)', [
         'methods'             => 'GET',
         'permission_callback' => '__return_true',
         'callback'            => 'undangan_rsvp_list',
     ]);
 });
 
+/**
+ * Undangan dari slug — satu-satunya pintu masuk publik ke CPT `undangan`.
+ *
+ * Status `publish` DITEGAKKAN DI KUERI, bukan diperiksa belakangan: masa-aktif
+ * menonaktifkan undangan kedaluwarsa dengan mengubahnya jadi `draft`, dan tanpa
+ * syarat ini undangan yang sudah "dimatikan" tetap menyerahkan seluruh daftar
+ * tamunya.
+ */
+function undangan_dari_slug(string $slug): ?WP_Post {
+    $slug = sanitize_title($slug);
+    if ($slug === '') return null;
+    $found = get_posts([
+        'name'           => $slug,
+        'post_type'      => 'undangan',
+        'post_status'    => 'publish',
+        'posts_per_page' => 1,
+    ]);
+    return $found ? $found[0] : null;
+}
+
 function undangan_rsvp_create(WP_REST_Request $r) {
     // Honeypot: bot mengisi field 'website' → pura-pura sukses (§6).
     if (!empty($r['website'])) return ['ok' => true];
 
-    $uid   = absint($r['undangan_id']);
+    // B1 — slug, bukan `undangan_id`. Selain menutup enumerasi, ini menutup
+    // jalur spam: dengan ID berurutan siapa pun bisa membanjiri buku tamu SEMUA
+    // undangan lewat satu loop. Status `publish` ikut ditegakkan lewat
+    // `undangan_dari_slug()` — sebelumnya hanya tipe post yang diperiksa,
+    // sehingga undangan yang sudah kedaluwarsa (draft) masih menerima RSVP.
+    $undangan = undangan_dari_slug((string) ($r['slug'] ?? ''));
+    $uid   = $undangan ? $undangan->ID : 0;
     $nama  = mb_substr(sanitize_text_field((string) ($r['nama'] ?? '')), 0, 100);
     $pesan = mb_substr(sanitize_textarea_field((string) ($r['pesan'] ?? '')), 0, 1500);
     $hadir = in_array($r['hadir'] ?? '', ['hadir', 'tidak', 'ragu'], true) ? $r['hadir'] : 'ragu';
@@ -38,7 +77,7 @@ function undangan_rsvp_create(WP_REST_Request $r) {
     $wa     = preg_replace('/\D+/', '', (string) ($r['wa'] ?? ''));
     $wa     = $wa !== '' ? mb_substr($wa, 0, 16) : '';
 
-    if (!$uid || get_post_type($uid) !== 'undangan' || $nama === '') {
+    if (!$uid || $nama === '') {
         return new WP_Error('bad_request', 'Data tidak lengkap.', ['status' => 400]);
     }
 
@@ -72,7 +111,13 @@ function undangan_rsvp_create(WP_REST_Request $r) {
 }
 
 function undangan_rsvp_list(WP_REST_Request $r) {
-    $uid = absint($r['id']);
+    $undangan = undangan_dari_slug((string) $r['slug']);
+    if (!$undangan) {
+        // 404, bukan daftar kosong: daftar kosong memberi tahu penebak bahwa
+        // slug-nya benar dan undangannya sekadar belum punya ucapan.
+        return new WP_Error('not_found', 'Undangan tidak ditemukan.', ['status' => 404]);
+    }
+    $uid = $undangan->ID;
 
     $posts = get_posts([
         'post_type'   => 'ucapan',
