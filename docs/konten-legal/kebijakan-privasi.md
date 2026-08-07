@@ -60,7 +60,7 @@ Masing-masing tunduk pada kebijakan privasinya sendiri.
 - Data pemesanan dan pembayaran disimpan sesuai kebutuhan pembukuan.
 - Daftar nama tamu mengikuti masa simpan data undangan pada butir pertama.
 - Data reseller (termasuk nomor rekening) disimpan selama kemitraan berjalan dan sesudahnya sebatas kebutuhan pembukuan komisi. Bila kemitraan diakhiri, ajukan penghapusan lewat halaman Kontak — lihat bagian 7.
-- Cadangan (backup) rutin disimpan terenkripsi/terbatas akses dengan retensi 4 minggu.
+- Cadangan (backup) rutin disimpan pada penyimpanan **berakses terbatas** di dua lokasi terpisah, dengan retensi 4 minggu. Cadangan tidak dibagikan ke pihak mana pun dan hanya dipakai untuk pemulihan.
 
 ## 6. Keamanan
 

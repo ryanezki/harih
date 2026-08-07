@@ -41,6 +41,7 @@ SSH_TUJUAN="u803921702@147.93.80.20"
 SSH_OPSI="-p 65002 -i /root/.ssh/id_harih -o BatchMode=yes -o StrictHostKeyChecking=accept-new"
 WP_PATH="domains/harih.id/public_html"
 RETENSI_HARI=28
+RETENSI_LUAR_HARI=14   # salinan di luar VPS — lihat alasannya di langkah 5
 TGL=$(date +%F)
 
 # --- Alert email via Brevo bila ada langkah yang gagal ---
@@ -64,7 +65,16 @@ echo "=== Backup hariH $TGL — mulai $(date '+%T %Z') ==="
 #    Catatan: `wp db export` gagal SENYAP di Hostinger (rc 255 tanpa pesan;
 #    WP-CLI 2.12 + mysqldump MariaDB 11) — dump langsung via mysqldump dengan
 #    kredensial dibaca dari wp-config di sisi server.
-ssh $SSH_OPSI "$SSH_TUJUAN" "cd $WP_PATH && mysqldump --no-tablespaces --single-transaction --quick -h\$(wp config get DB_HOST) -u\$(wp config get DB_USER) -p\$(wp config get DB_PASSWORD) \$(wp config get DB_NAME)" \
+# D2 — password TIDAK lagi ditaruh di baris perintah. `-p<password>` membuat
+# sandi database tampil di daftar proses (`ps aux`) selama dump berjalan, dan
+# ini shared hosting: tenant lain bisa melihatnya. Kini lewat berkas defaults
+# sementara ber-mode 600 yang dihapus lagi setelah selesai.
+ssh $SSH_OPSI "$SSH_TUJUAN" "cd $WP_PATH && \
+  CNF=\$(mktemp) && chmod 600 \"\$CNF\" && \
+  printf '[client]\\nhost=%s\\nuser=%s\\npassword=%s\\n' \
+    \"\$(wp config get DB_HOST)\" \"\$(wp config get DB_USER)\" \"\$(wp config get DB_PASSWORD)\" > \"\$CNF\" && \
+  mysqldump --defaults-extra-file=\"\$CNF\" --no-tablespaces --single-transaction --quick \"\$(wp config get DB_NAME)\"; \
+  rc=\$?; rm -f \"\$CNF\"; exit \$rc" \
   | gzip > "$BASE/db/db-$TGL.sql.gz"
 gunzip -t "$BASE/db/db-$TGL.sql.gz"
 UKURAN=$(stat -c %s "$BASE/db/db-$TGL.sql.gz")
@@ -74,11 +84,20 @@ if [ "$UKURAN" -lt 10000 ]; then
 fi
 echo "DB: $UKURAN B → db/db-$TGL.sql.gz"
 
-# 2) Uploads — rsync incremental mirror (T4.2: tar penuh mingguan membengkak;
+# 2) Uploads — rsync incremental (T4.2: tar penuh mingguan membengkak;
 #    rsync hanya mentransfer file baru/berubah)
-rsync -az --delete -e "ssh $SSH_OPSI" \
+#
+# D2 — `--delete` SENDIRIAN membuat ini REPLIKA, bukan cadangan: berkas yang
+# terhapus di Hostinger — tak sengaja, salah hapus massal, atau ransomware —
+# ikut terhapus di sini pada jalannya backup berikutnya, dan tidak ada versi
+# lain yang menyimpannya. `--backup --backup-dir` mempertahankan cermin tetap
+# akurat SEKALIGUS memindahkan yang terhapus/tertimpa ke loteng bertanggal.
+mkdir -p "$BASE/uploads-loteng/$TGL"
+rsync -az --delete --backup --backup-dir="../uploads-loteng/$TGL" -e "ssh $SSH_OPSI" \
   "$SSH_TUJUAN:$WP_PATH/wp-content/uploads/" "$BASE/uploads/"
-echo "Uploads: $(du -sh "$BASE/uploads" | cut -f1) (mirror)"
+rmdir "$BASE/uploads-loteng/$TGL" 2>/dev/null || true   # kosong = tidak ada yang hilang
+LOTENG=$(find "$BASE/uploads-loteng" -mindepth 2 -type f 2>/dev/null | wc -l)
+echo "Uploads: $(du -sh "$BASE/uploads" | cut -f1) (cermin) · loteng: $LOTENG berkas terhapus/tertimpa tersimpan"
 
 # 3) Sesi WAHA — aset kritis: hilang = scan ulang QR + risiko jeda delivery
 VOL_WAHA=$(docker volume ls -q | grep -E 'harih_waha_sessions$' | head -1)
@@ -99,7 +118,38 @@ docker run --rm -v "$VOL_N8N":/data:ro -v "$BASE/n8n":/backup alpine \
   tar czf "/backup/n8n-data-$TGL.tar.gz" --exclude='./binaryData' -C /data .
 echo "n8n: n8n/workflows-$TGL.json + n8n/n8n-data-$TGL.tar.gz"
 
-# 5) Retensi 4 minggu (uploads = mirror hidup, tidak ikut dihapus)
+# 5) SALIN KE LUAR VPS — D2.
+#
+# Titik gagal tunggal yang selama ini tidak dinamai: WordPress & uploads HIDUP
+# di Hostinger, jadi VPS lenyap ≠ data pelanggan lenyap. Tapi **sesi WAHA dan
+# volume n8n hanya ada di VPS** — dan cadangannya juga di VPS yang sama. Satu
+# kejadian menghapus keduanya sekaligus.
+#
+# Dua artefak terbaru disalin ke Hostinger memakai SSH key yang sudah ada —
+# nol biaya, nol kredensial baru. Gagal menyalin BUKAN kegagalan backup:
+# arsip lokalnya sudah jadi, jadi hanya diperingatkan.
+LUAR="backup-vps"
+ssh $SSH_OPSI "$SSH_TUJUAN" "mkdir -p $LUAR" 2>/dev/null || true
+if rsync -az -e "ssh $SSH_OPSI" \
+     "$BASE/waha/waha-sessions-$TGL.tar.gz" \
+     "$BASE/n8n/n8n-data-$TGL.tar.gz" \
+     "$BASE/n8n/workflows-$TGL.json" \
+     "$SSH_TUJUAN:$LUAR/" 2>/dev/null; then
+  # Retensi di sisi luar SENGAJA lebih pendek dari lokal (14 vs 28 hari): arsip
+  # sesi WAHA ±285 MB dan isinya hampir identik tiap minggu, sementara sesi lama
+  # praktis tidak berguna — pemulihan dari sesi basi tetap menuntut scan QR
+  # ulang. Yang dijaga di sini cuma "VPS lenyap hari ini", dan untuk itu satu
+  # salinan terbaru sudah cukup. Menghemat ±0,5 GB di akun shared hosting.
+  ssh $SSH_OPSI "$SSH_TUJUAN" "find $LUAR -type f -mtime +$RETENSI_LUAR_HARI -delete" 2>/dev/null || true
+  echo "Luar VPS: sesi WAHA + data n8n tersalin ke Hostinger:$LUAR/"
+else
+  echo "PERINGATAN: salinan ke luar VPS gagal — arsip lokal tetap ada, tapi sesi WAHA & n8n untuk sementara hanya ada di SATU tempat"
+fi
+
+# 6) Retensi 4 minggu (uploads = cermin hidup, tidak ikut dihapus;
+#    loteng uploads juga dibersihkan supaya tidak tumbuh tanpa batas)
 find "$BASE/db" "$BASE/waha" "$BASE/n8n" -type f -mtime +"$RETENSI_HARI" -delete
+find "$BASE/uploads-loteng" -type f -mtime +"$RETENSI_HARI" -delete 2>/dev/null || true
+find "$BASE/uploads-loteng" -type d -empty -delete 2>/dev/null || true
 
 echo "=== Selesai $(date '+%T') ==="
