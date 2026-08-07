@@ -2,7 +2,7 @@
 
 > Dipublikasikan sebagai halaman situs pada 22 Juli 2026.
 
-Terakhir diperbarui: 4 Agustus 2026
+Terakhir diperbarui: 7 Agustus 2026
 
 hariH (harih.id) menghormati privasi Anda. Kebijakan ini menjelaskan data apa yang kami kumpulkan, untuk apa, dan hak Anda — disusun dengan memperhatikan UU No. 27 Tahun 2022 tentang Pelindungan Data Pribadi.
 
@@ -12,9 +12,14 @@ hariH (harih.id) menghormati privasi Anda. Kebijakan ini menjelaskan data apa ya
 - Data pemesanan: nama, alamat email, nomor WhatsApp.
 - Untuk pesanan yang memuat produk cetak fisik: **alamat pengiriman** dan nomor telepon penerima.
 - Data undangan yang Anda isi: nama mempelai & orang tua, tanggal/waktu/lokasi acara, kisah, foto, pilihan musik, nomor rekening & gambar QRIS (bila memakai fitur amplop digital), nomor WhatsApp narahubung.
+- **Daftar nama tamu** yang Anda tempelkan pada halaman daftar tamu (maksimal 600 nama). Daftar ini dipakai untuk **mencetak nama pada amplop** dan membuat **link undangan personal** per tamu. Nama-nama itu adalah data pihak ketiga: dengan menempelkannya, Anda menyatakan berwenang memberikannya kepada kami untuk keperluan tersebut. Kami tidak memakainya untuk tujuan lain dan tidak menghubungi tamu Anda.
 
 **Dari tamu undangan:**
-- Isian buku ucapan/RSVP: nama, ucapan, dan status kehadiran. Kami tidak meminta kontak tamu.
+- Isian buku ucapan/RSVP: nama, ucapan, status kehadiran, jumlah tamu yang dibawa, dan sesi yang dihadiri. Kami tidak meminta kontak tamu.
+
+**Dari calon reseller** *(hanya bila Anda mendaftar di halaman Jadi Reseller)*:
+- Nama, nomor WhatsApp, **nama bank, dan nomor rekening**.
+- Rekening dipakai **semata-mata untuk membayarkan komisi** Anda; kami tidak menariknya untuk keperluan apa pun. Dasar pemrosesannya adalah pelaksanaan perjanjian kemitraan yang Anda ajukan sendiri.
 
 **Otomatis:** log teknis standar server (alamat IP, waktu akses) untuk keamanan dan pencegahan penyalahgunaan, serta data statistik kunjungan melalui Google Analytics — lihat bagian 8.
 
@@ -23,6 +28,7 @@ hariH (harih.id) menghormati privasi Anda. Kebijakan ini menjelaskan data apa ya
 - Membuat, menerbitkan, dan mengirimkan undangan digital Anda.
 - Komunikasi transaksional: konfirmasi pembayaran, link pengisian data, pengiriman undangan, pengingat menjelang acara.
 - Operasional internal, pencatatan pesanan, dan dukungan pelanggan.
+- Bagi reseller terdaftar: verifikasi pendaftaran, penerbitan kode kupon, perhitungan dan **pembayaran komisi**.
 
 Kami **tidak menjual** data pribadi Anda kepada pihak mana pun.
 
@@ -39,7 +45,7 @@ Data dibagikan terbatas sesuai keperluan layanan kepada:
 | Duitku | pemrosesan pembayaran |
 | Brevo | pengiriman email transaksional |
 | WhatsApp | pengiriman pesan transaksional |
-| Google (Workspace/Sheets) | pencatatan operasional pesanan |
+| Google (Workspace/Sheets) | pencatatan operasional pesanan, rekap komisi, dan data pendaftaran reseller |
 | Hostinger | infrastruktur hosting situs |
 | Google Analytics | statistik kunjungan halaman toko (lihat bagian 8) |
 | Jasa kurir/ekspedisi | pengiriman produk cetak fisik — nama, alamat & telepon penerima dibagikan sebatas keperluan kirim; nomor resi disimpan sebagai bukti |
@@ -52,6 +58,8 @@ Masing-masing tunduk pada kebijakan privasinya sendiri.
 
 - Data undangan dan foto disimpan selama masa aktif paket, dan dihapus/diarsipkan setelahnya (paling lambat 90 hari setelah masa aktif berakhir, kecuali diwajibkan lain oleh hukum).
 - Data pemesanan dan pembayaran disimpan sesuai kebutuhan pembukuan.
+- Daftar nama tamu mengikuti masa simpan data undangan pada butir pertama.
+- Data reseller (termasuk nomor rekening) disimpan selama kemitraan berjalan dan sesudahnya sebatas kebutuhan pembukuan komisi. Bila kemitraan diakhiri, ajukan penghapusan lewat halaman Kontak — lihat bagian 7.
 - Cadangan (backup) rutin disimpan terenkripsi/terbatas akses dengan retensi 4 minggu.
 
 ## 6. Keamanan
@@ -71,7 +79,7 @@ Untuk memahami bagaimana calon pemesan menggunakan halaman toko, kami memakai **
 **Yang sengaja kami kecualikan dari pelacakan:**
 
 - **Halaman undangan (`/u/…`)** — pengunjungnya adalah tamu Anda, bukan pelanggan kami. Kunjungan tamu ke halaman undangan **tidak dilacak sama sekali**.
-- **Halaman formulir pengisian data** — alamatnya memuat token pribadi pesanan Anda, sehingga tidak boleh dikirim ke pihak ketiga mana pun.
+- **Seluruh halaman berlink pribadi** — formulir pengisian data, penawaran upgrade, persetujuan proof, daftar tamu, dan rekap kehadiran. Alamat halaman-halaman itu memuat token pribadi pesanan Anda, sehingga tidak boleh dikirim ke pihak ketiga mana pun.
 
 Anda dapat menolak pelacakan ini kapan saja melalui pengaturan cookie/Do Not Track di peramban, mode penyamaran, pemblokir skrip, atau [Google Analytics Opt-out Browser Add-on](https://tools.google.com/dlpage/gaoptout).
 
