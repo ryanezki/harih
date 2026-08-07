@@ -13,6 +13,12 @@
 
 if (!defined('ABSPATH')) exit;
 
+// Sama seperti /isi-data/: halaman bertoken tidak boleh di-cache. Tanpa ini
+// LiteSpeed menyajikan HTML lama berhari-hari, dan nonce anonim yang hanya sah
+// ≤24 jam sudah mati saat pemesan menekan Setujui.
+nocache_headers();
+do_action('litespeed_control_set_nocache'); // no-op bila LSCWP tidak aktif
+
 $order_id = absint($_GET['order'] ?? 0);
 $key      = sanitize_text_field((string) ($_GET['key'] ?? ''));
 
@@ -26,10 +32,22 @@ if (!$order) {
 }
 
 $pesan = '';
-if (($_POST['harih_setuju'] ?? '') === '1' && wp_verify_nonce((string) ($_POST['_harih_nonce'] ?? ''), 'harih_proof_' . $order_id)) {
-    $hasil = undangan_catat_persetujuan($order);
-    $pesan = $hasil['pesan'];
-    $order = wc_get_order($order_id); // muat ulang agar status terbaru terbaca
+$galat = '';
+if (($_POST['harih_setuju'] ?? '') === '1') {
+    // Nonce DIPISAH dari aksi. Sebelumnya keduanya digabung, sehingga nonce mati
+    // membuat tombol "Setujui" jadi tombol mati tanpa satu kalimat pun: pemesan
+    // menekannya, halaman memuat ulang tak berubah, dan ia menganggap sudah
+    // menyetujui — sementara Antrean Cetak selamanya menampilkan "Menunggu
+    // persetujuan pelanggan" pada order yang tenggat Garansi Tepat Waktu-nya
+    // berjalan. Nonce anonim hanya sah ≤24 jam; halaman ini bisa dibuka
+    // berhari-hari setelah linknya dikirim, jadi ini kasus NORMAL.
+    if (!wp_verify_nonce((string) ($_POST['_harih_nonce'] ?? ''), 'harih_proof_' . $order_id)) {
+        $galat = 'Sesi halaman ini sudah kedaluwarsa, jadi persetujuanmu BELUM tercatat. Muat ulang halaman lalu tekan Setujui sekali lagi.';
+    } else {
+        $hasil = undangan_catat_persetujuan($order);
+        $pesan = $hasil['pesan'];
+        $order = wc_get_order($order_id); // muat ulang agar status terbaru terbaca
+    }
 }
 
 $berkas    = undangan_proof_berkas($order);
@@ -68,6 +86,7 @@ $harih_label = [
 </header>
 
 <main>
+    <?php if ($galat) : ?><p class="proof-notif proof-galat"><?php echo esc_html($galat); ?></p><?php endif; ?>
     <?php if ($pesan) : ?><p class="proof-notif"><?php echo esc_html($pesan); ?></p><?php endif; ?>
 
     <section class="proof-berkas">

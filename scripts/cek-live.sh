@@ -74,8 +74,21 @@ else
 fi
 
 # --- 6. Form isi data terkunci token ---
-kode=$(ambil "$BODY" "$HDR" "$BASE/isi-data/?order=1&key=salah")
-if [ "$kode" = 403 ]; then hijau "/isi-data/ token salah → 403"; else merah "/isi-data/ token salah → HTTP $kode (harus 403)"; fi
+# KELIMA halaman bertoken, bukan hanya /isi-data/. Sampai 2026-08-07 hanya
+# /isi-data/ yang diuji di sini, dan keempat sisanya diam-diam membalas 200:
+# LiteSpeed menyajikan halaman `wp_die` dari cache sehingga gerbang 403 tidak
+# pernah tegak di tingkat HTTP. Cache-Control ikut diperiksa karena itu akar
+# masalahnya — halaman ini memuat token order dan nonce yang hanya sah ≤24 jam,
+# jadi HTML-nya tidak boleh di-cache sedetik pun (A6).
+for hal in isi-data upsell proof tamu rekap; do
+  kode=$(ambil "$BODY" "$HDR" "$BASE/$hal/?order=1&key=salah&nc=$RANDOM")
+  if [ "$kode" = 403 ]; then hijau "/$hal/ token salah → 403"; else merah "/$hal/ token salah → HTTP $kode (harus 403)"; fi
+  if grep -qiE '^cache-control:.*(no-store|no-cache)' "$HDR"; then
+    hijau "/$hal/ tidak di-cache (Cache-Control no-store)"
+  else
+    merah "/$hal/ BOLEH di-cache — $(grep -i '^cache-control:' "$HDR" | tr -d '\r' | head -1). Tambahkan URI-nya ke LiteSpeed → Cache → Excludes"
+  fi
+done
 
 # --- 7. XML-RPC mati (T1.4) ---
 kode=$(curl -sS -m 20 -o /dev/null -w '%{http_code}' -X POST "$BASE/xmlrpc.php" 2>/dev/null)

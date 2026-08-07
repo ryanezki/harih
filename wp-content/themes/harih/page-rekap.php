@@ -19,6 +19,11 @@
 
 if (!defined('ABSPATH')) exit;
 
+// Halaman bertoken tidak boleh di-cache — sama seperti /isi-data/. URL-nya
+// memuat token order, dan isinya khusus satu pemesan.
+nocache_headers();
+do_action('litespeed_control_set_nocache'); // no-op bila LSCWP tidak aktif
+
 $order_id = absint($_GET['order'] ?? 0);
 $key      = sanitize_text_field((string) ($_GET['key'] ?? ''));
 

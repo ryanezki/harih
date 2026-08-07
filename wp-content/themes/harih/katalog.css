@@ -959,6 +959,11 @@ a { color: var(--c-accent-teks); }
 /* Halaman persetujuan proof (F4.5). Tampilan sengaja tenang & padat: ini
    halaman pemeriksaan, bukan halaman jualan. */
 .proof-notif { max-width: 640px; margin: 0 auto 18px; padding: 12px 18px; border-radius: var(--radius); background: color-mix(in srgb, var(--c-accent-teks) 10%, transparent); text-align: center; }
+/* Sesi kedaluwarsa (A6). Memakai token --c-warn-*, BUKAN --c-error: ini bukan
+   kesalahan pemesan dan datanya tidak hilang — merah pekat hanya membuat panik
+   pada halaman yang tugasnya menenangkan. Token warn sudah punya varian mode
+   gelap, jadi tidak perlu aturan tambahan. */
+.proof-galat { background: var(--c-warn-bg); border: 1px solid var(--c-warn-line); color: var(--c-warn-ink); text-align: left; }
 .proof-berkas { max-width: 720px; margin: 0 auto; padding: 0 20px; display: grid; gap: 16px; }
 .proof-item { margin: 0; text-align: center; }
 .proof-item img { width: 100%; height: auto; border: 1px solid var(--c-line); border-radius: var(--radius); background: var(--c-surface); }

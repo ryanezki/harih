@@ -21,6 +21,12 @@
 
 if (!defined('ABSPATH')) exit;
 
+// Sama seperti /isi-data/: halaman bertoken tidak boleh di-cache. Tanpa ini
+// LiteSpeed menyajikan HTML lama berhari-hari, dan nonce anonim yang hanya sah
+// ≤24 jam sudah mati saat pemesan menekan Simpan.
+nocache_headers();
+do_action('litespeed_control_set_nocache'); // no-op bila LSCWP tidak aktif
+
 $order_id = absint($_GET['order'] ?? 0);
 $key      = sanitize_text_field((string) ($_GET['key'] ?? ''));
 
@@ -50,16 +56,32 @@ foreach ($order->get_items() as $item) {
     }
 }
 
-$pesan = '';
-if (($_POST['harih_simpan_tamu'] ?? '') === '1'
-    && wp_verify_nonce((string) ($_POST['_harih_nonce'] ?? ''), 'harih_tamu_' . $order_id)
-    && $undangan_id) {
+$pesan   = '';
+$galat   = '';
+$kembali = ''; // ketikan pemesan, dikembalikan ke textarea bila simpan gagal
+
+if (($_POST['harih_simpan_tamu'] ?? '') === '1') {
     $isi = sanitize_textarea_field(wp_unslash((string) ($_POST['daftar_tamu'] ?? '')));
-    // Batas 600 nama: di atas itu hampir pasti salah tempel (kolom lain ikut
-    // tersalin), dan halaman jadi berat di HP.
-    $baris = array_slice(array_values(array_filter(array_map('trim', explode("\n", $isi)))), 0, 600);
-    update_post_meta($undangan_id, 'daftar_tamu', implode("\n", $baris));
-    $pesan = sprintf('Tersimpan — %d nama tamu.', count($baris));
+
+    // Ketiga syarat DIPISAH, bukan digabung jadi satu `if`. Sebelumnya gabungan
+    // itu membuat setiap kegagalan berakhir SENYAP: pemesan menempel 300 nama,
+    // menekan Simpan, halaman memuat ulang seolah tidak terjadi apa-apa, dan
+    // seluruh ketikannya hilang. Nonce mati bukan kasus tepi di sini — nonce
+    // anonim hanya sah ≤24 jam sementara halaman ini sempat disajikan dari
+    // cache berhari-hari (lihat nocache_headers di atas).
+    if (!wp_verify_nonce((string) ($_POST['_harih_nonce'] ?? ''), 'harih_tamu_' . $order_id)) {
+        $galat   = 'Sesi halaman ini sudah kedaluwarsa — muat ulang halaman lalu tekan Simpan sekali lagi. Daftar yang kamu ketik masih ada di bawah, tidak hilang.';
+        $kembali = $isi;
+    } elseif (!$undangan_id) {
+        $galat   = 'Undangan untuk pesanan ini belum terbit, jadi daftar tamu belum bisa disimpan. Isi data undanganmu dulu — atau hubungi CS bila kamu merasa ini keliru.';
+        $kembali = $isi;
+    } else {
+        // Batas 600 nama: di atas itu hampir pasti salah tempel (kolom lain ikut
+        // tersalin), dan halaman jadi berat di HP.
+        $baris = array_slice(array_values(array_filter(array_map('trim', explode("\n", $isi)))), 0, 600);
+        update_post_meta($undangan_id, 'daftar_tamu', implode("\n", $baris));
+        $pesan = sprintf('Tersimpan — %d nama tamu.', count($baris));
+    }
 }
 
 $daftar = $undangan_id ? (string) get_post_meta($undangan_id, 'daftar_tamu', true) : '';
@@ -83,6 +105,10 @@ $link   = $undangan_id ? get_permalink($undangan_id) : '';
 </header>
 
 <main>
+    <?php /* Di ATAS penjaga $undangan_id: salah satu cabang galat justru menyala
+             ketika undangan belum ada, dan pesannya tidak boleh ikut tersembunyi. */ ?>
+    <?php if ($galat) : ?><p class="proof-notif proof-galat"><?php echo esc_html($galat); ?></p><?php endif; ?>
+
     <?php if (!$undangan_id) : ?>
         <p class="satuan-kosong">Undangan kamu belum dibuat. Isi dulu data undangan lewat link yang kami kirim, lalu buka halaman ini lagi.</p>
     <?php else : ?>
@@ -95,7 +121,7 @@ $link   = $undangan_id ? get_permalink($undangan_id) : '';
             <input type="hidden" name="harih_simpan_tamu" value="1">
             <label class="field">
                 <span>Nama tamu <em class="opsional">(satu nama per baris)</em></span>
-                <textarea name="daftar_tamu" id="daftar-tamu" rows="10" placeholder="Bapak Hendra &amp; Ibu Sari&#10;Keluarga Besar Wicaksono&#10;Damar Prasetyo"><?php echo esc_textarea($daftar); ?></textarea>
+                <textarea name="daftar_tamu" id="daftar-tamu" rows="10" placeholder="Bapak Hendra &amp; Ibu Sari&#10;Keluarga Besar Wicaksono&#10;Damar Prasetyo"><?php echo esc_textarea($kembali !== '' ? $kembali : $daftar); ?></textarea>
             </label>
             <p class="tamu-hitung">
                 <span id="tamu-jumlah"><?php echo esc_html(count($nama)); ?></span> nama

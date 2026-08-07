@@ -90,9 +90,16 @@ Empat halaman bertoken tidak memanggil `nocache_headers()` sementara produksi me
   `cetak.php:284-288` menghapus setiap gateway yang id-nya tidak memuat `_va_`, `briva`, `indomaret`, `alfamart` untuk keranjang > Rp 2 juta — **tanpa penjaga "kalau hasilnya kosong, kembalikan aslinya"**. Keempat substring itu tebakan; tidak ada satu berkas pun di repo yang mencatat ID gateway Duitku yang nyata.
   **Selesai bila:** penjaga terpasang (hasil penyaringan kosong → kembalikan `$gateways` utuh) **dan** ID nyata dicetak di server (`wp eval 'print_r(array_keys(WC()->payment_gateways->get_available_payment_gateways()));'`) lalu `str_contains` diganti allowlist eksplisit yang sudah diverifikasi.
 
-- [ ] **A6** 🤝 `menit` — **`/proof/` & `/tamu/`: nocache + cabang else saat nonce gagal**
-  Cabang `else` bernilai sama besar dengan header — kalau cache tingkat server tetap lolos, `else` yang menyelamatkan ketikan pemesan.
-  **Selesai bila:** `nocache_headers(); do_action('litespeed_control_set_nocache');` di awal keempat template bertoken · kedua blok POST punya cabang else yang menampilkan "Sesi halaman ini sudah kedaluwarsa — muat ulang lalu coba lagi" **dan mengembalikan isi `$_POST` ke textarea** · 👤 owner menambahkan `/upsell/ /proof/ /tamu/ /rekap/` ke LiteSpeed → Cache → Excludes → URI (kode saja tidak cukup), instruksinya diperbarui di `scripts/setup-hostinger.sh:65`.
+- [x] **A6** 🤝 `menit` — **nocache + cabang else saat nonce gagal** → **SELESAI & LIVE 2026-08-07** *(v2.10.0)*
+  **Temuan yang lebih besar dari tugasnya sendiri: keempat halaman selain `/isi-data/` membalas 200, bukan 403, pada token salah.** LiteSpeed menyajikan halaman `wp_die` dari cache sebelum PHP dijalankan, jadi **gerbang 403 tidak pernah tegak di tingkat HTTP** — dan `cek-live.sh` tidak menangkapnya karena hanya menguji `/isi-data/`.
+  **Akar yang sebenarnya bukan kode, melainkan setelan:** `wp litespeed-option get cache-exc` berisi **hanya** `/isi-data/`. Itulah satu-satunya alasan halaman itu no-cache selama ini — bukan dua baris PHP-nya. Setelah keempat URI ditambahkan, keduanya beres sekaligus: header jadi `no-cache, must-revalidate, max-age=0, no-store, private` **dan** token salah jadi 403.
+  Tidak butuh tangan owner — bisa lewat wp-cli, perintahnya dicatat di [`../scripts/setup-hostinger.sh`](../scripts/setup-hostinger.sh).
+  **Yang dibangun:** `nocache_headers()` + `do_action('litespeed_control_set_nocache')` di keempat template · nonce **dipisah** dari aksi di `page-tamu.php` & `page-proof.php` sehingga kegagalan berhenti senyap · kelas `.proof-galat` memakai token `--c-warn-*` yang sudah punya varian mode gelap (**bukan** `--c-error`: ini bukan kesalahan pemesan dan datanya tidak hilang).
+  **Terverifikasi live** dengan order + undangan uji (dibuat `pending` agar webhook `processing` tidak menyala, lalu dihapus):
+  · nonce mati di `/tamu/` → pesan galat tampil, **300 dari 300 nama kembali ke textarea**, nol tersimpan
+  · nonce sah → *"Tersimpan — 300 nama"*, tanpa galat
+  · nonce mati di `/proof/` → *"…persetujuanmu BELUM tercatat"*
+  **Smoke test 21 → 30.** Sembilan pemeriksaan baru: kelima halaman bertoken diuji 403 **dan** `Cache-Control`, sehingga regresi setelan LiteSpeed ketahuan sendiri.
 
 - [ ] **A7** 🤝 `jam` — **Buka jalur bayar manual untuk paket digital — berhenti menunggu Duitku**
   Dokumen lama menyebut Duitku "gerbang tunggal", tapi F1.6 **sudah merestui** invoice WA + transfer manual untuk order Rp 2,9 juta. Jalur yang sah untuk produk 30× lebih mahal belum pernah diterapkan ke produk Rp 99–299 ribu yang 10 penjualannya adalah gerbang sesungguhnya. **Tidak butuh satu baris kode baru:** owner kirim rekening/QRIS → buat order WooCommerce → set `processing` → WF-01 menyala persis seperti biasa. Setiap hari menunggu adalah hari tanpa data attach rate, closing rate, dan distribusi tier.
