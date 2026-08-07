@@ -77,6 +77,24 @@ foreach ([['HORMAT', 'Hormat'], ['RESEPSI', 'Resepsi'], ['GRAND', 'Grand']] as [
     ];
 }
 
+/*
+ * Kredit yang BENAR-BENAR berlaku.
+ *
+ * Sebelum SKU `UPG-*` ada, kredit = jumlah yang dibayar pembeli untuk digital,
+ * jadi hero dan kartu paket selalu menyebut angka yang sama. Sejak harga
+ * `UPG-*` dikunci (F1.3, kredit tetap Rp 300.000 — dikonfirmasi owner
+ * 2026-08-07), keduanya berpisah: pembeli Favorit yang membayar Rp 179.000
+ * melihat hero menjanjikan "Rp 179.000" sementara kartu di bawahnya menulis
+ * "kredit Rp 300.000". Dua angka untuk hal yang sama, di halaman yang tugasnya
+ * menutup penjualan Rp 2,9 juta.
+ *
+ * Diambil dari tawaran yang benar-benar dirender, bukan dari konstanta — kalau
+ * suatu saat kreditnya berbeda per tier, kalimatnya otomatis jatuh ke bentuk
+ * netral alih-alih menyebut satu angka yang cuma benar untuk sebagian.
+ */
+$harih_kredit_list  = array_values(array_unique(array_map(static fn($t) => (float) $t['kredit'], $harih_tawaran)));
+$harih_kredit_sama  = count($harih_kredit_list) === 1 ? $harih_kredit_list[0] : null;
+
 $wa_cs = static fn(string $paket, int $oid): string =>
     'https://wa.me/6282251975575?text=' . rawurlencode("Halo hariH, saya mau naik ke Paket {$paket} untuk pesanan #{$oid}.");
 ?><!DOCTYPE html>
@@ -103,7 +121,13 @@ $wa_cs = static fn(string $paket, int $oid): string =>
         </div>
     <?php else : ?>
         <h1>Kartu fisiknya, untuk yang paling kamu hormati</h1>
-        <p class="hero-sub">Undangan digitalmu sudah dibayar — <strong><?php echo esc_html(strip_tags(wc_price($dibayar_digital))); ?> itu kami hitung sebagai kredit</strong> bila kamu naik ke paket cetak. Data undanganmu dipakai ulang; tidak ada pengisian dobel.</p>
+        <p class="hero-sub">Undangan digitalmu sudah dibayar.
+            <?php if ($harih_kredit_sama !== null) : ?>
+                Kalau naik ke paket cetak, harganya kami potong <strong><?php echo esc_html(strip_tags(wc_price($harih_kredit_sama))); ?></strong>.
+            <?php else : ?>
+                Kalau naik ke paket cetak, pembayaran itu kami hitung sebagai <strong>kredit</strong> — besarnya tertera di tiap paket.
+            <?php endif; ?>
+            Data undanganmu dipakai ulang; tidak ada pengisian dobel.</p>
         <div class="upsell-hitung" data-tenggat="<?php echo esc_attr($tenggat->format(DATE_ATOM)); ?>">
             <p class="upsell-hitung-label">Kredit berlaku sampai <?php echo esc_html(wp_date('j F Y', $tenggat->getTimestamp())); ?></p>
             <p class="upsell-hitung-angka" id="upsell-mundur">—</p>

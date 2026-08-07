@@ -20,7 +20,7 @@
 
 ## ⏸ CHECKPOINT SESI 2026-08-07 — fase G1 TUNTAS (8/8), produksi bersih
 
-**Mulai dari sini di sesi berikutnya.** `HARIH_VERSION 2.8.0` · 9 workflow aktif · smoke 21/21 · WAHA 2026.7.2 (sesi `WORKING`).
+**Mulai dari sini di sesi berikutnya.** `HARIH_VERSION 2.8.1` · 9 workflow aktif · smoke 21/21 · WAHA 2026.7.2 (sesi `WORKING`).
 
 ---
 
@@ -34,30 +34,19 @@ Diajukan 2026-08-04, masih menunggu. Selama ini belum keluar, **tidak ada satu r
 ⚠️ Sekalian tanyakan: **mekanisme refund** (Garansi Tepat Waktu menjanjikan uang kembali 100% atas order Rp 2,9 juta — berapa lama, siapa menanggung fee kanal) dan **batas nominal per kanal** (e-wallet/QRIS sering punya plafon di bawah Rp 5,9 juta).
 **Setelah approve:** ganti kredensial plugin ke Production → beri tahu saya → F0.2 jalan.
 
-### 2. Konfirmasi harga 3 SKU upgrade *(F1.3 / F3.9)* — ⚠️ SUDAH LIVE, tinggal dikonfirmasi
-Ketiganya **sudah ada di WooCommerce dengan harga sungguhan**, dan halaman `/upsell/` otomatis memakainya:
-
-| SKU | Harga paket | Harga upgrade | Kredit tersirat |
-|---|---|---|---|
-| `UPG-HORMAT` | 1.190.000 | **890.000** | 300.000 |
-| `UPG-RESEPSI` | 2.900.000 | **2.600.000** | 300.000 |
-| `UPG-GRAND` | 5.900.000 | **5.600.000** | 300.000 |
-
-Kreditnya **Rp 300.000 rata**, sementara saran di [`konfirmasi-owner.md`](./konfirmasi-owner.md) B1 adalah Rp 299.000. Selisihnya kecil, tapi **angka ini sudah tayang ke pembeli** yang membuka link upsell. Jawab satu kata: "300rb sudah benar" → saya centang F1.3 & F3.9. Kalau bukan, sebutkan angkanya.
-
-### 3. 🔴 Cetak satu sampel lengkap *(F1.1)* — undangan lipat + amplop bernama
+### 2. 🔴 Cetak satu sampel lengkap *(F1.1)* — undangan lipat + amplop bernama
 Satu sampel menjawab empat hal sekaligus: **bobot nyata** (ongkir yang kita tanggung — sekarang masih tebakan 2/5/9 kg), **waktu lipat per unit**, **uji pindai QR**, dan mutu amplop.
 ⚠️ Yang paling menentukan: **apakah mesin creasing sanggup**. 100 lipatan × 8 order = 800 lipatan/bulan. Kalau harus dilipat tangan, seluruh hitungan marjin per jam batal.
 
-### 4. QA perangkat riil *(F0.4)* — iPhone Safari & Android Chrome
+### 3. QA perangkat riil *(F0.4)* — iPhone Safari & Android Chrome
 Checklist di [`panduan-manual.md`](./panduan-manual.md) langkah 5: musik mulai setelah tap · countdown jalan · tombol salin rekening · upload foto HEIC · preview share WA.
 **Tambahan dari sesi ini** yang belum pernah disentuh tangan manusia di HP asli: **mode gelap** (tombol ☾/☀ di nav, dan apakah mengikuti setelan HP) · **galeri kolase** · **tombol Waze** · **tombol "beri tahu mempelai lewat WhatsApp"** setelah RSVP · **penolakan foto beresolusi rendah** di form.
 ⚠️ WA meng-cache preview per URL — uji dengan `?x=1` supaya dianggap URL baru.
 
-### 5. 10 penjualan dari orang asing *(F0.3)* 🔒 — gerbang sesungguhnya
+### 4. 10 penjualan dari orang asing *(F0.3)* 🔒 — gerbang sesungguhnya
 Teman, keluarga, dan diri sendiri **tidak dihitung**. Ini yang menggerbang seluruh fase G2 dan F1 berikutnya. Catat per penjualan: tier · dari mana datangnya · bertanya dulu atau langsung bayar.
 
-### 6. Keputusan & tinjauan yang tidak mendesak
+### 5. Keputusan & tinjauan yang tidak mendesak
 - **Naikkan pin WAHA lagi?** Sekarang `latest-2026.7.2`. Upgrade berikutnya berpotensi menuntut scan QR ulang → jadwalkan saat tidak ada order berjalan.
 - **Review gaya bahasa** pesan otomatis di [`copywriting-pesan.md`](./copywriting-pesan.md).
 - **Review visual tema-02 & tema-03 di HP** sebagai calon pembeli.
@@ -302,7 +291,8 @@ Kesimpulan: hambatan ada di **jalur jaringan lingkungan kerja saya**, bukan di s
 
 - [x] ~~**F1.2** Cari & uji 2–3 percetakan subkontrak~~ → **GUGUR 2026-08-06** — owner punya percetakan & alat sendiri. Estimasi marjin subkontrak Rp 1,6–1,8 jt tidak lagi relevan; yang menggantikannya adalah F1.7a (marjin per jam pekerjaan yang jamnya direbut).
 
-- [ ] **F1.3** 👤 **Tetapkan tiga harga SKU upgrade + besaran kredit**
+- [x] **F1.3** 👤 **Tetapkan tiga harga SKU upgrade + besaran kredit** → **DIPUTUSKAN OWNER 2026-08-07: kredit tetap Rp 300.000** untuk semua tier (bukan Rp 299.000 seperti saran awal). Harga terkunci: `UPG-HORMAT` 890rb · `UPG-RESEPSI` 2,6jt · `UPG-GRAND` 5,6jt. Ketiganya sudah ada di WooCommerce dan `/upsell/` memakainya otomatis.
+  *Konsekuensi yang ikut ketahuan & diperbaiki:* begitu kredit jadi angka TETAP, ia berhenti sama dengan yang dibayar pembeli untuk digital — hero `/upsell/` sempat menjanjikan "Rp 179.000 dihitung sebagai kredit" (untuk pembeli Favorit) sementara kartu di bawahnya menulis "kredit Rp 300.000". Dua angka untuk hal yang sama di halaman yang tugasnya menutup penjualan Rp 2,9 juta. Hero kini menyebut kredit yang benar-benar berlaku, diambil dari tawaran yang dirender — bukan konstanta, jadi bila suatu saat kreditnya berbeda per tier kalimatnya otomatis jatuh ke bentuk netral.
   Katalog menjual paket penuh; halaman upsell menjual **tiga SKU upgrade berharga tetap** untuk yang sudah membeli digital.
   **Yang perlu diputuskan:** besaran kredit digital. Cara paling sederhana — kredit tetap Rp 299.000 untuk semua tier, sehingga harga upgrade = harga paket − 299rb, satu angka per SKU tanpa matriks. Konsekuensinya pembeli Hemat (bayar 99rb) mendapat kredit Rp 200rb lebih besar dari yang ia bayar; pada paket Rp 2,9 juta itu derau, dan justru mendorong pembeli Hemat naik kelas. **Perlu keputusan sadar, bukan diasumsikan.**
 
@@ -398,7 +388,7 @@ Kesimpulan: hambatan ada di **jalur jaringan lingkungan kerja saya**, bukan di s
 - [x] **F3.8** **Field & pencatatan nomor resi**
   Wajib per keputusan owner. Disimpan di order + ikut ke sheet, dan dikirimkan ke pelanggan saat paket berangkat.
 
-- [~] **F3.9** **Produk cetak + 3 SKU upgrade di WooCommerce** — harga dari F1.3
+- [x] **F3.9** **Produk cetak + 3 SKU upgrade di WooCommerce** → **SELESAI 2026-08-07** — 3 paket `CETAK-*` + 3 SKU `UPG-*` ada, semuanya `catalog_visibility=hidden` sesuai gerbang `/shop/`. Harga upgrade terkunci setelah keputusan F1.3.
 
 - [x] **F3.10** **Halaman upsell pasca-bayar**
   Bertoken seperti `/isi-data/` · **hitung mundur kredit 14 hari tampil** — tanpa batas waktu tidak ada alasan memutuskan hari ini · **à la carte dilarang muncul di halaman ini**.

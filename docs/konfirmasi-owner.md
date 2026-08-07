@@ -41,7 +41,9 @@ Sudah approved atau masih menunggu? Ini masih gerbang tunggal untuk semua uang r
 
 Halaman upsell sudah live dan berfungsi, tapi sementara memakai rumus "harga paket − yang sudah dibayar" dan ditutup lewat WhatsApp. Begitu SKU `UPG-HORMAT/RESEPSI/GRAND` dibuat dengan harga tetap, halaman otomatis memakainya — tanpa saya sentuh kodenya.
 
-**Saran saya:** kredit **tetap Rp 299.000** untuk semua tier, sehingga:
+> ✅ **DIJAWAB 2026-08-07 — owner memilih kredit tetap Rp 300.000**, bukan Rp 299.000. Harga terkunci: `UPG-HORMAT` 890rb · `UPG-RESEPSI` 2.600rb · `UPG-GRAND` 5.600rb. Ketiganya sudah live.
+
+**Saran saya (saat itu):** kredit **tetap Rp 299.000** untuk semua tier, sehingga:
 
 | SKU | Harga upgrade |
 |---|---|
