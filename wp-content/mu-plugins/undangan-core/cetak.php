@@ -39,10 +39,45 @@ function undangan_cart_ada_fisik(): bool {
     if (!function_exists('WC') || !WC()->cart) return false;
     foreach (WC()->cart->get_cart() as $item) {
         $p = $item['data'] ?? null;
-        if ($p instanceof WC_Product && !$p->is_virtual()) return true;
+        if (!$p instanceof WC_Product) continue;
+        // SKU adalah otoritas (lihat catatan konvensi di kepala berkas), bukan
+        // `is_virtual()`. Produk digital yang dibuat manual di wp-admin
+        // bawaannya NON-virtual — dan begitu itu terjadi, pembeli undangan
+        // Rp 99rb mendadak dimintai alamat lengkap, wajib mengisi tanggal
+        // acara, dan diblokir kuota cetak. `undangan_jenis_produk()` sendiri
+        // sudah jatuh ke `is_virtual()` untuk SKU yang tidak dikenal, jadi
+        // perilaku lama tetap berlaku di luar konvensi kita.
+        if (in_array(undangan_jenis_produk($p), ['hybrid', 'satuan'], true)) return true;
     }
     return false;
 }
+
+/**
+ * Peringatan admin bila ada produk `HARIH-*` yang tidak virtual.
+ *
+ * Sejak `undangan_cart_ada_fisik()` memakai SKU sebagai otoritas, kekeliruan
+ * ini tidak lagi merusak checkout — tapi ia tetap membuat WooCommerce meminta
+ * pengiriman untuk barang yang tidak dikirim. Lebih baik ketahuan daripada
+ * diam. Di-cache sejam supaya tidak mengkueri produk tiap muat halaman admin.
+ */
+add_action('admin_notices', function () {
+    $layar = function_exists('get_current_screen') ? get_current_screen() : null;
+    if (!$layar || !in_array($layar->id, ['edit-product', 'product', 'woocommerce_page_wc-status'], true)) return;
+
+    $keliru = get_transient('harih_sku_digital_nonvirtual');
+    if ($keliru === false) {
+        $keliru = [];
+        foreach (wc_get_products(['limit' => -1, 'return' => 'objects', 'status' => 'publish']) as $p) {
+            if (undangan_jenis_produk($p) === 'digital' && !$p->is_virtual()) $keliru[] = $p->get_sku();
+        }
+        set_transient('harih_sku_digital_nonvirtual', $keliru, HOUR_IN_SECONDS);
+    }
+    if (!$keliru) return;
+    printf(
+        '<div class="notice notice-warning"><p><strong>hariH:</strong> produk digital berikut tidak ditandai <em>Virtual</em>: <code>%s</code>. Checkout tetap aman (jenis produk dibaca dari SKU), tapi WooCommerce akan meminta data pengiriman untuk barang yang tidak dikirim. Centang <em>Virtual</em> di tab Pengiriman produk tersebut.</p></div>',
+        esc_html(implode(', ', array_filter($keliru)))
+    );
+});
 
 /* =========================================================================
  * F3.4 — `sold_individually` hanya untuk paket, bukan item satuan.
@@ -371,7 +406,10 @@ add_action('woocommerce_init', function () {
 /** Sisa slot produksi bulan berjalan (di-cache 10 menit — dipanggil tiap
  *  pemuatan halaman harga, dan hitungannya menyapu order). */
 function undangan_sisa_slot(): int {
-    $kunci = 'harih_sisa_slot_' . gmdate('Y-m');
+    // wp_date, BUKAN gmdate: WordPress memaksa timezone PHP ke UTC sementara
+    // situs ini Asia/Jakarta. Antara 00:00–07:00 WIB gmdate masih menunjuk
+    // KEMARIN — pada tanggal 1 itu berarti kunci & jendela bulan yang salah.
+    $kunci = 'harih_sisa_slot_' . wp_date('Y-m');
     $sisa  = get_transient($kunci);
     if ($sisa === false) {
         $sisa = max(0, UNDANGAN_KUOTA_BULAN - undangan_kuota_terpakai());
@@ -383,9 +421,14 @@ function undangan_sisa_slot(): int {
 /** Jumlah pesanan cetak yang sudah masuk pada bulan berjalan. */
 function undangan_kuota_terpakai(): int {
     $orders = wc_get_orders([
-        'limit'        => 50,
+        // limit -1, bukan 50. Dengan 50 dan urutan tanggal menurun, begitu ada
+        // 50 order DIGITAL dalam sebulan — target yang wajar bila akuisisi
+        // berhasil — order cetak terdorong keluar jendela dan checkout
+        // menerima pesanan MELEWATI kapasitas, diam-diam. Biayanya sudah
+        // ditahan transient 10 menit di undangan_sisa_slot().
+        'limit'        => -1,
         'status'       => ['processing', 'on-hold', 'completed'],
-        'date_created' => '>=' . gmdate('Y-m-01'),
+        'date_created' => '>=' . wp_date('Y-m-01'),
         'return'       => 'objects',
     ]);
     $n = 0;
@@ -424,7 +467,13 @@ function undangan_cek_gerbang_cetak(string $tanggal = '', bool $wajib_tanggal = 
         return $galat;
     }
 
-    $selisih = (int) floor((strtotime($tanggal) - strtotime(gmdate('Y-m-d'))) / 86400);
+    // Selisih hari dihitung di TIMEZONE SITUS. Dengan gmdate, antara
+    // 00:00–07:00 WIB "hari ini" masih kemarin sehingga selisihnya 1 hari
+    // terlalu besar — order H-20 lolos sebagai H-21, menggerus penyangga
+    // produksi yang justru menopang Garansi Tepat Waktu.
+    $acara   = DateTimeImmutable::createFromFormat('!Y-m-d', $tanggal, wp_timezone());
+    $kini    = current_datetime()->setTime(0, 0, 0);
+    $selisih = $acara ? (int) $kini->diff($acara)->format('%r%a') : 0;
     if ($selisih < UNDANGAN_TENGGAT_HARI) {
         $galat[] = sprintf(
             'Acara Anda %d hari lagi, sementara pesanan cetak diterima paling lambat H-%d. Batas ini yang membuat kami bisa menjamin barang tiba H-14 — pesanan yang lebih mepet tidak kami terima. Hubungi WhatsApp kami untuk mencari jalan keluar tercepat.',
@@ -471,7 +520,9 @@ add_action('woocommerce_after_checkout_validation', function ($data, $errors) {
 // Tanggal acara tampil di halaman order, bersebelahan dengan resi.
 add_action('woocommerce_admin_order_data_after_shipping_address', function ($order) {
     if ($t = $order->get_meta('_tanggal_acara')) {
-        $sisa = (int) floor((strtotime($t) - time()) / 86400);
+        // Sama seperti gerbang di atas: hitung di timezone situs, bukan UTC.
+        $acara = DateTimeImmutable::createFromFormat('!Y-m-d', $t, wp_timezone());
+        $sisa  = $acara ? (int) current_datetime()->setTime(0, 0, 0)->diff($acara)->format('%r%a') : 0;
         printf('<p><strong>Tanggal acara:</strong> %s <em>(%d hari lagi)</em></p>', esc_html($t), $sisa);
     }
 }, 5);

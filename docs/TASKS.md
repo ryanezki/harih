@@ -236,11 +236,20 @@ Empat halaman bertoken tidak memanggil `nocache_headers()` sementara produksi me
   *Gaya `.gagal-salin` memakai token yang memang ada di CSS undangan (`--c-ink-soft`/`--c-ink`) — token peringatan hanya hidup di `katalog.css` yang tidak dimuat halaman undangan, jadi mengimpornya akan tabrakan di tema-03 yang gelap.*
   **Terverifikasi di browser, dan kegagalannya nyata bukan simulasi:** penyalinan benar-benar ditolak di konteks uji → tombol menampilkan *"Gagal menyalin…"*, bukan "Tersalin ✓" · dua ketukan cepat → label tetap pulih ke "Salin Nomor" · jalur sukses (clipboard distub) → "Tersalin ✓" + kelas `copied`, pulih bersih · ucapan `hadir=tidak, jumlah=3` → ter-render tanpa "3 tamu" · `beforeunload` → **tidak** dicegah saat form belum disentuh, **dicegah** setelah diketik.
 
-- [ ] **C4** 🤖 `menit` — **`cetak.php`: waktu UTC dipakai untuk acara WIB, dan kuota hanya membaca 50 order terakhir**
-  (a) `cetak.php:380` menghitung selisih H-21 dengan `gmdate('Y-m-d')` — WordPress memaksa timezone PHP ke UTC, jadi antara 00:00–07:00 WIB tanggalnya masih kemarin dan order H-20 lolos sebagai H-21. Pola sama di `:341` dan `:327`, padahal `masa-aktif.php:67` sudah memakai `wp_date()` dengan benar.
-  (b) `cetak.php:338-343` memakai `'limit' => 50` urutan menurun — begitu ada 50 order digital dalam sebulan (target wajar bila akuisisi berhasil), order cetak **terdorong keluar jendela** dan checkout menerima pesanan melewati kapasitas, diam-diam.
-  (c) `cetak.php:38-45` menggerbangkan seluruh alur cetak dari `!is_virtual()` padahal `cetak.php:15` menyatakan **SKU adalah sumber kebenaran** — produk digital yang dibuat manual di wp-admin bawaannya non-virtual, dan begitu itu terjadi pembeli Rp 99rb dapat form alamat, wajib isi tanggal acara, dan diblokir kuota cetak.
-  **Selesai bila:** `gmdate` → `wp_date` di tiga tempat · `'limit' => -1` (transient 10 menit sudah menahan biayanya) · `undangan_cart_ada_fisik()` memakai `undangan_jenis_produk()` sebagai otoritas dengan `is_virtual()` sebagai cadangan, plus notice admin bila SKU `HARIH-*` tidak virtual.
+- [x] **C4** 🤖 `menit` — **Waktu WIB, jendela kuota, dan otoritas SKU** → **SELESAI & LIVE 2026-08-07**
+  **(a) Empat titik `gmdate` → `wp_date`/`current_datetime()`.** Terkonfirmasi di server: timezone situs `Asia/Jakarta` tapi **runtime PHP UTC** — `gmdate` 13:46 sementara `wp_date` 20:46. Disimulasikan lintas jam, dan selisihnya nyata:
+
+  | jam WIB | cara lama | cara baru |
+  |---|---|---|
+  | 02:00 | 22 hari | **21 hari** |
+  | 06:59 | 22 hari | **21 hari** |
+  | 07:00 ke atas | 21 hari | 21 hari |
+
+  Antara **00:00–06:59 WIB**, order H-20 lolos sebagai H-21 — menggerus penyangga produksi yang justru menopang Garansi Tepat Waktu. Ikut dibetulkan: kunci transient & jendela awal bulan (pada tanggal 1 dini hari keduanya menunjuk bulan lalu) dan tampilan sisa hari di halaman order admin.
+  **(b) `'limit' => 50` → `-1`.** Dengan urutan tanggal menurun, begitu ada 50 order **digital** dalam sebulan — target wajar bila akuisisi berhasil — order cetak terdorong keluar jendela dan checkout menerima pesanan **melewati kapasitas, diam-diam**. Terukur: kueri `-1` hanya **5 ms**, dan transient 10 menit sudah menahan biayanya.
+  **(c) SKU jadi otoritas** di `undangan_cart_ada_fisik()`, `is_virtual()` tinggal cadangan lewat `undangan_jenis_produk()`. Produk digital yang dibuat manual di wp-admin bawaannya non-virtual — begitu itu terjadi, pembeli Rp 99rb dimintai alamat lengkap, wajib mengisi tanggal acara, dan diblokir kuota cetak. Ditambah **notice admin** (di-cache sejam) bila ada `HARIH-*` yang lupa dicentang Virtual.
+  ⚠️ **(c) sifatnya pencegahan, bukan menambal kerusakan berjalan** — diperiksa ke seluruh 18 produk produksi: nol ketidakcocokan antara jenis-dari-SKU dan `is_virtual()` hari ini.
+  **Terverifikasi lewat Store API sungguhan** (batas gerbang, order uji dihapus): H-20 → **ditolak**, pesannya menyebut *"Acara Anda 20 hari lagi"* (hitungan benar) · H-21 → lolos · H-22 → lolos.
 
 - [ ] **C7** 🤖 `menit` — **WF-08 & WF-05: jaring pengaman yang buta dan nudge palsu**
   (a) WF-08 mengambil 100 order terbaru dengan `status=any` lalu baru menyaring — checkout terbengkalai meninggalkan order pending/failed yang normal dalam volume besar, sehingga **order berbayar yang webhooknya gagal bisa terdorong keluar jendela**, dan justru di skenario itu `tertinggal` kosong sehingga `return []` mematikan **seluruh cabang alert**. Owner membaca kesunyian itu sebagai "sistem sehat". Catatan node menyebut multi-status tidak didukung, padahal WF-06 melakukannya persis.
