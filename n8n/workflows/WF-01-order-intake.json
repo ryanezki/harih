@@ -201,7 +201,7 @@
             "kupon": "={{ $json.kupon }}",
             "total": "={{ $json.total }}",
             "token": "={{ $json.token }}",
-            "status": "MENUNGGU_DATA",
+            "status": "={{ $json.jenis_order === 'cetak_saja' ? 'CETAK_SAJA' : 'MENUNGGU_DATA' }}",
             "link_undangan": "",
             "tgl_acara": "",
             "wa_status": "",
