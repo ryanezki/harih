@@ -8,10 +8,19 @@
 | `WF-03-onboarding-reseller.json` | Daftar reseller (PENDING) → approval owner via link HMAC → kupon WC → welcome kit WA | T3.9–T3.10 |
 | `WF-04-rekap-komisi.json` | Cron Senin 09:00 WIB: rekap UNPAID per reseller via WA + total ke owner | T3.11 |
 | `WF-05-reminder-harian.json` | Cron harian 08:00 WIB: nudge belum-isi-data (24–48 jam), reminder H-3, ucapan H+1 | T4.1 |
+| `WF-06-reminder-upsell.json` | Cron 09:00 WIB: pembeli digital murni yang belum pernah pesan cetak → tawaran upgrade di H+3 & H+12 (kredit 14 hari) | F4.8a |
 | `WF-07-monitor-waha.json` | Cron 10 menit: sesi WAHA ≠ `WORKING` → alert email owner (max 1×/jam) | T2.22 |
 | `WF-08-rekonsiliasi-order.json` | Cron 15 menit: order WC yang tak ada di sheet → kirim ulang ke WF-01 (loopback ber-HMAC) + cron harian cek status webhook WC | T3.12 |
 
-**WF-06 (backup mingguan) bukan workflow n8n** — diimplementasikan sebagai script host `vps/backup-harih.sh` (rsync incremental, arsip volume WAHA/n8n, export workflow JSON, retensi 4 minggu, alert Brevo mandiri). Alasan: rsync/akses volume Docker/SSH keluar tidak tersedia dari dalam kontainer n8n. Cara pasang ada di header script.
+**BACKUP-MINGGUAN bukan workflow n8n** — diimplementasikan sebagai script host `vps/backup-harih.sh` (rsync incremental, arsip volume WAHA/n8n, export workflow JSON, retensi 4 minggu, alert Brevo mandiri). Alasan: rsync/akses volume Docker/SSH keluar tidak tersedia dari dalam kontainer n8n. Cara pasang ada di header script.
+
+> ⚠️ **Dulu label ini "WF-06", dan itu menyembunyikan workflow WF-06 yang sungguhan.**
+> Akibatnya tabel di atas melompat dari WF-05 ke WF-07 dan daftar impor hanya
+> menyebut delapan berkas. Setelah rebuild VPS, orang yang mengikuti README ini
+> akan mengimpor delapan, melihat delapan aktif, dan menganggap selesai — yang
+> hilang justru pengingat H+3/H+12 yang **menjual paket cetak**. Tanpa satu pun
+> galat: hanya attach rate yang diam-diam nol, dan mudah disalahartikan sebagai
+> "upsell tidak laku". Skrip backup tidak lagi memakai nomor WF.
 
 **Alur WF-01:** verifikasi signature HMAC + handle ping WC → ambil detail order via WC REST (topic *Action* hanya mengirim `order_id`) → terima status `processing`/`completed` → generate token form (identik `page-isi-data.php`) → append tab `orders` lalu **baca ulang untuk verifikasi idempotency** (baris duplikat dihapus otomatis) → catat komisi 30% bila kupon `RES-` → email Brevo → cek nomor via WAHA `check-exists` → kirim WA → catat `wa_status`.
 
@@ -83,14 +92,14 @@ ssh root@31.97.50.197 'docker exec harih-n8n n8n export:workflow --id=<ID> --out
 ## Import (lewat UI)
 
 1. n8n → **Workflows → ⋯ → Import from File** → `WF-00-error-handler.json`, simpan.
-2. Import WF-01, WF-02, WF-03, WF-04, WF-05, WF-07, WF-08. Buka tiap node **Google Sheets** / **HTTP dengan Basic Auth** → pilih credential yang dibuat di atas (referensi credential tidak ikut terbawa saat import) → pada node Sheets, klik refresh mapping kolom agar schema terbaca.
-3. Di **semua** WF selain WF-00: **Settings (⚙) → Error Workflow → `WF-00 — Error Handler (hariH)`** (T2.4).
-4. **Activate** semuanya. URL produksi:
+2. Import WF-01, WF-02, WF-03, WF-04, WF-05, **WF-06**, WF-07, WF-08 — **sembilan berkas termasuk WF-00**. Buka tiap node **Google Sheets** / **HTTP dengan Basic Auth** → pilih credential yang dibuat di atas (referensi credential tidak ikut terbawa saat import) → pada node Sheets, klik refresh mapping kolom agar schema terbaca.
+3. ~~Setel Error Workflow lewat UI~~ — **tidak perlu lagi sejak 2026-08-07 (B3):** `errorWorkflow` sudah ditanam di blok `settings` kesembilan JSON dan menunjuk **ID** WF-00 (`sJ0vsHhFyPotbxMg`), bukan namanya. Periksa saja: `docker exec harih-n8n n8n export:workflow --id=<ID> --output=/tmp/v.json && docker exec harih-n8n grep -c sJ0vsHhFyPotbxMg /tmp/v.json`. WF-00 sengaja TIDAK menunjuk dirinya sendiri (anti-loop).
+4. **Activate** semuanya — bila lewat CLI, ingat `import:workflow` **menonaktifkan** workflow: publish kesembilan id lalu `docker restart harih-n8n`, lalu hitung ulang `n8n list:workflow --active=true` (harus **9**). Lihat jebakan ketiga di bawah. URL produksi:
    - WF-01: `https://n8n.harih.id/webhook/wc-order`
    - WF-02: `https://n8n.harih.id/webhook/form-undangan` → set di WP: `wp config set N8N_FORM_WEBHOOK_URL 'https://n8n.harih.id/webhook/form-undangan' --type=constant`
-   - WF-03: `https://n8n.harih.id/webhook/daftar-reseller` (form landing) + `…/webhook/approve-reseller` (hanya diklik owner)
+   - WF-03: `https://n8n.harih.id/webhook/daftar-reseller` (form landing — ⚠️ halaman `/jadi-reseller/` **diturunkan 2026-08-07**, jadi webhook ini tidak lagi terjangkau dari situs; workflow sengaja dibiarkan aktif supaya program bisa dihidupkan lagi tanpa impor ulang) + `…/webhook/approve-reseller` (hanya diklik owner)
 5. CORS webhook WF-02 & WF-03 sudah di-set `https://harih.id` (T2.20) — ubah di node webhook bila domain berbeda.
-6. **WF-06**: salin `vps/backup-harih.sh` ke `/opt/harih/`, ikuti langkah pemasangan di header script (SSH key → uji manual → cron → uji restore).
+6. **BACKUP-MINGGUAN**: salin `vps/backup-harih.sh` ke `/opt/harih/`, ikuti langkah pemasangan di header script (SSH key → uji manual → cron → uji restore).
 
 ## Sambungkan WooCommerce (T1.19)
 
@@ -113,7 +122,7 @@ ssh root@31.97.50.197 'docker exec harih-n8n n8n export:workflow --id=<ID> --out
 10. **WF-05**: siapkan baris uji (MENUNGGU_DATA umur 24–48 jam / `tgl_acara` = H+3 / kemarin) → Execute manual → pesan sesuai template; baris di luar jendela tidak dikirimi.
 11. **WF-00**: paksa error (mis. kosongkan sementara `BREVO_SENDER_EMAIL`) → owner menerima alert email + WA.
 12. **WF-07**: stop kontainer WAHA sebentar → dalam ≤ 10 menit owner menerima email "Sesi WhatsApp DOWN" (dan tidak di-spam tiap 10 menit sesudahnya).
-13. **WF-06**: jalankan `bash /opt/harih/backup-harih.sh` → 4 artefak muncul di `/opt/harih/backups/`; uji restore dump + `tar -tzf` arsip.
+13. **BACKUP-MINGGUAN**: jalankan `bash /opt/harih/backup-harih.sh` → 4 artefak muncul di `/opt/harih/backups/`; uji restore dump + `tar -tzf` arsip.
 14. **WF-08** (= QA "matikan n8n 10 menit"): nonaktifkan webhook WC di wp-admin → buat order sandbox → aktifkan lagi webhook → dalam ≤ 15 menit order terproses via rekonsiliasi (baris sheet + email/WA masuk) dan owner menerima alert "order tertinggal"; keesokan 07:30 owner menerima alert webhook non-aktif bila lupa diaktifkan.
 
 ## Catatan desain

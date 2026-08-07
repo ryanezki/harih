@@ -21,6 +21,29 @@
 3. Sekilas Google Sheet `orders` — baris berstatus `MENUNGGU_DATA` > 2 hari? Follow-up manual via WA (nudge otomatis hanya 1× di 24–48 jam).
 4. Kolom `wa_status` — ada `GAGAL_*`/`TIDAK_*`? → §5.2.
 
+**Mingguan (10 detik) — hitung workflow yang aktif:**
+
+```bash
+ssh root@31.97.50.197 'docker exec harih-n8n n8n list:workflow --active=true | grep -c "|"'
+```
+
+Harus **9**. Kurang dari itu berarti ada workflow yang mati diam-diam, dan
+jenis kegagalan ini **tidak memicu alert apa pun** — WF-00 hanya menyala saat
+sebuah workflow *berjalan lalu gagal*, bukan saat ia tidak pernah berjalan.
+
+Dua sebab paling sering:
+- `import:workflow` **menonaktifkan** workflow yang diimpor tanpa peringatan
+  (terukur 2026-08-07: 9 aktif → 0 aktif, sementara `list:workflow` tetap
+  menampilkan kesembilannya seolah tidak ada yang berubah);
+- rebuild VPS dengan hanya delapan berkas diimpor — dulu README melewatkan
+  WF-06 karena labelnya dipakai skrip backup.
+
+⚠️ **Jangan menaruh pemeriksaan ini di `scripts/cek-live.sh`** — skrip itu
+berjalan dari mesin developer lewat HTTP polos dan sengaja tidak memegang
+kredensial SSH. Yang bisa diperiksanya hanya webhook yang punya URL publik
+(WF-01, WF-02, WF-03); enam workflow bercron tidak punya, jadi matinya tidak
+akan terlihat dari sana.
+
 ## 3. Arti alert & tindakannya
 
 | Alert | Artinya | Tindakan |

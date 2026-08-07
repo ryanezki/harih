@@ -1,10 +1,16 @@
 #!/usr/bin/env bash
 # =============================================================================
-# hariH — Backup mingguan (WF-06 / TASKS T4.2)
+# hariH — Backup mingguan (BACKUP-MINGGUAN / TASKS T4.2)
+#
+# ⚠️ Skrip ini DULU berlabel "WF-06", dan label itu menyembunyikan workflow
+#    n8n WF-06 yang sungguhan (`WF-06-reminder-upsell.json`, pengingat upsell
+#    H+3/H+12 yang menjual paket cetak). README workflow sampai 2026-08-07
+#    melompat dari WF-05 ke WF-07 dan hanya menyuruh mengimpor delapan berkas.
+#    Jangan pakai nomor WF untuk skrip host.
 #
 # Dijalankan via cron di HOST VPS (bukan workflow n8n): rsync incremental,
 # akses volume Docker (sesi WAHA, data n8n), dan SSH keluar tidak tersedia
-# dari dalam kontainer n8n — karena itu WF-06 diimplementasikan sebagai
+# dari dalam kontainer n8n — karena itu backup diimplementasikan sebagai
 # script host. Gagal → alert email langsung via Brevo (mandiri dari n8n,
 # supaya backup yang gagal justru saat n8n bermasalah tetap terlaporkan).
 #
