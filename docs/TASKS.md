@@ -27,7 +27,8 @@
 **27 dari 30 item selesai.** Sisa tiga di bawah. Ditambah **31 item** dari review UI/UX ([🎨 PU](#-pu--review-uiux-menyeluruh-8-agustus-2026)) — **PU-A (U1–U9) SELESAI & LIVE** *(v2.22.0)* · **PU-B (U10–U20) LIVE** *(v2.24.2)* · **PU-C LIVE kecuali U22** · **SELURUH 31 ITEM PU LIVE** *(v2.33.0)*. Smoke 32/32.
 
 > ### ▶ MULAI DARI SINI
-> 1. **A8** — satu-satunya yang butuh tangan owner.
+> Seluruh **31 item review UI/UX** sudah live. Yang tersisa sebagian besar bukan pekerjaan kode — lihat [👤 Aksi owner](#-aksi-owner--yang-masih-menunggu-tangan-anda) (dirapikan 2026-08-08; keputusan yang sudah terjawab dipindah jadi catatan).
+> 1. **A8** — Duitku, satu-satunya item P0 yang tersisa.
 > 2. **C8** lalu **D3**.
 > 3. **Foto produk cetak SUNGGUHAN** — kelima slot kini terisi render AI berlabel *"ilustrasi"*; memotret sampel `TEST-173` dan bengkel percetakan menggantinya dengan bukti nyata dan mencabut labelnya. Lalu **keputusan `maxDim`** untuk menutup sisa D3.
 > 4. Pada order cetak sungguhan pertama: periksa dua cabang `/proof/` yang belum pernah dilewati data nyata (lihat catatan ⚠️ di kotak PU-A).
@@ -749,31 +750,43 @@ Ketiga blok copy ([page-katalog.php:136](../wp-content/themes/harih/page-katalog
 
 ## 👤 Keputusan yang menunggu owner
 
-> 📄 **Versi siap diskusi ada di [`diskusi-owner-2026-08-07.md`](./diskusi-owner-2026-08-07.md)** — ditulis supaya bisa dibaca orang yang belum pernah melihat produk maupun kodenya, lengkap dengan duduk perkara, pilihan, dan bukti apa yang menyelesaikan tiap poin. Daftar di bawah adalah versi ringkasnya untuk kerja sehari-hari.
+> 📄 Versi siap diskusi (duduk perkara + pilihan + bukti apa yang menyelesaikannya): [`diskusi-owner-2026-08-07.md`](./diskusi-owner-2026-08-07.md).
+>
+> **Dirapikan 2026-08-08.** Daftar ini sempat memuat tujuh poin yang enam di antaranya sudah terjawab — dan daftar keputusan yang isinya campur antara yang hidup dan yang mati adalah daftar yang berhenti dibaca. Yang sudah diputuskan dipindahkan ke bawah sebagai **catatan**, lengkap dengan apa yang menyelesaikannya, supaya alasannya tidak hilang.
 
+### Yang benar-benar terbuka
 
-1. **Duitku** — sudah ada kabar sejak 2026-08-04? Bila belum, **apakah kita membuka jalur bayar manual** (invoice WA + transfer, order WooCommerce dibuat tangan lalu di-set `processing`) untuk paket digital Rp 99–299 ribu sekarang? Itu satu-satunya cara gerbang 10-penjualan bergerak minggu ini, dan mekanismenya **sudah Anda setujui** untuk order cetak Rp 2,9 juta. → A7
+1. **`maxDim` kompresi foto: 1600 → 1280?** Menurunkannya memangkas berat undangan yang ditanggung ratusan tamu, tapi foto yang sama adalah **sumber untuk produk cetak**. Sampel `TEST-173` sudah tercetak — tapi **tidak memakai foto pemesan**, jadi pertanyaannya belum terjawab: pada 1280 px, apakah foto masih tajam saat dicetak di undangan lipat A5? Butuh satu cetakan uji memakai foto sungguhan. → **D3**, satu-satunya yang menahannya.
 
-2. **Reseller** — `/jadi-reseller/` hidup dan menerima pendaftar dengan janji komisi 30% tiap order, sedangkan keputusan terkunci membayar rupiah tetap untuk cetak. Pilih **sekarang**: (a) koreksi klaimnya, atau (b) tutup pendaftaran sampai reseller memang diinginkan. Arsip TASKS sudah mencabut "rekrut 3 reseller" tapi `panduan-manual.md` masih menyuruhnya. → B5
+2. **Ongkir Indonesia Timur — perlu dibatasi atau tidak?** Pengukuran 2026-08-08 memberi kabar baik dan satu sisa: mayoritas pesanan di Jawa ±Rp 35–50rb terhadap alokasi Rp 150.000, tapi **Grand ke Indonesia Timur ±Rp 200rb** — di atas alokasi. Rata-ratanya aman dengan slack besar; yang belum diputuskan apakah kasus terburuk itu dibiarkan (ditanggung dari slack) atau diberi syarat. Kecil, tapi belum pernah dijawab.
 
-3. **Garansi Tepat Waktu** — tidak punya satu klausul pun yang membatasi waktu **pelanggan**, padahal 3 dari 6 tahap antrean menunggu pelanggan. Setuju menambahkan *"jaminan bergeser hari-per-hari bila data/daftar tamu/persetujuan proof terlambat lebih dari 4 hari"*? Ini mengubah dokumen legal yang sudah tayang. → B7
+### ✅ Sudah diputuskan — catatan, bukan daftar kerja
 
-4. **Bobot paket** dicatat **tiga versi berbeda** di dokumen (2/5/9 kg vs 2/4/7 kg), sementara produk di WooCommerce memakai 2/4/7 dan ongkir dikunci Rp 150.000 se-Indonesia **tanpa sumber tercatat**. Angka mana yang benar, dan apakah Rp 150.000 pernah diuji ke tarif kurir nyata untuk 7 kg ke luar Jawa?
-
-5. **Backup tidak terenkripsi**, padahal Kebijakan Privasi yang tayang menyatakan "disimpan terenkripsi". Sementara enkripsi belum dipasang: lunakkan kalimat kebijakannya, atau langsung pasang enkripsi? → D2
-
-7. ~~**Harga satuan vs harga paket**~~ → **DIPUTUSKAN 2026-08-08: satuan yang terlalu murah.** Tabelnya dihargai waktu produknya masih kartu QR Rp 9.500 dan tidak ikut diperbarui. Undangan lipat 15rb → **35rb/pcs** (diubah di produk WooCommerce id 85 **dan** tabel `/harga/` — keduanya sumber terpisah, dan perbedaannya persis yang melahirkan U24). Paket kini menang di ketiga tingkat. **Perbaikan sesungguhnya bukan angka:** satuan kini **tidak termasuk undangan digital dan tidak mendapat Garansi Tepat Waktu**, jadi keduanya berhenti sebanding dan kalkulator pembeli tidak lagi bisa mengalahkan kita di tingkat mana pun.
-
-6. **Akuisisi** — mana yang diambil lebih dulu: mendekati 5 vendor/WO (sudah tertulis, nol biaya, sudah dinyatakan bisa paralel) atau daftar lapak di direktori pernikahan? **Saran: vendor dulu.** Keduanya butuh tangan Anda, bukan kode. → C9
+| Yang dulu ditanyakan | Diputuskan | Yang menyelesaikannya |
+|---|---|---|
+| Buka jalur bayar manual sambil menunggu Duitku? | **Ya** — seluruh CTA ke WhatsApp, kembali otomatis begitu Duitku production | `A7` · `U21` menutup copy yang masih menjanjikan gateway |
+| Reseller: koreksi klaim 30% atau tutup pendaftaran? | **Tutup** — halaman diturunkan 7 Agu; nol pendaftar, jadi tidak ada yang perlu dihubungi | `B5` · kontradiksi di `panduan-manual.md:184` ikut dicabut |
+| Garansi Tepat Waktu tanpa batas waktu pelanggan | **Ditambahkan**, dalam bentuk *syarat mulai* — bukan rumus geser | `B7` |
+| Bobot paket: 2/5/9 atau 2/4/7 kg? | **Keduanya salah** — diukur 1,4 / 2,6 / 3,8 kg, sudah hidup di WooCommerce | pengukuran sampel `TEST-173` |
+| Backup belum terenkripsi vs klaim di Kebijakan Privasi | **Kalimatnya dijujurkan**, enkripsi ditunda | `D2` |
+| Akuisisi: vendor dulu atau direktori? | **Dikeluarkan dari rencana** atas keputusan owner | bagian 🚫 |
+| Harga satuan vs paket saling bertentangan | **Satuan yang terlalu murah** — 15rb → 35rb, dan pembedanya dibuat struktural (satuan tanpa digital & tanpa garansi) | `U24` |
+| Badge "Paling Populer" pada produk nol penjualan | **Dicabut** — diganti pemandu yang tidak mengarang; cacat kembarnya di katalog digital ikut dibetulkan | `U24`/`U26` |
+| WebP: QUIC.cloud atau bangun sendiri? | **Bangun sendiri** — QUIC.cloud mengunggah foto pelanggan ke pihak ketiga, wajib masuk Kebijakan Privasi lebih dulu | `U31` |
+| Foto produk: mockup atau kosong? | **Placeholder → render AI berlabel "ilustrasi"** | `U22` · [`prompt-gambar.md`](./prompt-gambar.md) |
 
 ---
 
-## 👤 Aksi owner yang tetap berlaku dari rencana lama
+## 👤 Aksi owner — yang masih menunggu tangan Anda
 
-- **Cetak satu sampel lengkap** (undangan lipat + amplop bernama) — menjawab bobot nyata, waktu lipat per unit, uji pindai QR, mutu amplop, dan **apakah mesin creasing sanggup** (800 lipatan/bulan; kalau manual, hitungan marjin batal). Sekalian catat waktu untuk **50 unit**, bukan hanya 100 — paket Hormat menanggung setup yang sama dengan pendapatan terkecil.
-- **QA perangkat riil** — iPhone Safari & Android Chrome. Checklist di `panduan-manual.md` langkah 5, ditambah yang belum pernah disentuh tangan manusia: mode gelap · galeri kolase · tombol Waze · tombol WA mempelai setelah RSVP · penolakan foto resolusi rendah. ⚠️ WA meng-cache preview per URL — uji dengan `?x=1`.
-- **Review gaya bahasa** pesan otomatis di `copywriting-pesan.md` · **review visual tema-02 & tema-03 di HP** sebagai calon pembeli.
-- **Kebijakan nomor WA bisnis** — jangan logout, pakai wajar, jangan blast ke nomor tak dikenal. Sesi ter-ban = seluruh delivery mati.
+> Ini **pekerjaan**, bukan keputusan. Diurutkan menurut yang paling menahan uang.
+
+1. **Duitku — kejar approval** + tiga pertanyaan (profil nominal Rp 99–299rb vs paket Rp 5,9 jt · mekanisme refund · plafon per kanal). Satu-satunya item P0 yang tersisa. → `A8`
+2. **Foto produk SUNGGUHAN.** Kelima slot kini terisi render AI berlabel *"ilustrasi"*. Memotret sampel `TEST-173` yang sudah tercetak — plus **bengkel, mesin, dan tangan yang sedang melipat** — menggantinya dengan bukti nyata dan mencabut labelnya. Bagi pembeli yang takut kena penipu online, foto bengkel mengalahkan testimoni. Simpan ke `wp-content/themes/harih/aset/produk/` dengan nama yang sama; slotnya mengisi dirinya sendiri.
+3. **QA perangkat riil** — iPhone Safari & Android Chrome. **Lebih penting dari sebelumnya:** 31 item UI/UX tayang sejak 8 Agustus dan belum satu pun disentuh tangan manusia. Yang paling perlu dicoba: gerbang undangan **dalam posisi HP miring** · bilah lompat di bawah layar · tombol musik (kini tidak lagi memutar sendiri) · mode gelap · galeri kolase · penolakan foto resolusi rendah. Checklist di `panduan-manual.md` langkah 5. ⚠️ WA meng-cache preview per URL — uji dengan `?x=1`.
+4. **Satu cetakan uji memakai foto pemesan** — menjawab keputusan `maxDim` di atas.
+5. **Review gaya bahasa** pesan otomatis di `copywriting-pesan.md` · **review visual tema-02 & tema-03 di HP** sebagai calon pembeli.
+6. **Kebijakan nomor WA bisnis** *(berlaku terus)* — jangan logout, pakai wajar, jangan blast ke nomor tak dikenal. Sesi ter-ban = seluruh delivery mati.
 
 ---
 
