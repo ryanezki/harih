@@ -24,12 +24,12 @@
 
 **Mulai dari sini di sesi berikutnya.** `HARIH_VERSION 2.21.0` · 9 workflow aktif · smoke **32/32** · WAHA `healthy`, sesi `WORKING`.
 
-**27 dari 30 item selesai.** Sisa tiga di bawah. Ditambah **31 item** dari review UI/UX ([🎨 PU](#-pu--review-uiux-menyeluruh-8-agustus-2026)) — **PU-A (U1–U9) SELESAI & LIVE** *(v2.22.0)* · **PU-B (U10–U20) LIVE** *(v2.24.2)* · **PU-C LIVE kecuali U22** · **PU-D LIVE kecuali U30-skala & U31** *(v2.28.1)*. Smoke 32/32.
+**27 dari 30 item selesai.** Sisa tiga di bawah. Ditambah **31 item** dari review UI/UX ([🎨 PU](#-pu--review-uiux-menyeluruh-8-agustus-2026)) — **PU-A (U1–U9) SELESAI & LIVE** *(v2.22.0)* · **PU-B (U10–U20) LIVE** *(v2.24.2)* · **PU-C LIVE kecuali U22** · **PU-D LIVE kecuali remap skala tipografi U30** *(v2.31.0)*. Smoke 32/32.
 
 > ### ▶ MULAI DARI SINI
 > 1. **A8** — satu-satunya yang butuh tangan owner.
 > 2. **C8** lalu **D3**.
-> 3. **U22** — foto produk cetak; butuh tangan Anda (memotret sampel `TEST-173`). Sisa lain: **U31** (bersama D3) dan remap skala tipografi U30 — keduanya bergerbang, alasannya di bagian PU-D.
+> 3. **Foto produk** — slot & prompt sudah siap ([`prompt-gambar.md`](./prompt-gambar.md)); tinggal berkas gambarnya. Lalu **keputusan `maxDim`** untuk menutup sisa D3.
 > 4. Pada order cetak sungguhan pertama: periksa dua cabang `/proof/` yang belum pernah dilewati data nyata (lihat catatan ⚠️ di kotak PU-A).
 
 | | | |
@@ -647,9 +647,14 @@ Ketiga blok copy ([page-katalog.php:136](../wp-content/themes/harih/page-katalog
 > 🔴 **U29 — divergensi yang diprediksi SUDAH TERJADI**, diukur sendiri: `--warn-bg` `#fdf3e4` vs `#fdf3e0` · `--warn-line` · `--warn-ink` · `--error`. Kuning peringatan & merah galat berbeda antara `/isi-data/` dan `/tamu/`, dua halaman yang dilihat pembeli yang sama dalam satu jam yang sama. Delapan belas token di-rename, nilai `katalog.css` jadi kanon (8 halaman vs 1).
 >
 > **U30 — bagian yang berdampak dikerjakan, remap skala tipografi TIDAK.** Yang dikerjakan: 12 literal `rgba()` di luar `:root` ternyata **mengunci warna mode terang** sehingga elemennya tidak ikut berganti di mode gelap — diverifikasi di mode gelap sungguhan, nol sisa. Plus token hantu `--c-ink-3` dan peran dua token tinta yang kini tertulis.
-> **Yang sengaja tidak dikerjakan: remap 73 nilai `font-size` ke satu skala.** Itu perubahan lintas delapan halaman dengan risiko regresi nyata dan manfaat yang seluruhnya menghadap developer — review-nya sendiri menggolongkannya *"kerapian, bukan kerusakan berjalan"*. Kalau suatu saat dikerjakan, kerjakan sebagai pekerjaan tersendiri dengan pembanding tangkapan layar sebelum/sesudah, bukan menumpang ronde lain.
+> **Satu-satunya sisa PU-D: remap 73 nilai `font-size` ke satu skala — sengaja tidak dikerjakan.** Itu perubahan lintas delapan halaman dengan risiko regresi nyata dan manfaat yang seluruhnya menghadap developer — review-nya sendiri menggolongkannya *"kerapian, bukan kerusakan berjalan"*. Kalau suatu saat dikerjakan, kerjakan sebagai pekerjaan tersendiri dengan pembanding tangkapan layar sebelum/sesudah, bukan menumpang ronde lain.
 >
-> **U31 — digerbang, dan gerbangnya bukan waktu.** Jalur server (konversi WebP LiteSpeed) menuntut layanan **QUIC.cloud dengan akun & kuota terpisah** — itu keputusan owner, bukan sesuatu yang saya daftarkan sendiri. Jalur markup (`<picture>`) memang bisa dikerjakan, tapi ia menyentuh `<img>` yang sama dengan **D3** yang masih terbuka dan sendirinya menunggu keputusan resolusi cetak; mengerjakannya sekarang berarti menyentuh markup yang sama dua kali. **Kerjakan bersama D3.**
+> **U31 — SELESAI & LIVE lewat jalur LOKAL** (keputusan owner 2026-08-08). QUIC.cloud sempat didaftarkan, lalu **sengaja tidak dipakai**: layanan optimasi gambar bekerja dengan mengunggah isi media library ke server pihak ketiga, dan media library kita berisi **foto pranikah pelanggan serta gambar QRIS mempelai** — persis data yang B8 acak nama berkasnya karena dianggap sensitif. Itu pemroses data baru yang wajib masuk tabel Kebijakan Privasi lebih dulu, aturan yang proyek ini tetapkan sendiri untuk OpenRouter.
+> `scripts/buat-webp.php` (dijalankan di server; Mac pengembang tidak punya encoder WebP) → **1.061.697 → 356.176 byte (−66%)**. Terukur live: beranda **967.844 → 328.184 byte** gambar, enam `<picture>`, peramban benar-benar memilih `.webp`, **nol JPEG demo terunduh**.
+> · Skripnya menolak menulis bila WebP-nya justru lebih besar (terjadi pada QRIS demo PNG) · `harih_gambar()` turun anggun ke `<img>` bila `.webp` tidak ada · **`og:image` sengaja tetap `.jpg`** karena dukungan WebP di pratinjau WhatsApp/Facebook tidak andal.
+>
+> **Ikut selesai: bagian D3 yang memang digandeng** — `aspect-ratio: 1/1` + `object-fit` pada `.qris-panel img` (sumber CLS terakhir; galeri slider & kolase sudah dikunci CSS-nya sendiri) dan `width`/`height` pada thumbnail YouTube (`hqdefault` selalu 480×360). Foto pelanggan **tidak** diberi `width`/`height`: dimensinya tidak diketahui saat render.
+> **Sisa D3: keputusan `maxDim` 1600 → 1280** — masih menunggu penilaian mutu cetak dari sampel `TEST-173`, dan itu keputusan owner.
 
 
 - [x] **U27** 🤖 `jam` — **Tiga aset yatim berhenti dikirim ke setiap pengunjung**
@@ -680,7 +685,7 @@ Ketiga blok copy ([page-katalog.php:136](../wp-content/themes/harih/page-katalog
   ⚠️ Ini kerapian, bukan kerusakan berjalan. Kerjakan setelah PU-A dan PU-B.
   **Selesai bila:** nol `font-size` literal di luar `:root` · tiap token tinta punya satu peran tertulis.
 
-- [ ] **U31** 🤖 `jam` — **Format gambar modern — dikerjakan bersama D3, bukan sendiri**
+- [x] **U31** 🤖 `jam` — **Format gambar modern — dikerjakan bersama D3, bukan sendiri**
   `find` webp/avif di seluruh repo = **0 berkas**, dan negosiasi konten diuji langsung: `curl -H 'Accept: image/avif,image/webp'` tetap membalas `image/jpeg`, **tanpa header `Vary`**. Satu pemuatan undangan = 796 KB, **86,7% di antaranya gambar**.
   ⚠️ **Dua angka pelapor dikoreksi verifikator, dan koreksinya memperkuat argumennya:** LCP beranda **bukan** foto melainkan `<h1>` (diukur dengan `PerformanceObserver` pada 375×812 — kotak h1 lebih luas daripada gambarnya). Jadi foto 252 KB ber-`fetchpriority="high"` justru **merebut bandwidth dari LCP yang sesungguhnya** (teks + woff2) — alasan untuk menurunkannya, bukan menaikkannya.
   Ini **bukan** bagian dari D3: D3 soal `srcset`/`sizes`/`width`/`height` (ukuran & CLS), ini soal **format**. Tapi keduanya menyentuh markup `<img>` yang sama, jadi satu sentuhan.
