@@ -16,3 +16,10 @@ music/siap/
 
 # Berkas sampel cetak — dibangkitkan ulang dari snapshot, tidak perlu di git
 sampel-cetak-*.pdf
+
+# Gambar produk ASLI dari generator (1,5-2,7 MB/berkas, 11 MB total).
+# Mengikuti konvensi yang sama dengan music/*.mp3 dan sampel-cetak-*.pdf:
+# berkas berat yang BISA DIBANGUN ULANG tidak masuk git. Yang benar-benar
+# tayang adalah versi web di wp-content/themes/harih/aset/produk/ (617 KB,
+# ikut version control), dan promptnya ada di docs/prompt-gambar.md.
+img/
