@@ -24,12 +24,12 @@
 
 **Mulai dari sini di sesi berikutnya.** `HARIH_VERSION 2.21.0` · 9 workflow aktif · smoke **32/32** · WAHA `healthy`, sesi `WORKING`.
 
-**27 dari 30 item selesai.** Sisa tiga di bawah. Ditambah **31 item** dari review UI/UX ([🎨 PU](#-pu--review-uiux-menyeluruh-8-agustus-2026)) — **PU-A (U1–U9) SELESAI & LIVE** *(v2.22.0)* · **PU-B (U10–U20) LIVE** *(v2.24.2)* · **PU-C LIVE kecuali U22** · **PU-D LIVE kecuali remap skala tipografi U30** *(v2.31.0)*. Smoke 32/32.
+**27 dari 30 item selesai.** Sisa tiga di bawah. Ditambah **31 item** dari review UI/UX ([🎨 PU](#-pu--review-uiux-menyeluruh-8-agustus-2026)) — **PU-A (U1–U9) SELESAI & LIVE** *(v2.22.0)* · **PU-B (U10–U20) LIVE** *(v2.24.2)* · **PU-C LIVE kecuali U22** · **SELURUH 31 ITEM PU LIVE** *(v2.33.0)*. Smoke 32/32.
 
 > ### ▶ MULAI DARI SINI
 > 1. **A8** — satu-satunya yang butuh tangan owner.
 > 2. **C8** lalu **D3**.
-> 3. **Foto produk** — slot & prompt sudah siap ([`prompt-gambar.md`](./prompt-gambar.md)); tinggal berkas gambarnya. Lalu **keputusan `maxDim`** untuk menutup sisa D3.
+> 3. **Foto produk cetak SUNGGUHAN** — kelima slot kini terisi render AI berlabel *"ilustrasi"*; memotret sampel `TEST-173` dan bengkel percetakan menggantinya dengan bukti nyata dan mencabut labelnya. Lalu **keputusan `maxDim`** untuk menutup sisa D3.
 > 4. Pada order cetak sungguhan pertama: periksa dua cabang `/proof/` yang belum pernah dilewati data nyata (lihat catatan ⚠️ di kotak PU-A).
 
 | | | |
@@ -647,7 +647,10 @@ Ketiga blok copy ([page-katalog.php:136](../wp-content/themes/harih/page-katalog
 > 🔴 **U29 — divergensi yang diprediksi SUDAH TERJADI**, diukur sendiri: `--warn-bg` `#fdf3e4` vs `#fdf3e0` · `--warn-line` · `--warn-ink` · `--error`. Kuning peringatan & merah galat berbeda antara `/isi-data/` dan `/tamu/`, dua halaman yang dilihat pembeli yang sama dalam satu jam yang sama. Delapan belas token di-rename, nilai `katalog.css` jadi kanon (8 halaman vs 1).
 >
 > **U30 — bagian yang berdampak dikerjakan, remap skala tipografi TIDAK.** Yang dikerjakan: 12 literal `rgba()` di luar `:root` ternyata **mengunci warna mode terang** sehingga elemennya tidak ikut berganti di mode gelap — diverifikasi di mode gelap sungguhan, nol sisa. Plus token hantu `--c-ink-3` dan peran dua token tinta yang kini tertulis.
-> **Satu-satunya sisa PU-D: remap 73 nilai `font-size` ke satu skala — sengaja tidak dikerjakan.** Itu perubahan lintas delapan halaman dengan risiko regresi nyata dan manfaat yang seluruhnya menghadap developer — review-nya sendiri menggolongkannya *"kerapian, bukan kerusakan berjalan"*. Kalau suatu saat dikerjakan, kerjakan sebagai pekerjaan tersendiri dengan pembanding tangkapan layar sebelum/sesudah, bukan menumpang ronde lain.
+> **U30 — SELESAI 2026-08-08.** 40 nilai `font-size` berbeda di `katalog.css`, dalam px **dan** rem untuk ukuran yang sama: 12,48 di sebelah 12,5 · 14,4/14,5/14,72 · 16,8/16,96/17. Bukan tangga, melainkan derau. **105 deklarasi → 18 token, nol literal px/rem tersisa.**
+> Skalanya sengaja **18 langkah, bukan 10**: memaksanya lebih pendek menuntut geser sampai 2 px, dan itu keputusan desain — bukan sesuatu yang boleh diambil diam-diam di tengah refaktor.
+> **Terverifikasi dengan membandingkan ukuran font TIAP elemen berteks terhadap potret sebelum remap, pada viewport yang sama:** 31 selektor, 19 bergeser, **geser terbesar 0,50 px**, nol selektor hilang.
+> ⚠️ Pengukuran pertama sempat menunjukkan `h2` turun **42 → 30 px**. Kalau dipercaya, itu regresi sungguhan. Diperiksa: aturan `clamp()` identik sebelum/sesudah, dan `innerWidth` panel peramban ternyata **0** — sehingga `4.5vw` = 0 dan clamp memilih batas bawahnya. Diukur ulang pada 1280 px: `h2` kembali 42 px. Jebakan sekelas transisi-beku-di-tab-tersembunyi dan parser `color(srgb …)` yang sudah tercatat.
 >
 > **U31 — SELESAI & LIVE lewat jalur LOKAL** (keputusan owner 2026-08-08). QUIC.cloud sempat didaftarkan, lalu **sengaja tidak dipakai**: layanan optimasi gambar bekerja dengan mengunggah isi media library ke server pihak ketiga, dan media library kita berisi **foto pranikah pelanggan serta gambar QRIS mempelai** — persis data yang B8 acak nama berkasnya karena dianggap sensitif. Itu pemroses data baru yang wajib masuk tabel Kebijakan Privasi lebih dulu, aturan yang proyek ini tetapkan sendiri untuk OpenRouter.
 > `scripts/buat-webp.php` (dijalankan di server; Mac pengembang tidak punya encoder WebP) → **1.061.697 → 356.176 byte (−66%)**. Terukur live: beranda **967.844 → 328.184 byte** gambar, enam `<picture>`, peramban benar-benar memilih `.webp`, **nol JPEG demo terunduh**.
@@ -679,7 +682,7 @@ Ketiga blok copy ([page-katalog.php:136](../wp-content/themes/harih/page-katalog
   **Langkah:** rename 18 token di `isi-data.css` ke skema `--c-*`/`--font-*` (satu pass `sed`, berkas itu satu-satunya pemuatnya), **lalu** satukan `.btn`/`.field` dengan `katalog.css` sebagai kanon dan salin `:focus-visible` ke ketiga permukaan. Urutannya penting: rename dulu, baru satukan komponen.
   **Selesai bila:** nol token kembar bernilai beda · ketiga permukaan punya perlakuan fokus yang setara.
 
-- [ ] **U30** 🤖 `jam` — **Skala tipografi & dua token "teks pendukung"**
+- [x] **U30** 🤖 `jam` — **Skala tipografi & dua token "teks pendukung"**
   **73 nilai `font-size` unik** di enam stylesheet bila shorthand `font:` ikut dihitung (28 px, 21 rem, 4 em, 12 clamp) — `katalog.css` sendirian menyumbang 43 dan mencampur px, rem, dan em untuk ukuran yang sama. Tidak ada skala; ada tangga acak. Terpisah: `--c-ink-2` (8,47:1) dan `--c-ink-soft` (5,29:1) sama-sama dipakai untuk peran "teks pendukung" di 51 titik, terbelah menurut **umur kode**, bukan menurut makna — beda 3,2 poin kontras, jelas terlihat bersebelahan. Varian gelapnya sama pincangnya. Ikut sekalian: **12** literal `rgba()` di `katalog.css` yang persis varian alpha dari token yang sudah ada, di berkas yang **sudah memakai `color-mix()` 13 kali**.
   **Langkah:** definisikan skala di `:root` (`--fs-3xs` … `--fs-lg`), petakan nilai literal ke tetangga terdekatnya dalam satu pass — mayoritas bergeser <0,5 px sehingga tidak butuh persetujuan desain. Pilih satu satuan. Putuskan satu makna per token tinta dan tulis di komentar definisinya (`--c-ink-2` = teks isi sekunder, `--c-ink-soft` = tersier), lalu audit 51 titik pemakaian. Ganti kedua belas `rgba()` jadi `color-mix()`.
   ⚠️ Ini kerapian, bukan kerusakan berjalan. Kerjakan setelah PU-A dan PU-B.
