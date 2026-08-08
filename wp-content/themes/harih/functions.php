@@ -12,7 +12,27 @@ if (!defined('ABSPATH')) exit;
  * pengunjung & LiteSpeed tetap menyajikan berkas lama meski file di server
  * sudah baru, dan perbaikan tampilan terlihat "tidak berpengaruh".
  */
-const HARIH_VERSION = '2.26.3';
+const HARIH_VERSION = '2.27.0';
+
+/**
+ * Versi aset PER BERKAS (U28).
+ *
+ * `HARIH_VERSION` adalah satu tombol untuk seluruh aset, dan itu terukur mahal:
+ * dari dua belas kenaikan versi terakhir, hanya TIGA yang benar-benar menyentuh
+ * aset undangan — sembilan sisanya membatalkan cache CSS+JS undangan tanpa satu
+ * byte pun berubah, termasuk rilis yang murni PHP/n8n. Dengan ~1,2 kenaikan per
+ * hari, tamu yang kembali membuka undangan mengunduh ulang berkas yang identik.
+ *
+ * `filemtime()` membuat URL hanya berganti saat isinya memang berganti.
+ * `HARIH_VERSION` tetap jadi cadangan bila berkasnya tidak terbaca (mis. jalur
+ * salah setelah refaktor) — lebih baik cache-bust berlebihan daripada
+ * menyajikan berkas basi.
+ */
+function harih_ver(string $rel): string {
+    $abs = get_stylesheet_directory() . $rel;
+    $mt  = @filemtime($abs);
+    return $mt ? (string) $mt : HARIH_VERSION;
+}
 
 add_action('after_setup_theme', function () {
     add_theme_support('title-tag');
@@ -227,7 +247,7 @@ function harih_reseller_webhook_url(): string {
 // Halaman toko: style child di atas Astra.
 add_action('wp_enqueue_scripts', function () {
     if (is_singular('undangan') || is_page_template('page-isi-data.php') || is_page_template('page-katalog.php') || is_page_template('page-jadi-reseller.php') || is_page_template('page-harga-hybrid.php') || is_page_template('page-satuan.php') || is_page_template('page-upsell.php') || is_page_template('page-proof.php') || is_page_template('page-tamu.php') || is_page_template('page-rekap.php') || is_page_template('page-teks.php')) return;
-    wp_enqueue_style('harih-child', get_stylesheet_uri(), [], HARIH_VERSION);
+    wp_enqueue_style('harih-child', get_stylesheet_uri(), [], harih_ver('/style.css'));
 }, 20);
 
 /**
@@ -349,17 +369,17 @@ add_action('wp_enqueue_scripts', function () {
         // Font halaman toko SELF-HOSTED sejak redesain 2026-08-06 (@font-face di
         // katalog.css) — tidak lagi memanggil Google Fonts. Preload woff2 yang
         // dipakai di layar pertama supaya judul tidak berkedip ganti font.
-        wp_enqueue_style('undangan-katalog', get_stylesheet_directory_uri() . '/katalog.css', [], HARIH_VERSION);
+        wp_enqueue_style('undangan-katalog', get_stylesheet_directory_uri() . '/katalog.css', [], harih_ver('/katalog.css'));
         if ($is_reseller) {
-            wp_enqueue_script('undangan-reseller-js', get_stylesheet_directory_uri() . '/reseller.js', [], HARIH_VERSION, true);
+            wp_enqueue_script('undangan-reseller-js', get_stylesheet_directory_uri() . '/reseller.js', [], harih_ver('/reseller.js'), true);
         }
         return;
     }
 
     if ($is_isidata) {
         // Font self-hosted lewat @font-face di isi-data.css — tidak lagi CDN.
-        wp_enqueue_style('undangan-isidata', get_stylesheet_directory_uri() . '/undangan/shared/isi-data.css', [], HARIH_VERSION);
-        wp_enqueue_script('undangan-isidata-js', get_stylesheet_directory_uri() . '/undangan/shared/isi-data.js', [], HARIH_VERSION, true);
+        wp_enqueue_style('undangan-isidata', get_stylesheet_directory_uri() . '/undangan/shared/isi-data.css', [], harih_ver('/undangan/shared/isi-data.css'));
+        wp_enqueue_script('undangan-isidata-js', get_stylesheet_directory_uri() . '/undangan/shared/isi-data.js', [], harih_ver('/undangan/shared/isi-data.js'), true);
         return;
     }
 
@@ -369,9 +389,9 @@ add_action('wp_enqueue_scripts', function () {
 
     // Font self-hosted lewat @font-face di undangan/{tema}/style.css — tidak ada
     // lagi stylesheet Google Fonts yang di-enqueue (G1.2, 2026-08-07).
-    wp_enqueue_style('undangan-shared', "{$dir}/undangan/shared/undangan.css", [], HARIH_VERSION);
-    wp_enqueue_style('undangan-tema', "{$dir}/undangan/{$tema}/style.css", ['undangan-shared'], HARIH_VERSION);
-    wp_enqueue_script('undangan-js', "{$dir}/undangan/shared/undangan.js", [], HARIH_VERSION, true);
+    wp_enqueue_style('undangan-shared', "{$dir}/undangan/shared/undangan.css", [], harih_ver('/undangan/shared/undangan.css'));
+    wp_enqueue_style('undangan-tema', "{$dir}/undangan/{$tema}/style.css", ['undangan-shared'], harih_ver("/undangan/{$tema}/style.css"));
+    wp_enqueue_script('undangan-js', "{$dir}/undangan/shared/undangan.js", [], harih_ver('/undangan/shared/undangan.js'), true);
 
     // Normalisasi sama dengan yang dipakai section penutup, supaya nomor yang
     // sama tidak dirapikan dua cara berbeda.
@@ -408,10 +428,16 @@ add_action('wp_enqueue_scripts', function () {
  * membuat nav & footer diangkat jadi komponen bersama.
  */
 function harih_halaman_toko(): bool {
+    /* U28 — `page-isi-data.php` DITAMBAHKAN. Ia memakai font & mode gelap yang
+       sama dengan halaman toko, dan hook mode gelap sudah menambahkan
+       pengecualian khusus untuknya — tapi hook preload font tidak, jadi satu
+       daftar dibaca dua cara dan form terpanjang yang kita punya tidak pernah
+       dapat `<link rel=preload>`. Dengan ia masuk di sini, kedua hook kembali
+       membaca satu daftar yang sama. */
     static $tpl = [
         'page-katalog.php', 'page-harga-hybrid.php', 'page-satuan.php', 'page-upsell.php',
         'page-proof.php', 'page-tamu.php', 'page-rekap.php', 'page-jadi-reseller.php',
-        'page-teks.php',
+        'page-teks.php', 'page-isi-data.php',
     ];
     foreach ($tpl as $t) {
         if (is_page_template($t)) return true;

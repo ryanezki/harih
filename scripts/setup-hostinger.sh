@@ -79,3 +79,21 @@ echo "4) Simpan WP_APP_PASSWORD & FORM_TOKEN_SECRET di env n8n"
 echo "5) Setelah WF-02 dibuat di n8n, pasang URL webhooknya (T2.6):"
 echo "   wp config set N8N_FORM_WEBHOOK_URL 'https://n8n.harih.id/webhook/…' --type=constant"
 echo "================================================================"
+
+# --- U28 (2026-08-08): font woff2 di-cache abadi ---------------------------
+# Header ini TIDAK bisa di-commit sebagai patch repo — ia setelan server, dan
+# `find . -name .htaccess` di repo mengembalikan nol berkas. Dicatat di sini
+# supaya ikut terpasang lagi setelah rebuild hosting.
+#
+#   ssh -p 65002 u803921702@147.93.80.20
+#   cd domains/harih.id/public_html
+#   cp -n .htaccess .htaccess.bak-sebelum-u28
+#   cat >> .htaccess <<'BLOK'
+#   <FilesMatch "\.woff2$">
+#       Header set Cache-Control "public, max-age=31536000, immutable"
+#   </FilesMatch>
+#   BLOK
+#
+# Verifikasi:
+#   curl -sI https://harih.id/wp-content/themes/harih/aset/font/Figtree-latin.woff2 | grep -i cache-control
+#   -> harus: public, max-age=31536000, immutable
