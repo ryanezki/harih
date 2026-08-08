@@ -866,6 +866,15 @@ a { color: var(--c-accent-teks); }
 @media (min-width: 760px) {
     .garansi-grid { grid-template-columns: repeat(3, 1fr); }
     .paket-grid-hybrid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+    /* U8 — `/upsell/` memakai kelas yang sama tapi sengaja hanya membangun DUA
+       tawaran (Hormat dicabut, keputusan owner 2026-08-07). Empat kolom untuk
+       dua kartu menyusutkan kolom teksnya sampai ±119px sementara badge 148px
+       menindih padding kartu, dan separuh baris tinggal kosong. */
+    .upsell-body .paket-grid-hybrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        max-width: 720px;
+        margin-inline: auto;
+    }
 }
 
 /* Jembatan katalog digital → paket cetak (F1.5). Dibedakan latarnya supaya
@@ -936,6 +945,8 @@ a { color: var(--c-accent-teks); }
 }
 .upsell-hitung-label { font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; color: var(--c-ink-2); }
 .upsell-hitung-angka { margin-top: 6px; font-size: 1.15rem; font-weight: 600; color: var(--c-ink); font-variant-numeric: tabular-nums; }
+/* U8 — konsekuensi setelah hitung mundur habis. */
+.upsell-hitung-catatan { margin-top: 8px; font-size: .82rem; line-height: 1.5; color: var(--c-ink-2); }
 .upsell-coret { text-align: center; font-size: .82rem; color: var(--c-ink-2); margin: -2px 0 8px; }
 
 @media (min-width: 720px) {

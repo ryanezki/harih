@@ -148,6 +148,11 @@ $wa_cs = static fn(string $paket, int $oid): string =>
         <div class="upsell-hitung" data-tenggat="<?php echo esc_attr($tenggat->format(DATE_ATOM)); ?>">
             <p class="upsell-hitung-label">Kredit berlaku sampai <?php echo esc_html(wp_date('j F Y', $tenggat->getTimestamp())); ?></p>
             <p class="upsell-hitung-angka" id="upsell-mundur">—</p>
+            <?php /* U8 — konsekuensinya disebutkan SEBELUM terlambat. Kalimat ini
+                     sudah ada di cabang kedaluwarsa, yaitu di tempat ia tidak lagi
+                     berguna; hitung mundur tanpa penjelasan membaca seperti ancaman
+                     kehilangan paketnya, bukan kehilangan kreditnya. */ ?>
+            <p class="upsell-hitung-catatan">Setelah itu paketnya tetap bisa dipesan — hanya dengan harga normal, tanpa kredit.</p>
         </div>
     <?php endif; ?>
 </header>
@@ -180,6 +185,10 @@ $wa_cs = static fn(string $paket, int $oid): string =>
     <p class="brand">hariH</p>
     <p class="kaki-tag">Pesanan #<?php echo esc_html($order_id); ?></p>
     <nav class="kaki-nav">
+        <?php /* U8 — halaman ini juga jalan buntu sebelumnya. Rekap kehadiran
+                 adalah halaman yang paling sering dibutuhkan pemesan di jendela
+                 waktu yang sama (RSVP sedang masuk selagi ia menimbang cetak). */ ?>
+        <a href="<?php echo esc_url(add_query_arg(['order' => $order_id, 'key' => undangan_token_halaman($order_id, 'rekap')], home_url('/rekap/'))); ?>">Rekap kehadiran</a>
         <a href="<?php echo esc_url(home_url('/kontak/')); ?>">Kontak</a>
         <a href="<?php echo esc_url(home_url('/syarat-ketentuan/')); ?>">Syarat &amp; Ketentuan</a>
         <a href="<?php echo esc_url(home_url('/kebijakan-refund/')); ?>">Kebijakan Refund</a>

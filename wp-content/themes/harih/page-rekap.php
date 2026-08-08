@@ -122,6 +122,12 @@ $hadir_resepsi = $per_sesi['resepsi'] + $per_sesi['keduanya'];
             <a class="btn btn-garis" href="<?php echo esc_url(add_query_arg(['order' => $order_id, 'key' => undangan_token_halaman($order_id, 'tamu')], home_url('/tamu/'))); ?>">Daftar tamu &amp; link personal</a>
         </div>
 
+        <?php /* U8 — pembungkus geser. `.katalog-body` memasang `overflow-x: clip`
+                 yang naik ke viewport dan ditafsirkan `hidden`, jadi tabel yang
+                 lebih lebar dari layar TERPOTONG dan tidak bisa digulir sama
+                 sekali: kolom Waktu (dan Sesi) hilang total, bukan sekadar
+                 sempit. Kelasnya sudah ada di katalog.css, dipakai tabel satuan. */ ?>
+        <div class="satuan-tabel-wrap">
         <table class="rekap-tabel" id="rekap-tabel">
             <thead><tr><th>Nama</th><th>Status</th><th>Tamu</th><th>Sesi</th><th>Waktu</th></tr></thead>
             <tbody>
@@ -136,6 +142,7 @@ $hadir_resepsi = $per_sesi['resepsi'] + $per_sesi['keduanya'];
             <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
     </section>
 
     <?php endif; ?>

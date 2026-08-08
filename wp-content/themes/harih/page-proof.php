@@ -186,10 +186,31 @@ $harih_label = [
     <?php endif; ?>
 </main>
 
+<?php
+/* U8 — halaman ini dulu JALAN BUNTU: footernya cuma Kontak + S&K, jadi
+   pemesan yang sedang memeriksa proof tidak punya jalan ke daftar nama yang
+   justru akan dicetak di amplopnya. Linknya tiba terpencar lewat WhatsApp
+   berhari-hari jarak, jadi menemukannya kembali bukan hal sepele.
+   Pola add_query_arg + undangan_token_halaman() sama persis dengan
+   page-tamu.php → /rekap/. */
+$harih_uid   = function_exists('undangan_cari_undangan_order') ? undangan_cari_undangan_order($order_id) : 0;
+$harih_ntamu = $harih_uid
+    ? count(array_filter(array_map('trim', explode("\n", (string) get_post_meta($harih_uid, 'daftar_tamu', true)))))
+    : 0;
+$harih_link_tamu = add_query_arg(
+    ['order' => $order_id, 'key' => undangan_token_halaman($order_id, 'tamu')],
+    home_url('/tamu/')
+);
+?>
 <footer class="kaki">
     <p class="brand">hariH</p>
     <p class="kaki-tag">Pesanan #<?php echo esc_html($order_id); ?></p>
     <nav class="kaki-nav">
+        <a href="<?php echo esc_url($harih_link_tamu); ?>"><?php
+            echo $harih_ntamu
+                ? esc_html(sprintf('Lihat %d nama yang akan dicetak di amplop', $harih_ntamu))
+                : 'Daftar tamu untuk amplop';
+        ?></a>
         <a href="<?php echo esc_url(home_url('/kontak/')); ?>">Kontak</a>
         <a href="<?php echo esc_url(home_url('/syarat-ketentuan/')); ?>">Syarat &amp; Ketentuan</a>
     </nav>
