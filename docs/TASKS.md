@@ -24,12 +24,12 @@
 
 **Mulai dari sini di sesi berikutnya.** `HARIH_VERSION 2.21.0` · 9 workflow aktif · smoke **32/32** · WAHA `healthy`, sesi `WORKING`.
 
-**27 dari 30 item selesai.** Sisa tiga di bawah. Ditambah **31 item** dari review UI/UX ([🎨 PU](#-pu--review-uiux-menyeluruh-8-agustus-2026)) — **PU-A (U1–U9) SELESAI & LIVE** *(v2.22.0)* · **PU-B (U10–U20) LIVE** *(v2.24.2)* · **PU-C LIVE kecuali U22** *(v2.25.3)*. Smoke 32/32.
+**27 dari 30 item selesai.** Sisa tiga di bawah. Ditambah **31 item** dari review UI/UX ([🎨 PU](#-pu--review-uiux-menyeluruh-8-agustus-2026)) — **PU-A (U1–U9) SELESAI & LIVE** *(v2.22.0)* · **PU-B (U10–U20) LIVE** *(v2.24.2)* · **PU-C LIVE kecuali U22** · **PU-D LIVE kecuali U30-skala & U31** *(v2.28.1)*. Smoke 32/32.
 
 > ### ▶ MULAI DARI SINI
 > 1. **A8** — satu-satunya yang butuh tangan owner.
 > 2. **C8** lalu **D3**.
-> 3. **U22** — foto produk cetak; butuh tangan Anda (memotret sampel `TEST-173`). Lalu **PU-D**, yang murni kerapian.
+> 3. **U22** — foto produk cetak; butuh tangan Anda (memotret sampel `TEST-173`). Sisa lain: **U31** (bersama D3) dan remap skala tipografi U30 — keduanya bergerbang, alasannya di bagian PU-D.
 > 4. Pada order cetak sungguhan pertama: periksa dua cabang `/proof/` yang belum pernah dilewati data nyata (lihat catatan ⚠️ di kotak PU-A).
 
 | | | |
@@ -633,7 +633,24 @@ Ketiga blok copy ([page-katalog.php:136](../wp-content/themes/harih/page-katalog
 
 ### PU-D · Aset & sistem desain
 
-- [ ] **U27** 🤖 `jam` — **Tiga aset yatim berhenti dikirim ke setiap pengunjung**
+> ## ◐ PU-D — **U27 · U28 · U29 SELESAI & LIVE** 2026-08-08 *(v2.28.1)* · **U30 sebagian** · **U31 digerbang**
+>
+> Commit `f8b9314` · `af74481` · `92d7428`. Smoke 32/32.
+>
+> **U27 — empat aset yatim, bukan tiga.** Emoji WordPress ikut ketemu. Terukur: HTML undangan **44.180 → 27.577 byte (−38%)**, beranda **41.622 → 23.879 (−43%)**, dan satu permintaan pemblokir render hilang dari `<head>` tiap halaman.
+> ⚠️ **Mengejar jalur enqueue-nya terbukti tebak-tebakan** — tiga percobaan gagal berturut (`wp_enqueue_scripts`, `enqueue_block_assets`, `wp_print_styles`, semuanya meleset pada `wc-blocks-style`). Yang bekerja: menyaring di `style_loader_tag`/`script_loader_tag`, titik semua jalur bermuara. Halaman diuji tetap berfungsi penuh sesudahnya, bukan hanya diperiksa ukurannya.
+>
+> **U28** — versi aset kini per-berkas (`filemtime`); terverifikasi keempat aset punya versi berbeda sesuai kapan masing-masing benar-benar berubah. Font woff2 `max-age=31536000, immutable` — ini **setelan server**, `.htaccess` dicadangkan lebih dulu dan blok ditambahkan (bukan menimpa); langkah + verifikasinya dicatat di `scripts/setup-hostinger.sh`. `/isi-data/` akhirnya dapat preload font.
+>
+> 🔴 **U29 — divergensi yang diprediksi SUDAH TERJADI**, diukur sendiri: `--warn-bg` `#fdf3e4` vs `#fdf3e0` · `--warn-line` · `--warn-ink` · `--error`. Kuning peringatan & merah galat berbeda antara `/isi-data/` dan `/tamu/`, dua halaman yang dilihat pembeli yang sama dalam satu jam yang sama. Delapan belas token di-rename, nilai `katalog.css` jadi kanon (8 halaman vs 1).
+>
+> **U30 — bagian yang berdampak dikerjakan, remap skala tipografi TIDAK.** Yang dikerjakan: 12 literal `rgba()` di luar `:root` ternyata **mengunci warna mode terang** sehingga elemennya tidak ikut berganti di mode gelap — diverifikasi di mode gelap sungguhan, nol sisa. Plus token hantu `--c-ink-3` dan peran dua token tinta yang kini tertulis.
+> **Yang sengaja tidak dikerjakan: remap 73 nilai `font-size` ke satu skala.** Itu perubahan lintas delapan halaman dengan risiko regresi nyata dan manfaat yang seluruhnya menghadap developer — review-nya sendiri menggolongkannya *"kerapian, bukan kerusakan berjalan"*. Kalau suatu saat dikerjakan, kerjakan sebagai pekerjaan tersendiri dengan pembanding tangkapan layar sebelum/sesudah, bukan menumpang ronde lain.
+>
+> **U31 — digerbang, dan gerbangnya bukan waktu.** Jalur server (konversi WebP LiteSpeed) menuntut layanan **QUIC.cloud dengan akun & kuota terpisah** — itu keputusan owner, bukan sesuatu yang saya daftarkan sendiri. Jalur markup (`<picture>`) memang bisa dikerjakan, tapi ia menyentuh `<img>` yang sama dengan **D3** yang masih terbuka dan sendirinya menunggu keputusan resolusi cetak; mengerjakannya sekarang berarti menyentuh markup yang sama dua kali. **Kerjakan bersama D3.**
+
+
+- [x] **U27** 🤖 `jam` — **Tiga aset yatim berhenti dikirim ke setiap pengunjung**
   Komentar `functions.php:233-235` menyatakan niatnya — *"buang SEMUA aset tema/plugin lain… halaman harus ringan & bebas bentrok CSS"* — tapi tiga hal lolos, dan ketiganya sampai ke **halaman undangan** yang dibuka ratusan tamu:
   · **`wc-blocks.css` 14.006 byte, render-blocking di `<head>`**, ada di kedelapan halaman yang diperiksa termasuk ketiga demo undangan. Loop dequeue ([functions.php:245-250](../wp-content/themes/harih/functions.php:245)) berjalan di `wp_enqueue_scripts`, sementara WooCommerce Blocks meng-enqueue saat render — jadi handle-nya tiba setelah loop selesai. Nol blok WooCommerce di halaman undangan.
   · **`global-styles-inline-css` 14.627 byte**, identik di kelima halaman yang diambil — **33% dari HTML mentah undangan** (44.180 byte). Biaya terkompresinya diukur dengan membandingkan brotli HTML utuh (10.398 B) vs tanpa blok itu (8.147 B) = **2.251 byte, 21% dari yang benar-benar terkirim**.
@@ -642,13 +659,13 @@ Ketiga blok copy ([page-katalog.php:136](../wp-content/themes/harih/page-katalog
   ⚠️ Mekanisme "enqueue saat render" tidak bisa dibaca dari repo (inti WordPress tidak ada di sini) — **hasilnya** yang pasti. Uji satu per satu di kelima halaman, jangan borongan.
   **Selesai bila:** halaman undangan hanya memuat dua stylesheet milik sendiri · nol `#ast-scroll-top` di HTML · HTML undangan turun ±14 KB mentah.
 
-- [ ] **U28** 🤖 `jam` — **Cache: versi per-berkas, font abadi, preload yang sampai ke `/isi-data/`**
+- [x] **U28** 🤖 `jam` — **Cache: versi per-berkas, font abadi, preload yang sampai ke `/isi-data/`**
   **(a)** `HARIH_VERSION` adalah satu tombol untuk seluruh aset. Dari 12 kenaikan versi terakhir, hanya **3** yang benar-benar menyentuh aset undangan — sembilan sisanya membatalkan cache undangan **tanpa satu byte pun berubah**, termasuk `2.21.0` (D1, murni PHP/n8n). Dengan ~1,2 kenaikan per hari, tamu yang kembali mengunduh ulang CSS+JS undangan berkali-kali tanpa alasan. **(b)** Font woff2 hanya di-cache **7 hari** (66.548 byte) sementara JPEG di origin yang sama 1 tahun dan CSS 30 hari — berkas yang paling tidak pernah berubah justru masa hidupnya paling pendek. **(c)** `/isi-data/` tidak pernah dapat `<link rel=preload>` font karena `harih_halaman_toko()` ([functions.php:315-319](../wp-content/themes/harih/functions.php:315)) tidak memuatnya, padahal hook mode gelap sudah menambahkan pengecualian khusus untuk halaman itu — dua daftar, satu maksud.
   **Langkah:** `harih_ver($rel)` berbasis `filemtime()` dengan `HARIH_VERSION` sebagai fallback, dipakai di `functions.php:256` & `:276-278` · tambahkan `page-isi-data.php` ke `$tpl` (satu baris, sekaligus menghapus kebutuhan pengecualian di `:340`) · `Cache-Control: max-age=31536000, immutable` untuk `*.woff2`.
   ⚠️ Untuk (b): **`find . -name .htaccess` di repo = 0 berkas.** Header ini setelan LiteSpeed/Hostinger, bukan patch yang bisa di-commit — kerjakan lewat SSH/wp-cli seperti preseden A6, dan catat perintahnya di `scripts/setup-hostinger.sh`.
   **Selesai bila:** menaikkan `HARIH_VERSION` tanpa menyentuh CSS undangan tidak mengubah URL aset undangan · `curl -sI` woff2 menunjukkan `immutable` · `/isi-data/` memuat preload font.
 
-- [ ] **U29** 🤖 `jam` — **`isi-data.css` dan `katalog.css` berhenti jadi dua sistem desain**
+- [x] **U29** 🤖 `jam` — **`isi-data.css` dan `katalog.css` berhenti jadi dua sistem desain**
   Delapan belas token dengan nilai **identik** dan nama berbeda: `--accent` vs `--c-accent`, `--bg` vs `--c-bg`, `--ink` vs `--c-ink`, `--soft` vs `--c-ink-soft`, `--line` vs `--c-line`, `--gold` vs `--c-gold`; prefiks font `--f-*` vs `--font-*`.
   🔴 **Kerusakan yang diprediksi sudah terjadi:** empat pasangan yang jelas kembar **tidak lagi sama nilainya** — `--warn-bg #fdf3e4` vs `--c-warn-bg #fdf3e0`, `--warn-line #ecd9b3` vs `--c-warn-line`, dan seterusnya. Halaman yang sama-sama dilihat pembeli dalam satu jam sudah menampilkan dua kuning yang berbeda.
   Sekeluarga: `.btn` punya **tiga** definisi berbeda (padding 16/17/16 px, bobot 800/500/…, radius 999px/`var(--radius-btn)`, `:active` scale vs translateY) dan hanya versi `katalog.css` yang punya `:focus-visible`. `.field` juga tiga. *(Cakupan sebenarnya: `/isi-data/` hanya punya **satu** `.btn` — tombol submit — jadi benturan yang dirasakan pembeli adalah CTA `/harga/` vs tombol kirim itu.)*
