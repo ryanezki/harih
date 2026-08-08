@@ -593,7 +593,9 @@ Ketiga blok copy ([page-katalog.php:136](../wp-content/themes/harih/page-katalog
 >
 > ⚠️ **Perbaikan breakpoint U25 gagal DUA KALI sebelum benar, dan keduanya terukur:** `auto-fit minmax(220px)` tetap memberi 3 kolom di 744px (4×220 + gap butuh ±928px), lalu aturannya sempat ditaruh di `@media (min-width: 760px)` — yang di 744px **tidak aktif sama sekali**, sehingga 3 kolom milik `.paket-grid` tetap menang. Yang benar: di media 720px tepat setelah `.paket-grid`, karena spesifisitasnya sama dan urutan sumber yang menentukan.
 >
-> **Sisa: U22** — `/harga/` & `/satuan/` menjual produk Rp 1,19–5,9 juta dengan `document.images.length` = **0**. Butuh owner memotret sampel `TEST-173` yang sudah tercetak. Markup kartu siap menerima foto; saya sengaja **tidak** membuat mockup, karena gambar produk yang dikarang lebih berbahaya daripada tidak ada gambar.
+> **U22 — SELESAI sebagai infrastruktur, menunggu berkasnya.** `harih_foto_produk()` membaca `aset/produk/{slug}.{webp,jpg,png}`: begitu berkasnya ada ia langsung tampil, tanpa menyentuh kode. **Lima slot live** — `amplop-nama`, `undangan-terbuka`, `paket-hormat`, `paket-resepsi`, `paket-grand` — sementara ini menampilkan placeholder yang menyebut apa yang akan ada di situ. Hasil AI otomatis berlabel **"ilustrasi"**; labelnya jangan dicabut sampai fotonya sungguhan. Prompt siap pakai + daftar foto nyata (bengkel, mesin, tangan melipat) ada di [`prompt-gambar.md`](./prompt-gambar.md).
+>
+> **Sisa PU-C: nol.**
 
 
 - [x] **U21** 🤖 `menit` — **Copy pembayaran berhenti menjanjikan yang belum menyala**
@@ -602,7 +604,7 @@ Ketiga blok copy ([page-katalog.php:136](../wp-content/themes/harih/page-katalog
   **Langkah:** kondisikan ketiga blok pada `harih_bayar_online_siap()` sama seperti tombolnya. Versi sandbox yang jujur dan tetap menjual: hero → *"Mulai Rp 99rb, sekali bayar · konfirmasi & pembayaran lewat CS WhatsApp"*; langkah 1 → *"Chat WhatsApp — CS kirim rincian & rekening resmi hariH"*; FAQ → sebut transfer bank/QRIS ke rekening atas nama usaha. Cabang lama hidup lagi otomatis begitu Duitku production dipasang, tanpa deploy.
   **Selesai bila:** nol kalimat "gateway" tayang selama `duitku_environment !== 'production'` · kedua cabang diuji dengan membalik nilai opsinya.
 
-- [ ] **U22** 🤝 `jam` — **Produk cetak Rp 1,19–5,9 juta berhenti dijual tanpa satu pun fotonya**
+- [x] **U22** 🤝 `jam` — **Produk cetak Rp 1,19–5,9 juta berhenti dijual tanpa satu pun fotonya**
   `document.images.length` = **0** di `/harga/` **dan** `/satuan/`; `<picture>` = 0; enumerasi computed `backgroundImage` seluruh elemen `/harga/` hanya mengembalikan satu gradien. Jadi tidak ada foto yang "terlewat lewat CSS". Beranda punya enam gambar tapi **tak satu pun memperlihatkan cetakan** — band cetak memakai foto cincin & sepatu. Sementara copy-nya menuntut pembeli **membayangkan**: *"dicetak langsung pada amplopnya, bukan stiker yang ditempel"*, *"A4 dilipat jadi A5"*, *"kertas lebih tebal · finishing khusus"*. Sampel `TEST-173` sudah dicetak sungguhan — bahannya ada.
   **Langkah:** 3–5 foto di `page-harga-hybrid.php` — close-up amplop bernama di hero, undangan terbuka dengan QR di halaman dalam, hamparan isi paket Resepsi (satu foto ini sekaligus menjawab "apa saja yang saya dapat"), satu foto per kartu paket.
   👤 **Butuh tangan owner:** memotret sampel yang sudah ada. Selama itu belum ada, mockup jujur berlabel "ilustrasi" jauh lebih baik daripada nol.
@@ -752,7 +754,7 @@ Ketiga blok copy ([page-katalog.php:136](../wp-content/themes/harih/page-katalog
 
 5. **Backup tidak terenkripsi**, padahal Kebijakan Privasi yang tayang menyatakan "disimpan terenkripsi". Sementara enkripsi belum dipasang: lunakkan kalimat kebijakannya, atau langsung pasang enkripsi? → D2
 
-7. **Harga satuan vs harga paket saling bertentangan** (ditemukan U24, 2026-08-08). Dihitung dari tabel `/satuan/` sendiri, ketiga paket lebih mahal daripada membeli isinya satuan: Hormat +Rp 141rb · Resepsi +Rp 201rb · Grand +Rp 1,6 jt. Klaim "hemat" sudah dicabut dari kedua halaman supaya tidak ada yang bisa dibantah pembeli, tapi **pertanyaannya belum terjawab: harga satuan yang terlalu murah, atau harga paket yang terlalu mahal?** Selama belum diputuskan, paket dijual atas dasar kemudahan (satu proof, satu pengiriman, satu desain), bukan atas dasar harga. → U24
+7. ~~**Harga satuan vs harga paket**~~ → **DIPUTUSKAN 2026-08-08: satuan yang terlalu murah.** Tabelnya dihargai waktu produknya masih kartu QR Rp 9.500 dan tidak ikut diperbarui. Undangan lipat 15rb → **35rb/pcs** (diubah di produk WooCommerce id 85 **dan** tabel `/harga/` — keduanya sumber terpisah, dan perbedaannya persis yang melahirkan U24). Paket kini menang di ketiga tingkat. **Perbaikan sesungguhnya bukan angka:** satuan kini **tidak termasuk undangan digital dan tidak mendapat Garansi Tepat Waktu**, jadi keduanya berhenti sebanding dan kalkulator pembeli tidak lagi bisa mengalahkan kita di tingkat mana pun.
 
 6. **Akuisisi** — mana yang diambil lebih dulu: mendekati 5 vendor/WO (sudah tertulis, nol biaya, sudah dinyatakan bisa paralel) atau daftar lapak di direktori pernikahan? **Saran: vendor dulu.** Keduanya butuh tangan Anda, bukan kode. → C9
 
