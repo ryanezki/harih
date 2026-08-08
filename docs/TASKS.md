@@ -24,12 +24,12 @@
 
 **Mulai dari sini di sesi berikutnya.** `HARIH_VERSION 2.21.0` · 9 workflow aktif · smoke **32/32** · WAHA `healthy`, sesi `WORKING`.
 
-**27 dari 30 item selesai.** Sisa tiga di bawah. Ditambah **31 item** dari review UI/UX ([🎨 PU](#-pu--review-uiux-menyeluruh-8-agustus-2026)) — **PU-A (U1–U9) SELESAI & LIVE** *(v2.22.0)* · **SELURUH PU-B (U10–U20) SELESAI & LIVE** *(v2.24.2)*. Smoke 32/32.
+**27 dari 30 item selesai.** Sisa tiga di bawah. Ditambah **31 item** dari review UI/UX ([🎨 PU](#-pu--review-uiux-menyeluruh-8-agustus-2026)) — **PU-A (U1–U9) SELESAI & LIVE** *(v2.22.0)* · **PU-B (U10–U20) LIVE** *(v2.24.2)* · **PU-C LIVE kecuali U22** *(v2.25.3)*. Smoke 32/32.
 
 > ### ▶ MULAI DARI SINI
 > 1. **A8** — satu-satunya yang butuh tangan owner.
 > 2. **C8** lalu **D3**.
-> 3. **PU-C** (U21–U26) — halaman jualan. **U22** butuh tangan Anda: memotret sampel `TEST-173` yang sudah tercetak. **PU-D murni kerapian, jangan didahulukan.**
+> 3. **U22** — foto produk cetak; butuh tangan Anda (memotret sampel `TEST-173`). Lalu **PU-D**, yang murni kerapian.
 > 4. Pada order cetak sungguhan pertama: periksa dua cabang `/proof/` yang belum pernah dilewati data nyata (lihat catatan ⚠️ di kotak PU-A).
 
 | | | |
@@ -575,7 +575,28 @@ Ketiga blok copy ([page-katalog.php:136](../wp-content/themes/harih/page-katalog
 
 ### PU-C · Halaman jualan
 
-- [ ] **U21** 🤖 `menit` — **Copy pembayaran berhenti menjanjikan yang belum menyala**
+> ## ◐ PU-C — **U21 · U23 · U24 · U25 · U26 SELESAI & LIVE** 2026-08-08 *(v2.25.3)* · **U22 menunggu owner**
+>
+> Commit `ed9bb10`. Smoke 32/32, keempat halaman jualan 200, nol sisa klaim lama.
+>
+> 🔴 **U24 ternyata lebih buruk dari yang tercatat.** Dihitung ulang dari tabel satuan halaman itu sendiri, **ketiga paket lebih mahal** daripada beli satuan — bukan hanya angka "Rp 3.600.000 / hemat Rp 700.000" yang tak bersumber:
+>
+> | paket | dibeli satuan | harga paket | selisih |
+> |---|---|---|---|
+> | Hormat | Rp 1.049.000 | Rp 1.190.000 | **paket +141.000** |
+> | Resepsi | Rp 2.699.000 | Rp 2.900.000 | **paket +201.000** |
+> | Grand | Rp 4.298.000 | Rp 5.900.000 | **paket +1.602.000** |
+>
+> *(satuan = tabel `/satuan/` × isi paket + digital termahal Rp 299.000. "300 kupon souvenir" di Grand tidak ada di tabel satuan, jadi tidak bisa dihargai dari halaman itu.)*
+>
+> Klaim payung *"paket selalu lebih hemat per unit"* karena itu ikut dicabut, diganti pembeda yang bisa dibuktikan (satu proof · satu pengiriman · satu desain · gratis ongkir yang bernilai Rp 150.000 di struktur biaya · garansi). **Yang belum diputuskan: apakah harga satuan yang terlalu murah, atau harga paket yang terlalu mahal — itu keputusan owner, bukan keputusan kode.** Ditambahkan ke daftar keputusan menunggu owner.
+>
+> ⚠️ **Perbaikan breakpoint U25 gagal DUA KALI sebelum benar, dan keduanya terukur:** `auto-fit minmax(220px)` tetap memberi 3 kolom di 744px (4×220 + gap butuh ±928px), lalu aturannya sempat ditaruh di `@media (min-width: 760px)` — yang di 744px **tidak aktif sama sekali**, sehingga 3 kolom milik `.paket-grid` tetap menang. Yang benar: di media 720px tepat setelah `.paket-grid`, karena spesifisitasnya sama dan urutan sumber yang menentukan.
+>
+> **Sisa: U22** — `/harga/` & `/satuan/` menjual produk Rp 1,19–5,9 juta dengan `document.images.length` = **0**. Butuh owner memotret sampel `TEST-173` yang sudah tercetak. Markup kartu siap menerima foto; saya sengaja **tidak** membuat mockup, karena gambar produk yang dikarang lebih berbahaya daripada tidak ada gambar.
+
+
+- [x] **U21** 🤖 `menit` — **Copy pembayaran berhenti menjanjikan yang belum menyala**
   Ketiga blok — hero-trust, langkah 1, dan FAQ ([page-katalog.php:136](../wp-content/themes/harih/page-katalog.php:136), [:170](../wp-content/themes/harih/page-katalog.php:170), [:302](../wp-content/themes/harih/page-katalog.php:302)) — berada **di luar percabangan apa pun**, sementara `harih_bayar_online_siap()` ([functions.php:598-600](../wp-content/themes/harih/functions.php:598)) hanya membungkus `href`. Ini kelas cacat yang sama persis dengan B5/B6/B7: halaman tayang menjanjikan hal yang keputusan atau kode tidak dukung.
   ⚠️ Jangan berlebihan: *"bukti pembayaran otomatis via email"* **tetap benar** — runbook §7c membuat order WooCommerce lalu set `processing`, dan WooCommerce memang mengirim email order otomatis. Yang salah spesifik frasa *"diproses payment gateway berlisensi resmi"*.
   **Langkah:** kondisikan ketiga blok pada `harih_bayar_online_siap()` sama seperti tombolnya. Versi sandbox yang jujur dan tetap menjual: hero → *"Mulai Rp 99rb, sekali bayar · konfirmasi & pembayaran lewat CS WhatsApp"*; langkah 1 → *"Chat WhatsApp — CS kirim rincian & rekening resmi hariH"*; FAQ → sebut transfer bank/QRIS ke rekening atas nama usaha. Cabang lama hidup lagi otomatis begitu Duitku production dipasang, tanpa deploy.
@@ -587,24 +608,24 @@ Ketiga blok copy ([page-katalog.php:136](../wp-content/themes/harih/page-katalog
   👤 **Butuh tangan owner:** memotret sampel yang sudah ada. Selama itu belum ada, mockup jujur berlabel "ilustrasi" jauh lebih baik daripada nol.
   **Selesai bila:** `/harga/` memuat foto produk cetak sungguhan · tiap kartu paket punya visual.
 
-- [ ] **U23** 🤝 `jam` — **Sinyal kepercayaan: nomor yang bisa dibaca, jam layanan, identitas usaha**
+- [x] **U23** 🤝 `jam` — **Sinyal kepercayaan: nomor yang bisa dibaca, jam layanan, identitas usaha**
   Hitungan pada **teks tampak** (bukan HTML mentah) di beranda, `/harga/`, `/satuan/`: "testimoni" 0 · "ulasan" 0 · "rating" 0 · "portofolio" 0. Nomor CS muncul 3–9 kali di HTML mentah tapi **nol kali di teks tampak** — hanya di dalam `href="wa.me/…"`, jadi tidak bisa dibaca, disalin, atau dicek pengunjung. "Jam layanan"/"WIB"/"Senin"/"09.00"/`hi@harih.id` = 0 di ketiganya, padahal `/kontak/` yang tayang menyebut *"Senin–Sabtu, 09.00–18.00 WIB"*. Blok Identitas Usaha hanya ada di `/kontak/`, dan `nav.php` tidak menautkannya sama sekali — hanya footer. Satu-satunya bukti sosial adalah badge "Paling Laris" & "Paling Populer" pada produk yang **belum pernah terjual**.
   ⚠️ Rumusan yang tepat: informasinya **satu klik jauhnya** lewat footer, bukan "tidak ada di mana pun". Yang hilang adalah kehadirannya **di dekat CTA**, tepat saat orang memutuskan.
   **Langkah:** nomor WhatsApp sebagai **teks** di dekat tiap kelompok CTA + jam layanan · "Kontak" masuk `nav.php` · ringkasan Identitas Usaha ke `kaki.php`. Berikutnya: 3 kutipan pemesan pertama dengan izin, atau foto paket sungguhan sebelum dikirim. Ganti "Paling Populer" dengan penanda yang jujur untuk produk baru — mis. *"Rekomendasi kami untuk resepsi gedung"*.
   **Selesai bila:** nomor & jam layanan terbaca tanpa mengeklik apa pun di ketiga halaman jualan.
 
-- [ ] **U24** 🤖 `menit` — **Klaim "Anda hemat Rp 700.000" berhenti dibantah tabel di halaman yang sama**
+- [x] **U24** 🤖 `menit` — **Klaim "Anda hemat Rp 700.000" berhenti dibantah tabel di halaman yang sama**
   Isi Paket Resepsi dihargai dengan **tabel satuan halaman itu sendiri**: 100×15.000 + 200×2.000 + 100×3.500 + 100×1.500 = **Rp 2.400.000**, plus digital termahal Rp 299.000 = **Rp 2.699.000**. Klaim yang tayang: *"Dibeli satuan: Rp 3.600.000 — Anda hemat Rp 700.000"* ([page-harga-hybrid.php:60](../wp-content/themes/harih/page-harga-hybrid.php:60)). Selisih **Rp 901.000 tidak berasal dari harga mana pun yang situs terbitkan**, dan totalnya justru Rp 201.000 **lebih murah** daripada harga paketnya. Klaim payung *"Paket selalu lebih hemat per unit"* juga gugur untuk Hormat (satuan Rp 1.049.000 vs paket Rp 1.190.000). Diverifikasi silang dengan harga WooCommerce hidup — keduanya cocok persis. Klaim yang sama diulang sebagai h2 di `/satuan/`.
   *(Peringan yang layak disebut di perbaikan, bukan pembatalan: minimum Rp 1.000.000/transaksi membuat keranjang setara-Hormat memang tidak bisa di-checkout.)*
   **Langkah:** ganti angka gelondongan dengan rincian yang bisa dijumlahkan pembaca (baris per item × harga satuan) dan cantumkan nilai "undangan digital custom" sebagai satu baris berharga. Bila Rp 3.600.000 memang benar, komponen penutup selisihnya **harus muncul** di tabel satuan. Bila tidak, turunkan ke angka yang bisa dibuktikan — atau ganti sudutnya: *"satu proof, satu pengiriman, satu desain"*.
   **Selesai bila:** angka di halaman bisa dijumlahkan sendiri oleh pembaca dan hasilnya cocok.
 
-- [ ] **U25** 🤖 `jam` — **Layar pertama: nav 174 px, nol CTA menetap, harga di kedalaman 2.899 px**
+- [x] **U25** 🤖 `jam` — **Layar pertama: nav 174 px, nol CTA menetap, harga di kedalaman 2.899 px**
   `.nav` tingginya **88 px di 1280 px tapi 174 px di 360 px** — tiga baris, karena `flex-wrap` tanpa satu pun media query maupun hamburger ([katalog.css:291-305](../wp-content/themes/harih/katalog.css:291)). Itu **27% layar pertama** di ponsel entry-level, dan mendorong foto produk serta harga ke bawah lipatan. Terpisah: pencacahan seluruh elemen `position: fixed|sticky` di beranda mengembalikan **array kosong** — `.nav` sendiri `static` sehingga hilang setelah 174 px pertama. `#paket` baru mulai di 2.899 px dari dokumen 6.288 px. Ikut di ronde ini: jurang breakpoint **720–759 px** (persis iPad mini portrait 744 px) — `.paket-grid` sudah 3 kolom di ≥720 px tapi `.paket-grid-hybrid` baru 4 kolom di ≥760 px ([katalog.css:814-819](../wp-content/themes/harih/katalog.css:814), [:866-869](../wp-content/themes/harih/katalog.css:866)), sehingga empat kartu pecah jadi 3 + 1 yatim yang terpisah ±1.000 px ke bawah.
   **Langkah:** ciutkan `.nav-tautan` di layar sempit (tautan Tema/Paket/Cetak toh cuma anchor ke bawah halaman) atau jadikan tombol menu · bilah CTA menempel di bawah layar berisi "mulai Rp …" + satu tombol WhatsApp, muncul setelah hero terlewati · samakan ambang kedua grid, atau ganti dengan `repeat(auto-fit, minmax(220px, 1fr))` sehingga jumlah kolom dihitung sendiri.
   **Selesai bila:** nav satu baris di 360 px · harga terbaca tanpa menggulir tiga layar · tidak ada kartu yatim di 720–759 px.
 
-- [ ] **U26** 🤖 `menit` — **Enam koreksi copy & tautan yang masing-masing berbiaya satu baris**
+- [x] **U26** 🤖 `menit` — **Enam koreksi copy & tautan yang masing-masing berbiaya satu baris**
   **(a)** `<title>` `/harga/` masih *"Undangan Digital + Kartu Fisik Ber-QR"* ([functions.php:681](../wp-content/themes/harih/functions.php:681)) — produk yang FAQ halaman itu sendiri argumentasikan **bukan** tawaran utamanya; `og:title` sudah benar, hanya elemen title yang tertinggal. Periksa juga `/satuan/` ([:661](../wp-content/themes/harih/functions.php:661)). **(b)** Sedikitnya **empat** format rupiah tayang bersamaan: `99 rb` (kartu, **tanpa "Rp"**) · `Rp 99rb` (hero & marquee) · `Rp 99 ribu` (CTA penutup) · `Rp 1.190.000`. Bukan efek CSS yang terlewat — `katalog.css:556-558` tidak punya `::before { content: 'Rp' }`. **(c)** Kartu terakhir carousel tema menaut `href="#tema"` — ke section tempat tombol itu **sendiri berada** ([page-katalog.php:197-200](../wp-content/themes/harih/page-katalog.php:197)). **(d)** Label "Tambah 50 pcs" di `/satuan/` tidak dikondisikan padahal href-nya sudah ([page-satuan.php:80](../wp-content/themes/harih/page-satuan.php:80)); begitu pula kalimat aturan keranjang yang tidak pernah dilalui pembeli. **(e)** Masa aktif H+7 dicabut dari kartu Hemat (C3b) tapi masih **bocor** lewat pesan filter tamu ([page-katalog.php:358](../wp-content/themes/harih/page-katalog.php:358)) — sementara `masa-aktif.php:66-102` tetap menegakkannya dan S&K §4 tetap menyebutnya. **(f)** Jam layanan CS tidak pernah muncul di dekat CTA (lihat U23).
   **Selesai bila:** satu format rupiah di seluruh situs · nol tautan yang mendarat di tempatnya sendiri · label & href sama-sama dikondisikan.
 
@@ -713,6 +734,8 @@ Ketiga blok copy ([page-katalog.php:136](../wp-content/themes/harih/page-katalog
 4. **Bobot paket** dicatat **tiga versi berbeda** di dokumen (2/5/9 kg vs 2/4/7 kg), sementara produk di WooCommerce memakai 2/4/7 dan ongkir dikunci Rp 150.000 se-Indonesia **tanpa sumber tercatat**. Angka mana yang benar, dan apakah Rp 150.000 pernah diuji ke tarif kurir nyata untuk 7 kg ke luar Jawa?
 
 5. **Backup tidak terenkripsi**, padahal Kebijakan Privasi yang tayang menyatakan "disimpan terenkripsi". Sementara enkripsi belum dipasang: lunakkan kalimat kebijakannya, atau langsung pasang enkripsi? → D2
+
+7. **Harga satuan vs harga paket saling bertentangan** (ditemukan U24, 2026-08-08). Dihitung dari tabel `/satuan/` sendiri, ketiga paket lebih mahal daripada membeli isinya satuan: Hormat +Rp 141rb · Resepsi +Rp 201rb · Grand +Rp 1,6 jt. Klaim "hemat" sudah dicabut dari kedua halaman supaya tidak ada yang bisa dibantah pembeli, tapi **pertanyaannya belum terjawab: harga satuan yang terlalu murah, atau harga paket yang terlalu mahal?** Selama belum diputuskan, paket dijual atas dasar kemudahan (satu proof, satu pengiriman, satu desain), bukan atas dasar harga. → U24
 
 6. **Akuisisi** — mana yang diambil lebih dulu: mendekati 5 vendor/WO (sudah tertulis, nol biaya, sudah dinyatakan bisa paralel) atau daftar lapak di direktori pernikahan? **Saran: vendor dulu.** Keduanya butuh tangan Anda, bukan kode. → C9
 
