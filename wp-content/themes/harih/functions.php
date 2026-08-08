@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) exit;
  * pengunjung & LiteSpeed tetap menyajikan berkas lama meski file di server
  * sudah baru, dan perbaikan tampilan terlihat "tidak berpengaruh".
  */
-const HARIH_VERSION = '2.27.0';
+const HARIH_VERSION = '2.28.1';
 
 /**
  * Versi aset PER BERKAS (U28).

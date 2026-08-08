@@ -30,24 +30,32 @@
 }
 
 :root {
-    --f-display: 'DM Serif Display', Georgia, serif;
-    --f-body: 'Figtree', system-ui, -apple-system, sans-serif;
-    --bg: #faf7f0;
-    --surface: #ffffff;
-    --ink: #2a2922;
-    --soft: #6b675a;
-    --line: #e6e1d2;
-    --accent: #3f5c4f;
-    --accent-ink: #f4f1e7;
-    --gold: #b4923f;
+    /* U29 — SKEMA NAMA DISAMAKAN dengan katalog.css (`--c-*` / `--font-*`).
+       Sebelumnya berkas ini memakai `--accent`, `--bg`, `--soft`, `--f-body`
+       untuk nilai yang IDENTIK — dan yang diprediksi akan terjadi memang sudah
+       terjadi: empat pasangan sudah divergen diam-diam (--warn-bg #fdf3e4 vs
+       #fdf3e0 · --warn-line · --warn-ink · --error), sehingga kuning peringatan
+       dan merah galat berbeda antara /isi-data/ dan /tamu/ — dua halaman yang
+       dilihat pembeli yang sama dalam satu jam yang sama. Nilai katalog.css
+       dijadikan kanon karena ia melayani delapan halaman, ini satu. */
+    --font-display: 'DM Serif Display', Georgia, serif;
+    --font-body: 'Figtree', system-ui, -apple-system, sans-serif;
+    --c-bg: #faf7f0;
+    --c-surface: #ffffff;
+    --c-ink: #2a2922;
+    --c-ink-soft: #6b675a;
+    --c-line: #e6e1d2;
+    --c-accent: #3f5c4f;
+    --c-accent-ink: #f4f1e7;
+    --c-gold: #b4923f;
     /* Ditokenkan 2026-08-07 (G1.1) supaya mode gelap punya tempat menimpanya. */
-    --surface-2: #fdfcf9;      /* panel di dalam kartu */
-    --surface-3: #f5f4ec;      /* keping/chip */
-    --on-gold: #ffffff;
-    --warn-bg: #fdf3e4;
-    --warn-line: #ecd9b3;
-    --warn-ink: #7a5c1e;
-    --error: #a4442f;
+    --c-surface-2: #fdfcf9;      /* panel di dalam kartu */
+    --c-surface-3: #f5f4ec;      /* keping/chip */
+    --c-on-gold: #ffffff;
+    --c-warn-bg: #fdf3e0;
+    --c-warn-line: #e5c98c;
+    --c-warn-ink: #7a5b1e;
+    --c-error: #a2452f;
     --radius: 18px;
     --shadow: 0 12px 32px rgba(63, 92, 79, .10);
 }
@@ -63,35 +71,35 @@
 @media (prefers-color-scheme: dark) {
     :root:not([data-tema="terang"]) {
         color-scheme: dark;
-        --bg: #111510;          --surface: #1e241d;
-        --ink: #f0ede2;         --soft: #a39d8d;
-        --line: #313828;        --accent: #8cba9e;
-        --accent-ink: #141a13;  --gold: #d4ab55;
-        --surface-2: #232a21;   --surface-3: #262d24;
-        --on-gold: #1a1408;     --warn-bg: #2e2513;
-        --warn-line: #5c4a20;   --warn-ink: #e8c98a;
-        --error: #e98872;       --shadow: 0 12px 32px rgba(0, 0, 0, .5);
+        --c-bg: #111510;          --c-surface: #1e241d;
+        --c-ink: #f0ede2;         --c-ink-soft: #a39d8d;
+        --c-line: #313828;        --c-accent: #8cba9e;
+        --c-accent-ink: #141a13;  --c-gold: #d4ab55;
+        --c-surface-2: #232a21;   --c-surface-3: #262d24;
+        --c-on-gold: #1a1408;     --c-warn-bg: #2e2513;
+        --c-warn-line: #5c4a20;   --c-warn-ink: #e8c98a;
+        --c-error: #e98872;       --shadow: 0 12px 32px rgba(0, 0, 0, .5);
     }
 }
 :root[data-tema="gelap"] {
     color-scheme: dark;
-    --bg: #111510;          --surface: #1e241d;
-    --ink: #f0ede2;         --soft: #a39d8d;
-    --line: #313828;        --accent: #8cba9e;
-    --accent-ink: #141a13;  --gold: #d4ab55;
-    --surface-2: #232a21;   --surface-3: #262d24;
-    --on-gold: #1a1408;     --warn-bg: #2e2513;
-    --warn-line: #5c4a20;   --warn-ink: #e8c98a;
-    --error: #e98872;       --shadow: 0 12px 32px rgba(0, 0, 0, .5);
+    --c-bg: #111510;          --c-surface: #1e241d;
+    --c-ink: #f0ede2;         --c-ink-soft: #a39d8d;
+    --c-line: #313828;        --c-accent: #8cba9e;
+    --c-accent-ink: #141a13;  --c-gold: #d4ab55;
+    --c-surface-2: #232a21;   --c-surface-3: #262d24;
+    --c-on-gold: #1a1408;     --c-warn-bg: #2e2513;
+    --c-warn-line: #5c4a20;   --c-warn-ink: #e8c98a;
+    --c-error: #e98872;       --shadow: 0 12px 32px rgba(0, 0, 0, .5);
 }
 
 * { box-sizing: border-box; }
 
 body.isidata-body {
     margin: 0;
-    font-family: var(--f-body);
-    color: var(--ink);
-    background: var(--bg);
+    font-family: var(--font-body);
+    color: var(--c-ink);
+    background: var(--c-bg);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
 }
@@ -100,12 +108,12 @@ body.isidata-body {
 
 /* ---- Header ---- */
 .isidata-header { text-align: center; margin-bottom: 26px; }
-.brand { margin: 0; font: 600 15px/1 var(--f-display); letter-spacing: .22em; text-transform: uppercase; color: var(--gold); }
-.isidata-header h1 { margin: 10px 0 6px; font: 500 30px/1.2 var(--f-display); }
-.sub { margin: 0; color: var(--soft); font-size: 14px; }
-.sub-kecil { margin: 8px 0 0; color: var(--soft); font-size: 13px; }
-.sub-legenda { margin: 10px 0 0; color: var(--soft); font-size: 12.5px; }
-.sub-legenda strong { color: var(--ink); }
+.brand { margin: 0; font: 600 15px/1 var(--font-display); letter-spacing: .22em; text-transform: uppercase; color: var(--c-gold); }
+.isidata-header h1 { margin: 10px 0 6px; font: 500 30px/1.2 var(--font-display); }
+.sub { margin: 0; color: var(--c-ink-soft); font-size: 14px; }
+.sub-kecil { margin: 8px 0 0; color: var(--c-ink-soft); font-size: 13px; }
+.sub-legenda { margin: 10px 0 0; color: var(--c-ink-soft); font-size: 12.5px; }
+.sub-legenda strong { color: var(--c-ink); }
 
 /* U9 — `.opsional` dipakai 15x tapi tidak punya SATU aturan pun. Ia mewarisi
    UPPERCASE + letter-spacing dari `.field > span` dan miring dari <em>, jadi
@@ -119,9 +127,9 @@ body.isidata-body {
 }
 
 .banner-warning {
-    background: var(--warn-bg);
-    border: 1px solid var(--warn-line);
-    color: var(--warn-ink);
+    background: var(--c-warn-bg);
+    border: 1px solid var(--c-warn-line);
+    color: var(--c-warn-ink);
     border-radius: 12px;
     padding: 12px 16px;
     font-size: 13px;
@@ -130,7 +138,7 @@ body.isidata-body {
 
 /* ---- Kartu section ---- */
 .kartu {
-    background: var(--surface);
+    background: var(--c-surface);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     padding: 22px 20px;
@@ -138,22 +146,22 @@ body.isidata-body {
 }
 .kartu h2 {
     margin: 0 0 16px;
-    font: 500 19px/1.3 var(--f-display);
+    font: 500 19px/1.3 var(--font-display);
     display: flex;
     align-items: center;
     gap: 8px;
     flex-wrap: wrap;
 }
-.kartu-note { margin: -8px 0 16px; font-size: 13px; color: var(--soft); }
+.kartu-note { margin: -8px 0 16px; font-size: 13px; color: var(--c-ink-soft); }
 .paket-badge {
-    font: 600 10px/1 var(--f-body);
+    font: 600 10px/1 var(--font-body);
     letter-spacing: .08em;
     text-transform: uppercase;
-    color: var(--gold);
+    color: var(--c-gold);
     /* color-mix, bukan rgba literal: nilai literalnya adalah emas MODE TERANG,
        jadi di mode gelap rona keping ini tidak ikut tokennya. Kontrasnya sendiri
        aman (6,13:1 terukur), ini soal konsistensi palet. */
-    background: color-mix(in srgb, var(--gold) 12%, transparent);
+    background: color-mix(in srgb, var(--c-gold) 12%, transparent);
     border-radius: 999px;
     padding: 5px 10px;
 }
@@ -166,7 +174,7 @@ body.isidata-body {
     font-weight: 600;
     letter-spacing: .05em;
     text-transform: uppercase;
-    color: var(--soft);
+    color: var(--c-ink-soft);
     margin-bottom: 6px;
 }
 /* U2 — radio & checkbox DIKECUALIKAN dari `width: 100%`. Radio `galeri_tata`
@@ -178,15 +186,15 @@ body.isidata-body {
    tapi belum pernah sampai ke form terpanjang yang kita punya. */
 .field input:not([type="radio"]):not([type="checkbox"]), .field select, .field textarea {
     width: 100%;
-    border: 1px solid var(--line);
-    background: var(--surface-2);
+    border: 1px solid var(--c-line);
+    background: var(--c-surface-2);
     border-radius: 12px;
     padding: 12px 14px;
-    font: 400 16px/1.5 var(--f-body);
-    color: var(--ink);
+    font: 400 16px/1.5 var(--font-body);
+    color: var(--c-ink);
 }
 .field input:not([type="radio"]):not([type="checkbox"]):focus, .field select:focus, .field textarea:focus {
-    outline: 2px solid var(--accent);
+    outline: 2px solid var(--c-accent);
     outline-offset: 1px;
     border-color: transparent;
 }
@@ -196,7 +204,7 @@ body.isidata-body {
 @media (min-width: 560px) {
     .row-2 { grid-template-columns: 1fr 1fr; }
 }
-.counter { margin: -8px 0 0; text-align: right; font-size: 11px; color: var(--soft); }
+.counter { margin: -8px 0 0; text-align: right; font-size: 11px; color: var(--c-ink-soft); }
 
 fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
 fieldset:disabled { opacity: .6; }
@@ -208,24 +216,24 @@ fieldset:disabled { opacity: .6; }
     display: flex;
     flex-direction: column;
     gap: 4px;
-    border: 1.5px solid var(--line);
+    border: 1.5px solid var(--c-line);
     border-radius: 12px;
     padding: 14px;
     cursor: pointer;
-    background: var(--surface-2);
+    background: var(--c-surface-2);
 }
 .tema-card input { position: absolute; opacity: 0; pointer-events: none; }
 /* U9 — radio native disembunyikan beserta cincin fokusnya; tanpa baris ini
    pemilih tema tidak punya penanda fokus sama sekali. Polanya sudah benar di
    `.tata-opsi` beberapa puluh baris di bawah — ini menyamakannya. */
-.tema-card:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tema-card:has(input:focus-visible) { outline: 2px solid var(--c-accent); outline-offset: 2px; }
 .tema-card:has(input:checked) {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent);
-    background: var(--surface-3);
+    border-color: var(--c-accent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--c-accent) 20%, transparent);
+    background: var(--c-surface-3);
 }
 .tema-nama { font-weight: 600; font-size: 14px; }
-.tema-demo { font-size: 12px; color: var(--accent); text-decoration: none; }
+.tema-demo { font-size: 12px; color: var(--c-accent); text-decoration: none; }
 .tema-demo:hover { text-decoration: underline; }
 
 /* ---- Upload foto ---- */
@@ -236,16 +244,16 @@ fieldset:disabled { opacity: .6; }
 /* U9 — foto pertama menentukan sampul undangan DAN kartu preview WhatsApp;
    copy-nya sudah menyatakan taruhannya, tapi tidak pernah ada cara memilih
    maupun tanda mana yang terpilih. */
-.foto-item.sampul img { outline: 2px solid var(--accent); outline-offset: 2px; }
+.foto-item.sampul img { outline: 2px solid var(--c-accent); outline-offset: 2px; }
 .foto-badge {
     position: absolute;
     left: 0;
     bottom: 0;
     padding: 2px 6px;
     border-radius: 0 8px 0 10px;
-    background: var(--accent);
-    color: var(--accent-ink);
-    font: 700 9.5px/1.4 var(--f-body);
+    background: var(--c-accent);
+    color: var(--c-accent-ink);
+    font: 700 9.5px/1.4 var(--font-body);
     letter-spacing: .06em;
     text-transform: uppercase;
 }
@@ -257,7 +265,7 @@ fieldset:disabled { opacity: .6; }
     height: 26px;
     border: 0;
     border-radius: 0 8px 0 10px;
-    background: color-mix(in srgb, var(--ink) 72%, transparent);
+    background: color-mix(in srgb, var(--c-ink) 72%, transparent);
     color: #fff;
     font-size: 13px;
     line-height: 1;
@@ -265,7 +273,7 @@ fieldset:disabled { opacity: .6; }
     display: grid;
     place-items: center;
 }
-.btn-sampul:hover, .btn-sampul:focus-visible { background: var(--accent); color: var(--accent-ink); }
+.btn-sampul:hover, .btn-sampul:focus-visible { background: var(--c-accent); color: var(--c-accent-ink); }
 .foto-hapus {
     position: absolute;
     top: -7px;
@@ -274,8 +282,8 @@ fieldset:disabled { opacity: .6; }
     height: 22px;
     border: 0;
     border-radius: 50%;
-    background: var(--ink);
-    color: var(--on-gold);
+    background: var(--c-ink);
+    color: var(--c-on-gold);
     font-size: 13px;
     line-height: 1;
     cursor: pointer;
@@ -285,31 +293,31 @@ fieldset:disabled { opacity: .6; }
 .btn-file {
     display: inline-block;
     cursor: pointer;
-    font: 600 13px/1 var(--f-body);
-    color: var(--accent);
-    box-shadow: inset 0 0 0 1.5px var(--accent);
+    font: 600 13px/1 var(--font-body);
+    color: var(--c-accent);
+    box-shadow: inset 0 0 0 1.5px var(--c-accent);
     padding: 11px 18px;
     border-radius: 999px;
 }
-.pesan-file { min-height: 1.1em; margin: 8px 0 0; font-size: 12px; color: var(--error); line-height: 1.5; }
+.pesan-file { min-height: 1.1em; margin: 8px 0 0; font-size: 12px; color: var(--c-error); line-height: 1.5; }
 /* Peringatan LUNAK (resolusi pas-pasan, F4.2): fotonya tetap dipakai, jadi
    warnanya harus beda dari penolakan — merah untuk sesuatu yang berhasil
    diunggah hanya membuat pemesan mengira ada yang gagal. */
-.pesan-file.pesan-lunak { color: var(--warn-ink); }
+.pesan-file.pesan-lunak { color: var(--c-warn-ink); }
 
 /* U1 — penghitung permanen + daftar catatan yang BERTAHAN sampai pemilihan
    berikutnya. Keduanya menggantikan `#pesan-foto` yang dulu memegang tiga
    tugas sekaligus dan menimpa dirinya sendiri tiap iterasi. */
-.foto-hitung { margin: 4px 0 0; font-size: 12px; font-weight: 600; color: var(--soft); }
+.foto-hitung { margin: 4px 0 0; font-size: 12px; font-weight: 600; color: var(--c-ink-soft); }
 .pesan-tolak { margin: 8px 0 0; padding-left: 18px; font-size: 12px; line-height: 1.55; }
 .pesan-tolak li + li { margin-top: 6px; }
-.pesan-tolak .tolak-keras { color: var(--error); }
-.pesan-tolak .tolak-lunak { color: var(--warn-ink); }
+.pesan-tolak .tolak-keras { color: var(--c-error); }
+.pesan-tolak .tolak-lunak { color: var(--c-warn-ink); }
 
 /* Petunjuk di bawah field — untuk aturan yang tidak muat di placeholder
    (format koordinat, daftar dompet yang diterima). Ditambahkan G1 2026-08-07. */
-.petunjuk { display: block; margin-top: 6px; font-size: 12px; font-style: normal; line-height: 1.55; color: var(--soft); }
-.petunjuk strong { color: var(--ink); font-weight: 700; }
+.petunjuk { display: block; margin-top: 6px; font-size: 12px; font-style: normal; line-height: 1.55; color: var(--c-ink-soft); }
+.petunjuk strong { color: var(--c-ink); font-weight: 700; }
 
 /* Pemilih tata letak galeri (G1.4): dua pilihan yang perlu DILIHAT bedanya,
    bukan dibaca — jadi radio bergambar mini, bukan <select>. */
@@ -322,20 +330,20 @@ fieldset:disabled { opacity: .6; }
     align-items: center;
     gap: 10px;
     padding: 10px 12px;
-    border: 1.5px solid var(--line);
+    border: 1.5px solid var(--c-line);
     border-radius: 12px;
-    background: var(--surface-2);
+    background: var(--c-surface-2);
     cursor: pointer;
 }
 .tata-opsi input { position: absolute; opacity: 0; pointer-events: none; }
-.tata-opsi:has(input:checked) { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
-.tata-opsi:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tata-opsi:has(input:checked) { border-color: var(--c-accent); box-shadow: inset 0 0 0 1px var(--c-accent); }
+.tata-opsi:has(input:focus-visible) { outline: 2px solid var(--c-accent); outline-offset: 2px; }
 .tata-ikon { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; width: 34px; flex: none; }
-.tata-ikon i { display: block; aspect-ratio: 1; background: var(--soft); opacity: .55; border-radius: 2px; }
+.tata-ikon i { display: block; aspect-ratio: 1; background: var(--c-ink-soft); opacity: .55; border-radius: 2px; }
 .tata-ikon .tt-besar { grid-column: span 3; aspect-ratio: 3 / 2; opacity: .8; }
 .tata-ikon .tt-a { grid-column: span 2; aspect-ratio: 2 / 1; opacity: .8; }
-.tata-nama { font-size: 13px; font-weight: 700; color: var(--ink); line-height: 1.3; }
-.tata-nama em { display: block; font-style: normal; font-size: 11.5px; font-weight: 500; color: var(--soft); margin-top: 2px; }
+.tata-nama { font-size: 13px; font-weight: 700; color: var(--c-ink); line-height: 1.3; }
+.tata-nama em { display: block; font-style: normal; font-size: 11.5px; font-weight: 500; color: var(--c-ink-soft); margin-top: 2px; }
 
 /* ---- Kirim ---- */
 .kirim-area { text-align: center; margin-top: 8px; }
@@ -343,10 +351,10 @@ fieldset:disabled { opacity: .6; }
     display: inline-block;
     border: 0;
     cursor: pointer;
-    font: 600 15px/1 var(--f-body);
+    font: 600 15px/1 var(--font-body);
     letter-spacing: .03em;
-    color: var(--accent-ink);
-    background: var(--accent);
+    color: var(--c-accent-ink);
+    background: var(--c-accent);
     padding: 16px 34px;
     border-radius: 999px;
     transition: transform .15s ease;
@@ -358,28 +366,28 @@ fieldset:disabled { opacity: .6; }
     margin: 16px auto 0;
     max-width: 420px;
     height: 10px;
-    background: var(--line);
+    background: var(--c-line);
     border-radius: 999px;
     overflow: hidden;
 }
 .progress-bar {
     width: 0%;
     height: 100%;
-    background: linear-gradient(90deg, var(--accent), var(--gold));
+    background: linear-gradient(90deg, var(--c-accent), var(--c-gold));
     border-radius: 999px;
     transition: width .25s ease;
 }
 /* U9 — angka persen yang terlihat mata; pembaca layar memakai aria-valuenow
    pada bar-nya, jadi elemen ini aria-hidden dan tidak ikut diumumkan. */
-.progress-pct { margin: 6px 0 0; font-size: 12px; font-weight: 600; color: var(--soft); font-variant-numeric: tabular-nums; }
-.kirim-msg { min-height: 1.3em; margin: 12px 0 0; font-size: 14px; color: var(--soft); }
-.kirim-msg.error { color: var(--error); }
-.bantuan { margin: 18px 0 0; font-size: 12px; color: var(--soft); }
-.bantuan a { color: var(--accent); }
+.progress-pct { margin: 6px 0 0; font-size: 12px; font-weight: 600; color: var(--c-ink-soft); font-variant-numeric: tabular-nums; }
+.kirim-msg { min-height: 1.3em; margin: 12px 0 0; font-size: 14px; color: var(--c-ink-soft); }
+.kirim-msg.error { color: var(--c-error); }
+.bantuan { margin: 18px 0 0; font-size: 12px; color: var(--c-ink-soft); }
+.bantuan a { color: var(--c-accent); }
 
 /* ---- Panel sukses ---- */
 .panel-sukses {
-    background: var(--surface);
+    background: var(--c-surface);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     padding: 40px 24px;
@@ -391,32 +399,32 @@ fieldset:disabled { opacity: .6; }
     height: 64px;
     margin: 0 auto 14px;
     border-radius: 50%;
-    background: var(--accent);
-    color: var(--accent-ink);
+    background: var(--c-accent);
+    color: var(--c-accent-ink);
     font-size: 30px;
     display: grid;
     place-items: center;
 }
-.panel-sukses h2 { margin: 0 0 8px; font: 500 24px/1.2 var(--f-display); }
-.panel-sukses p { margin: 0; color: var(--soft); font-size: 14px; }
+.panel-sukses h2 { margin: 0 0 8px; font: 500 24px/1.2 var(--font-display); }
+.panel-sukses p { margin: 0; color: var(--c-ink-soft); font-size: 14px; }
 /* U4 — panel "data sudah masuk" memakai kerangka panel sukses, dengan ruang
    untuk tombol & catatan tambahan yang tidak dipunyai versi aslinya. */
 .panel-sudah p + p { margin-top: 14px; }
 .panel-sudah .panel-aksi { margin-top: 20px; }
-.panel-sudah .panel-catatan { color: var(--warn-ink); }
+.panel-sudah .panel-catatan { color: var(--c-warn-ink); }
 
 /* ---- U3: layar periksa sebelum kirim ---- */
 .konfirmasi {
-    background: var(--surface);
-    border: 1.5px solid var(--accent);
+    background: var(--c-surface);
+    border: 1.5px solid var(--c-accent);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     padding: 24px 20px;
     margin-bottom: 20px;
     text-align: left;
 }
-.konfirmasi h2 { margin: 0 0 6px; font: 500 20px/1.25 var(--f-display); }
-.konfirmasi-sub { margin: 0 0 16px; font-size: 13px; color: var(--soft); }
+.konfirmasi h2 { margin: 0 0 6px; font: 500 20px/1.25 var(--font-display); }
+.konfirmasi-sub { margin: 0 0 16px; font-size: 13px; color: var(--c-ink-soft); }
 .konfirmasi-isi {
     display: grid;
     grid-template-columns: auto 1fr;
@@ -430,10 +438,10 @@ fieldset:disabled { opacity: .6; }
     font-weight: 700;
     letter-spacing: .05em;
     text-transform: uppercase;
-    color: var(--soft);
+    color: var(--c-ink-soft);
     padding-top: 3px;
 }
-.konfirmasi-isi dd { margin: 0; color: var(--ink); overflow-wrap: anywhere; }
+.konfirmasi-isi dd { margin: 0; color: var(--c-ink); overflow-wrap: anywhere; }
 .konfirmasi-aksi { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; }
 .btn-teks {
     appearance: none;
@@ -441,12 +449,12 @@ fieldset:disabled { opacity: .6; }
     background: none;
     cursor: pointer;
     padding: 12px 4px;
-    font: 600 14px/1 var(--f-body);
-    color: var(--soft);
+    font: 600 14px/1 var(--font-body);
+    color: var(--c-ink-soft);
     text-decoration: underline;
     text-underline-offset: 3px;
 }
-.btn-teks:hover { color: var(--ink); }
+.btn-teks:hover { color: var(--c-ink); }
 
 @media (max-width: 440px) {
     .tema-grid { grid-template-columns: 1fr; }
@@ -461,13 +469,13 @@ fieldset:disabled { opacity: .6; }
 .kisah-contoh { display: flex; gap: 10px; flex-wrap: wrap; margin: -4px 0 4px; }
 .btn-mini {
     appearance: none;
-    border: 1px solid var(--line);
+    border: 1px solid var(--c-line);
     background: transparent;
-    color: var(--accent);
+    color: var(--c-accent);
     border-radius: 999px;
     padding: 7px 14px;
     font: 500 12.5px/1 inherit;
     cursor: pointer;
     transition: background .2s ease, border-color .2s ease;
 }
-.btn-mini:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); border-color: var(--accent); }
+.btn-mini:hover { background: color-mix(in srgb, var(--c-accent) 10%, transparent); border-color: var(--c-accent); }
