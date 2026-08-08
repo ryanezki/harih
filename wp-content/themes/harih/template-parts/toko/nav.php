@@ -19,11 +19,18 @@ $ada_harga  = (bool) get_page_by_path('harga');
         <a class="brand-tautan" href="<?php echo esc_url(home_url('/')); ?>"><p class="brand">hariH</p></a>
     <?php endif; ?>
     <nav class="nav-tautan">
-        <a href="<?php echo esc_url($basis . '#tema'); ?>">Tema</a>
-        <a href="<?php echo esc_url($basis . '#paket'); ?>">Paket</a>
+        <?php /* U25 — di 360px nav ini setinggi 174px (tiga baris) = 27% layar
+                 pertama, mendorong foto produk & harga ke bawah lipatan. Ketiga
+                 tautan jangkar disembunyikan di layar sempit lewat
+                 `.nav-sekunder` (CSS): isinya toh akan dilewati saat menggulir,
+                 sementara CTA & Kontak tetap ada. U23 — "Kontak" ditambahkan;
+                 sebelumnya identitas usaha hanya terjangkau lewat footer. */ ?>
+        <a class="nav-sekunder" href="<?php echo esc_url($basis . '#tema'); ?>">Tema</a>
+        <a class="nav-sekunder" href="<?php echo esc_url($basis . '#paket'); ?>">Paket</a>
         <?php if ($ada_harga) : ?>
-            <a href="<?php echo esc_url($di_beranda ? '#cetak' : home_url('/harga/')); ?>">Cetak</a>
+            <a class="nav-sekunder" href="<?php echo esc_url($di_beranda ? '#cetak' : home_url('/harga/')); ?>">Cetak</a>
         <?php endif; ?>
+        <a class="nav-sekunder" href="<?php echo esc_url(home_url('/kontak/')); ?>">Kontak</a>
         <a class="nav-cta" href="<?php echo esc_url($basis . '#paket'); ?>">Buat Undangan</a>
         <?php /* Mode gelap (G1.1). Ikon dipilih CSS lewat atribut `data-tema` di
                  <html>, jadi JS tidak perlu menyentuh isi tombol sama sekali. */ ?>

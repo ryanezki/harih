@@ -17,7 +17,8 @@
  * Copy mengikuti Rencana Bisnis §5.9: jual HASIL, bukan gramatur — spesifikasi
  * teknis tampil kecil sebagai bukti. Tiga garansi tampil DI HALAMAN INI
  * (§11.2: garansi tersembunyi di FAQ = penyebab #1 closing rate rendah).
- * Grand = jangkar harga; penghematan paket vs satuan ditulis eksplisit.
+ * Grand = jangkar harga. (Klaim penghematan vs satuan DICABUT U24 — tidak
+ * pernah cocok dengan tabel satuan halaman ini sendiri; lihat catatan di §satuan.)
  */
 
 if (!defined('ABSPATH')) exit;
@@ -57,7 +58,6 @@ $harih_paket_cetak = [
         ],
         'spek'  => 'A4 dilipat jadi A5 · desain seragam dengan undangan digital',
         'badge' => 'Paling Populer',
-        'hemat' => 'Dibeli satuan: Rp 3.600.000 — Anda hemat Rp 700.000',
     ],
     [
         'nama'  => 'Grand',
@@ -213,7 +213,22 @@ $harih_satuan = [
 
     <section class="satuan">
         <h2>Butuh satuan saja?</h2>
-        <p>Semua item bisa dibeli terpisah — minimum order per item, dan <strong>minimum Rp 1.000.000 per transaksi</strong>. Paket selalu lebih hemat per unit; tabel ini pembandingnya.</p>
+        <?php /* U24 — KLAIM HEMAT DICABUT, bukan diperkecil.
+                 Dihitung ulang dari tabel di bawah ini sendiri: isi Paket
+                 Resepsi = 100x15.000 + 200x2.000 + 100x3.500 + 100x1.500 =
+                 Rp 2.400.000, plus digital termahal yang situs jual (Premium
+                 Rp 299.000) = Rp 2.699.000 — sementara paketnya Rp 2.900.000.
+                 Angka "Rp 3.600.000 / hemat Rp 700.000" tidak berasal dari
+                 harga mana pun yang situs terbitkan, dan pembeli bisa
+                 membantahnya dengan kalkulator di halaman yang sama.
+                 Pemeriksaan yang sama untuk Hormat (+141rb) dan Grand
+                 (+1,6 jt) memberi arah yang sama, jadi klaim payung "paket
+                 selalu lebih hemat per unit" ikut dicabut.
+                 Yang menggantikannya adalah pembeda yang BISA dibuktikan —
+                 dan gratis ongkir memang bernilai Rp 150.000 di struktur biaya
+                 kami. Penetapan harga satuan vs paket = keputusan owner,
+                 dicatat di TASKS. */ ?>
+        <p>Semua item bisa dibeli terpisah — minimum order per item, dan <strong>minimum Rp 1.000.000 per transaksi</strong>. Paket menyatukannya jadi <strong>satu proof, satu pengiriman, dan satu desain yang seragam</strong> — plus gratis ongkir ke seluruh Indonesia dan Garansi Tepat Waktu.</p>
         <div class="satuan-tabel-wrap">
             <table class="satuan-tabel">
                 <thead><tr><th>Item</th><th>Harga</th><th>Minimum</th></tr></thead>

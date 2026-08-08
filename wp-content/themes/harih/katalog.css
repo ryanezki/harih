@@ -303,6 +303,17 @@ a { color: var(--c-accent-teks); }
 .nav-tautan a:hover { color: var(--c-accent-teks); }
 .nav-cta { background: var(--c-accent); color: var(--c-accent-ink) !important; padding: 11px 22px !important; font-size: 13.5px; }
 .nav-cta:hover { background: var(--c-accent-soft); }
+/* U25 — di bawah 560px tautan jangkar disembunyikan supaya nav muat SATU baris.
+   Terukur sebelumnya: 88,3px di 1280 tapi 174,3px di 360 (tiga baris) = 27%
+   layar pertama, dan itulah yang mendorong foto produk serta harga ke bawah
+   lipatan. Yang disembunyikan hanya jangkar ke bawah halaman — konten yang
+   sama akan dilewati saat menggulir; CTA & Kontak tetap tinggal. */
+@media (max-width: 559px) {
+    .nav { gap: 10px 12px; flex-wrap: nowrap; }
+    .nav-sekunder:not([href*="kontak"]) { display: none; }
+    .nav-tautan { flex-wrap: nowrap; gap: 4px; }
+    .nav-cta { padding: 11px 16px !important; }
+}
 
 /* ---------- 2. Hero (khusus front page; `.hero` polos dipakai halaman lain) ---------- */
 
@@ -555,6 +566,10 @@ a { color: var(--c-accent-teks); }
 .unggulan .paket-label { color: var(--c-gold-light); }
 .paket-harga { font-family: var(--font-display); font-size: 48px; margin: 0 0 4px; line-height: 1; text-align: left; }
 .paket-harga .rb { font-size: 17px; font-family: var(--font-body); font-weight: 700; color: var(--c-ink-soft); }
+/* U26 — satuan mata uang; ukurannya mengikuti `.rb` supaya angka tetap jadi
+   yang dominan dan tata letak kartu tidak berubah. */
+.paket-harga .rp { font-size: 17px; font-family: var(--font-body); font-weight: 700; color: var(--c-ink-soft); }
+.unggulan .paket-harga .rp { color: var(--c-ivory-muted); }
 .unggulan .paket-harga .rb { color: var(--c-ivory-muted); }
 .paket-sub { color: var(--c-ink-soft); font-size: 13.5px; margin: 0 0 20px; text-align: left; }
 .unggulan .paket-sub { color: var(--c-ivory-muted); }
@@ -654,7 +669,10 @@ a { color: var(--c-accent-teks); }
 .kaki-nav { display: flex; gap: 8px 22px; flex-wrap: wrap; font-size: 13.5px; font-weight: 600; justify-content: center; }
 .kaki-nav a { color: rgba(244, 241, 231, .85); text-decoration: none; }
 .kaki-nav a:hover { color: var(--c-accent-ink); text-decoration: underline; }
-.kaki-cc { max-width: 1120px; margin: 26px auto 0; font-size: 12px; color: rgba(201, 195, 174, .5); text-align: left; }
+.kaki-identitas { max-width: 1120px; margin: 22px auto 0; font-size: 12.5px; line-height: 1.7; color: var(--c-ivory-muted); text-align: left; }
+.kaki-identitas a { color: var(--c-ivory-muted); }
+/* U23 — alpha .5 hanya memberi 3,46:1 pada teks 12px (gagal AA); .72 ≈ 5,4:1. */
+.kaki-cc { max-width: 1120px; margin: 12px auto 0; font-size: 12px; color: rgba(201, 195, 174, .72); text-align: left; }
 
 /* ---------- Halaman teks (kontak + legal) ---------- */
 
@@ -814,6 +832,13 @@ a { color: var(--c-accent-teks); }
 @media (min-width: 720px) {
     .cara-grid { grid-template-columns: repeat(3, 1fr); }
     .paket-grid { grid-template-columns: repeat(3, 1fr); align-items: stretch; }
+    /* U25 — grid EMPAT kartu diberi pembagiannya sendiri DI SINI, tepat setelah
+       `.paket-grid`, karena keduanya berspesifisitas sama dan urutan sumberlah
+       yang menentukan. Percobaan sebelumnya menaruhnya di `@media (min-width:
+       760px)` — dan di 744px media query itu tidak aktif sama sekali, sehingga
+       3 kolom milik `.paket-grid` tetap menang dan kartu keempat jadi yatim.
+       2x2 di sini, 4x1 di >=980px (4x220px + gap butuh ±928px). */
+    .paket-grid-hybrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .paket-card.unggulan { transform: translateY(-8px); }
     .row-2 { grid-template-columns: 1fr 1fr; }
 }
@@ -865,7 +890,7 @@ a { color: var(--c-accent-teks); }
 
 @media (min-width: 760px) {
     .garansi-grid { grid-template-columns: repeat(3, 1fr); }
-    .paket-grid-hybrid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+    .paket-grid-hybrid { gap: 16px; }
     /* U8 — `/upsell/` memakai kelas yang sama tapi sengaja hanya membangun DUA
        tawaran (Hormat dicabut, keputusan owner 2026-08-07). Empat kolom untuk
        dua kartu menyusutkan kolom teksnya sampai ±119px sementara badge 148px
@@ -876,6 +901,11 @@ a { color: var(--c-accent-teks); }
         margin-inline: auto;
     }
 }
+
+@media (min-width: 980px) {
+    .paket-grid-hybrid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
 
 /* Jembatan katalog digital → paket cetak (F1.5). Dibedakan latarnya supaya
    terbaca sebagai penawaran lain, bukan sambungan tangga harga digital. */

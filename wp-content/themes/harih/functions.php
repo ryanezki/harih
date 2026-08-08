@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) exit;
  * pengunjung & LiteSpeed tetap menyajikan berkas lama meski file di server
  * sudah baru, dan perbaikan tampilan terlihat "tidak berpengaruh".
  */
-const HARIH_VERSION = '2.24.2';
+const HARIH_VERSION = '2.25.3';
 
 add_action('after_setup_theme', function () {
     add_theme_support('title-tag');
@@ -544,9 +544,13 @@ function harih_harga_ribu(string $sku): ?int {
  * yang sedikit berbeda daripada angka yang salah.
  */
 function harih_harga_tampil(string $sku, string $cadangan): string {
+    /* U26 — "Rp" ikut ditampilkan. Kartu paket dulu berbunyi "99 rb" polos
+       sementara di layar yang sama hero menulis "Rp 99rb", CTA penutup "Rp 99
+       ribu", dan paket cetak "Rp 1.190.000" — sedikitnya empat format rupiah
+       tayang bersamaan, dan satu-satunya angka besar justru tanpa satuannya. */
     $rb = harih_harga_ribu($sku);
     if ($rb !== null) {
-        return esc_html((string) $rb) . '<span class="rb"> rb</span>';
+        return '<span class="rp">Rp</span> ' . esc_html((string) $rb) . '<span class="rb"> rb</span>';
     }
     if (function_exists('wc_get_product_id_by_sku') && function_exists('wc_price')) {
         $id = (int) wc_get_product_id_by_sku($sku);
@@ -556,7 +560,7 @@ function harih_harga_tampil(string $sku, string $cadangan): string {
         }
     }
     // Pre-deploy (produk belum dibuat): pakai angka di definisi paket.
-    return esc_html($cadangan) . '<span class="rb"> rb</span>';
+    return '<span class="rp">Rp</span> ' . esc_html($cadangan) . '<span class="rb"> rb</span>';
 }
 
 /**
@@ -610,6 +614,13 @@ function harih_bayar_online_siap(): bool {
  */
 function harih_wa_nomor(): string {
     return defined('HARIH_WA_CS') && HARIH_WA_CS !== '' ? (string) HARIH_WA_CS : '6282251975575';
+}
+
+/** Nomor WA dalam bentuk yang bisa DIBACA & disalin manusia (U23). */
+function harih_wa_tampil(): string {
+    $n = harih_wa_nomor();                      // mis. 6282251975575
+    $lokal = str_starts_with($n, '62') ? '0' . substr($n, 2) : $n;
+    return trim(chunk_split($lokal, 4, ' '));   // 0822 5197 5575
 }
 
 /** Tautan WhatsApp berisi pesan siap kirim. */
@@ -674,7 +685,7 @@ add_filter('document_title_parts', function ($parts) {
         $parts['site']  = 'hariH';
         unset($parts['tagline'], $parts['page']);
     } elseif (is_page_template('page-satuan.php')) {
-        $parts['title'] = 'Beli Satuan — Kartu QR, Label & Souvenir';
+        $parts['title'] = 'Beli Satuan — Undangan Cetak, Label & Souvenir';
         $parts['site']  = 'hariH';
         unset($parts['tagline'], $parts['page']);
     } elseif (is_page_template('page-rekap.php')) {
@@ -694,7 +705,10 @@ add_filter('document_title_parts', function ($parts) {
         $parts['site']  = 'hariH';
         unset($parts['tagline'], $parts['page']);
     } elseif (is_page_template('page-harga-hybrid.php')) {
-        $parts['title'] = 'Undangan Digital + Kartu Fisik Ber-QR';
+        // U24/U26 — disamakan dengan og:title yang sudah benar. Judul lama menjual
+        // "kartu fisik ber-QR", produk yang FAQ halaman ini SENDIRI argumentasikan
+        // bukan tawaran utamanya ("kenapa undangan cetak lipat, bukan kartu QR kecil?").
+        $parts['title'] = 'Undangan Cetak Beramplop Nama + Undangan Digital';
         $parts['site']  = 'hariH';
         unset($parts['tagline'], $parts['page']);
     } elseif (is_page_template('page-jadi-reseller.php')) {

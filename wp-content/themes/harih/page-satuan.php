@@ -11,7 +11,7 @@
  *
  * Aturan bisnis yang harus terlihat SEBELUM pembeli mengisi keranjang:
  *   · minimum Rp 1.000.000 per transaksi (keputusan terkunci)
- *   · paket selalu lebih hemat per unit — halaman ini pembandingnya, bukan
+ *   · paket = satu proof & satu pengiriman — halaman ini pembandingnya, bukan
  *     jalur utama. Karena itu jalur ke /harga/ ditaruh di atas dan di bawah.
  */
 
@@ -45,9 +45,9 @@ $harih_min_transaksi = defined('UNDANGAN_MIN_TRANSAKSI_SATUAN') ? UNDANGAN_MIN_T
 
 <header class="hero hero-ringkas">
     <h1>Beli satuan</h1>
-    <p class="hero-sub">Sudah punya undangan digital, tinggal butuh cetakannya? Semua item bisa dipesan terpisah. <strong>Paket tetap lebih hemat per unit</strong> — halaman ini pembandingnya.</p>
+    <p class="hero-sub">Sudah punya undangan digital, tinggal butuh cetakannya? Semua item bisa dipesan terpisah. Kalau butuh beberapa item sekaligus, <strong>paket menyatukannya jadi satu proof &amp; satu pengiriman</strong>.</p>
     <div class="hero-cta">
-        <a class="btn btn-utama" href="<?php echo esc_url(home_url('/harga/')); ?>">Lihat Paket (lebih hemat)</a>
+        <a class="btn btn-utama" href="<?php echo esc_url(home_url('/harga/')); ?>">Lihat Paket Lengkap</a>
     </div>
 </header>
 
@@ -77,18 +77,28 @@ $harih_min_transaksi = defined('UNDANGAN_MIN_TRANSAKSI_SATUAN') ? UNDANGAN_MIN_T
                 <?php if ($p->get_short_description()) : ?>
                     <p class="satuan-ket"><?php echo esc_html(wp_strip_all_tags($p->get_short_description())); ?></p>
                 <?php endif; ?>
-                <a class="btn btn-garis btn-blok" href="<?php echo esc_url($beli); ?>">Tambah <?php echo esc_html($min); ?> pcs</a>
+                <a class="btn btn-garis btn-blok" href="<?php echo esc_url($beli); ?>"><?php
+                    /* U26 — href sudah dikondisikan sejak A7, labelnya tidak: sembilan
+                       tombol berbunyi "Tambah N pcs" padahal kesembilanmya membuka
+                       chat WhatsApp. */
+                    echo harih_bayar_online_siap()
+                        ? 'Tambah ' . esc_html($min) . ' pcs'
+                        : 'Tanya via WhatsApp (min. ' . esc_html($min) . ' pcs)';
+                ?></a>
             </article>
             <?php endforeach; ?>
         </div>
-        <p class="paket-catatan">Keranjang menolak checkout selama total item satuan belum mencapai <?php echo esc_html(strip_tags(wc_price($harih_min_transaksi))); ?> — tambahkan item lain, atau ambil paket yang sudah termasuk undangan digital.</p>
+        <p class="paket-catatan"><?php if (harih_bayar_online_siap()) : ?>Keranjang menolak checkout selama total item satuan belum mencapai <?php echo esc_html(strip_tags(wc_price($harih_min_transaksi))); ?> — tambahkan item lain, atau ambil paket yang sudah termasuk undangan digital.<?php else : ?>Pesanan satuan dikonfirmasi lewat WhatsApp, dengan <strong>minimum <?php echo esc_html(strip_tags(wc_price($harih_min_transaksi))); ?> per pesanan</strong>.<?php endif; ?></p>
         <?php endif; ?>
     </section>
 
     <section class="jembatan-cetak">
         <p class="jembatan-label">Perbandingan</p>
-        <h2>Isi Paket Resepsi kalau dibeli satuan: Rp 3.600.000</h2>
-        <p>Harga paketnya Rp 2.900.000 — selisih <strong>Rp 700.000</strong>, dan undangan digital customnya sudah termasuk.</p>
+        <?php /* U24 — angka Rp 3.600.000 / Rp 700.000 dicabut: dihitung dari
+                 tabel di atas, isi Paket Resepsi = Rp 2.400.000 (+ digital
+                 Rp 299.000). Lihat catatan lengkap di page-harga-hybrid.php. */ ?>
+        <h2>Butuh lebih dari satu item?</h2>
+        <p>Paket Resepsi menyatukan undangan cetak, amplop bernama, label souvenir, kartu terima kasih, dan stiker segel — <strong>satu proof, satu pengiriman, satu desain</strong>, dengan undangan digital custom sudah termasuk.</p>
         <a class="btn btn-utama" href="<?php echo esc_url(home_url('/harga/')); ?>">Lihat Paket</a>
     </section>
 </main>

@@ -22,5 +22,19 @@ $ada_reseller = harih_reseller_aktif();
             <?php if ($ada_reseller) : ?><a href="<?php echo esc_url(home_url('/jadi-reseller/')); ?>">Jadi Reseller</a><?php endif; ?>
         </nav>
     </div>
+    <?php /* U23 — SINYAL KEPERCAYAAN. Hitungan pada TEKS TAMPAK beranda,
+             /harga/, dan /satuan/: "testimoni" 0 · "ulasan" 0 · "portofolio" 0,
+             dan nomor CS muncul 3–9x di HTML mentah tapi NOL kali di teks tampak
+             — hanya di dalam href wa.me, jadi tidak bisa dibaca, disalin, atau
+             dicek pengunjung. Blok Identitas Usaha pun cuma ada di /kontak/.
+             Di negara dengan penipuan online tinggi, itu tiga hal yang paling
+             murah untuk diperbaiki. Ditaruh di kaki karena ia satu sumber untuk
+             delapan halaman. */ ?>
+    <p class="kaki-identitas">
+        <strong>hariH</strong> · Melayani seluruh Indonesia ·
+        WhatsApp <a href="<?php echo esc_url(harih_wa_link('Halo hariH, saya mau bertanya soal undangan.')); ?>" target="_blank" rel="noopener"><?php echo esc_html(harih_wa_tampil()); ?></a> ·
+        <a href="mailto:hi@harih.id">hi@harih.id</a><br>
+        CS Senin–Sabtu 09.00–18.00 WIB · di luar jam itu dibalas paling lambat pagi berikutnya.
+    </p>
     <p class="kaki-cc">© <?php echo esc_html(wp_date('Y')); ?> hariH · harih.id</p>
 </footer>

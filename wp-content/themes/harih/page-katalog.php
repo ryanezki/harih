@@ -133,7 +133,18 @@ $harih_aset         = get_stylesheet_directory_uri() . '/aset';
         </div>
         <?php /* Baris trust (temuan review A2): kanal pembayaran disebut sebelum
                  pengunjung menekan apa pun — keberatan "aman tidak?" dijawab di muka. */ ?>
-        <p class="hero-trust"><strong>Mulai Rp <?php echo esc_html(harih_harga_mulai()); ?>rb</strong>, sekali bayar · QRIS, VA &amp; e-wallet — gateway berlisensi</p>
+        <?php /* U21 — kalimat kanal pembayaran DIKONDISIKAN, sama seperti tombolnya.
+                 Sebelumnya ketiga blok ini di luar percabangan apa pun sementara
+                 `harih_bayar_online_siap()` hanya membungkus href — jadi halaman
+                 menjanjikan gateway berlisensi tiga kali sambil mengarahkan
+                 pembeli ke chat yang pesan pra-isinya justru MENANYAKAN cara
+                 bayar. Kelas cacat yang sama dengan B5/B6/B7: halaman tayang
+                 menjanjikan hal yang keputusan atau kode tidak dukung. */ ?>
+        <p class="hero-trust"><strong>Mulai Rp <?php echo esc_html(harih_harga_mulai()); ?>rb</strong>, sekali bayar · <?php
+            echo harih_bayar_online_siap()
+                ? 'QRIS, VA &amp; e-wallet — gateway berlisensi'
+                : 'konfirmasi &amp; pembayaran lewat CS WhatsApp';
+        ?></p>
     </div>
     <div class="hero-visual">
         <div class="hero-panggung">
@@ -167,7 +178,11 @@ $harih_marquee = str_replace('✦', '<i>✦</i>', $harih_marquee);
         <h2>Tiga langkah, <em class="aksen-emas">beres</em>.</h2>
         <p class="seksi-sub">Semuanya dari HP, sambil rebahan juga bisa.</p>
         <div class="cara-grid">
-            <div class="cara-kartu" data-naik><span class="cara-no">1</span><strong>Pilih paket &amp; bayar</strong><span>QRIS, transfer bank, atau e-wallet — aman via payment gateway resmi.</span></div>
+            <div class="cara-kartu" data-naik><span class="cara-no">1</span><strong><?php echo harih_bayar_online_siap() ? 'Pilih paket &amp; bayar' : 'Chat WhatsApp'; ?></strong><span><?php
+                echo harih_bayar_online_siap()
+                    ? 'QRIS, transfer bank, atau e-wallet — aman via payment gateway resmi.'
+                    : 'CS kirim rincian paket &amp; rekening resmi hariH, lalu konfirmasi pembayaranmu.';
+            ?></span></div>
             <div class="cara-kartu" data-naik><span class="cara-no">2</span><strong>Isi data undangan</strong><span>Link form dikirim ke WhatsApp &amp; email. Isinya ±10 menit dari HP.</span></div>
             <div class="cara-kartu" data-naik><span class="cara-no">3</span><strong>Undangan jadi otomatis</strong><span>±5 menit setelah data dikirim, link undangan + QR code sampai ke kamu.</span></div>
         </div>
@@ -194,7 +209,10 @@ $harih_marquee = str_replace('✦', '<i>✦</i>', $harih_marquee);
                 </span>
             </a>
             <?php endforeach; ?>
-            <a class="tema-kartu tema-kartu-akhir" href="#tema">
+            <?php /* U26 — dulu href="#tema", yaitu section tempat kartu ini SENDIRI
+                     berada: mengekliknya cuma menggulir kembali ke judul yang sudah
+                     terlihat. Diarahkan ke langkah berikutnya yang sesungguhnya. */ ?>
+            <a class="tema-kartu tema-kartu-akhir" href="#paket">
                 <span class="tema-akhir-judul">Tema baru<br>terus nambah</span>
                 <span class="tema-akhir-pill">Lihat semua demo</span>
             </a>
@@ -299,7 +317,15 @@ $harih_marquee = str_replace('✦', '<i>✦</i>', $harih_marquee);
         <details><summary>Berapa lama undangan saya jadi?</summary><p>Setelah kamu mengisi form data (±10 menit), undangan dibuat otomatis dan link-nya dikirim ke WhatsApp &amp; email dalam ±5 menit.</p></details>
         <details><summary>Bagaimana cara membagikan ke tamu?</summary><p>Cukup bagikan satu link via WhatsApp. Nama tamu bisa muncul otomatis di halaman pembuka dengan menambah <code>?to=Nama%20Tamu</code> di belakang link — panduannya dikirim bersama undangan.</p></details>
         <details><summary>Bisa revisi setelah jadi?</summary><p>Bisa, lewat CS. Paket Favorit dapat 1× revisi gratis, Premium 3× gratis dan didahulukan. Paket Hemat dan revisi di luar jatah dikenakan Rp 25 ribu per pengajuan. Kalau kesalahannya dari sistem kami, koreksinya selalu gratis. Revisi dikerjakan maksimal 2×24 jam — ajukan paling lambat H-3 sebelum acara.</p></details>
-        <details><summary>Pembayarannya bagaimana?</summary><p>QRIS, virtual account bank, dan e-wallet — diproses payment gateway berlisensi resmi. Kamu menerima bukti pembayaran otomatis via email.</p></details>
+        <details><summary>Pembayarannya bagaimana?</summary><p><?php
+            /* Bagian "bukti pembayaran otomatis via email" TETAP benar di kedua
+               cabang: runbook §7c membuat order WooCommerce lalu men-set
+               `processing`, dan WooCommerce memang mengirim email order otomatis.
+               Yang keliru cuma frasa "diproses payment gateway berlisensi". */
+            echo harih_bayar_online_siap()
+                ? 'QRIS, virtual account bank, dan e-wallet — diproses payment gateway berlisensi resmi. Kamu menerima bukti pembayaran otomatis via email.'
+                : 'Untuk sekarang lewat CS: chat WhatsApp kami, lalu transfer bank atau QRIS ke rekening atas nama usaha hariH. Setelah pembayaran kami konfirmasi, kamu menerima bukti pesanan otomatis via email dan link pengisian data.';
+        ?></p></details>
     </section>
 
     <?php /* CTA penutup (temuan review A5): pembaca yang sampai bawah tidak
@@ -355,7 +381,10 @@ $harih_marquee = str_replace('✦', '<i>✦</i>', $harih_marquee);
     var PESAN = {
         kecil:  'Ketiga paket cocok untuk skala ini.',
         sedang: 'Galeri foto & amplop digital biasanya mulai terasa perlu di skala ini.',
-        besar:  'Paket Hemat kami sembunyikan — masa aktif H+7 dan tanpa galeri tidak cocok untuk resepsi sebesar ini. Klik lagi untuk menampilkan semua paket.'
+        // U26 — baris masa aktif sengaja dicabut dari kartu Hemat (C3b), tapi
+        // angkanya masih bocor lewat pesan ini. Alasannya diganti pembeda yang
+        // memang tampil di kartu: galeri & amplop digital.
+        besar:  'Paket Hemat kami sembunyikan — tanpa galeri foto dan amplop digital, paket itu tidak cocok untuk resepsi sebesar ini. Klik lagi untuk menampilkan semua paket.'
     };
     var pilihan = null;
 
