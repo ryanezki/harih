@@ -984,7 +984,9 @@ a { color: var(--c-accent-teks); }
 .tamu-form { max-width: 640px; margin: 0 auto; padding: 0 20px; }
 .tamu-form .field span { display: block; margin-bottom: 6px; font-size: .9rem; color: var(--c-ink-2); }
 .tamu-form textarea {
-    width: 100%; padding: 12px 14px; font: 400 15px/1.7 inherit;
+    /* 16px (U2) — textarea 600 nama adalah salah satu dari tiga form terpanjang
+       yang kita punya; di bawah 16px iOS memperbesar halaman saat difokus. */
+    width: 100%; padding: 12px 14px; font: 400 16px/1.7 inherit;
     border: 1px solid var(--c-line); border-radius: var(--radius);
     background: var(--c-surface); color: var(--c-ink); resize: vertical;
 }

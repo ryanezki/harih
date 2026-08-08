@@ -102,7 +102,8 @@
 }
 .section-intro, .prose { line-height: 1.9; }
 .acara-tanggal, .lokasi-nama, .ucapan-nama { font-weight: 600; }
-.field input, .field select, .field textarea { font-size: 16px; }
+/* (Baris `.field input … { font-size: 16px }` dicabut U2 — 16px kini jadi
+   bawaan di undangan.css sehingga ketiga tema kebagian, bukan tema-01 saja.) */
 /* Label serif kapital: tracking lebih lebar dari sans agar tidak terlihat rapat */
 .cover-eyebrow { letter-spacing: .4em; text-indent: .4em; }
 .btn { letter-spacing: .24em; text-indent: .24em; font-size: 13px; }

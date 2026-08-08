@@ -156,21 +156,33 @@ body.isidata-body {
     color: var(--soft);
     margin-bottom: 6px;
 }
-.field input, .field select, .field textarea {
+/* U2 — radio & checkbox DIKECUALIKAN dari `width: 100%`. Radio `galeri_tata`
+   bersarang di dalam `.field`, jadi selektor lama ikut memberinya lebar penuh;
+   digabung dengan `position: absolute` tanpa containing block, kotaknya mendarat
+   selebar viewport dan meluberkan halaman 57 px pada 360 px (663 px pada 1280).
+   Ukuran font 16px, bukan 15: di bawah itu iOS Safari memperbesar halaman
+   sendiri saat field difokus — aturan yang sudah tertulis di katalog.css:486
+   tapi belum pernah sampai ke form terpanjang yang kita punya. */
+.field input:not([type="radio"]):not([type="checkbox"]), .field select, .field textarea {
     width: 100%;
     border: 1px solid var(--line);
     background: var(--surface-2);
     border-radius: 12px;
     padding: 12px 14px;
-    font: 400 15px/1.5 var(--f-body);
+    font: 400 16px/1.5 var(--f-body);
     color: var(--ink);
 }
-.field input:focus, .field select:focus, .field textarea:focus {
+.field input:not([type="radio"]):not([type="checkbox"]):focus, .field select:focus, .field textarea:focus {
     outline: 2px solid var(--accent);
     outline-offset: 1px;
     border-color: transparent;
 }
-.row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+/* Mobile-first, mengikuti pola yang sudah benar di katalog.css:770/818 — dua
+   kolom baru dinyalakan saat ada ruangnya. */
+.row-2 { display: grid; grid-template-columns: 1fr; gap: 12px; }
+@media (min-width: 560px) {
+    .row-2 { grid-template-columns: 1fr 1fr; }
+}
 .counter { margin: -8px 0 0; text-align: right; font-size: 11px; color: var(--soft); }
 
 fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
@@ -234,6 +246,15 @@ fieldset:disabled { opacity: .6; }
    diunggah hanya membuat pemesan mengira ada yang gagal. */
 .pesan-file.pesan-lunak { color: var(--warn-ink); }
 
+/* U1 — penghitung permanen + daftar catatan yang BERTAHAN sampai pemilihan
+   berikutnya. Keduanya menggantikan `#pesan-foto` yang dulu memegang tiga
+   tugas sekaligus dan menimpa dirinya sendiri tiap iterasi. */
+.foto-hitung { margin: 4px 0 0; font-size: 12px; font-weight: 600; color: var(--soft); }
+.pesan-tolak { margin: 8px 0 0; padding-left: 18px; font-size: 12px; line-height: 1.55; }
+.pesan-tolak li + li { margin-top: 6px; }
+.pesan-tolak .tolak-keras { color: var(--error); }
+.pesan-tolak .tolak-lunak { color: var(--warn-ink); }
+
 /* Petunjuk di bawah field — untuk aturan yang tidak muat di placeholder
    (format koordinat, daftar dompet yang diterima). Ditambahkan G1 2026-08-07. */
 .petunjuk { display: block; margin-top: 6px; font-size: 12px; font-style: normal; line-height: 1.55; color: var(--soft); }
@@ -243,6 +264,8 @@ fieldset:disabled { opacity: .6; }
    bukan dibaca — jadi radio bergambar mini, bukan <select>. */
 .pilih-tata { display: flex; flex-wrap: wrap; gap: 10px; }
 .tata-opsi {
+    position: relative;   /* U2 — jangkar bagi radio absolut di bawah; tanpa ini
+                             containing block-nya jatuh ke viewport */
     flex: 1 1 150px;
     display: flex;
     align-items: center;

@@ -25,7 +25,13 @@
     // sebelumnya peringatan hanya muncul saat SEDANG mengunggah, padahal
     // kehilangan yang paling menyakitkan justru terjadi sebelum itu — form ini
     // ±10 menit pengisian, dan menutup tab membuang semuanya tanpa sepatah kata.
-    var state = { foto: [], qris: null, uploading: false, kotor: false };
+    //
+    // `memproses` (U1) = kompresi canvas sedang berjalan. Tanpa flag ini tombol
+    // Kirim tetap hidup selama `await kompres()`, dan menekannya merakit payload
+    // dari `state.foto` yang baru terisi sebagian — 10 foto dipilih, 2 terkirim,
+    // pemesan melihat panel "Data diterima!". Sisanya selesai dikompresi di
+    // latar, di balik form yang sudah disembunyikan.
+    var state = { foto: [], qris: null, uploading: false, kotor: false, memproses: false };
 
     /* ================= Kompresi gambar ================= */
 
@@ -117,8 +123,13 @@
     var inputFoto = $('#input-foto');
     var fotoGrid = $('#foto-grid');
     var pesanFoto = $('#pesan-foto');
+    var tolakFoto = $('#tolak-foto');
+    var fotoHitung = $('#foto-hitung');
 
     function renderFoto() {
+        if (fotoHitung) {
+            fotoHitung.textContent = state.foto.length + ' dari ' + cfg.maxFoto + ' foto terpilih';
+        }
         if (!fotoGrid) return;
         fotoGrid.textContent = '';
         state.foto.forEach(function (item, i) {
@@ -129,6 +140,43 @@
                 renderFoto();
             }));
         });
+    }
+
+    /**
+     * Daftar foto yang DITOLAK — dirender sekali setelah seluruh loop selesai,
+     * bukan ditulis ke `#pesan-foto` di tengah jalan (U1).
+     *
+     * Cacat yang ini tutup: `#pesan-foto` adalah satu elemen yang ditimpa di
+     * AWAL tiap iterasi oleh teks "Memproses foto n/N…", lalu dikosongkan bila
+     * foto terakhir kebetulan lolos. Foto ke-3 dan ke-6 yang ditolak karena
+     * resolusi menghilang tanpa jejak: pemesan melihat 8 thumbnail dan pesan
+     * kosong, tanpa pernah tahu dua fotonya tidak ikut.
+     */
+    function renderTolak(daftar) {
+        if (!tolakFoto) return;
+        tolakFoto.textContent = '';
+        tolakFoto.hidden = daftar.length === 0;
+        daftar.forEach(function (item) {
+            var li = document.createElement('li');
+            // Peringatan LUNAK dibedakan warnanya: fotonya TETAP dipakai, dan
+            // merah untuk sesuatu yang berhasil diunggah hanya membuat pemesan
+            // mengira ada yang gagal (alasan yang sama sudah dipakai `.pesan-lunak`).
+            li.className = item.lunak ? 'tolak-lunak' : 'tolak-keras';
+            li.textContent = item.teks;
+            tolakFoto.appendChild(li);
+        });
+    }
+
+    /**
+     * Kunci tombol Kirim selama kompresi berjalan (U1). Tombolnya dicari lambat
+     * supaya fungsi ini tidak bergantung pada urutan deklarasi `var` di berkas.
+     */
+    function kunciKirim(terkunci, label) {
+        var b = document.getElementById('btn-kirim');
+        if (!b) return;
+        if (!b.dataset.labelAsli) b.dataset.labelAsli = b.textContent;
+        b.disabled = terkunci;
+        b.textContent = terkunci ? label : b.dataset.labelAsli;
     }
 
     function buatThumb(item, onHapus) {
@@ -151,47 +199,65 @@
     if (inputFoto) {
         inputFoto.addEventListener('change', async function () {
             var files = Array.from(inputFoto.files || []);
-            if (pesanFoto) pesanFoto.textContent = '';
+            if (!files.length) return;
 
-            for (var i = 0; i < files.length; i++) {
-                var f = files[i];
-                if (state.foto.length >= cfg.maxFoto) {
-                    if (pesanFoto) pesanFoto.textContent = 'Maksimal ' + cfg.maxFoto + ' foto.';
-                    break;
-                }
-                if (!/^image\//.test(f.type)) {
-                    if (pesanFoto) pesanFoto.textContent = 'File bukan gambar: ' + f.name;
-                    continue;
-                }
-                try {
-                    if (pesanFoto) pesanFoto.textContent = 'Memproses foto ' + (i + 1) + '/' + files.length + '…';
-                    var hasil = await kompres(f, 1600, 'image/jpeg', 'foto-' + Date.now() + '-' + i, MIN_SISI_TOLAK);
-                    if (hasil.size > cfg.maxSizeMB * 1024 * 1024) {
-                        if (pesanFoto) pesanFoto.textContent = 'Foto terlalu besar setelah dikompresi: ' + f.name;
+            // Catatan dikumpulkan dulu, dirender SETELAH loop — lihat renderTolak().
+            var catatan = [];
+            var lewat = 0;
+
+            state.memproses = true;
+            kunciKirim(true, 'Menyiapkan foto…');
+            if (pesanFoto) pesanFoto.classList.remove('pesan-lunak');
+            renderTolak([]);
+
+            try {
+                for (var i = 0; i < files.length; i++) {
+                    var f = files[i];
+                    if (state.foto.length >= cfg.maxFoto) { lewat = files.length - i; break; }
+                    if (!/^image\//.test(f.type)) {
+                        catatan.push({ teks: 'File bukan gambar, dilewati: ' + f.name });
                         continue;
                     }
-                    state.foto.push({ file: hasil, url: URL.createObjectURL(hasil) });
-                    renderFoto();
-                    if (pesanFoto) {
-                        pesanFoto.classList.remove('pesan-lunak');
+                    try {
+                        if (pesanFoto) pesanFoto.textContent = 'Memproses foto ' + (i + 1) + '/' + files.length + '…';
+                        var hasil = await kompres(f, 1600, 'image/jpeg', 'foto-' + Date.now() + '-' + i, MIN_SISI_TOLAK);
+                        if (hasil.size > cfg.maxSizeMB * 1024 * 1024) {
+                            catatan.push({ teks: 'Foto "' + f.name + '" terlalu besar setelah dikompresi — tidak ikut dikirim.' });
+                            continue;
+                        }
+                        state.foto.push({ file: hasil, url: URL.createObjectURL(hasil) });
+                        renderFoto();
                         var pendek = Math.min(hasil.asliLebar || 0, hasil.asliTinggi || 0);
                         if (pendek && pendek < MIN_SISI_IDEAL) {
-                            pesanFoto.classList.add('pesan-lunak');
-                            pesanFoto.textContent = 'Foto "' + f.name + '" resolusinya pas-pasan ('
-                                + hasil.asliLebar + '×' + hasil.asliTinggi + ') — tetap kami pakai, '
-                                + 'tapi hasilnya akan terlihat lebih lembut. File asli dari fotografer akan jauh lebih tajam.';
-                        } else {
-                            pesanFoto.textContent = '';
+                            catatan.push({
+                                lunak: true,
+                                teks: 'Foto "' + f.name + '" resolusinya pas-pasan (' + hasil.asliLebar + '×' + hasil.asliTinggi
+                                    + ') — tetap kami pakai, tapi hasilnya akan terlihat lebih lembut. '
+                                    + 'File asli dari fotografer akan jauh lebih tajam.'
+                            });
                         }
+                    } catch (e) {
+                        catatan.push({
+                            teks: e && e.kode === 'RESOLUSI'
+                                ? pesanResolusi(f.name, e.lebar, e.tinggi)
+                                : 'Gagal memproses "' + f.name + '" — tidak ikut dikirim. Coba foto lain.'
+                        });
                     }
-                } catch (e) {
-                    if (pesanFoto) pesanFoto.textContent = e && e.kode === 'RESOLUSI'
-                        ? pesanResolusi(f.name, e.lebar, e.tinggi)
-                        : 'Gagal memproses ' + f.name + ' — coba foto lain.';
-                    if (pesanFoto) pesanFoto.classList.remove('pesan-lunak');
                 }
+
+                if (lewat > 0) {
+                    catatan.push({
+                        teks: 'Batas ' + cfg.maxFoto + ' foto tercapai — ' + lewat + ' file terakhir tidak ikut. '
+                            + 'Hapus salah satu foto di atas bila ingin menggantinya.'
+                    });
+                }
+            } finally {
+                state.memproses = false;
+                kunciKirim(false);
+                if (pesanFoto) pesanFoto.textContent = '';
+                renderTolak(catatan);
+                inputFoto.value = '';
             }
-            inputFoto.value = '';
         });
     }
 
@@ -222,6 +288,10 @@
                 if (pesanQris) pesanQris.textContent = 'File bukan gambar.';
                 return;
             }
+            // Dikunci sama seperti galeri (U1): QRIS juga lewat kompresi canvas,
+            // jadi jendela "Kirim ditekan sebelum selesai" berlaku di sini juga.
+            state.memproses = true;
+            kunciKirim(true, 'Menyiapkan QRIS…');
             try {
                 // PNG: kode QR harus tetap tajam agar bisa dipindai
                 var hasil = await kompres(f, 1200, 'image/png', 'qris-' + Date.now());
@@ -230,8 +300,11 @@
                 renderQris();
             } catch (e) {
                 if (pesanQris) pesanQris.textContent = 'Gagal memproses gambar QRIS.';
+            } finally {
+                state.memproses = false;
+                kunciKirim(false);
+                inputQris.value = '';
             }
-            inputQris.value = '';
         });
     }
 
@@ -293,6 +366,14 @@
     form.addEventListener('submit', function (ev) {
         ev.preventDefault();
         if (state.uploading) return;
+
+        // Jaring kedua U1. Tombolnya sudah di-disable selama kompresi, tapi
+        // submit bisa datang dari Enter di dalam field, dan `disabled` pada
+        // tombol tidak menghalangi itu.
+        if (state.memproses) {
+            tampilPesan('Foto masih disiapkan — tunggu sebentar lalu tekan Kirim lagi.', true);
+            return;
+        }
 
         if (!form.reportValidity()) return; // validasi native (required, url, dsb.)
         if (!cfg.webhook) {

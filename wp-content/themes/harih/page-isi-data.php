@@ -44,6 +44,11 @@ $premium = $paket_hint === 'premium';
 $temas   = function_exists('undangan_get_temas') ? undangan_get_temas() : ['tema-01' => 'Tema 01'];
 $musik   = harih_musik_library();
 $webhook = harih_form_webhook_url();
+
+// Satu sumber kebenaran untuk batas foto — dipakai teks di halaman DAN
+// window.ISI_DATA. Sebelumnya angka 10 ditulis terpisah di keduanya, pola yang
+// sudah pernah menggigit di C5 (harga di enam tempat).
+$harih_max_foto = 10;
 ?><!DOCTYPE html>
 <html <?php language_attributes(); ?>>
 <head>
@@ -182,12 +187,18 @@ $webhook = harih_form_webhook_url();
 
             <section class="kartu">
                 <h2>5. Galeri Foto <span class="paket-badge">Favorit+</span></h2>
-                <p class="kartu-note">Maksimal 10 foto. Foto pertama menjadi sampul undangan <strong>dan gambar preview saat undangan dibagikan di WhatsApp</strong> — pilih yang terbaik. Foto dikompresi otomatis di perangkat Anda sebelum dikirim, jadi aman untuk kuota.</p>
+                <p class="kartu-note">Maksimal <?php echo (int) $harih_max_foto; ?> foto. Foto pertama menjadi sampul undangan <strong>dan gambar preview saat undangan dibagikan di WhatsApp</strong> — pilih yang terbaik. Foto dikompresi otomatis di perangkat Anda sebelum dikirim, jadi aman untuk kuota.</p>
                 <p class="kartu-note"><strong>Pakai file asli dari fotografer.</strong> Foto yang diterima atau diteruskan lewat WhatsApp sudah dikecilkan sistem WhatsApp — hasilnya buram saat dipakai sebagai sampul.</p>
                 <div class="foto-grid" id="foto-grid"></div>
                 <label class="btn-file" for="input-foto">＋ Pilih foto</label>
                 <input type="file" id="input-foto" accept="image/jpeg,image/png,image/webp" multiple hidden>
-                <p class="pesan-file" id="pesan-foto" role="status"></p>
+                <?php /* U1 — tiga elemen dengan tugas berbeda, dulu ditumpuk di satu <p>:
+                         `#pesan-foto` sementara (progres kompresi, TANPA live region — ia
+                         berubah tiap foto dan akan dibacakan berkali-kali) · `#foto-hitung`
+                         permanen · `#tolak-foto` bertahan sampai pemilihan berikutnya. */ ?>
+                <p class="pesan-file" id="pesan-foto"></p>
+                <p class="foto-hitung" id="foto-hitung">0 dari <?php echo (int) $harih_max_foto; ?> foto terpilih</p>
+                <ul class="pesan-tolak" id="tolak-foto" role="status" hidden></ul>
                 <div class="field">
                     <span>Tata letak galeri</span>
                     <div class="pilih-tata">
@@ -272,7 +283,7 @@ $webhook = harih_form_webhook_url();
 <script>
 window.ISI_DATA = <?php echo wp_json_encode([
     'webhook'   => $webhook,
-    'maxFoto'   => 10,
+    'maxFoto'   => $harih_max_foto,
     'maxSizeMB' => 2,
 ]); ?>;
 </script>

@@ -980,8 +980,12 @@ body.is-locked .pratinjau-nama { display: none; } /* gerbang tetap sinematik */
     border: 1px solid var(--c-line);
     background: var(--c-surface);
     border-radius: var(--radius-btn);
+    /* 16px, bukan 15 (U2): di bawah itu iOS Safari memperbesar halaman sendiri
+       saat field difokus. Dulu hanya tema-01 yang menimpanya jadi 16px, jadi
+       RSVP tema-02 & tema-03 memicu zoom — di sini supaya ketiganya kebagian
+       dan tema keempat tidak lahir dengan cacat yang sama. */
     padding: 13px 14px;
-    font: 400 15px/1.5 var(--font-body);
+    font: 400 16px/1.5 var(--font-body);
     color: var(--c-ink);
 }
 .field input:focus, .field select:focus, .field textarea:focus {
