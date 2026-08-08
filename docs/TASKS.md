@@ -24,12 +24,12 @@
 
 **Mulai dari sini di sesi berikutnya.** `HARIH_VERSION 2.21.0` · 9 workflow aktif · smoke **32/32** · WAHA `healthy`, sesi `WORKING`.
 
-**27 dari 30 item selesai.** Sisa tiga di bawah. Ditambah **31 item** dari review UI/UX ([🎨 PU](#-pu--review-uiux-menyeluruh-8-agustus-2026)) — **PU-A (U1–U9) SELESAI & LIVE** *(v2.22.0)* · **PU-B U14–U19 SELESAI & LIVE** *(v2.23.0)*. Smoke 32/32.
+**27 dari 30 item selesai.** Sisa tiga di bawah. Ditambah **31 item** dari review UI/UX ([🎨 PU](#-pu--review-uiux-menyeluruh-8-agustus-2026)) — **PU-A (U1–U9) SELESAI & LIVE** *(v2.22.0)* · **SELURUH PU-B (U10–U20) SELESAI & LIVE** *(v2.24.2)*. Smoke 32/32.
 
 > ### ▶ MULAI DARI SINI
 > 1. **A8** — satu-satunya yang butuh tangan owner.
 > 2. **C8** lalu **D3**.
-> 3. **Sisa PU-B: U10 · U11 · U12 · U13 · U20** — U14–U19 sudah live (v2.23.0). Kelimanya `jam` dan menyentuh gerbang, musik, navigasi, buku tamu, dan kalender. **PU-D murni kerapian, jangan didahulukan.**
+> 3. **PU-C** (U21–U26) — halaman jualan. **U22** butuh tangan Anda: memotret sampel `TEST-173` yang sudah tercetak. **PU-D murni kerapian, jangan didahulukan.**
 > 4. Pada order cetak sungguhan pertama: periksa dua cabang `/proof/` yang belum pernah dilewati data nyata (lihat catatan ⚠️ di kotak PU-A).
 
 | | | |
@@ -490,7 +490,7 @@ Ketiga blok copy ([page-katalog.php:136](../wp-content/themes/harih/page-katalog
 
 > Tamu tidak membeli apa pun, tapi merekalah bukti sosial produk. Tiap cacat di sini dikalikan 50–600 orang per pesanan.
 
-> ## ◐ PU-B SEBAGIAN — **U14–U19 SELESAI & LIVE** 2026-08-08 *(v2.23.0)*
+> ## ✅ SELURUH PU-B **SELESAI & LIVE** 2026-08-08 *(v2.24.2)*
 >
 > Enam item aksesibilitas & semantik tuntas dalam satu commit (`dfe1d22`), di-deploy, dan **diukur pada elemen ter-render di KETIGA tema** — bukan dari berkas. Parser warnanya mengompositkan alpha dan mengenali sintaks `color(srgb …)`; dua jebakan yang pernah menghasilkan temuan palsu di proyek ini.
 >
@@ -503,24 +503,33 @@ Ketiga blok copy ([page-katalog.php:136](../wp-content/themes/harih/page-katalog
 >
 > Sebelumnya terendahnya **2,60:1**. Ikut terverifikasi live: heading **7 → 17** dengan hierarki h2/h3 benar · `<figcaption>` di dalam `<figure>` · `aria-pressed` terpasang termasuk pada keadaan awal · pil aktif solid `rgb(63,92,79)` dengan tanda centang `"✓ "` (teks 4,97:1, latar 4,80:1 terhadap section) · dot galeri **6×6 → 24×24** (aktif 42×24) tanpa berubah rupa · gambar galeri `tabindex="0" role="button"` · select "Jumlah Tamu" kini di dalam `<label>` · input RSVP 16px di ketiganya. Smoke **32/32**.
 >
-> **Sisa PU-B (5 item, semuanya `jam`):** **U10** gerbang lanskap · **U11** MP3 1,8–2,2 MB otomatis · **U12** alamat 4 layar dari puncak · **U13** buku tamu (batas 50 + jebakan gulir) · **U20** kalender .ics.
+> **U10–U13 & U20 menyusul di ronde kedua** (`a110420`), diverifikasi live:
+> · **U10** lanskap 640×360 **dan** 844×390, tema-01 & tema-03 → isi == layar, **kelebihan 0**, `elementFromPoint` mengembalikan tombolnya sendiri (dulu 124–150 px di bawah layar, mustahil ditekan). Potret tidak tersentuh: seal & Hijriah tetap tampil, gap 14px asli.
+> · **U11** MP3 **0 byte sebelum DAN sesudah gerbang dibuka** (dulu 1,8–2,2 MB langsung terunduh; satu pemuatan tanpa MP3 hanya ±796 KB).
+> · **U12** bilah 4 tautan, tinggi **44 px**, tidak bertumpuk tombol musik, nol luber horizontal. `sessionStorage` melewati gerbang pada kunjungan kedua dalam sesi yang sama.
+> · **U13** `max-height: none`, gulir-dalam **6.497 → 0**, keadaan kosong tampil dan dibedakan dari keadaan gagal; endpoint mengembalikan `{items,total,hal,per}`.
+> · **U20** dua acara, masing-masing Google + `.ics`; VEVENT diperiksa isinya — `DTSTART:20260912T010000Z` (= 08.00 WIB, konversi benar), `LOCATION` ter-escape.
+>
+> ⚠️ **Dua kesalahan saya sendiri, dicatat supaya tidak terulang:** media query lanskap sempat ditaruh **sebelum** aturan yang ditimpanya sehingga kalah pada spesifisitas yang sama — terukur sebagai `gap` yang tidak pernah berubah; dan `transform: scale()` **tidak** mengurangi tinggi layout sedikit pun. Pemangkasan akhirnya dipilih dari pengukuran anak-per-anak, bukan tebakan.
+>
+> *Catatan: satu jalan smoke sempat melaporkan 2 gagal. Diulang tiga kali berturut → 32/32 dengan kedua pemeriksaan RSVP lulus; itu gangguan jaringan sesaat yang sudah tercatat di "Wajib dibaca" no. 8, bukan regresi.*
 
-- [ ] **U10** 🤖 `jam` — **Gerbang bisa dibuka di orientasi lanskap**
+- [x] **U10** 🤖 `jam` — **Gerbang bisa dibuka di orientasi lanskap**
   Tiga hal bersamaan menutupnya: `.gate { position: fixed; inset: 0; overflow: hidden }` ([undangan.css:211-219](../wp-content/themes/harih/undangan/shared/undangan.css:211)) mengklip alih-alih menggulir · `justify-content: space-between` + `padding: 7vh` ([:246-258](../wp-content/themes/harih/undangan/shared/undangan.css:246)) · `body` terkunci `overflow: hidden; height: 100dvh` ([:78](../wp-content/themes/harih/undangan/shared/undangan.css:78)). Pada 640×360 isi gerbang 532–557 px sementara layar 360 px; tombol duduk 124–150 px di bawah layar di **ketiga tema**. `elementFromPoint(320,350)` mengembalikan `.gate-bawah`, bukan tombolnya.
   **Langkah:** `.gate-inner { overflow-y: auto }` · `padding: clamp(16px, 7vh, 56px)` · blok `@media (orientation: landscape) and (max-height: 600px)` yang mengecilkan `.seal` 76→48, gap 14→8, dan `.cover-names` clamp atas 46→30 — dengan ketiganya isi turun ke ±340 px.
   **Selesai bila:** tombol terlihat & bisa ditekan pada 640×360, 844×390, dan 915×412 di ketiga tema.
 
-- [ ] **U11** 🤖 `jam` — **Menekan gerbang berhenti mengunduh 1,8–2,2 MB MP3 tanpa ditanya**
+- [x] **U11** 🤖 `jam` — **Menekan gerbang berhenti mengunduh 1,8–2,2 MB MP3 tanpa ditanya**
   `musicBtn.hidden = false` hanya dijalankan **di dalam** `playMusic()` ([undangan.js:106](../wp-content/themes/harih/undangan/shared/undangan.js:106), [:108](../wp-content/themes/harih/undangan/shared/undangan.js:108)), dan `playMusic()` hanya dipanggil dari handler klik gerbang ([:139](../wp-content/themes/harih/undangan/shared/undangan.js:139)). Jadi urutannya: gerbang ditekan → `audio.play()` → unduhan mulai → **barulah** kontrolnya muncul. Ukuran dari `curl -I` ke live: 1.908.919 · 1.781.026 · 2.214.866 byte. Total satu kali buka demo ≈ **796 KB tanpa MP3, ≈2,6 MB dengan**. Kuota adalah keberatan nyata pembeli Indonesia, dan di sini biayanya ditanggung ratusan orang yang tidak memesan apa pun.
   **Langkah:** balik urutannya — tampilkan `#music-toggle` (kelas `paused`) saat gerbang dibuka **tanpa** memanggil `playMusic()`; panggil hanya dari handler tombol musik. Bila autoplay dianggap wajib bagi kesan produk, potong berkasnya: 60–70 detik @96 kbps sudah cukup karena `loop` mengulang dari cache — memangkas ±1,2 MB per tamu tanpa mengubah yang terdengar.
   **Selesai bila:** `performance.getEntriesByType('resource')` menunjukkan nol byte MP3 sampai tombol musik ditekan.
 
-- [ ] **U12** 🤖 `jam` — **Alamat & jam acara berhenti berada empat layar dari puncak**
+- [x] **U12** 🤖 `jam` — **Alamat & jam acara berhenti berada empat layar dari puncak**
   `#acara` adalah section **ke-6 dari 12** (identik di ketiga tema, diverifikasi dari HTML terkirim): 2.977 px pada 360×740 = **4,0 layar**; dokumen penuh 9.125 px = 12,3 layar. Seluruh dokumen demo hanya memuat 9 tag `<a>`, dan satu-satunya ber-`href="#"` adalah placeholder RSVP-WA yang bawaannya `hidden` — jadi **nol tautan lompat**. Ditambah: nol `sessionStorage` di `undangan.js`, sehingga gerbang dipasang ulang **tiap kunjungan** — tamu yang membuka tautan lagi di dalam mobil untuk mengecek alamat harus menekan gerbang lalu mengulang empat layar gulir.
   **Langkah:** bilah aksi tetap di bawah layar setelah gerbang terbuka — Acara · Lokasi · RSVP · Amplop — memakai `#acara`/`#rsvp`/`#amplop` yang **sudah ada di markup**, jadi nol perubahan urutan section. Berpasangan dengan tombol musik yang sudah fixed. Terpisah: `sessionStorage` penanda gerbang, lewati pada kunjungan berikutnya di sesi yang sama.
   **Selesai bila:** alamat terjangkau satu ketukan dari mana pun · kunjungan kedua tidak menampilkan gerbang.
 
-- [ ] **U13** 🤖 `jam` — **Buku tamu: batas 50, jebakan gulir, keadaan kosong, dan kiriman yang merusak tata letak**
+- [x] **U13** 🤖 `jam` — **Buku tamu: batas 50, jebakan gulir, keadaan kosong, dan kiriman yang merusak tata letak**
   **(a)** `'numberposts' => 50` tanpa parameter halaman ([rest.php:124](../wp-content/mu-plugins/undangan-core/rest.php:124)) + pemanggilan sekali tanpa tombol muat-lagi ([undangan.js:602-612](../wp-content/themes/harih/undangan/shared/undangan.js:602)). Karena `get_posts()` bawaannya `date DESC`, yang tampil adalah **50 terbaru** — pengirim awal benar-benar hilang. `/rekap/` memakai 500, jadi mempelai aman dan tamu tidak. **(b)** `.ucapan-list` dikurung `max-height: 460px; overflow-y: auto` ([undangan.css:1020-1032](../wp-content/themes/harih/undangan/shared/undangan.css:1020)) tanpa `overscroll-behavior` — jebakan gulir mulai menggigit pada **≥4 ucapan** (4×129 px > 460), tepat sebelum section penutup yang memuat "Bagikan via WhatsApp". **(c)** Nol cabang untuk `items.length === 0`, dan ketiga demo memang menampilkannya kosong melompong — `curl` ke endpoint mengembalikan `[]` di ketiganya. **(d)** Nol `overflow-wrap` pada `.ucapan-nama`/`.ucapan-pesan`, jadi satu nama 65 karakter tanpa spasi merusak tata letak. *(Ini soal moderasi & pembungkus kata, **bukan** celah keamanan — `rest.php:70-71` sudah memotong 100/1.500 karakter lewat `mb_substr` + sanitasi.)*
   **Langkah:** tampilkan 5 lalu tombol *"Lihat semua ucapan (N)"* dalam alir halaman (buang kotak gulir); parameter `?hal=` + `total` di REST; cabang kosong yang tenang + cabang gagal-jaringan yang berbeda; `overflow-wrap: anywhere`. Sekalian isi ketiga demo dengan 6–8 ucapan contoh — calon pembeli sedang menilai produk dari halaman itu.
   **Selesai bila:** ucapan ke-51 bisa dilihat tamu · gulir halaman tidak terperangkap · demo tidak lagi kosong.
@@ -557,7 +566,7 @@ Ketiga blok copy ([page-katalog.php:136](../wp-content/themes/harih/page-katalog
   **Langkah:** `padding: 9px; background-clip: content-box` pada dot (visual tetap 6 px, target jadi 24×24) · tambahkan `.galeri-slide img` ke daftar reduced-motion, atau ganti daftar eksplisit dengan satu aturan menyapu agar tidak terulang · `calc(18px + env(safe-area-inset-bottom, 0px))` pada `.music-toggle` · `overscroll-behavior: contain` pada kedua slider horizontal.
   **Selesai bila:** dot ≥24×24 tanpa berubah rupa · nol animasi lolos saat reduced-motion menyala.
 
-- [ ] **U20** 🤖 `jam` — **"Catat Tanggalnya" melayani kedua acara dan kedua platform**
+- [x] **U20** 🤖 `jam` — **"Catat Tanggalnya" melayani kedua acara dan kedua platform**
   Satu `<a>` ke `calendar.google.com` saja ([countdown.php:36-38](../wp-content/themes/harih/template-parts/undangan/countdown.php:36)); pencarian `.ics`/`text/calendar`/`BEGIN:VCALENDAR` di seluruh `wp-content` **nol hasil** — padahal komentar [undangan.js:234](../wp-content/themes/harih/undangan/shared/undangan.js:234) sudah menyebut baris ini sebagai *"tombol Google + .ics"*, jadi niatnya ada dan separuhnya tidak pernah dibuat. Tombolnya juga hanya membawa target countdown, yaitu resepsi — tamu yang diundang akad tidak terlayani. *(Klaim "pemakai iPhone dilempar ke layar login Google" tidak diverifikasi; yang pasti cukup: nol berkas .ics = nol jalur ke Kalender bawaan iOS/Android.)*
   **Langkah:** pindahkan tombol kalender ke tiap kartu di `acara.php` sehingga akad & resepsi membawa jam dan venue-nya sendiri; bangun `.ics` sebagai `data:text/calendar;base64,` di PHP — nol endpoint baru, nol permintaan jaringan — dan tawarkan dua tautan berdampingan.
   **Selesai bila:** kedua acara punya tombolnya masing-masing · tautan .ics terbuka di Kalender bawaan iOS.
