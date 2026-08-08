@@ -1,6 +1,6 @@
 # TASKS — hariH
 
-**Status:** aktif · **Ditulis ulang:** 2026-08-07 setelah audit menyeluruh 6 dimensi · **Checkpoint terakhir:** 2026-08-08 (keamanan · kode PHP · frontend · n8n/infra · produk-bisnis · benchmark pasar) · **Ditambah 2026-08-08:** bagian [🎨 PU](#-pu--review-uiux-menyeluruh-8-agustus-2026) — review UI/UX 7 dimensi.
+**Status:** aktif · **Ditulis ulang:** 2026-08-07 setelah audit menyeluruh 6 dimensi · **Checkpoint terakhir:** 2026-08-08 sesi kedua · Bagian [🎨 PU](#-pu--review-uiux-menyeluruh-8-agustus-2026) (review UI/UX 7 dimensi, 31 item) **seluruhnya live** di `v2.33.0`.
 
 > Versi sebelumnya (553 baris, checkpoint bertumpuk) diarsipkan di [`arsip/TASKS-2026-08-07.md`](./arsip/TASKS-2026-08-07.md). Dokumen ini hanya memuat **yang berlaku sekarang**. Riwayat lengkap ada di git log.
 
@@ -20,24 +20,33 @@
 
 ---
 
-## ⏸ CHECKPOINT — tutup sesi 8 Agustus 2026
+## ⏸ CHECKPOINT — tutup sesi 8 Agustus 2026 (sesi kedua)
 
-**Mulai dari sini di sesi berikutnya.** `HARIH_VERSION 2.21.0` · 9 workflow aktif · smoke **32/32** · WAHA `healthy`, sesi `WORKING`.
+**Mulai dari sini di sesi berikutnya.** `HARIH_VERSION 2.33.0` · 9 workflow aktif · smoke **32/32** · WAHA `healthy` 13 jam *(healthcheck D4 menguji SESI, bukan port — jadi `healthy` berarti sesinya `WORKING`)*.
 
-**27 dari 30 item selesai.** Sisa tiga di bawah. Ditambah **31 item** dari review UI/UX ([🎨 PU](#-pu--review-uiux-menyeluruh-8-agustus-2026)) — **PU-A (U1–U9) SELESAI & LIVE** *(v2.22.0)* · **PU-B (U10–U20) LIVE** *(v2.24.2)* · **PU-C LIVE kecuali U22** · **SELURUH 31 ITEM PU LIVE** *(v2.33.0)*. Smoke 32/32.
+**26 commit.** Sesi ini menambah satu dimensi baru ke rencana dan menghabiskannya: **review UI/UX 7 dimensi → 31 item → SELURUHNYA LIVE.** Sisa dari rencana lama tetap tiga: **A8** (owner), **C8**, **D3** (bagian bebasnya sudah dikerjakan).
 
 > ### ▶ MULAI DARI SINI
-> Seluruh **31 item review UI/UX** sudah live. Yang tersisa sebagian besar bukan pekerjaan kode — lihat [👤 Aksi owner](#-aksi-owner--yang-masih-menunggu-tangan-anda) (dirapikan 2026-08-08; keputusan yang sudah terjawab dipindah jadi catatan).
-> 1. **A8** — Duitku, satu-satunya item P0 yang tersisa.
-> 2. **C8** lalu **D3**.
-> 3. **Foto produk cetak SUNGGUHAN** — kelima slot kini terisi render AI berlabel *"ilustrasi"*; memotret sampel `TEST-173` dan bengkel percetakan menggantinya dengan bukti nyata dan mencabut labelnya. Lalu **keputusan `maxDim`** untuk menutup sisa D3.
-> 4. Pada order cetak sungguhan pertama: periksa dua cabang `/proof/` yang belum pernah dilewati data nyata (lihat catatan ⚠️ di kotak PU-A).
+> 1. **A8** — Duitku, satu-satunya item P0 yang tersisa. 👤
+> 2. **C8** — retensi 90 hari; janji yang sudah tayang tanpa satu baris kode penegak.
+> 3. Sisanya sebagian besar **bukan pekerjaan kode** → [👤 Aksi owner](#-aksi-owner--yang-masih-menunggu-tangan-anda) (dirapikan sesi ini; keputusan yang sudah terjawab dipindah jadi catatan).
+> 4. Pada order cetak sungguhan pertama: periksa dua cabang `/proof/` yang belum pernah dilewati data nyata (catatan ⚠️ di kotak PU-A).
 
 | | | |
 |---|---|---|
 | **C8** `hari` 🤖 | Retensi 90 hari & hak penghapusan **tanpa satu baris kode** — janji ini sudah tayang di Kebijakan Privasi. `masa-aktif.php` hanya mendraft post; **medianya tetap publik**. | *disarankan berikutnya* |
-| **D3** `hari` 🤖 | Gambar undangan: nol `srcset`, nol `width/height`. Yang bisa dikerjakan tanpa menunggu keputusan resolusi cetak: atribut dimensi di enam template + `aspect-ratio` pada QRIS (sumber CLS terakhir). Keputusan `maxDim` masih menunggu — sampel cetak kemarin tidak memakai foto pemesan. | |
-| **A8** `menit` 👤 | **Duitku** — kejar approval + tiga pertanyaan (profil nominal Rp 99–299rb vs paket Rp 5,9 jt · mekanisme refund · plafon per kanal). Satu-satunya yang butuh tangan owner. | |
+| **D3** `hari` 🤖 | **Bagian bebasnya SELESAI** bersama U31: `aspect-ratio` pada `.qris-panel img` (sumber CLS terakhir) + `width/height` pada thumbnail YouTube. Sisa: `srcset` penuh (menunggu WF-02 disentuh untuk hal lain) dan **keputusan `maxDim`** — butuh satu cetakan uji memakai foto pemesan; `TEST-173` tidak memakainya. | |
+| **A8** `menit` 👤 | **Duitku** — kejar approval + tiga pertanyaan (profil nominal Rp 99–299rb vs paket Rp 5,9 jt · mekanisme refund · plafon per kanal). | |
+
+**Yang berubah paling besar sesi ini:**
+
+1. **Undangan berhenti membuang pekerjaan pembeli tanpa suara.** Tiga jalur terpisah, ketiganya dibuktikan dengan MENJALANKAN kodenya: menekan Kirim selagi foto dikompresi mengirim 2 dari 10 foto lalu menampilkan *"Data diterima!"* · foto yang ditolak lenyap tanpa jejak · 650 nama tamu tersimpan 600 dan dilaporkan *"Tersimpan — 600"*. → U1 · U5
+2. **Gerbang undangan MUSTAHIL dibuka di orientasi lanskap** — tombolnya 124–150 px di bawah layar sementara scroll terkunci. Kini isi == layar, kelebihan **0**. → U10
+3. **Menekan gerbang mengunduh 1,8–2,2 MB MP3 tanpa ditanya**, dan kontrolnya baru muncul setelah unduhan jalan. Kini **0 byte** sampai tombol musik ditekan. → U11
+4. **Halaman jualan berhenti menjanjikan yang tidak ada.** Tiga janji "gateway berlisensi" sementara tombolnya membuka chat yang menanyakan cara bayar · klaim "hemat Rp 700.000" yang dibantah tabel di halaman yang sama · badge "Paling Populer" pada produk nol penjualan. → U21 · U24 · U26
+5. **Berat halaman turun tajam, dan foto produk akhirnya ada.** HTML undangan 44.180 → **27.577 byte**; gambar beranda 967.844 → **328.184**; lima slot foto terisi. WebP dibangun **sendiri**, bukan lewat QUIC.cloud — layanan itu mengunggah foto pelanggan ke pihak ketiga dan wajib masuk Kebijakan Privasi lebih dulu. → U27 · U31 · U22
+
+**Cara verifikasi yang dipakai sesi ini — dan kenapa itu penting:** berkasnya **dijalankan**, bukan dibaca. `isi-data.js` asli dimuat di peramban dengan XHR disadap; kontras dihitung dengan komposit alpha dan parser `color(srgb …)`; remap tipografi dibandingkan per-elemen terhadap potret sebelum-sesudah. **Empat kali metode itu menyelamatkan dari kesimpulan palsu:** `h2` "turun 42→30px" (ternyata `innerWidth` panel = 0) · CSS "tidak berpengaruh" (ternyata HTML undangan di-cache 7 hari) · smoke "2 gagal" (gangguan jaringan, tiga jalan berikutnya 32/32) · media query lanskap yang "sudah dipasang" tapi kalah spesifisitas. Semuanya tercatat di entri masing-masing.
 
 **Data uji yang SENGAJA disimpan** (permintaan owner) — jangan dihapus tanpa konfirmasi:
 - Pesanan **TEST-173** + undangan **174** (`/u/test-rangga-sekar/`) — sumber berkas sampel cetak
@@ -367,6 +376,8 @@ Empat halaman bertoken tidak memanggil `nocache_headers()` sementara produksi me
   Grep `srcset|sizes` di seluruh tema: 0 hasil; tidak satu `<img>` di `template-parts/undangan/*.php` punya width/height. Foto dikompresi ke 1600px untuk kolom 480px — paket Favorit dengan 10 foto membawa ~6–9 MB, dan foto sampul ber-`loading="eager"` adalah LCP yang tidak tertolong lazy. Kuota adalah keberatan nyata pembeli Indonesia dan biayanya ditanggung ratusan tamu yang tidak memesan apa pun.
   Digerbang karena solusi termurahnya (turunkan `maxDim` ke 1280) **bukan perubahan bebas risiko**: foto yang sama adalah sumber untuk produk **cetak**, dan resolusi yang dibutuhkan cetak baru terjawab oleh sampel cetak pertama.
   **Selesai bila:** yang gratis dikerjakan sekarang sebagai tumpangan — `aspect-ratio: 1/1` pada `.qris-panel img` (satu-satunya sumber CLS tersisa) dan atribut width/height di keenam template. srcset penuh menunggu WF-02 disentuh untuk hal lain; keputusan `maxDim` menunggu sampel cetak.
+  → **BAGIAN BEBASNYA SELESAI & LIVE 2026-08-08** bersama U31 *(v2.31.0)*: `aspect-ratio: 1/1` + `object-fit` pada `.qris-panel img`, dan `width/height` pada thumbnail YouTube (`hqdefault` selalu 480×360). Galeri slider & kolase ternyata **sudah** dikunci tinggi/aspect-ratio oleh CSS-nya sendiri, jadi panel QRIS memang satu-satunya sisa CLS. Foto pemesan sengaja TIDAK diberi width/height — dimensinya tidak diketahui saat render, dan membacanya berarti satu `getimagesize()` per gambar.
+  ⚠️ **Sisa D3 tinggal dua, keduanya bergerbang:** `srcset` penuh (menunggu WF-02 disentuh untuk hal lain) dan keputusan **`maxDim`** — butuh satu cetakan uji memakai foto pemesan, karena `TEST-173` tidak memakainya.
 
 - [x] **D4** 🤝 `jam` — **Infrastruktur VPS: batas log, healthcheck sesi, pemeriksaan disk** → **SELESAI & TERUJI 2026-08-08**
   ⚠️ **Dua premis audit meleset, diperiksa langsung:** disk VPS **193 GB dengan pemakaian 12%**, bukan 25 GB yang hampir penuh; dan log container cuma 124 KB & 16 KB. Jadi ini **pencegahan, bukan pemadam kebakaran** — penting untuk tidak diwariskan sebagai keadaan darurat.
