@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) exit;
  * pengunjung & LiteSpeed tetap menyajikan berkas lama meski file di server
  * sudah baru, dan perbaikan tampilan terlihat "tidak berpengaruh".
  */
-const HARIH_VERSION = '2.25.3';
+const HARIH_VERSION = '2.26.3';
 
 add_action('after_setup_theme', function () {
     add_theme_support('title-tag');
@@ -230,6 +230,108 @@ add_action('wp_enqueue_scripts', function () {
     wp_enqueue_style('harih-child', get_stylesheet_uri(), [], HARIH_VERSION);
 }, 20);
 
+/**
+ * Buang semua aset yang bukan milik kita (konvensi: handle berawalan `undangan-`).
+ *
+ * U27 — DIJALANKAN DUA KALI, dan itu bukan kelebihan.
+ * Sapuan di `wp_enqueue_scripts` saja tidak cukup: `wc-blocks-style` (14.006 byte)
+ * dan `global-styles` (14.627 byte inline) tiba SETELAH hook itu selesai, jadi
+ * keduanya lolos dan ikut terkirim ke SEMUA halaman — termasuk halaman undangan
+ * yang tidak punya satu pun blok, tempat `wc-blocks.css` jadi <link> pemblokir
+ * render di <head> untuk styling yang tidak dipakai apa pun. Sapuan kedua di
+ * `wp_print_styles` berjalan tepat sebelum tag dicetak, jadi tidak ada lagi yang
+ * bisa menyelinap.
+ */
+function harih_buang_aset_asing(): void {
+    global $wp_styles, $wp_scripts;
+    if ($wp_styles instanceof WP_Styles) {
+        foreach ((array) $wp_styles->queue as $handle) {
+            if (strpos($handle, 'undangan-') !== 0) wp_dequeue_style($handle);
+        }
+    }
+    if ($wp_scripts instanceof WP_Scripts) {
+        foreach ((array) $wp_scripts->queue as $handle) {
+            if (strpos($handle, 'undangan-') !== 0) wp_dequeue_script($handle);
+        }
+    }
+}
+
+/** Halaman yang dirender standalone — dipakai ketiga penjaga U27 di bawah. */
+function harih_halaman_standalone(): bool {
+    return is_singular('undangan')
+        || is_page_template('page-isi-data.php')
+        || is_page_template('page-katalog.php')
+        || is_page_template('page-jadi-reseller.php')
+        || is_page_template('page-harga-hybrid.php')
+        || is_page_template('page-satuan.php')
+        || is_page_template('page-upsell.php')
+        || is_page_template('page-proof.php')
+        || is_page_template('page-tamu.php')
+        || is_page_template('page-rekap.php')
+        || is_page_template('page-teks.php');
+}
+
+// U27 (a) — sapuan lanjutan. `wc-blocks-style` (14.006 byte) tidak masuk lewat
+// `wp_enqueue_scripts` melainkan lewat `WC_Frontend_Scripts::enqueue_block_assets`
+// pada hook `enqueue_block_assets`, jadi sapuan pertama selalu meleset. Ketiga
+// titik di bawah menutup seluruh jalur yang mungkin, dan `wp_print_styles`
+// adalah jaring terakhir tepat sebelum tag dicetak.
+add_action('enqueue_block_assets', function () {
+    if (harih_halaman_standalone()) harih_buang_aset_asing();
+}, 999);
+add_action('wp_print_styles', function () {
+    if (harih_halaman_standalone()) harih_buang_aset_asing();
+}, 100);
+
+/* U27 — JARING TERAKHIR, di tingkat pencetakan tag.
+ *
+ * Tiga sapuan berbasis antrean semuanya meleset pada `wc-blocks-style`, dan
+ * mengejar jalur enqueue-nya terbukti tebak-tebakan: ia tidak lewat
+ * `wp_enqueue_scripts`, tidak tertangkap `enqueue_block_assets`, dan tidak
+ * tertangkap `wp_print_styles`. Filter ini bekerja di titik semua jalur
+ * bermuara — saat tag benar-benar dirakit — sehingga tidak perlu tahu lagi
+ * bagaimana sebuah handle sampai ke sana.
+ *
+ * Aman karena cakupannya sempit: hanya halaman standalone, yang memang
+ * dirancang memuat aset kita saja (konvensi handle `undangan-`).
+ */
+add_filter('style_loader_tag', function ($tag, $handle) {
+    if (!harih_halaman_standalone()) return $tag;
+    return strpos((string) $handle, 'undangan-') === 0 ? $tag : '';
+}, 999, 2);
+
+/* U27 — deteksi emoji WordPress dicetak langsung lewat `wp_head`/`wp_print_styles`,
+   bukan lewat antrean, jadi filter tag di bawah tidak menjangkaunya. Halaman
+   undangan tidak punya satu pun kebutuhan atasnya. */
+add_action('init', function () {
+    if (is_admin()) return;
+    remove_action('wp_head', 'print_emoji_detection_script', 7);
+    remove_action('wp_print_styles', 'print_emoji_styles');
+    add_filter('emoji_svg_url', '__return_false');
+}, 20);
+
+add_filter('script_loader_tag', function ($tag, $handle) {
+    if (!harih_halaman_standalone()) return $tag;
+    return strpos((string) $handle, 'undangan-') === 0 ? $tag : '';
+}, 999, 2);
+
+// U27 (b) — `global-styles` dicetak lewat jalurnya sendiri, tidak lewat antrean,
+// jadi mencabut hook-nya adalah satu-satunya cara. 14.627 byte mentah = 33% HTML
+// undangan; terkompresi ±2.251 byte = 21% dari yang benar-benar terkirim.
+add_action('init', function () {
+    remove_action('wp_enqueue_scripts', 'wp_enqueue_global_styles');
+    remove_action('wp_footer', 'wp_enqueue_global_styles', 1);
+    remove_action('wp_body_open', 'wp_global_styles_render_svg_filters');
+}, 20);
+
+// U27 (c) — tombol "Scroll to Top" bawaan Astra disuntik lewat wp_footer padahal
+// CSS *dan* JS Astra dibuang: hasilnya SVG chevron tanpa gaya, bisa difokus
+// keyboard, tanpa handler klik, dengan teks pembaca layar berbahasa Inggris di
+// halaman lang="id". Dimatikan di sumbernya, bukan disembunyikan dengan CSS.
+add_filter('astra_get_option_scroll-to-top-enable', function ($nilai) {
+    return harih_halaman_standalone() ? false : $nilai;
+});
+
 // Halaman undangan, form isi data & katalog: buang SEMUA aset tema/plugin lain
 // (Astra, WooCommerce, dst.) lalu muat hanya aset kita — halaman harus ringan
 // & bebas bentrok CSS. Konvensi: semua handle milik kita berawalan `undangan-`.
@@ -241,13 +343,7 @@ add_action('wp_enqueue_scripts', function () {
     $is_hybrid   = is_page_template('page-harga-hybrid.php') || is_page_template('page-satuan.php') || is_page_template('page-upsell.php') || is_page_template('page-proof.php') || is_page_template('page-tamu.php') || is_page_template('page-rekap.php') || is_page_template('page-teks.php');
     if (!$is_undangan && !$is_isidata && !$is_katalog && !$is_reseller && !$is_hybrid) return;
 
-    global $wp_styles, $wp_scripts;
-    foreach ((array) $wp_styles->queue as $handle) {
-        if (strpos($handle, 'undangan-') !== 0) wp_dequeue_style($handle);
-    }
-    foreach ((array) $wp_scripts->queue as $handle) {
-        if (strpos($handle, 'undangan-') !== 0) wp_dequeue_script($handle);
-    }
+    harih_buang_aset_asing();
 
     if ($is_katalog || $is_reseller || $is_hybrid) {
         // Font halaman toko SELF-HOSTED sejak redesain 2026-08-06 (@font-face di
