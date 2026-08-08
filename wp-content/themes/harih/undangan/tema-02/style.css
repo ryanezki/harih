@@ -66,6 +66,8 @@
     --c-accent: #a15436;      /* terakota */
     --c-accent-ink: #faf3ea;  /* krem */
     --c-gold: #be7a4a;        /* tembaga */
+    --c-gold-teks: #975e36;   /* U14 — peran teks: 4,61:1 ber-tint (gold 3,03:1) */
+    --c-line-input: #93857a;  /* U15 — batas kontrol form: 3,13:1 (line 1,17:1) */
     --radius: 18px;       /* lembut & membulat, seirama motif arch */
     --radius-btn: 10px;   /* modern, tapi bukan pil aplikasi */
     --shadow: 0 12px 32px rgba(161, 84, 54, .10);

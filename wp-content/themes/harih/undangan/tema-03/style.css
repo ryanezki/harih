@@ -74,6 +74,10 @@
     --c-accent: #c9a45c;      /* emas — tombol berlatar emas, teks navy */
     --c-accent-ink: #171f33;
     --c-gold: #c9a45c;
+    /* U14 — tema gelap sudah lolos (6,68:1), jadi peran teks memakai nilai yang
+       sama. Tokennya tetap ada supaya selektor bersama tidak bercabang. */
+    --c-gold-teks: #c9a45c;
+    --c-line-input: #6b7080;  /* U15 — 3,17:1; dicampur ke --c-ink, arah TERANG karena latarnya gelap */
     --radius: 4px;        /* tegas & tenang, memberi panggung ke tipografi */
     --radius-btn: 2px;
     --shadow: 0 14px 34px rgba(0, 0, 0, .35);

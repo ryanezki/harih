@@ -18,6 +18,21 @@
     var nama = qs.get('to');
     if (nama) {
         document.querySelectorAll('.guest-name').forEach(function (el) { el.textContent = nama; });
+
+        /* U18 — nama yang SUDAH kita ketahui berhenti diminta lagi.
+           `.guest-name` cuma ada satu, di dalam gerbang; begitu gerbang naik
+           nama itu hilang dari layar dan `#rsvp-nama` dibiarkan kosong. Tamu
+           mengetik ulang, dan mempelai menerima ejaan yang tidak cocok dengan
+           daftar undangannya — padahal sisi pembeli membangun tautan personal
+           per tamu di tiga titik page-tamu.php. Tetap bisa disunting: ini
+           mengisi, bukan mengunci. Aman terhadap cache halaman karena semuanya
+           sisi klien, sama seperti pola `?to=` itu sendiri.
+
+           Diset langsung, bukan lewat DOMContentLoaded: skrip ini dimuat di
+           footer sehingga form-nya sudah terurai — persis seperti baris
+           `.guest-name` di atas yang juga menanyai DOM seketika. */
+        var fNama = document.getElementById('rsvp-nama');
+        if (fNama && !fNama.value) fNama.value = nama;
     }
 
     /* ---- Pratinjau "coba nama kalian" (G1.3) — HANYA di undangan demo ----
@@ -274,10 +289,17 @@
     var ampBtn = $('#amplop-toggle');
     var ampWrap = $('#amplop-wrap');
     if (ampBtn && ampWrap) {
+        /* U17 — amplop tertutup memakai `grid-template-rows: 0fr` + opacity 0,
+           tanpa `hidden`/`visibility`/`inert`. Isinya tetap di urutan tab: dua
+           kontrol — termasuk "Salin Nomor" — menerima fokus keyboard di dalam
+           panel setinggi NOL piksel. `inert` menutupnya dalam satu atribut. */
+        function segarkanInert(buka) { ampWrap.toggleAttribute('inert', !buka); }
+        segarkanInert(ampWrap.classList.contains('terbuka'));
         ampBtn.addEventListener('click', function () {
             var buka = ampWrap.classList.toggle('terbuka');
             ampBtn.setAttribute('aria-expanded', buka ? 'true' : 'false');
             ampBtn.textContent = buka ? 'Tutup Amplop' : 'Buka Amplop Digital';
+            segarkanInert(buka);
         });
     }
 
@@ -369,10 +391,22 @@
             lbNum.textContent = (idx + 1) + ' / ' + imgs.length;
             lb.hidden = false;
         }
+        /* U17 — pemicunya dulu HANYA `click` pada <img>: lightbox tidak bisa
+           dibuka sama sekali tanpa mouse. Gambar diberi peran tombol + urutan
+           tab, dan Enter/Space membuka persis seperti klik. */
         imgs.forEach(function (img, i) {
-            img.addEventListener('click', function () {
+            function buka() {
                 if (!lb) bangun();
                 tampil(i);
+            }
+            img.setAttribute('role', 'button');
+            img.setAttribute('tabindex', '0');
+            if (!img.getAttribute('aria-label')) {
+                img.setAttribute('aria-label', 'Perbesar foto ' + (i + 1));
+            }
+            img.addEventListener('click', buka);
+            img.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); buka(); }
             });
         });
     })();
@@ -399,6 +433,9 @@
         var f = document.querySelector('.video-frame-dalam[data-yt]');
         if (!f) return;
         function muat() {
+            // U17 — keydown tidak lagi `once`, jadi muat() harus tahan
+            // dipanggil dua kali; tanpa ini Enter kedua akan me-restart video.
+            if (f.querySelector('iframe')) return;
             var id = f.getAttribute('data-yt');
             var ifr = document.createElement('iframe');
             ifr.src = 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1';
@@ -409,10 +446,15 @@
             f.appendChild(ifr);
             f.style.cursor = 'default';
         }
+        /* U17 — `{once:true}` DICABUT dari keydown. Opsi itu mencopot listener setiap
+           kali ia DIPANGGIL, bukan setiap kali ia berhasil: satu tekan panah-bawah
+           untuk menggulir sudah menghabiskan satu-satunya kesempatan, dan sesudahnya
+           Enter mati permanen sementara klik mouse tetap bekerja. Listener klik boleh
+           tetap `once` karena klik selalu memuat. */
         f.addEventListener('click', muat, { once: true });
         f.addEventListener('keydown', function (e) {
             if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); muat(); }
-        }, { once: true });
+        });
     })();
 
     /* ---- Pemilih nuansa (halaman demo saja) ---- */
@@ -462,6 +504,9 @@
         if (!petas.length) return;
         petas.forEach(function (f) {
             var muat = function () {
+                // U17 — keydown tidak lagi `once`, jadi muat() harus tahan
+                // dipanggil dua kali; tanpa ini Enter kedua memuat ulang peta.
+                if (f.querySelector('iframe')) return;
                 var q = f.getAttribute('data-peta');
                 var ifr = document.createElement('iframe');
                 ifr.src = 'https://maps.google.com/maps?q=' + encodeURIComponent(q) + '&z=16&output=embed';
@@ -474,28 +519,97 @@
                 f.removeAttribute('tabindex');
                 f.appendChild(ifr);
             };
+            /* U17 — `{once:true}` DICABUT dari keydown. Opsi itu mencopot listener setiap
+               kali ia DIPANGGIL, bukan setiap kali ia berhasil: satu tekan panah-bawah
+               untuk menggulir sudah menghabiskan satu-satunya kesempatan, dan sesudahnya
+               Enter mati permanen sementara klik mouse tetap bekerja. Listener klik boleh
+               tetap `once` karena klik selalu memuat. */
             f.addEventListener('click', muat, { once: true });
             f.addEventListener('keydown', function (e) {
                 if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); muat(); }
-            }, { once: true });
+            });
         });
     })();
 
     /* ---- Pill kehadiran RSVP (menggantikan dropdown) ---- */
+    /* U15 — keadaan terpilih diekspos ke pembaca layar. Sebelumnya
+       `aria-pressed`/`aria-checked`/`aria-selected` muncul NOL kali di seluruh
+       tema: satu-satunya penanda adalah kelas CSS. Karena defaultnya "hadir",
+       tamu berhalangan yang memakai pembaca layar bisa mengirim konfirmasi
+       HADIR tanpa sadar — lalu mempelai menghitung kursi & katering dari situ.
+
+       U18 — dan blok "Hadir Pada"/"Jumlah Tamu" disembunyikan saat tamu memilih
+       Berhalangan; menanyakan sesi mana yang ia hadiri setelah ia menjawab
+       tidak hadir adalah pertanyaan yang tidak punya jawaban benar. */
+    var rsvpReset;   // dipasang oleh blok pil RSVP di bawah (U18)
     (function () {
-        function grupPill(hiddenSel, btnSel, attr) {
+        function grupPill(hiddenSel, btnSel, attr, sesudah) {
             var hidden = $(hiddenSel);
             var pills = document.querySelectorAll(btnSel);
-            if (!hidden || !pills.length) return;
+            if (!hidden || !pills.length) return null;
+            function pasang(b) {
+                hidden.value = b.getAttribute(attr);
+                pills.forEach(function (x) {
+                    var aktif = x === b;
+                    x.classList.toggle('aktif', aktif);
+                    x.setAttribute('aria-pressed', aktif ? 'true' : 'false');
+                });
+                if (sesudah) sesudah(hidden.value);
+            }
+            // Keadaan awal ikut diumumkan — tanpa ini pil yang sudah aktif sejak
+            // halaman dimuat tetap terbaca "tidak ditekan".
             pills.forEach(function (b) {
-                b.addEventListener('click', function () {
-                    hidden.value = b.getAttribute(attr);
-                    pills.forEach(function (x) { x.classList.toggle('aktif', x === b); });
+                b.setAttribute('aria-pressed', b.classList.contains('aktif') ? 'true' : 'false');
+                b.addEventListener('click', function () { pasang(b); });
+            });
+            return pasang;
+        }
+
+        var barisJumlah = document.querySelector('.rsvp-jumlah-baris');
+        var barisSesi   = document.querySelector('.rsvp-sesi-baris');
+        function terapkan(nilai) {
+            var hadir = nilai !== 'tidak';
+            if (barisJumlah) barisJumlah.hidden = !hadir;
+            if (barisSesi)   barisSesi.hidden   = !hadir;
+        }
+
+        grupPill('#rsvp-hadir', '.hadir-btn[data-hadir]', 'data-hadir', terapkan);
+        grupPill('#rsvp-sesi', '.sesi-btn', 'data-sesi');
+        terapkan(($('#rsvp-hadir') || {}).value || 'hadir');
+
+        /* U18 — `form.reset()` membersihkan SEBAGIAN saja, dan itu terbukti di
+           demo live: nama, pesan, dan jumlah kembali, tapi pil Kehadiran & Sesi
+           tetap menyala pilihan orang sebelumnya. Sebabnya `type="hidden"`
+           berada dalam value mode "default" — menulis `.value` ikut mengubah
+           ATRIBUT-nya, sehingga reset justru memulihkan ke pilihan tadi.
+           Karena itu keadaan awal disimpan sendiri, lalu dipulihkan eksplisit. */
+        var awal = {};
+        ['#rsvp-hadir', '#rsvp-sesi'].forEach(function (sel) {
+            var el = $(sel);
+            if (el) awal[sel] = el.value;
+        });
+
+        rsvpReset = function () {
+            ['#rsvp-nama', '#rsvp-pesan'].forEach(function (sel) {
+                var el = $(sel);
+                if (el) el.value = '';
+            });
+            var j = $('#rsvp-jumlah');
+            if (j) j.value = '1';
+            Object.keys(awal).forEach(function (sel) {
+                var el = $(sel);
+                if (!el) return;
+                el.value = awal[sel];
+                var grup = sel === '#rsvp-hadir' ? '.hadir-btn[data-hadir]' : '.sesi-btn';
+                var attr = sel === '#rsvp-hadir' ? 'data-hadir' : 'data-sesi';
+                document.querySelectorAll(grup).forEach(function (b) {
+                    var aktif = b.getAttribute(attr) === awal[sel];
+                    b.classList.toggle('aktif', aktif);
+                    b.setAttribute('aria-pressed', aktif ? 'true' : 'false');
                 });
             });
-        }
-        grupPill('#rsvp-hadir', '.hadir-btn[data-hadir]', 'data-hadir');
-        grupPill('#rsvp-sesi', '.sesi-btn', 'data-sesi');
+            terapkan(awal['#rsvp-hadir'] || 'hadir');
+        };
     })();
 
     /* ---- Salin rekening ---- */
@@ -679,7 +793,7 @@
                     list.prepend(itemUcapan({ nama: data.nama, pesan: data.pesan, hadir: data.hadir, jumlah: data.jumlah, sesi: data.sesi, waktu: '' }));
                 }
                 tampilkanTombolWa(data);
-                form.reset();
+                rsvpReset && rsvpReset();
             }).catch(function (err) {
                 msg.classList.add('error');
                 msg.textContent = err.message;

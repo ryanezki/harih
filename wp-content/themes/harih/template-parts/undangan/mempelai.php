@@ -10,7 +10,7 @@ $u = $args;
 $inisial = static fn(string $nama): string => $nama !== '' ? mb_strtoupper(mb_substr($nama, 0, 1)) : '♥';
 ?>
 <section class="section mempelai" id="mempelai">
-    <p class="section-title" data-reveal>Kedua Mempelai</p>
+    <h2 class="section-title" data-reveal>Kedua Mempelai</h2>
 
     <?php
     /* "Putra kedua dari Bapak…" — konvensi kuat undangan Indonesia.

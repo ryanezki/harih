@@ -9,7 +9,7 @@ $u  = $args;
 $yt = harih_youtube_id($u['video_url']);
 ?>
 <section class="section video" id="video">
-    <p class="section-title" data-reveal>Live Streaming</p>
+    <h2 class="section-title" data-reveal>Live Streaming</h2>
     <p class="section-intro" data-reveal data-delay="100">Bagi Bapak/Ibu/Saudara/i yang berhalangan hadir, prosesi dapat diikuti secara langsung:</p>
     <?php if ($yt !== '') : ?>
         <div class="video-frame" data-reveal data-delay="180">

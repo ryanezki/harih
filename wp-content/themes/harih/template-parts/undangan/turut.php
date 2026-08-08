@@ -6,7 +6,7 @@ $nama = array_values(array_filter(array_map('trim', explode("\n", $u['turut_meng
 if (!$nama) return;
 ?>
 <section class="section turut" id="turut">
-    <p class="section-title" data-reveal>Turut Mengundang</p>
+    <h2 class="section-title" data-reveal>Turut Mengundang</h2>
     <ul class="turut-daftar" data-reveal data-delay="120">
         <?php foreach ($nama as $n) : ?><li><?php echo esc_html($n); ?></li><?php endforeach; ?>
     </ul>

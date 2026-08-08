@@ -10,7 +10,7 @@ $u = $args;
 $foto = $u['galeri'][1] ?? ($u['galeri'][0] ?? '');
 ?>
 <section class="section love-story" id="love-story">
-    <p class="section-title" data-reveal>Kisah Kami</p>
+    <h2 class="section-title" data-reveal>Kisah Kami</h2>
     <?php if ($foto !== '') : ?>
     <div class="kisah-foto" data-reveal data-delay="120">
         <img src="<?php echo esc_url($foto); ?>" alt="" loading="lazy" decoding="async" data-parallax="44">

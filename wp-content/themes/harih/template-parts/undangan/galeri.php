@@ -20,7 +20,7 @@ $u      = $args;
 $kolase = ($u['galeri_tata'] ?? 'slider') === 'kolase';
 ?>
 <section class="section galeri" id="galeri">
-    <p class="section-title" data-reveal>Galeri</p>
+    <h2 class="section-title" data-reveal>Galeri</h2>
 
     <?php if ($kolase) : ?>
         <div class="galeri-grid" data-reveal data-delay="140">

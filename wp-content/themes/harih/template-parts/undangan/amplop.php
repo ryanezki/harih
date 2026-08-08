@@ -13,7 +13,7 @@ $u = $args;
 $baris = array_values(array_filter(array_map('trim', explode("\n", $u['rekening']))));
 ?>
 <section class="section amplop" id="amplop">
-    <p class="label-atas" data-reveal>Amplop Digital</p>
+    <h2 class="label-atas" data-reveal>Amplop Digital</h2>
     <p class="section-intro amplop-intro" data-reveal data-delay="100">Doa restu Anda adalah hadiah terbaik bagi kami. Namun bila ingin berbagi tanda kasih, dapat melalui:</p>
     <button type="button" class="btn btn-ghost" id="amplop-toggle" aria-expanded="false" aria-controls="amplop-wrap" data-reveal data-delay="180">Buka Amplop Digital</button>
 
@@ -78,11 +78,17 @@ $baris = array_values(array_filter(array_map('trim', explode("\n", $u['rekening'
                 <i class="tick t1"></i><i class="tick t2"></i><i class="tick t3"></i><i class="tick t4"></i>
                 <p class="qris-label">QRIS</p>
                 <p class="qris-sub">Tanda kasih tanpa tunai</p>
+                <?php /* U16 — `<figcaption>` DI DALAM `<figure>`. HTML hanya
+                         mengizinkannya sebagai anak pertama atau terakhir; di
+                         luar itu parser memperlakukannya sebagai elemen generik
+                         dan keterkaitannya dengan gambar QRIS putus. Nol
+                         perubahan visual — `.qris-cap` hanya mengatur margin,
+                         font, dan warna. */ ?>
                 <figure class="qris">
                     <span class="qris-diamond" aria-hidden="true"></span>
                     <span class="qris-panel"><img src="<?php echo esc_url($u['qris_media_url']); ?>" alt="Kode QRIS" loading="lazy" decoding="async"></span>
+                    <figcaption class="qris-cap">Scan QRIS dari aplikasi pembayaran apa pun</figcaption>
                 </figure>
-                <figcaption class="qris-cap">Scan QRIS dari aplikasi pembayaran apa pun</figcaption>
             </div>
             <?php endif; ?>
 

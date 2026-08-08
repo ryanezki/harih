@@ -82,6 +82,15 @@
     --c-accent: #3f5c4f;      /* sage tua */
     --c-accent-ink: #f4f1e7;  /* gading */
     --c-gold: #b4923f;
+    /* U14 — peran TEKS dipisah dari peran ornamen. `--c-gold` tetap dipakai
+       garis, kutip display, ampersand, dan ikon (di sana kontras tinggi tidak
+       dibutuhkan); tapi sebagai warna teks ia cuma 2,59:1 di section ber-tint —
+       gagal AA di sepuluh judul section, jam susunan acara, dan NAMA BANK
+       tempat tamu transfer. Dihitung: 4,61:1 ber-tint · 5,24:1 di atas putih. */
+    --c-gold-teks: #82692d;
+    /* U15 — batas kontrol form. `--c-line` cuma 1,15:1 terhadap latar section,
+       jadi kotak isian RSVP praktis tidak punya tepi. 3,11:1 (SC 1.4.11). */
+    --c-line-input: #8b887d;
     --radius: 3px;        /* sudut tegas — kartu cetak, bukan kartu aplikasi */
     --radius-btn: 2px;
     --shadow: 0 12px 32px rgba(63, 92, 79, .10);

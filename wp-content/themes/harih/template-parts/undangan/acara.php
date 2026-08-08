@@ -36,7 +36,7 @@ if ($u['tanggal_resepsi'] !== '') {
 if (!$kartu) return;
 ?>
 <section class="section acara" id="acara">
-    <p class="section-title" data-reveal>Rangkaian Acara</p>
+    <h2 class="section-title" data-reveal>Rangkaian Acara</h2>
 
     <?php foreach ($kartu as $i => $k) : ?>
     <div class="acara-card" data-reveal data-delay="<?php echo esc_attr(120 + $i * 100); ?>">
@@ -124,7 +124,7 @@ if (!$kartu) return;
     ?>
     <?php if ($u['dresscode'] !== '' || $warna) : ?>
     <div class="dresscode" data-reveal>
-        <p class="label-atas dresscode-label">Dress Code</p>
+        <h3 class="label-atas dresscode-label">Dress Code</h3>
         <?php if ($u['dresscode'] !== '') : ?><p class="dresscode-teks"><?php echo esc_html($u['dresscode']); ?></p><?php endif; ?>
         <?php if ($warna) : ?>
         <div class="dresscode-swatch" aria-hidden="true">
@@ -147,7 +147,7 @@ if (!$kartu) return;
     ?>
     <?php if ($acara_rundown) : ?>
     <div class="rundown" data-reveal>
-        <p class="label-atas rundown-label">Susunan Acara</p>
+        <h3 class="label-atas rundown-label">Susunan Acara</h3>
         <ul class="rundown-daftar">
             <?php foreach ($acara_rundown as $r) : ?>
             <li><?php if ($r[0] !== '') : ?><span class="rd-waktu"><?php echo esc_html($r[0]); ?></span><?php endif; ?><span class="rd-nama"><?php echo esc_html($r[1]); ?></span></li>

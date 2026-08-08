@@ -24,7 +24,7 @@ if (preg_match('/^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})/', $u['target'], $m)) {
 }
 ?>
 <section class="section countdown" id="countdown">
-    <p class="label-atas" data-reveal>Menghitung Hari</p>
+    <h2 class="label-atas" data-reveal>Menghitung Hari</h2>
     <div class="countdown-grid" id="countdown-grid" data-target="<?php echo esc_attr($u['target']); ?>" data-reveal data-delay="140">
         <div class="cd-col"><span class="cd-num" data-cd="hari">0</span><span class="cd-label">Hari</span></div>
         <div class="cd-col"><span class="cd-num" data-cd="jam">0</span><span class="cd-label">Jam</span></div>

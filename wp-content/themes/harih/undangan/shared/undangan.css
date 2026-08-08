@@ -120,7 +120,7 @@ img { max-width: 100%; }
     letter-spacing: .42em;
     text-indent: .42em;
     text-transform: uppercase;
-    color: var(--c-gold);
+    color: var(--c-gold-teks);
     margin: 0 0 26px;
 }
 .section-title::after, .label-atas::after {
@@ -337,7 +337,7 @@ body:not(.js-gate) .gate { position: relative; height: 100dvh; }
 
 /* ---- 1b. Hero — bagian pertama di aliran halaman ---- */
 .hero { padding-top: 60px; color: var(--c-ink); }
-.hero .cover-eyebrow { color: var(--c-gold); opacity: 1; }
+.hero .cover-eyebrow { color: var(--c-gold-teks); opacity: 1; }
 .hero-names { color: var(--c-ink); font-size: clamp(30px, 8.4vw, 42px); margin-top: 14px; }
 .hero-arch {
     margin: 0 18px;
@@ -349,7 +349,7 @@ body:not(.js-gate) .gate { position: relative; height: 100dvh; }
 .hero-arch-foto img { width: 100%; height: calc(100% + 60px); margin-top: -30px; object-fit: cover; animation: undangan-kenburns2 14s ease-in-out infinite alternate; }
 .seal-hero { margin: 26px auto 0; }
 .seal-hero.naik { margin-top: -38px; }
-.seal-hero .seal-teks { background: var(--c-bg); color: var(--c-gold); }
+.seal-hero .seal-teks { background: var(--c-bg); color: var(--c-gold-teks); }
 .hero-tanggal { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 18px; }
 .hero-tanggal p { margin: 0; font-size: 16px; color: var(--c-ink-soft); letter-spacing: .06em; }
 
@@ -362,10 +362,10 @@ body:not(.js-gate) .gate { position: relative; height: 100dvh; }
 .salam-assalam { margin: 0 0 22px; font: 500 clamp(18px, 5vw, 21px)/1.5 var(--font-display); color: var(--c-ink); text-wrap: balance; }
 .salam-ayat { margin: 0 0 30px; padding: 0; }
 .salam-ayat p { margin: 0; font: italic 400 15.5px/1.9 var(--font-display); color: var(--c-ink-soft); }
-.salam-ayat cite { display: block; margin-top: 14px; font: 400 10px/1 var(--font-label); letter-spacing: .26em; text-transform: uppercase; font-style: normal; color: var(--c-gold); }
+.salam-ayat cite { display: block; margin-top: 14px; font: 400 10px/1 var(--font-label); letter-spacing: .26em; text-transform: uppercase; font-style: normal; color: var(--c-gold-teks); }
 .salam-teks { margin: 0; font: italic 400 clamp(16px, 4.4vw, 18px)/1.85 var(--font-display); color: var(--c-ink); }
 
-.tgl-hijriah { margin: 6px 0 0; font: 400 10px/1.4 var(--font-label); letter-spacing: .2em; text-transform: uppercase; color: var(--c-gold); }
+.tgl-hijriah { margin: 6px 0 0; font: 400 10px/1.4 var(--font-label); letter-spacing: .2em; text-transform: uppercase; color: var(--c-gold-teks); }
 .tgl-hijriah:empty { display: none; }
 .hero-hijriah { margin-top: 10px; }
 
@@ -394,7 +394,7 @@ body:not(.js-gate) .gate { position: relative; height: 100dvh; }
     border-bottom: 1px solid color-mix(in srgb, var(--c-gold) 14%, transparent);
 }
 .rundown-daftar li:last-child { border-bottom: 0; }
-.rd-waktu { flex: none; width: 52px; font: 400 12px/1.5 var(--font-label); letter-spacing: .12em; color: var(--c-gold); font-variant-numeric: tabular-nums; }
+.rd-waktu { flex: none; width: 52px; font: 400 12px/1.5 var(--font-label); letter-spacing: .12em; color: var(--c-gold-teks); font-variant-numeric: tabular-nums; }
 .rd-nama { font-size: 15px; color: var(--c-ink); }
 
 .kado-kartu {
@@ -490,7 +490,7 @@ body:not(.js-gate) .gate { position: relative; height: 100dvh; }
     color: var(--c-ink);
     font-variant-numeric: tabular-nums;
 }
-.cd-col:last-child .cd-num { color: var(--c-gold); }
+.cd-col:last-child .cd-num { color: var(--c-gold-teks); }
 .cd-label {
     font: 400 9px/1 var(--font-label);
     text-transform: uppercase;
@@ -551,10 +551,14 @@ body:not(.js-gate) .gate { position: relative; height: 100dvh; }
     text-decoration: none;
     font: 400 12.5px/1 var(--font-label, var(--font-body));
     letter-spacing: .06em;
+    /* U19 — terukur 74x14 px, gagal SC 2.5.8. Padding + margin negatif menaikkan
+       kotak targetnya ke >=24px tanpa menggeser apa pun di sekitarnya. */
+    padding: 6px 8px;
+    margin-inline: -8px;
     transition: color .3s ease;
 }
 .mempelai-ig svg { width: 14px; height: 14px; opacity: .85; }
-.mempelai-ig:hover, .mempelai-ig:focus-visible { color: var(--c-gold); }
+.mempelai-ig:hover, .mempelai-ig:focus-visible { color: var(--c-gold-teks); }
 
 /* Pemilih nuansa halaman demo. Diletakkan di kiri-bawah supaya berpasangan
    dengan tombol musik di kanan-bawah, dan diberi kapsul "pratinjau demo" agar
@@ -580,7 +584,7 @@ body:not(.js-gate) .gate { position: relative; height: 100dvh; }
     font: 400 9.5px/1 var(--font-label, var(--font-body));
     letter-spacing: .2em;
     text-transform: uppercase;
-    color: var(--c-gold);
+    color: var(--c-gold-teks);
 }
 .pratinjau-nuansa select {
     appearance: none;
@@ -669,7 +673,7 @@ body.is-locked .pratinjau-nama { display: none; } /* gerbang tetap sinematik */
     font: 400 11px/1 var(--font-label, var(--font-body));
     letter-spacing: .18em;
     text-transform: uppercase;
-    color: var(--c-gold);
+    color: var(--c-gold-teks);
     margin-bottom: 6px;
 }
 .kt-teks {
@@ -749,6 +753,7 @@ body.is-locked .pratinjau-nama { display: none; } /* gerbang tetap sinematik */
     padding: 9px;
 }
 .galeri-slider {
+    overscroll-behavior-x: contain;   /* U19 — gestur "kembali" Chrome Android */
     display: flex;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
@@ -774,17 +779,23 @@ body.is-locked .pratinjau-nama { display: none; } /* gerbang tetap sinematik */
     animation: undangan-kenburns2 12s ease-in-out infinite alternate;
 }
 .galeri-dots { display: flex; justify-content: center; gap: 8px; margin-top: 22px; }
+/* U19 — titik tetap 6px SECARA VISUAL, tapi kotak targetnya 24x24 lewat
+   padding + background-clip. Terukur sebelumnya: 6x6 px dengan jarak
+   antar-pusat 14 px — gagal WCAG 2.2 SC 2.5.8 lewat KEDUA jalur (ukuran
+   maupun spacing), satu-satunya di undangan yang begitu. */
 .galeri-dots button {
     width: 6px;
     height: 6px;
+    padding: 9px;
+    background-clip: content-box;
+    box-sizing: content-box;
     border-radius: 999px;
     border: 0;
-    padding: 0;
-    background: color-mix(in srgb, var(--c-gold) 32%, transparent);
+    background-color: color-mix(in srgb, var(--c-gold) 32%, transparent);
     cursor: pointer;
-    transition: width .45s ease, background .45s ease;
+    transition: width .45s ease, background-color .45s ease;
 }
-.galeri-dots button.aktif { width: 24px; background: var(--c-gold); }
+.galeri-dots button.aktif { width: 24px; background-color: var(--c-gold); }
 .galeri-hint { margin: 16px 0 0; font: 400 10px/1.6 var(--font-label); letter-spacing: .2em; text-transform: uppercase; color: var(--c-ink-soft); }
 
 /* ---- Galeri tata letak KOLASE (G1.4) ----
@@ -852,7 +863,7 @@ body.is-locked .pratinjau-nama { display: none; } /* gerbang tetap sinematik */
 .qris-kartu .t2 { top: 10px; right: 10px; border-top-width: 1px; border-right-width: 1px; }
 .qris-kartu .t3 { bottom: 10px; left: 10px; border-bottom-width: 1px; border-left-width: 1px; }
 .qris-kartu .t4 { bottom: 10px; right: 10px; border-bottom-width: 1px; border-right-width: 1px; }
-.qris-label { margin: 0; font: 400 11px/1 var(--font-label); letter-spacing: .3em; text-indent: .3em; text-transform: uppercase; color: var(--c-gold); }
+.qris-label { margin: 0; font: 400 11px/1 var(--font-label); letter-spacing: .3em; text-indent: .3em; text-transform: uppercase; color: var(--c-gold-teks); }
 .qris-sub { margin: 10px 0 0; font: italic 400 16px/1.4 var(--font-display); color: var(--c-ink-soft); }
 .qris { position: relative; width: 224px; margin: 30px auto 0; }
 .qris::before {
@@ -929,7 +940,7 @@ body.is-locked .pratinjau-nama { display: none; } /* gerbang tetap sinematik */
     font: 400 11px/1 var(--font-label);
     letter-spacing: .3em;
     text-transform: uppercase;
-    color: var(--c-gold);
+    color: var(--c-gold-teks);
     position: relative;
 }
 .kartu-bank .bank-nomor {
@@ -977,7 +988,10 @@ body.is-locked .pratinjau-nama { display: none; } /* gerbang tetap sinematik */
 }
 .field input, .field select, .field textarea {
     width: 100%;
-    border: 1px solid var(--c-line);
+    /* U15 — `--c-line` (garis rambut dekoratif) hanya 1,03–1,17:1 terhadap latar
+       section, jadi kotak isian RSVP praktis tidak punya tepi yang terlihat.
+       Token terpisah supaya garis pemisah antar-section tetap setipis maunya. */
+    border: 1px solid var(--c-line-input, var(--c-line));
     background: var(--c-surface);
     border-radius: var(--radius-btn);
     /* 16px, bukan 15 (U2): di bawah itu iOS Safari memperbesar halaman sendiri
@@ -1007,11 +1021,20 @@ body.is-locked .pratinjau-nama { display: none; } /* gerbang tetap sinematik */
     cursor: pointer;
     transition: border-color .35s ease, background .35s ease, color .35s ease;
 }
+/* U15 — keadaan terpilih SOLID, bukan tint 14%.
+   Diukur sebelumnya: latar aktif hanya berbeda 1,13:1 dari yang tidak aktif
+   (syarat SC 1.4.11 = 3:1), teksnya 3,45:1 pada 10px, dan bordernya 2,59:1.
+   Karena defaultnya "hadir", tamu yang berhalangan bisa mengirim konfirmasi
+   HADIR tanpa sadar — dan mempelai menghitung kursi & katering dari situ.
+   Dengan --c-accent: teks 6,51:1 (tema-01) / 4,97 (02) / 6,99 (03), dan latar
+   aktif vs latar section 6,47 / 4,79 / 6,68 — lolos di ketiganya.
+   Tanda centang ditambahkan supaya pembedanya tidak hanya warna (SC 1.4.1). */
 .hadir-btn.aktif {
-    border-color: var(--c-gold);
-    background: color-mix(in srgb, var(--c-gold) 14%, transparent);
-    color: color-mix(in srgb, var(--c-gold) 70%, var(--c-ink));
+    border-color: var(--c-accent);
+    background: var(--c-accent);
+    color: var(--c-accent-ink);
 }
+.hadir-btn.aktif::before { content: '✓ '; }
 .hadir-btn:focus-visible { outline: 2px solid var(--c-gold); outline-offset: 2px; }
 
 .hp-field { position: absolute !important; left: -9999px; opacity: 0; height: 0; width: 0; pointer-events: none; }
@@ -1163,6 +1186,11 @@ body.is-locked .pratinjau-nama { display: none; } /* gerbang tetap sinematik */
 .music-toggle.playing span { display: inline-block; animation: undangan-putar 3s linear infinite; }
 @keyframes undangan-putar { to { transform: rotate(360deg); } }
 /* Kolom 480px di tengah — tombol menempel di tepi kolom, bukan tepi layar */
+/* U19 — `viewport-fit=cover` dipasang di sebelas template, jadi halaman memang
+   mengisi sampai ke bawah home indicator iPhone; konsekuensinya harus dibayar
+   dengan env(). Tombol musik adalah satu-satunya kontrol mengambang yang
+   dilihat TAMU. */
+.music-toggle { bottom: calc(18px + env(safe-area-inset-bottom, 0px)); right: calc(16px + env(safe-area-inset-right, 0px)); }
 @media (min-width: 520px) { .music-toggle { right: calc(50% - 240px + 16px); } }
 
 /* ---- Animasi reveal ---- */
@@ -1174,6 +1202,12 @@ body.is-locked .pratinjau-nama { display: none; } /* gerbang tetap sinematik */
     [data-reveal] { opacity: 1; transform: none; transition: none; }
     [data-grow] { transition: none; }
     .music-toggle.playing span { animation: none; }
+    /* U19 — Ken Burns pada foto galeri adalah SATU-SATUNYA dari 18 deklarasi
+       animasi yang lolos dari kedua blok reduced-motion, karena daftar ini
+       ditulis selektor per selektor. Jaring penyapu di bawah menutup yang ini
+       DAN yang akan datang; daftar eksplisit dipertahankan supaya niat tiap
+       barisnya tetap terbaca. */
+    .galeri-slide img { animation: none; }
     .gate { transition: none; }
     .gate.has-photo::before,
     .hero-arch-foto img,

@@ -28,14 +28,27 @@ $u = $args;
             </div>
         </div>
 
-        <div class="field">
+        <?php /* U16 — `<label>`, bukan `<div>` + `<span>` lepas. Sebelumnya
+                 nama aksesibel select ini KOSONG, sementara dua field di
+                 sekitarnya sudah memakai `<label class="field">` — jadi ini
+                 kelalaian, bukan pilihan. Nol perubahan CSS: `.field span` dan
+                 `.field select` menargetkan kelas, bukan nama elemen. */ ?>
+        <label class="field rsvp-jumlah-baris">
             <span>Jumlah Tamu</span>
             <select name="jumlah" id="rsvp-jumlah">
                 <?php for ($n = 1; $n <= 6; $n++) : ?><option value="<?php echo $n; ?>"><?php echo $n; ?> orang</option><?php endfor; ?>
             </select>
-        </div>
+        </label>
 
-        <div class="field">
+        <?php /* U18 — "Hadir Pada" hanya bermakna bila memang ADA dua acara.
+                 Pada undangan resepsi-saja (tanggal akad tidak wajib di
+                 page-isi-data.php) acara.php merender satu kartu sementara blok
+                 ini tetap menawarkan Akad/Resepsi/Keduanya dengan "Keduanya"
+                 sudah terpilih — nilai yang terkirim ke mempelai jadi omong
+                 kosong. undangan.js menyembunyikannya lagi saat tamu memilih
+                 Berhalangan. */ ?>
+        <?php if (trim((string) ($u['tanggal_akad'] ?? '')) !== '' && trim((string) ($u['tanggal_resepsi'] ?? '')) !== '') : ?>
+        <div class="field rsvp-sesi-baris">
             <span id="rsvp-sesi-label">Hadir Pada</span>
             <input type="hidden" name="sesi" id="rsvp-sesi" value="keduanya">
             <div class="hadir-opsi" role="group" aria-labelledby="rsvp-sesi-label">
@@ -44,6 +57,7 @@ $u = $args;
                 <button type="button" class="hadir-btn sesi-btn aktif" data-sesi="keduanya">Keduanya</button>
             </div>
         </div>
+        <?php endif; ?>
 
         <label class="field">
             <span>Ucapan &amp; doa</span>
