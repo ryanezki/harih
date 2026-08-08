@@ -363,6 +363,93 @@
         });
     })();
 
+    /* ================= Layar periksa sebelum kirim (U3) =================
+
+       Tiga puluh enam field, satu aksi yang tidak bisa dibatalkan, dan pembeli
+       paket DIGITAL tidak pernah melihat layar periksa apa pun antara Kirim dan
+       undangan tayang — `/proof/` khusus produk cetak. Ringkasan ini menampilkan
+       kembali tanggal dalam bentuk manusia ("Sabtu, 12 Desember 2026"), yang
+       justru bentuk paling cepat menyingkap salah ketik tahun. */
+
+    var panelKonfirmasi = $('#panel-konfirmasi');
+    var konfirmasiIsi = $('#konfirmasi-isi');
+    var btnKonfirmasiYa = $('#konfirmasi-ya');
+    var btnKonfirmasiBatal = $('#konfirmasi-batal');
+
+    function nilai(nama) {
+        var e = form.elements[nama];
+        return e ? String(e.value || '').trim() : '';
+    }
+
+    function tanggalManusia(iso, jam) {
+        if (!iso) return '';
+        var d = new Date(iso + 'T' + (jam || '00:00'));
+        if (isNaN(d.getTime())) return iso;
+        var teks = new Intl.DateTimeFormat('id-ID', {
+            weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+        }).format(d);
+        return jam ? teks + ' · ' + jam + ' WIB' : teks;
+    }
+
+    function barisKonfirmasi() {
+        var baris = [];
+        var pasangan = [nilai('nama_pria'), nilai('nama_wanita')].filter(Boolean).join(' & ');
+        if (pasangan) baris.push(['Mempelai', pasangan]);
+
+        var akad = tanggalManusia(nilai('tanggal_akad'), nilai('waktu_akad'));
+        if (akad) baris.push(['Akad', akad]);
+        baris.push(['Resepsi', tanggalManusia(nilai('tanggal_resepsi'), nilai('waktu_resepsi')) || '—']);
+
+        var lokasi = [nilai('lokasi_nama'), nilai('lokasi_alamat')].filter(Boolean).join(' — ');
+        if (lokasi) baris.push(['Lokasi', lokasi]);
+
+        var tema = form.querySelector('input[name="template_id"]:checked');
+        if (tema) {
+            var kartu = tema.closest('.tema-card');
+            var nama = kartu && kartu.querySelector('.tema-nama');
+            // `|| tema.value` juga menangkap label yang ada tapi kosong — baris
+            // ringkasan tanpa isi lebih membingungkan daripada slug tema.
+            baris.push(['Tema', (nama && nama.textContent.trim()) || tema.value]);
+        }
+        // Galeri hanya ada di paket Favorit ke atas.
+        if (inputFoto) {
+            baris.push(['Foto', state.foto.length + ' foto' + (state.qris ? ' · QRIS terlampir' : '')]);
+        }
+        return baris;
+    }
+
+    function tampilKonfirmasi() {
+        if (!panelKonfirmasi || !konfirmasiIsi) { kirimSekarang(); return; }
+        konfirmasiIsi.textContent = '';
+        barisKonfirmasi().forEach(function (b) {
+            var dt = document.createElement('dt');
+            var dd = document.createElement('dd');
+            dt.textContent = b[0];
+            dd.textContent = b[1];
+            konfirmasiIsi.appendChild(dt);
+            konfirmasiIsi.appendChild(dd);
+        });
+        panelKonfirmasi.hidden = false;
+        if (btnKirim) btnKirim.hidden = true;
+        panelKonfirmasi.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        if (btnKonfirmasiYa) btnKonfirmasiYa.focus();
+    }
+
+    function tutupKonfirmasi(kembalikanFokus) {
+        if (panelKonfirmasi) panelKonfirmasi.hidden = true;
+        if (btnKirim) {
+            btnKirim.hidden = false;
+            if (kembalikanFokus) btnKirim.focus();
+        }
+    }
+
+    if (btnKonfirmasiYa) {
+        btnKonfirmasiYa.addEventListener('click', function () { tutupKonfirmasi(false); kirimSekarang(); });
+    }
+    if (btnKonfirmasiBatal) {
+        btnKonfirmasiBatal.addEventListener('click', function () { tutupKonfirmasi(true); });
+    }
+
     form.addEventListener('submit', function (ev) {
         ev.preventDefault();
         if (state.uploading) return;
@@ -375,12 +462,16 @@
             return;
         }
 
-        if (!form.reportValidity()) return; // validasi native (required, url, dsb.)
+        if (!form.reportValidity()) return; // validasi native (required, url, min tanggal)
         if (!cfg.webhook) {
             tampilPesan('Formulir belum terhubung ke sistem — hubungi CS.', true);
             return;
         }
 
+        tampilKonfirmasi();
+    });
+
+    function kirimSekarang() {
         // Rakit payload SEBELUM fieldset di-disable (fieldset disabled = field
         // tidak ikut FormData).
         var fd = new FormData(form);
@@ -443,5 +534,5 @@
         };
 
         xhr.send(fd);
-    });
+    }
 })();

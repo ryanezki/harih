@@ -49,6 +49,24 @@ $webhook = harih_form_webhook_url();
 // window.ISI_DATA. Sebelumnya angka 10 ditulis terpisah di keduanya, pola yang
 // sudah pernah menggigit di C5 (harga di enam tempat).
 $harih_max_foto = 10;
+
+/* U4 — DATA YANG SUDAH MASUK TIDAK BOLEH DISEMBUNYIKAN DI BALIK FORM KOSONG.
+ *
+ * Token halaman ini HMAC murni tanpa komponen waktu (woocommerce.php), jadi
+ * linknya berlaku selamanya — itu disengaja dan berguna untuk pemulihan. Tapi
+ * template tidak pernah memeriksa apakah datanya sudah pernah dikirim, dan
+ * `#panel-sukses` cuma elemen `hidden` yang dibuka JS pada sesi yang sama.
+ * Pemesan yang membuka ulang tautan dari WhatsApp — untuk MEMERIKSA apa yang
+ * ia kirim — melihat form bersih, dan sebagian akan mengisinya lagi. Hasilnya
+ * undangan KEDUA dengan slug berbeda, sementara link yang mungkin sudah ia
+ * sebar ke tamu bukan lagi yang dipakai.
+ *
+ * Memakai helper yang sama dengan /proof/ sehingga rantai upgrade (D1) ikut
+ * tertelusuri: order `UPG-*` menemukan undangan milik order asalnya.
+ */
+$harih_undangan_id = function_exists('undangan_cari_undangan_order') ? undangan_cari_undangan_order($order) : 0;
+$harih_sudah_kirim = $harih_undangan_id > 0;
+$harih_undangan_terbit = $harih_sudah_kirim && get_post_status($harih_undangan_id) === 'publish';
 ?><!DOCTYPE html>
 <html <?php language_attributes(); ?>>
 <head>
@@ -76,6 +94,22 @@ $harih_max_foto = 10;
         <h2>Data diterima!</h2>
         <p>Undangan Anda sedang dibuat. Link undangan akan dikirim ke <strong>WhatsApp &amp; email</strong> Anda dalam ±5 menit. Halaman ini boleh ditutup.</p>
     </div>
+
+    <?php if ($harih_sudah_kirim) : /* U4 — jangan render form di atas data yang sudah ada */ ?>
+
+    <div class="panel-sukses panel-sudah">
+        <div class="cek" aria-hidden="true">✓</div>
+        <h2>Data pesanan #<?php echo esc_html($order); ?> sudah kami terima</h2>
+        <p>Dikirim pada <strong><?php echo esc_html(get_the_date('j F Y', $harih_undangan_id)); ?></strong>. Anda <strong>tidak perlu mengisi ulang</strong> — mengisi lagi akan membuat undangan kedua dengan link yang berbeda dari yang mungkin sudah Anda sebar.</p>
+        <?php if ($harih_undangan_terbit) : ?>
+            <p class="panel-aksi"><a class="btn" href="<?php echo esc_url(get_permalink($harih_undangan_id)); ?>" target="_blank" rel="noopener">Lihat undangan Anda ↗</a></p>
+        <?php else : ?>
+            <p class="panel-catatan">Halaman undangannya sedang tidak aktif. Bila masa aktifnya sudah lewat dan Anda ingin menghidupkannya kembali, hubungi CS.</p>
+        <?php endif; ?>
+        <p class="bantuan">Ada yang perlu diperbaiki? <a href="<?php echo esc_url(harih_wa_link("Halo hariH, ada yang perlu diperbaiki di data pesanan #{$order}.")); ?>" target="_blank" rel="noopener">Beri tahu kami lewat WhatsApp</a> — jangan mengisi formulir dua kali.</p>
+    </div>
+
+    <?php else : ?>
 
     <form id="isi-data-form" novalidate>
         <input type="hidden" name="order" value="<?php echo esc_attr($order); ?>">
@@ -133,8 +167,14 @@ $harih_max_foto = 10;
             <section class="kartu">
                 <h2>3. Acara</h2>
                 <p class="kartu-note">Waktu ditampilkan dalam WIB.</p>
+                <?php /* U3 — `min` hari ini. Tanpa ini salah ketik tahun lolos
+                         checkValidity() dan baru ketahuan saat TAMU membaca
+                         "Acara telah berlangsung"; hilirnya (cpt.php, WF-02)
+                         juga tidak memeriksa rentang. wp_date, bukan gmdate —
+                         runtime PHP di server UTC sementara situs Asia/Jakarta
+                         (pelajaran C4a). */ ?>
                 <div class="row-2">
-                    <label class="field"><span>Tanggal akad</span><input type="date" name="tanggal_akad"></label>
+                    <label class="field"><span>Tanggal akad</span><input type="date" name="tanggal_akad" min="<?php echo esc_attr(wp_date('Y-m-d')); ?>"></label>
                     <label class="field"><span>Waktu akad</span><input type="time" name="waktu_akad"></label>
                 </div>
                 <label class="field"><span>Nama lokasi akad <em class="opsional">(kosongkan bila sama dengan resepsi)</em></span>
@@ -156,7 +196,7 @@ $harih_max_foto = 10;
                 <label class="field"><span>Susunan acara <em class="opsional">(per baris: 18.00 Pembukaan)</em></span>
                     <textarea name="rundown" rows="3" maxlength="1200" placeholder="18.00 Pembukaan&#10;19.00 Resepsi"></textarea></label>
                 <div class="row-2">
-                    <label class="field"><span>Tanggal resepsi *</span><input type="date" name="tanggal_resepsi" required></label>
+                    <label class="field"><span>Tanggal resepsi *</span><input type="date" name="tanggal_resepsi" min="<?php echo esc_attr(wp_date('Y-m-d')); ?>" required></label>
                     <label class="field"><span>Waktu resepsi *</span><input type="time" name="waktu_resepsi" required></label>
                 </div>
                 <label class="field"><span>Nama lokasi *</span>
@@ -269,6 +309,20 @@ $harih_max_foto = 10;
         </fieldset>
 
         <div class="kirim-area">
+            <?php /* U3 — satu layar periksa sebelum aksi yang tidak bisa dibatalkan.
+                     Tiga puluh enam field, dan pembeli paket digital tidak pernah
+                     melihat layar periksa apa pun antara Kirim dan undangan tayang
+                     (/proof/ khusus produk cetak). Diisi oleh isi-data.js. */ ?>
+            <div class="konfirmasi" id="panel-konfirmasi" role="group" aria-labelledby="konfirmasi-judul" hidden>
+                <h2 id="konfirmasi-judul">Periksa sebentar sebelum dikirim</h2>
+                <p class="konfirmasi-sub">Setelah dikirim, undangan langsung dibuat. Perbaikan setelah ini lewat CS.</p>
+                <dl class="konfirmasi-isi" id="konfirmasi-isi"></dl>
+                <div class="konfirmasi-aksi">
+                    <button type="button" class="btn" id="konfirmasi-ya">Ya, kirim sekarang</button>
+                    <button type="button" class="btn-teks" id="konfirmasi-batal">Periksa lagi</button>
+                </div>
+            </div>
+
             <button type="submit" class="btn" id="btn-kirim" <?php disabled($webhook === ''); ?>>Kirim &amp; Buat Undangan</button>
             <div class="progress" id="progress" hidden>
                 <div class="progress-bar" id="progress-bar"></div>
@@ -277,6 +331,8 @@ $harih_max_foto = 10;
             <p class="bantuan">Kesulitan mengisi? <a href="<?php echo esc_url(home_url('/kontak/')); ?>" target="_blank" rel="noopener">Hubungi CS</a></p>
         </div>
     </form>
+
+    <?php endif; /* U4 */ ?>
 
 </div>
 

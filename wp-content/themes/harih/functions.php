@@ -599,11 +599,27 @@ function harih_bayar_online_siap(): bool {
     return get_option('duitku_environment') === 'production';
 }
 
+/**
+ * Nomor WhatsApp CS — SATU sumber kebenaran untuk seluruh tautan wa.me.
+ *
+ * Sebelumnya angkanya ditulis literal di dua tempat (di sini dan page-proof.php)
+ * dan U4 hampir menjadikannya tiga. Pola yang sama sudah menggigit di C5, jadi
+ * dipusatkan sekarang selagi pemakainya masih sedikit. Bisa ditimpa lewat
+ * konstanta di wp-config bila nomornya kelak dipisah dari sesi WAHA (lihat
+ * catatan D4: satu nomor merangkap 9 workflow DAN satu-satunya CTA penjualan).
+ */
+function harih_wa_nomor(): string {
+    return defined('HARIH_WA_CS') && HARIH_WA_CS !== '' ? (string) HARIH_WA_CS : '6282251975575';
+}
+
+/** Tautan WhatsApp berisi pesan siap kirim. */
+function harih_wa_link(string $pesan): string {
+    return 'https://wa.me/' . harih_wa_nomor() . '?text=' . rawurlencode($pesan);
+}
+
 /** Link WhatsApp berisi pesan siap kirim untuk satu paket. */
 function harih_wa_pesan(string $paket): string {
-    return 'https://wa.me/6282251975575?text=' . rawurlencode(
-        "Halo hariH, saya mau pesan {$paket}. Boleh info cara pembayarannya?"
-    );
+    return harih_wa_link("Halo hariH, saya mau pesan {$paket}. Boleh info cara pembayarannya?");
 }
 
 /**
