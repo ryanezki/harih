@@ -176,6 +176,15 @@ add_action('woocommerce_admin_order_data_after_shipping_address', function ($ord
 
     if ($hash) {
         printf('<p style="margin:6px 0">Snapshot: <code>%s</code> · dibekukan %s</p>', esc_html($hash), esc_html((string) $order->get_meta('_snapshot_tgl')));
+    } elseif ((string) $order->get_meta('_proof_url') !== '') {
+        /* U7 — kombinasi paling berbahaya, dan yang paling mudah terjadi:
+           URL proof sudah ditempel tapi kotak "Bekukan snapshot" terlewat.
+           Pelanggan lalu melihat halaman tanpa tabel data, dan `_proof_hash`
+           mengunci berkas saja — nol data. Halaman pelanggan sekarang menahan
+           tombolnya, tapi CS harus tahu SEBABNYA di sini, bukan menebak kenapa
+           persetujuan tidak kunjung masuk. */
+        echo '<p style="margin:6px 0;padding:8px 10px;border-left:3px solid #d63638;background:#fcf0f1;color:#8a1f21">'
+           . '<strong>URL proof sudah diisi tapi snapshot BELUM dibekukan.</strong> Tombol persetujuan sengaja tidak ditampilkan ke pelanggan sampai snapshot ada — centang kotak di atas lalu simpan.</p>';
     } else {
         echo '<p style="margin:6px 0;color:#996800">Snapshot belum dibekukan.</p>';
     }

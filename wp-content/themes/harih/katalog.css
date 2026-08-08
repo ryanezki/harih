@@ -978,7 +978,11 @@ a { color: var(--c-accent-teks); }
 .proof-kunci { margin-top: 12px; font-size: .86rem; color: var(--c-ink-2); }
 .proof-setuju { max-width: 640px; margin: 30px auto 0; padding: 0 20px 10px; }
 .proof-konsekuensi { font-size: .92rem; color: var(--c-ink); background: color-mix(in srgb, var(--c-gold) 9%, transparent); border: 1px solid color-mix(in srgb, var(--c-gold) 40%, transparent); border-radius: var(--radius); padding: 14px 18px; margin-bottom: 16px; }
-.proof-batal { text-align: center; margin-top: 12px; font-size: .88rem; color: var(--c-ink-2); }
+/* U7 — `.proof-batal` kini SAUDARA <section>, bukan anaknya: jalur pemulihan
+   harus hidup baik sebelum maupun sesudah proof disetujui, jadi ia dikeluarkan
+   dari blok `!$disetujui`. Lebar & padding-nya sendiri sekarang, mengikuti
+   .proof-setuju supaya letaknya tidak berubah di mata pemesan. */
+.proof-batal { max-width: 640px; margin: 12px auto 0; padding: 0 20px; text-align: center; font-size: .88rem; color: var(--c-ink-2); }
 
 /* Daftar tamu (FU.6 + amplop bernama). */
 .tamu-form { max-width: 640px; margin: 0 auto; padding: 0 20px; }

@@ -97,10 +97,19 @@ $harih_label = [
                 <?php $gambar = (bool) preg_match('/\.(jpe?g|png|webp)$/i', $url); ?>
                 <figure class="proof-item">
                     <?php if ($gambar) : ?>
+                        <?php /* U7 — berkas PERTAMA dimuat lebih dulu, bukan `lazy`.
+                                 Gambar ini satu-satunya alasan halaman ini ada dan
+                                 elemen isi pertama di bawah header; `lazy`
+                                 menurunkan prioritas pengambilannya justru di
+                                 tempat ia paling dibutuhkan. Sisanya tetap lazy. */ ?>
                         <a href="<?php echo esc_url($url); ?>" target="_blank" rel="noopener">
-                            <img src="<?php echo esc_url($url); ?>" alt="Proof cetak halaman <?php echo esc_attr($i + 1); ?>" loading="lazy">
+                            <img src="<?php echo esc_url($url); ?>" alt="Proof cetak halaman <?php echo esc_attr($i + 1); ?>"
+                                 <?php echo $i === 0 ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"'; ?>>
                         </a>
-                        <figcaption>Ketuk gambar untuk memperbesar</figcaption>
+                        <figcaption>
+                            Ketuk gambar untuk memperbesar ·
+                            <a href="<?php echo esc_url($url); ?>" download>Unduh berkas</a>
+                        </figcaption>
                     <?php else : ?>
                         <a class="btn btn-garis" href="<?php echo esc_url($url); ?>" target="_blank" rel="noopener">Buka berkas proof <?php echo esc_html($i + 1); ?></a>
                     <?php endif; ?>
@@ -137,7 +146,21 @@ $harih_label = [
     </section>
     <?php endif; ?>
 
-    <?php if (!$disetujui && $berkas) : ?>
+    <?php /* U7 — tombol setujui menuntut SNAPSHOT, bukan cuma berkas.
+             Syarat lama `if (!$disetujui && $berkas)` tidak menguji $snapshot,
+             sementara seluruh section pemeriksaan data bersyarat `if ($snapshot)`.
+             Bila CS menempel URL proof tapi lupa mencentang "Bekukan snapshot"
+             (kotak terpisah di proof.php), halaman yang dilihat pemesan menyusut
+             jadi: gambar + paragraf tanggung jawab hukum + tombol setujui —
+             tanpa tabel data yang justru ia setujui. `_proof_hash` lalu mengunci
+             berkas saja, nol data. */ ?>
+    <?php if (!$disetujui && $berkas && !$snapshot) : ?>
+    <section class="proof-setuju">
+        <p class="proof-notif proof-galat">Data cetakmu belum kami kunci, jadi tombol persetujuan belum kami tampilkan — menyetujui sekarang berarti menyetujui gambar tanpa data yang menyertainya. Tim kami sedang menyiapkannya; tombolnya muncul setelah itu.</p>
+    </section>
+    <?php endif; ?>
+
+    <?php if (!$disetujui && $berkas && $snapshot) : ?>
     <section class="proof-setuju">
         <p class="proof-konsekuensi">Dengan menekan tombol di bawah, Anda menyatakan seluruh teks pada proof sudah benar. <strong>Setelah disetujui, kesalahan penulisan yang sudah tampak di proof menjadi tanggung jawab pemesan</strong> dan cetak ulang dikenakan biaya — sesuai <a href="<?php echo esc_url(home_url('/syarat-ketentuan/')); ?>" target="_blank" rel="noopener">Syarat &amp; Ketentuan §12.1</a>. Kesalahan dari pihak kami tetap kami cetak ulang gratis.</p>
         <form method="post">
@@ -145,8 +168,21 @@ $harih_label = [
             <input type="hidden" name="harih_setuju" value="1">
             <button type="submit" class="btn btn-utama btn-blok">Saya sudah periksa — setujui proof ini</button>
         </form>
-        <p class="proof-batal">Ada yang perlu diperbaiki? <a href="https://wa.me/6282251975575?text=<?php echo esc_attr(rawurlencode("Halo hariH, ada yang perlu diperbaiki di proof pesanan #{$order_id}.")); ?>" target="_blank" rel="noopener">Beri tahu kami lewat WhatsApp</a> — jangan setujui dulu.</p>
     </section>
+    <?php endif; ?>
+
+    <?php /* U7 — jalur pemulihan hidup di KEDUA keadaan. Sebelumnya ia berada
+             di dalam blok `!$disetujui`, jadi begitu proof disetujui satu-satunya
+             cara memberi tahu "ada yang salah" ikut lenyap — tepat di jendela
+             waktu ia paling dibutuhkan, selagi pesanan belum masuk mesin. */ ?>
+    <?php if ($berkas) : ?>
+    <p class="proof-batal">
+        <?php if ($disetujui) : ?>
+            Baru menemukan kesalahan? <a href="<?php echo esc_url(harih_wa_link("Halo hariH, saya menemukan kesalahan pada proof pesanan #{$order_id} yang sudah saya setujui.")); ?>" target="_blank" rel="noopener">Hubungi kami SEKARANG lewat WhatsApp</a> — selama belum masuk mesin, masih bisa kami tahan.
+        <?php else : ?>
+            Ada yang perlu diperbaiki? <a href="<?php echo esc_url(harih_wa_link("Halo hariH, ada yang perlu diperbaiki di proof pesanan #{$order_id}.")); ?>" target="_blank" rel="noopener">Beri tahu kami lewat WhatsApp</a> — jangan setujui dulu.
+        <?php endif; ?>
+    </p>
     <?php endif; ?>
 </main>
 
