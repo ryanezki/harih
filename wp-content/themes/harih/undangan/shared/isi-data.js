@@ -138,6 +138,16 @@
                 state.foto.splice(i, 1);
                 state.kotor = true;
                 renderFoto();
+            }, {
+                // U9 — foto pertama menentukan sampul undangan DAN kartu preview
+                // WhatsApp. Copy-nya sudah menyatakan taruhannya sejak lama, tapi
+                // tidak pernah ada cara memilihnya maupun tanda mana yang terpilih.
+                sampul: i === 0,
+                onSampul: i === 0 ? null : function () {
+                    state.foto.unshift(state.foto.splice(i, 1)[0]);
+                    state.kotor = true;
+                    renderFoto();
+                }
             }));
         });
     }
@@ -179,7 +189,7 @@
         b.textContent = terkunci ? label : b.dataset.labelAsli;
     }
 
-    function buatThumb(item, onHapus) {
+    function buatThumb(item, onHapus, opsi) {
         var wrap = document.createElement('div');
         wrap.className = 'foto-item';
         var img = document.createElement('img');
@@ -193,6 +203,24 @@
         btn.addEventListener('click', onHapus);
         wrap.appendChild(img);
         wrap.appendChild(btn);
+
+        // QRIS memanggil tanpa `opsi` — tidak ada sampul di sana.
+        if (opsi && opsi.sampul) {
+            wrap.classList.add('sampul');
+            var tanda = document.createElement('span');
+            tanda.className = 'foto-badge';
+            tanda.textContent = 'Sampul';
+            wrap.appendChild(tanda);
+        } else if (opsi && opsi.onSampul) {
+            var pilih = document.createElement('button');
+            pilih.type = 'button';
+            pilih.className = 'btn-sampul';
+            pilih.title = 'Jadikan sampul';
+            pilih.setAttribute('aria-label', 'Jadikan foto ini sampul undangan');
+            pilih.textContent = '☆';
+            pilih.addEventListener('click', opsi.onSampul);
+            wrap.appendChild(pilih);
+        }
         return wrap;
     }
 
@@ -321,6 +349,7 @@
     var btnKirim = $('#btn-kirim');
     var progress = $('#progress');
     var progressBar = $('#progress-bar');
+    var progressPct = $('#progress-pct');
     var kirimMsg = $('#kirim-msg');
     var fields = $('#form-fields');
 
@@ -479,12 +508,21 @@
         fd.append('jumlah_foto', String(state.foto.length));
         if (state.qris) fd.append('qris', state.qris.file);
 
+        // Dideklarasikan DI SINI, sebelum dipakai: `var` di dekat onprogress
+        // akan dihoist tanpa nilainya, lalu inisialisasinya menimpa penugasan
+        // di bawah ini saat baris itu tercapai.
+        var pctTerakhir = 0;
+        var faseTerakhir = '';
+
         state.uploading = true;
         fields.disabled = true;
         btnKirim.disabled = true;
         progress.hidden = false;
         progressBar.style.width = '0%';
-        tampilPesan('Mengunggah… jangan tutup halaman ini.');
+        progress.setAttribute('aria-valuenow', '0');
+        if (progressPct) progressPct.textContent = '0%';
+        faseTerakhir = 'Mengunggah… jangan tutup halaman ini.';
+        tampilPesan(faseTerakhir);
 
         var xhr = new XMLHttpRequest();
         xhr.open('POST', cfg.webhook);
@@ -492,12 +530,26 @@
         // Jangan set Content-Type manual — browser mengisi boundary multipart,
         // dan tanpa header custom request tetap "simple" (tanpa preflight CORS).
 
+        /* U9 — persen BERHENTI ditulis ke `#kirim-msg`.
+           Elemen itu `role="status"`, yaitu live region: menulis angka baru tiap
+           event progres berarti puluhan sampai ratusan pengumuman untuk satu
+           unggahan. Angkanya pindah ke bar (aria-valuenow + label ber-aria-hidden
+           untuk mata), dan `#kirim-msg` hanya menerima PERUBAHAN FASE — dua kali,
+           bukan ratusan. */
+        function fase(teks) {
+            if (teks === faseTerakhir) return;
+            faseTerakhir = teks;
+            tampilPesan(teks);
+        }
+
         xhr.upload.onprogress = function (e) {
-            if (e.lengthComputable) {
-                var pct = Math.round((e.loaded / e.total) * 100);
-                progressBar.style.width = pct + '%';
-                tampilPesan(pct < 100 ? 'Mengunggah… ' + pct + '%' : 'Memproses… sebentar lagi.');
-            }
+            if (!e.lengthComputable) return;
+            var pct = Math.round((e.loaded / e.total) * 100);
+            pctTerakhir = pct;
+            progressBar.style.width = pct + '%';
+            if (progress) progress.setAttribute('aria-valuenow', String(pct));
+            if (progressPct) progressPct.textContent = pct + '%';
+            fase(pct < 100 ? 'Mengunggah… jangan tutup halaman ini.' : 'Memproses… sebentar lagi.');
         };
 
         function gagal(teks) {
@@ -505,6 +557,8 @@
             fields.disabled = false;
             btnKirim.disabled = false;
             progress.hidden = true;
+            if (progressPct) progressPct.textContent = '';
+            faseTerakhir = ''; // percobaan berikutnya harus mengumumkan fasenya lagi
             tampilPesan(teks, true);
         }
 
@@ -529,8 +583,19 @@
         xhr.onerror = function () {
             gagal('Koneksi terputus — periksa jaringan lalu tekan Kirim lagi. Isian Anda tidak hilang.');
         };
+        /* U9 — dua situasi yang sangat berbeda dulu diucapkan dengan kalimat yang
+           sama. `xhr.timeout` berlaku untuk SELURUH round trip, termasuk waktu
+           WF-02 memproses payload setelah bar mencapai 100%. Bila timeout jatuh
+           di fase itu, datanya kemungkinan besar SUDAH masuk — dan menyuruh
+           "kirim lagi" menghasilkan undangan kedua. */
         xhr.ontimeout = function () {
-            gagal('Waktu unggah habis — coba jaringan yang lebih stabil lalu kirim lagi.');
+            if (pctTerakhir >= 100) {
+                gagal('Unggahanmu sudah sampai ke server, tapi prosesnya belum sempat dilaporkan kembali. '
+                    + 'JANGAN kirim ulang — hubungi CS dan sebutkan pesanan #' + nilai('order') + '. '
+                    + 'Kami cek apakah undanganmu sudah terbuat.');
+            } else {
+                gagal('Waktu unggah habis — coba jaringan yang lebih stabil lalu kirim lagi.');
+            }
         };
 
         xhr.send(fd);

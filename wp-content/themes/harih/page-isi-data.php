@@ -83,6 +83,9 @@ $harih_undangan_terbit = $harih_sudah_kirim && get_post_status($harih_undangan_i
         <h1>Lengkapi Data Undangan</h1>
         <p class="sub">Pesanan <strong>#<?php echo esc_html($order); ?></strong> · paket <strong><?php echo esc_html(ucfirst($paket_hint)); ?></strong></p>
         <p class="sub-kecil">Isi santai saja — setelah dikirim, undangan Anda terbit otomatis dalam hitungan menit.</p>
+        <?php /* U9 — tanda `*` dipakai di enam field tapi tidak pernah dijelaskan:
+                 grep "wajib" di berkas ini dulu mengembalikan nol hasil. */ ?>
+        <p class="sub-legenda">Field bertanda <strong>*</strong> wajib diisi. Sisanya boleh dilewati — bisa menyusul lewat CS.</p>
     </header>
 
     <?php if ($webhook === '') : ?>
@@ -134,7 +137,7 @@ $harih_undangan_terbit = $harih_sudah_kirim && get_post_status($harih_undangan_i
             <section class="kartu">
                 <h2>2. Mempelai</h2>
                 <label class="field"><span>Nama mempelai pria *</span>
-                    <input type="text" name="nama_pria" maxlength="100" required placeholder="mis. Raka Pratama"></label>
+                    <input type="text" name="nama_pria" autocapitalize="words" maxlength="100" required placeholder="mis. Raka Pratama"></label>
                 <label class="field"><span>Nuansa undangan</span>
                     <select name="nuansa">
                         <?php foreach (harih_nuansa_daftar() as $harih_nk => $harih_nl) : ?>
@@ -143,22 +146,22 @@ $harih_undangan_terbit = $harih_sudah_kirim && get_post_status($harih_undangan_i
                     </select></label>
                 <p class="kartu-note">Menentukan salam pembuka, ayat/kutipan, salam penutup, dan tampil-tidaknya tanggal Hijriah. Pilih <strong>Tanpa unsur agama</strong> bila ingin undangan netral.</p>
                 <label class="field"><span>Orang tua mempelai pria</span>
-                    <input type="text" name="ortu_pria" maxlength="150" placeholder="mis. Bapak Hendra & Ibu Sari"></label>
+                    <input type="text" name="ortu_pria" autocapitalize="words" maxlength="150" placeholder="mis. Bapak Hendra & Ibu Sari"></label>
                 <div class="row-2">
                     <label class="field"><span>Anak ke- <em class="opsional">(mis. kedua)</em></span>
                         <input type="text" name="anak_ke_pria" maxlength="20" placeholder="kedua"></label>
                     <label class="field"><span>Instagram <em class="opsional">(tanpa @)</em></span>
-                        <input type="text" name="ig_pria" maxlength="40" placeholder="username"></label>
+                        <input type="text" name="ig_pria" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="40" placeholder="username"></label>
                 </div>
                 <label class="field"><span>Nama mempelai wanita *</span>
-                    <input type="text" name="nama_wanita" maxlength="100" required placeholder="mis. Sela Ananda"></label>
+                    <input type="text" name="nama_wanita" autocapitalize="words" maxlength="100" required placeholder="mis. Sela Ananda"></label>
                 <label class="field"><span>Orang tua mempelai wanita</span>
-                    <input type="text" name="ortu_wanita" maxlength="150" placeholder="mis. Bapak Budi & Ibu Rina"></label>
+                    <input type="text" name="ortu_wanita" autocapitalize="words" maxlength="150" placeholder="mis. Bapak Budi & Ibu Rina"></label>
                 <div class="row-2">
                     <label class="field"><span>Anak ke- <em class="opsional">(mis. pertama)</em></span>
                         <input type="text" name="anak_ke_wanita" maxlength="20" placeholder="pertama"></label>
                     <label class="field"><span>Instagram <em class="opsional">(tanpa @)</em></span>
-                        <input type="text" name="ig_wanita" maxlength="40" placeholder="username"></label>
+                        <input type="text" name="ig_wanita" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="40" placeholder="username"></label>
                 </div>
                 <label class="field"><span>Turut mengundang <em class="opsional">(satu nama per baris)</em></span>
                     <textarea name="turut_mengundang" rows="3" maxlength="1200" placeholder="Keluarga Besar …&#10;Bapak/Ibu …"></textarea></label>
@@ -178,20 +181,20 @@ $harih_undangan_terbit = $harih_sudah_kirim && get_post_status($harih_undangan_i
                     <label class="field"><span>Waktu akad</span><input type="time" name="waktu_akad"></label>
                 </div>
                 <label class="field"><span>Nama lokasi akad <em class="opsional">(kosongkan bila sama dengan resepsi)</em></span>
-                    <input type="text" name="lokasi_akad_nama" maxlength="150" placeholder="mis. Masjid Agung"></label>
+                    <input type="text" name="lokasi_akad_nama" autocapitalize="words" maxlength="150" placeholder="mis. Masjid Agung"></label>
                 <label class="field"><span>Alamat lokasi akad</span>
                     <textarea name="lokasi_akad_alamat" rows="2" maxlength="300" placeholder="alamat lokasi akad (bila beda)"></textarea></label>
                 <label class="field"><span>Link Google Maps akad</span>
                     <input type="url" name="gmaps_akad_url" maxlength="300" inputmode="url" placeholder="https://maps.app.goo.gl/…"></label>
                 <label class="field"><span>Koordinat lokasi akad <em class="opsional">(opsional)</em></span>
-                    <input type="text" name="koordinat_akad" maxlength="60" inputmode="decimal" placeholder="-6.914744,107.609810"></label>
+                    <input type="text" name="koordinat_akad" maxlength="60" inputmode="decimal" pattern="-?\d{1,3}(\.\d+)?\s*,\s*-?\d{1,3}(\.\d+)?" title="Dua angka dipisah koma, mis. -6.914744,107.609810" placeholder="-6.914744,107.609810"></label>
                 <label class="field"><span>Catatan lokasi akad <em class="opsional">(parkir, pintu masuk)</em></span>
                     <textarea name="catatan_lokasi_akad" rows="2" maxlength="400" placeholder="Parkir di halaman masjid, masuk lewat pintu timur"></textarea></label>
                 <div class="row-2">
                     <label class="field"><span>Dress code <em class="opsional">(opsional)</em></span>
                         <input type="text" name="dresscode" maxlength="120" placeholder="mis. Sage & Krem"></label>
                     <label class="field"><span>Warna dress code <em class="opsional">(hex, koma)</em></span>
-                        <input type="text" name="dresscode_warna" maxlength="60" placeholder="#3f5c4f, #f4f1e7"></label>
+                        <input type="text" name="dresscode_warna" maxlength="60" pattern="\s*#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})(\s*,\s*#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6}))*\s*" title="Kode warna hex dipisah koma, mis. #3f5c4f, #f4f1e7" placeholder="#3f5c4f, #f4f1e7"></label>
                 </div>
                 <label class="field"><span>Susunan acara <em class="opsional">(per baris: 18.00 Pembukaan)</em></span>
                     <textarea name="rundown" rows="3" maxlength="1200" placeholder="18.00 Pembukaan&#10;19.00 Resepsi"></textarea></label>
@@ -200,13 +203,13 @@ $harih_undangan_terbit = $harih_sudah_kirim && get_post_status($harih_undangan_i
                     <label class="field"><span>Waktu resepsi *</span><input type="time" name="waktu_resepsi" required></label>
                 </div>
                 <label class="field"><span>Nama lokasi *</span>
-                    <input type="text" name="lokasi_nama" maxlength="150" required placeholder="mis. Graha Kencana"></label>
+                    <input type="text" name="lokasi_nama" autocapitalize="words" maxlength="150" required placeholder="mis. Graha Kencana"></label>
                 <label class="field"><span>Alamat lokasi *</span>
                     <textarea name="lokasi_alamat" rows="2" maxlength="300" required placeholder="mis. Jl. Melati No. 12, Bandung"></textarea></label>
                 <label class="field"><span>Link Google Maps</span>
                     <input type="url" name="gmaps_url" maxlength="300" inputmode="url" placeholder="https://maps.app.goo.gl/…"></label>
                 <label class="field"><span>Koordinat lokasi <em class="opsional">(opsional — paling akurat)</em></span>
-                    <input type="text" name="koordinat" maxlength="60" inputmode="decimal" placeholder="-6.914744,107.609810">
+                    <input type="text" name="koordinat" maxlength="60" inputmode="decimal" pattern="-?\d{1,3}(\.\d+)?\s*,\s*-?\d{1,3}(\.\d+)?" title="Dua angka dipisah koma, mis. -6.914744,107.609810" placeholder="-6.914744,107.609810">
                     <em class="petunjuk">Di Google Maps: tekan lama titik lokasi → koordinat muncul di bawah → salin ke sini. Kalau dikosongkan, kami coba ambil sendiri dari link Maps di atas.</em></label>
                 <label class="field"><span>Catatan lokasi resepsi <em class="opsional">(parkir, valet, pintu masuk)</em></span>
                     <textarea name="catatan_lokasi" rows="2" maxlength="400" placeholder="Valet tersedia di lobi utama · parkir basement P2"></textarea></label>
@@ -324,9 +327,15 @@ $harih_undangan_terbit = $harih_sudah_kirim && get_post_status($harih_undangan_i
             </div>
 
             <button type="submit" class="btn" id="btn-kirim" <?php disabled($webhook === ''); ?>>Kirim &amp; Buat Undangan</button>
-            <div class="progress" id="progress" hidden>
+            <?php /* U9 — semantik progres ada di BAR-nya, bukan di teks status.
+                     `#kirim-msg` adalah live region; menulis persen ke sana tiap
+                     event progres berarti ratusan pengumuman untuk satu unggahan.
+                     Angka yang terlihat mata ditandai aria-hidden supaya tidak
+                     terbaca dua kali. */ ?>
+            <div class="progress" id="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="Progres unggah" hidden>
                 <div class="progress-bar" id="progress-bar"></div>
             </div>
+            <p class="progress-pct" id="progress-pct" aria-hidden="true"></p>
             <p class="kirim-msg" id="kirim-msg" role="status"></p>
             <p class="bantuan">Kesulitan mengisi? <a href="<?php echo esc_url(home_url('/kontak/')); ?>" target="_blank" rel="noopener">Hubungi CS</a></p>
         </div>
