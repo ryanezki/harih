@@ -1,12 +1,50 @@
 # TASKS — hariH
 
-**Status:** aktif · **Ditulis ulang:** 2026-08-07 setelah audit menyeluruh 6 dimensi (keamanan · kode PHP · frontend · n8n/infra · produk-bisnis · benchmark pasar).
+**Status:** aktif · **Ditulis ulang:** 2026-08-07 setelah audit menyeluruh 6 dimensi · **Checkpoint terakhir:** 2026-08-08 (keamanan · kode PHP · frontend · n8n/infra · produk-bisnis · benchmark pasar).
 
 > Versi sebelumnya (553 baris, checkpoint bertumpuk) diarsipkan di [`arsip/TASKS-2026-08-07.md`](./arsip/TASKS-2026-08-07.md). Dokumen ini hanya memuat **yang berlaku sekarang**. Riwayat lengkap ada di git log.
 
 **Cara pakai:** centang `- [x]` saat selesai. ID (`A1`) stabil. 👤 = butuh tangan owner · 🤖 = bisa dikerjakan asisten · 🤝 = keduanya. Urutan grup adalah urutan kerja — jangan lompat ke P1 sebelum P0 tuntas.
 
-**Tingkat keyakinan temuan:** A1 (kedua bug WF-02) **diverifikasi langsung** terhadap file — bukan laporan. Sisanya lolos satu putaran verifikasi adversarial (55 lolos, 1 dibantah) tapi belum dikonfirmasi tangan kedua; **periksa file yang dirujuk sebelum mengeksekusi**, terutama sebelum menyentuh n8n.
+**Tingkat keyakinan temuan:** 27 dari 30 item sudah **dieksekusi dan diverifikasi di produksi** — bukan lagi laporan audit. Lima di antaranya ternyata **premisnya meleset** dan dikoreksi di entrinya masing-masing, jadi jangan menganggap teks audit asli sebagai kebenaran:
+
+| Item | Yang dikira | Kenyataannya |
+|---|---|---|
+| A5 | checkout Rp 2,9 jt bisa tanpa tombol bayar | 6 gateway lolos saringan — sehat |
+| B7 | S&K menjual produk yang sudah diganti | kesembilan produk masih dijual; daftarnya justru **tidak menyebut produk utama** |
+| C4(c) | otoritas SKU sedang rusak | nol ketidakcocokan di 18 produk — murni pencegahan |
+| C5 | harga hardcode di 3 tempat | **enam** tempat |
+| D4 | disk 25 GB nyaris penuh | **193 GB, terpakai 12%**; `/health` WAHA ternyata hanya cek disk, bukan status engine |
+
+**Selalu periksa file yang dirujuk sebelum mengeksekusi**, terutama sebelum menyentuh n8n.
+
+---
+
+## ⏸ CHECKPOINT — tutup sesi 8 Agustus 2026
+
+**Mulai dari sini di sesi berikutnya.** `HARIH_VERSION 2.21.0` · 9 workflow aktif · smoke **32/32** · WAHA `healthy`, sesi `WORKING`.
+
+**27 dari 30 item selesai.** Sisa tiga:
+
+| | | |
+|---|---|---|
+| **C8** `hari` 🤖 | Retensi 90 hari & hak penghapusan **tanpa satu baris kode** — janji ini sudah tayang di Kebijakan Privasi. `masa-aktif.php` hanya mendraft post; **medianya tetap publik**. | *disarankan berikutnya* |
+| **D3** `hari` 🤖 | Gambar undangan: nol `srcset`, nol `width/height`. Yang bisa dikerjakan tanpa menunggu keputusan resolusi cetak: atribut dimensi di enam template + `aspect-ratio` pada QRIS (sumber CLS terakhir). Keputusan `maxDim` masih menunggu — sampel cetak kemarin tidak memakai foto pemesan. | |
+| **A8** `menit` 👤 | **Duitku** — kejar approval + tiga pertanyaan (profil nominal Rp 99–299rb vs paket Rp 5,9 jt · mekanisme refund · plafon per kanal). Satu-satunya yang butuh tangan owner. | |
+
+**Data uji yang SENGAJA disimpan** (permintaan owner) — jangan dihapus tanpa konfirmasi:
+- Pesanan **TEST-173** + undangan **174** (`/u/test-rangga-sekar/`) — sumber berkas sampel cetak
+- Ditandai `_harih_uji=1` → **tidak menghitung kuota** (Agustus tetap 0 dari 8), tampil di Antrean Cetak berlabel **"UJI INTERNAL"**
+- Baris sheet `orders` order_id 173, `premium+cetak`, `SUDAH_JADI`
+
+**Yang berubah paling besar sesi ini:**
+1. **Pipeline pemenuhan otomatis PASTI GAGAL sebelum diperbaiki** — `ReferenceError` di satu-satunya jalur pembeli sah. Pembeli pertama akan menerima HTTP 500. Ditutup (A1) lalu dibuktikan end-to-end (A3).
+2. **Daftar tamu semua pelanggan bisa dipanen** lewat loop ID berurutan tanpa autentikasi. Ditutup (B1), dibuktikan dengan panen sungguhan lebih dulu.
+3. **Angka produksi diukur, bukan lagi diestimasi** — mesin creasing sanggup, bobot jauh lebih ringan, jam tangan terpisah dari jam dinding. Seluruh estimasi lama dicabut.
+4. **Jalur bayar manual dibuka** — Duitku masih sandbox, jadi tombol bayar lama mengarah ke halaman pembayaran uji. Semua CTA kini ke WhatsApp, dan kembali otomatis begitu kredensial production dipasang.
+5. **Akuisisi dikeluarkan dari rencana** atas keputusan owner — lihat bagian 🚫.
+
+**Yang perlu diingat sebelum menyentuh apa pun:** baca bagian *"⚠️ Wajib dibaca sebelum menyentuh n8n / deploy"* di bawah. Delapan jebakan, semuanya pernah menggigit.
 
 ---
 
