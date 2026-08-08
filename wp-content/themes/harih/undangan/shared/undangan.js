@@ -118,9 +118,17 @@
         if (!audio) return;
         audio.volume = .6;
         audio.play().then(function () {
-            if (musicBtn) { musicBtn.hidden = false; musicBtn.classList.add('playing'); }
+            if (musicBtn) {
+                musicBtn.hidden = false;
+                musicBtn.classList.add('playing');
+                musicBtn.classList.remove('paused');
+            }
         }).catch(function () {
-            if (musicBtn) { musicBtn.hidden = false; musicBtn.classList.add('paused'); }
+            if (musicBtn) {
+                musicBtn.hidden = false;
+                musicBtn.classList.add('paused');
+                musicBtn.classList.remove('playing');
+            }
         });
     }
 
@@ -128,9 +136,10 @@
         musicBtn.addEventListener('click', function () {
             if (!audio) return;
             if (audio.paused) {
-                audio.play();
-                musicBtn.classList.add('playing');
-                musicBtn.classList.remove('paused');
+                // U11 — lewat playMusic() supaya volume & penanganan penolakan
+                // autoplay tetap di satu tempat; sebelumnya cabang ini memanggil
+                // audio.play() sendiri dan melewatkan keduanya.
+                playMusic();
             } else {
                 audio.pause();
                 musicBtn.classList.remove('playing');
@@ -143,6 +152,56 @@
        membuat autoplay musik legal; gate naik dan tidak kembali ---- */
     var gate = $('#gate');
     var openBtn = $('#buka-undangan');
+
+    /* ---- U12: bilah lompat + gerbang tidak diulang dalam satu sesi ----
+
+       Diukur di demo live 360x740: `#acara` — yang memuat ALAMAT, JAM, dan peta —
+       ada di 2.977 px dari puncak, yaitu 4,0 layar penuh, pada dokumen setinggi
+       9.125 px (12,3 layar). Dan seluruh dokumen hanya memuat sembilan tag <a>,
+       satu-satunya ber-href "#" adalah placeholder RSVP-WA yang bawaannya
+       hidden: NOL tautan lompat. Tamu yang membuka undangan di depan gedung
+       untuk memastikan alamatnya harus menggulir empat layar — setelah menekan
+       gerbang lagi, karena tidak ada yang mengingat ia sudah membukanya.
+
+       Jangkarnya memakai id yang SUDAH ADA di markup, jadi urutan section tidak
+       berubah sama sekali — ini menambah jalan pintas, bukan menata ulang. */
+    var KUNCI_GERBANG = 'harih-gerbang-' + (cfg.slug || cfg.id || '');
+
+    function bangunBilahAksi() {
+        if (document.querySelector('.bilah-aksi')) return;
+        var titik = [['#acara', 'Acara'], ['#galeri', 'Galeri'], ['#amplop', 'Amplop'], ['#rsvp', 'RSVP']]
+            .filter(function (t) { return document.querySelector(t[0]); });
+        if (titik.length < 2) return;   // satu tautan bukan navigasi
+        var nav = document.createElement('nav');
+        nav.className = 'bilah-aksi';
+        nav.setAttribute('aria-label', 'Lompat ke bagian undangan');
+        titik.forEach(function (t) {
+            var a = document.createElement('a');
+            a.href = t[0];
+            a.textContent = t[1];
+            nav.appendChild(a);
+        });
+        document.body.appendChild(nav);
+        document.body.classList.add('ada-bilah');
+    }
+
+    function sesudahGerbang() {
+        if (musicBtn) { musicBtn.hidden = false; musicBtn.classList.add('paused'); }
+        initProgress();
+        bangunBilahAksi();
+    }
+
+    // Kunjungan berikutnya DALAM SESI YANG SAMA melewati gerbang. Sengaja
+    // sessionStorage, bukan localStorage: kesan pertama tetap utuh untuk
+    // kunjungan baru, yang dihemat hanya pengulangan di hari yang sama.
+    var lewatiGerbang = false;
+    try { lewatiGerbang = sessionStorage.getItem(KUNCI_GERBANG) === '1'; } catch (e) { /* mode privat */ }
+    if (gate && lewatiGerbang) {
+        gate.classList.add('lewati', 'terbuka');
+        document.body.classList.remove('is-locked');
+        sesudahGerbang();
+    }
+
     if (openBtn) {
         // C1c — penanda "gerbang BISA dibuka", bukan sekadar "JS jalan".
         // Dipasang tepat setelah handler terpasang; arloji penjaga di
@@ -151,8 +210,19 @@
         openBtn.addEventListener('click', function () {
             if (gate) gate.classList.add('terbuka');
             document.body.classList.remove('is-locked');
-            playMusic();
-            initProgress();
+            /* U11 — MUSIK TIDAK LAGI DIUNDUH TANPA DITANYA.
+               Dulu menekan gerbang memanggil playMusic() seketika, dan tombol
+               kontrolnya baru muncul DI DALAM playMusic() — jadi urutannya:
+               tamu menekan → audio.play() → unduhan 1,8–2,2 MB mulai → barulah
+               kontrolnya terlihat. Terukur dari server: 1.908.919 · 1.781.026 ·
+               2.214.866 byte, sementara satu pemuatan undangan tanpa MP3 hanya
+               ±796 KB. Biaya itu ditanggung RATUSAN tamu yang tidak memesan apa
+               pun, di pasar yang kuotanya jadi keberatan nyata.
+               Sekarang: tombolnya ditampilkan dalam keadaan `paused`, dan satu
+               ketukan lagi memutarnya. `preload="none"` di markup memastikan
+               nol byte berpindah sampai itu terjadi. */
+            sesudahGerbang();
+            try { sessionStorage.setItem(KUNCI_GERBANG, '1'); } catch (e) { /* mode privat */ }
         });
     }
 
@@ -713,15 +783,63 @@
         return wrap;
     }
 
+    /* U13 — buku tamu dulu memuat SEKALI, 50 teratas, tanpa penghitung, tanpa
+       muat-lagi, dan tanpa cabang kosong: ketiga undangan demo menampilkannya
+       kosong melompong kepada calon pembeli yang sedang menilai produk. */
+    var halUcapan = 0;
+    var btnLagi = null;
+
+    function pasangTombolLagi(sisa) {
+        if (!btnLagi) {
+            btnLagi = document.createElement('button');
+            btnLagi.type = 'button';
+            btnLagi.className = 'btn btn-ghost ucapan-lagi';
+            btnLagi.addEventListener('click', function () { muatUcapan(); });
+            list.parentNode.insertBefore(btnLagi, list.nextSibling);
+        }
+        btnLagi.hidden = sisa <= 0;
+        btnLagi.textContent = 'Lihat ' + sisa + ' ucapan lainnya';
+    }
+
     function muatUcapan() {
         if (!list || !cfg.restUrl || !cfg.slug) return;
-        fetch(cfg.restUrl + '/rsvp/' + encodeURIComponent(cfg.slug))
-            .then(function (r) { return r.ok ? r.json() : []; })
-            .then(function (items) {
-                list.textContent = '';
-                (items || []).forEach(function (u) { list.appendChild(itemUcapan(u)); });
+        var berikut = halUcapan + 1;
+        if (btnLagi) btnLagi.disabled = true;
+        fetch(cfg.restUrl + '/rsvp/' + encodeURIComponent(cfg.slug) + '?hal=' + berikut)
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (data) {
+                if (data === null) throw new Error('gagal');
+                // Menerima kedua bentuk: objek {items,total} (baru) dan array
+                // polos (respons lama yang mungkin masih ter-cache 60 dtk).
+                var items = Array.isArray(data) ? data : (data.items || []);
+                var total = Array.isArray(data) ? data.length : (data.total || items.length);
+                if (berikut === 1) list.textContent = '';
+                items.forEach(function (u) { list.appendChild(itemUcapan(u)); });
+                halUcapan = berikut;
+
+                if (berikut === 1 && !items.length) {
+                    var kosong = document.createElement('p');
+                    kosong.className = 'ucapan-kosong';
+                    kosong.textContent = 'Jadilah yang pertama mengirim doa & ucapan.';
+                    list.appendChild(kosong);
+                }
+                if (total > list.querySelectorAll('.ucapan-item').length) {
+                    pasangTombolLagi(total - list.querySelectorAll('.ucapan-item').length);
+                } else if (btnLagi) {
+                    btnLagi.hidden = true;
+                }
             })
-            .catch(function () { /* daftar ucapan bukan konten kritis */ });
+            .catch(function () {
+                // Dibedakan dari keadaan kosong: "belum ada ucapan" dan "gagal
+                // memuat" adalah dua kabar yang berbeda bagi tamu.
+                if (berikut === 1 && list && !list.children.length) {
+                    var g = document.createElement('p');
+                    g.className = 'ucapan-kosong';
+                    g.textContent = 'Ucapan gagal dimuat — coba muat ulang halaman.';
+                    list.appendChild(g);
+                }
+            })
+            .finally(function () { if (btnLagi) btnLagi.disabled = false; });
     }
     muatUcapan();
 

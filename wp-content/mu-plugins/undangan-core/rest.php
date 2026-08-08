@@ -119,12 +119,26 @@ function undangan_rsvp_list(WP_REST_Request $r) {
     }
     $uid = $undangan->ID;
 
-    $posts = get_posts([
-        'post_type'   => 'ucapan',
-        'numberposts' => 50,
-        'meta_key'    => 'undangan_id',
-        'meta_value'  => $uid,
+    /* U13 — `numberposts => 50` tanpa parameter halaman berarti ucapan ke-51 dan
+       seterusnya TIDAK PERNAH bisa dilihat tamu mana pun. Dan karena get_posts()
+       bawaannya `date DESC`, yang tampil adalah 50 TERBARU — jadi yang hilang
+       justru pengirim paling awal, orang-orang terdekat yang membalas lebih
+       dulu. Halaman /rekap/ memakai batas 500, jadi mempelai aman dan tamu
+       tidak. Sekarang ber-offset, dengan `total` dikembalikan supaya klien bisa
+       menawarkan "muat lagi" alih-alih diam. */
+    $per   = 30;
+    $hal   = max(1, (int) ($r['hal'] ?? 1));
+    $query = new WP_Query([
+        'post_type'      => 'ucapan',
+        'post_status'    => 'publish',
+        'posts_per_page' => $per,
+        'paged'          => $hal,
+        'meta_key'       => 'undangan_id',
+        'meta_value'     => $uid,
+        'no_found_rows'  => false,
     ]);
+    $posts = $query->posts;
+    $total = (int) $query->found_posts;
 
     // wp_insert_post meng-escape '&' dkk. di title/content (wptexturize/kses).
     // Frontend me-render via textContent (XSS-safe), jadi entity harus di-decode
@@ -147,7 +161,16 @@ function undangan_rsvp_list(WP_REST_Request $r) {
     do_action('litespeed_control_set_ttl', 60);
     do_action('litespeed_tag_add', 'rsvp_' . $uid);
 
-    $res = rest_ensure_response($items);
+    /* Bentuk respons berubah dari ARRAY POLOS jadi objek ber-`total` supaya
+       klien bisa tahu masih ada berapa. Aman: `undangan.js` di-deploy bersama
+       lewat HARIH_VERSION (URL aset ikut berganti), dan ia tetap menerima kedua
+       bentuk sebagai jaring pengaman untuk respons yang masih ter-cache. */
+    $res = rest_ensure_response([
+        'items' => $items,
+        'total' => $total,
+        'hal'   => $hal,
+        'per'   => $per,
+    ]);
     $res->header('X-LiteSpeed-Cache-Control', 'public, max-age=60'); // fallback level server
     // Cache-Control untuk BROWSER tamu. Wajib eksplisit: setelan Browser Cache
     // LiteSpeed mengirim `public, max-age=604800` ke semua respons, sehingga tanpa

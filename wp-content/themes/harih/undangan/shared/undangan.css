@@ -243,6 +243,16 @@ body:not(.js-gate) .gate { position: relative; height: 100dvh; }
         radial-gradient(120% 88% at 50% 38%, transparent 36%, rgba(0, 0, 0, .38) 100%),
         var(--cover-overlay, linear-gradient(180deg, rgba(0, 0, 0, .3), rgba(0, 0, 0, .62)));
 }
+/* U10 — DI ORIENTASI LANSKAP GERBANG TIDAK BISA DIBUKA SAMA SEKALI.
+   Tiga hal bersamaan: `.gate` ber-`overflow: hidden` mengklip alih-alih
+   menggulir · `justify-content: space-between` + `padding: 7vh` membuat isinya
+   lebih tinggi daripada layar · `body` terkunci `overflow: hidden`. Terukur di
+   640x360: isi gerbang 532–557 px sementara layarnya 360 px, sehingga tombol
+   "Buka Undangan" duduk 124–150 px DI BAWAH layar di ketiga tema.
+
+   Tiga perbaikan yang saling menopang: isinya bisa digulir di dalam overlay ·
+   padding vertikal diberi batas atas & bawah · dan pada lanskap pendek,
+   ornamen dikecilkan supaya tidak perlu menggulir sama sekali. */
 .gate-inner {
     position: absolute;
     inset: 0;
@@ -254,8 +264,13 @@ body:not(.js-gate) .gate { position: relative; height: 100dvh; }
     justify-content: space-between;
     text-align: center;
     color: var(--cover-ink, #fff);
-    padding: 7vh 28px 7vh;
+    padding: clamp(16px, 7vh, 56px) 28px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
 }
+
+
 .gate.has-photo .gate-inner { text-shadow: 0 1px 12px rgba(0, 0, 0, .55); }
 .gate-bawah { display: flex; flex-direction: column; align-items: center; gap: 14px; }
 /* Entrance gate: tiap elemen naik bergiliran saat halaman dimuat — kesan
@@ -1044,22 +1059,23 @@ body.is-locked .pratinjau-nama { display: none; } /* gerbang tetap sinematik */
    tugas utamanya sudah selesai saat RSVP tersimpan, ini tawaran tambahan. */
 .rsvp-wa { margin-top: 10px; width: 100%; }
 
+/* U13 — KOTAK GULIR BERSARANG DICABUT. `max-height: 460px` + `overflow-y: auto`
+   membuat 6.497 px gulir DALAM tepat di section kedua-dari-akhir: jari yang
+   mendarat di sini menggulir daftar, bukan halaman, sehingga section penutup
+   (berisi "Bagikan via WhatsApp") praktis tidak terjangkau. Menggigit mulai
+   dari EMPAT ucapan (4 x 129 px > 460). Sekarang daftarnya mengalir di halaman
+   dan panjangnya dibatasi paginasi + tombol "muat lagi", bukan oleh kotak. */
 .ucapan-list {
     margin-top: 26px;
     display: flex;
     flex-direction: column;
     gap: 10px;
     text-align: left;
-    max-height: 460px;
-    overflow-y: auto;
-    padding: 14px 2px;
-    -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 18px, #000 calc(100% - 26px), transparent 100%);
-    mask-image: linear-gradient(180deg, transparent 0, #000 18px, #000 calc(100% - 26px), transparent 100%);
-    scrollbar-width: thin;
+    padding: 4px 2px;
 }
 .ucapan-item { background: var(--c-surface); border-radius: var(--radius); box-shadow: var(--shadow), inset 0 0 0 1px var(--c-line); padding: 14px 16px; }
 .ucapan-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.ucapan-nama { font-weight: 600; font-size: 14px; }
+.ucapan-nama { font-weight: 600; font-size: 14px; overflow-wrap: anywhere; }
 .badge {
     font: 400 9.5px/1.6 var(--font-label);
     letter-spacing: .12em;
@@ -1070,7 +1086,7 @@ body.is-locked .pratinjau-nama { display: none; } /* gerbang tetap sinematik */
 .badge-hadir { background: rgba(67, 120, 80, .12); color: #3c6a48; }
 .badge-tidak { background: rgba(120, 120, 120, .12); color: #6d6d6d; }
 .badge-ragu { background: rgba(178, 141, 52, .14); color: #8a6d2a; }
-.ucapan-pesan { margin: 6px 0 2px; font-size: 14px; }
+.ucapan-pesan { margin: 6px 0 2px; font-size: 14px; overflow-wrap: anywhere; }
 .ucapan-waktu { font-size: 11px; color: var(--c-ink-soft); }
 
 /* ---- 10. Penutup ---- */
@@ -1186,6 +1202,79 @@ body.is-locked .pratinjau-nama { display: none; } /* gerbang tetap sinematik */
 .music-toggle.playing span { display: inline-block; animation: undangan-putar 3s linear infinite; }
 @keyframes undangan-putar { to { transform: rotate(360deg); } }
 /* Kolom 480px di tengah — tombol menempel di tepi kolom, bukan tepi layar */
+/* U13 — keadaan kosong & tombol muat-lagi buku tamu. */
+.ucapan-kosong { margin: 0; padding: 18px 4px; text-align: center; font-size: 14px; color: var(--c-ink-soft); }
+.ucapan-lagi { display: block; margin: 16px auto 0; }
+
+/* ---- U10: lanskap pendek (HP diputar) ----
+   DITARUH DI SINI, bukan di dekat `.gate-inner`: aturan yang ditimpanya
+   (`.gate-bawah`, `.gate-tamu`) didefinisikan BELAKANGAN, jadi media query yang
+   diletakkan lebih awal kalah pada spesifisitas yang sama — persis yang terjadi
+   pada percobaan pertama dan terukur sebagai `gap` yang tidak pernah berubah.
+
+   Diukur pada 640x360 sebelum blok ini: isi gerbang 463 px di layar 360 px.
+   Yang dipangkas dipilih dari pengukuran anak per anak, bukan ditebak:
+   · `.seal` 76 px (margin -8/-8, net 60) — ornamen murni, disembunyikan.
+     `transform: scale()` TIDAK menolong: ia tidak mengurangi tinggi layout.
+   · gap `.gate-bawah` 14 -> 6 px pada lima jarak = 40 px
+   · `.tgl-hijriah` 14 px + margin 6 px — tetap tampil di hero, jadi tidak hilang
+   Total ±120 px dipangkas dari kelebihan 103 px. */
+@media (orientation: landscape) and (max-height: 600px) {
+    .gate-inner { padding: 10px 28px; }
+    .gate-inner > .seal { display: none; }
+    .gate-bawah { gap: 6px; }
+    .gate-bawah > .cover-names { font-size: clamp(22px, 5.4vh, 28px); margin-top: 0; }
+    .gate-bawah > .tgl-hijriah { display: none; }
+    .gate-bawah > .gate-tamu { margin-top: 6px; padding: 8px 14px; }
+    .gate-bawah > .btn { margin-top: 8px; }
+}
+
+/* ---- U12: bilah lompat (dibangun undangan.js setelah gerbang terbuka) ----
+   Alamat & jam acara berada 4 layar dari puncak dan undangan tidak punya satu
+   pun tautan lompat. Bilah ini memakai jangkar yang SUDAH ada di markup, jadi
+   urutan section tidak berubah — hanya jalan pintasnya yang ditambahkan.
+   Bahasanya mengikuti bahasa label undangan (kapital ber-tracking, --font-label),
+   bukan bahasa tab aplikasi. */
+.bilah-aksi {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: env(safe-area-inset-bottom, 0px);
+    z-index: 40;
+    width: min(480px, 100%);
+    display: flex;
+    justify-content: space-around;
+    gap: 2px;
+    padding: 4px 8px calc(4px + env(safe-area-inset-bottom, 0px) * 0);
+    background: color-mix(in srgb, var(--c-bg) 92%, transparent);
+    border-top: 1px solid var(--c-line);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+}
+.bilah-aksi a {
+    flex: 1;
+    /* >=44px tinggi: ini kontrol yang dipakai sambil berjalan, di layar kecil.
+       Terukur 40px pada padding 15px, jadi dinaikkan ke 17px. */
+    padding: 17px 4px;
+    text-align: center;
+    text-decoration: none;
+    color: var(--c-ink);
+    font: 400 10px/1 var(--font-label);
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    border-radius: var(--radius-btn);
+}
+.bilah-aksi a:hover, .bilah-aksi a:focus-visible { color: var(--c-gold-teks); }
+.bilah-aksi a:focus-visible { outline: 2px solid var(--c-accent); outline-offset: -2px; }
+/* Tombol musik naik supaya tidak bertumpuk dengan bilah. */
+body.ada-bilah .music-toggle { bottom: calc(70px + env(safe-area-inset-bottom, 0px)); }
+/* Section terakhir diberi ruang supaya isinya tidak tertutup bilah. */
+body.ada-bilah .undangan { padding-bottom: 58px; }
+/* Gerbang yang DILEWATI (kunjungan kedua dalam sesi yang sama) tidak boleh
+   ikut dianimasikan — transisi 1,35 dtk pada halaman yang baru dimuat terbaca
+   sebagai halaman yang sedang rusak. */
+.gate.lewati { transition: none; }
+
 /* U19 — `viewport-fit=cover` dipasang di sebelas template, jadi halaman memang
    mengisi sampai ke bawah home indicator iPhone; konsekuensinya harus dibayar
    dengan env(). Tombol musik adalah satu-satunya kontrol mengambang yang
@@ -1220,4 +1309,14 @@ body.is-locked .pratinjau-nama { display: none; } /* gerbang tetap sinematik */
     .rekening-item::before, .rekening-item::after, .qris::before, .penutup-nama { animation: none; }
 }
 
-.cd-cal-baris { display: flex; justify-content: center; margin-top: 34px; }
+/* U20 — dua tombol per acara (Google + .ics), dan sampai dua acara. */
+.cd-cal-baris { display: flex; flex-direction: column; align-items: center; gap: 16px; margin-top: 34px; }
+.cd-cal-acara { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; }
+.cd-cal-nama {
+    flex-basis: 100%;
+    font: 400 9.5px/1 var(--font-label);
+    letter-spacing: .24em;
+    text-transform: uppercase;
+    color: var(--c-ink-soft);
+    margin-bottom: 2px;
+}
