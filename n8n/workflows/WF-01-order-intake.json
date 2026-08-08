@@ -163,7 +163,7 @@
     {
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const crypto = require('crypto');\nconst o = $input.first().json;\n\n// Fungsi normalisasi nomor bersama (T2.14) — jaga identik dengan WF-02/WF-03\nfunction normalisasiWa(input) {\n  let d = String(input || '').replace(/\\D/g, '');\n  if (!d) return '';\n  if (d.startsWith('0')) d = '62' + d.slice(1);\n  else if (d.startsWith('620')) d = '62' + d.slice(3);\n  else if (d.startsWith('8')) d = '62' + d;\n  if (!d.startsWith('62') || d.length < 10 || d.length > 15) return '';\n  return d;\n}\n\nconst billing = o.billing || {};\nconst nama = [billing.first_name, billing.last_name].filter(Boolean).join(' ').trim() || 'Kak';\nconst namaDepan = billing.first_name || nama;\nconst email = billing.email || '';\nconst wa = normalisasiWa(billing.phone);\n\nconst items = Array.isArray(o.line_items) ? o.line_items : [];\n\n// F3.2 — jenis tiap line item dibaca dari SKU, sumber kebenaran yang sama\n// dengan mu-plugin cetak.php. Deteksi lama membaca NAMA line item pertama dan\n// mencari kata hemat|favorit|premium; nama paket hybrid (Hormat/Resepsi/Grand)\n// tidak memuat satu pun kata itu, sehingga paket jatuh ke '' dan WF-02\n// fallback ke `hemat`: pembeli Rp 2,9 juta menerima undangan tier Hemat.\nfunction jenisItem(li) {\n  const sku = String(li.sku || '').toUpperCase();\n  if (sku.startsWith('HARIH-')) return 'digital';\n  if (sku.startsWith('CETAK-') || sku.startsWith('UPG-')) return 'hybrid';\n  if (sku.startsWith('SATUAN-')) return 'satuan';\n  // Tanpa SKU dikenal: jatuh ke deteksi nama lama (order lawas & produk uji).\n  return /hemat|favorit|premium/i.test(String(li.name || '')) ? 'digital' : 'satuan';\n}\n\n// Tier undangan digital yang berhak diterima pembeli.\n// Paket hybrid membawa undangan setara PREMIUM (halaman harga menjanjikan\n// \"digital custom\"/\"setara paket Premium\") — inilah perbaikan bug tier.\nfunction tierItem(li) {\n  const j = jenisItem(li);\n  if (j === 'hybrid') return 'premium';\n  if (j !== 'digital') return '';\n  const nama = String(li.name || '').toLowerCase();\n  return ['hemat', 'favorit', 'premium'].find((p) => nama.includes(p)) || '';\n}\n\nconst jenisSet = [...new Set(items.map(jenisItem))];\nconst adaDigital = items.some((li) => jenisItem(li) === 'digital' || jenisItem(li) === 'hybrid');\nconst adaCetak = items.some((li) => ['hybrid', 'satuan'].includes(jenisItem(li)));\nconst PRIORITAS = { premium: 3, favorit: 2, hemat: 1, '': 0 };\nconst paket = items.map(tierItem).reduce((a, b) => (PRIORITAS[b] > PRIORITAS[a] ? b : a), '');\n// 'cetak_saja' = order tanpa komponen undangan digital (à la carte murni):\n// tidak boleh dikirimi link form isi data & tidak membuat baris `orders` baru.\n// D1 — order yang SELURUHNYA `UPG-*` adalah UPGRADE, bukan pesanan baru.\n// Undangannya sudah terbit dari pesanan ASAL, jadi pembeli TIDAK boleh diminta\n// mengisi data lagi — halaman upsell justru menjanjikan sebaliknya. Kalau ia\n// menurut dan mengisi, terbit undangan KEDUA dengan slug berbeda, dan link yang\n// mungkin sudah ia sebar ke tamu bukan lagi yang dicetak.\n// Catatan: `UPG-*` dihitung `hybrid` oleh jenisItem(), dan baris adaDigital\n// memperlakukan `hybrid` sebagai \"ada digital\" — jadi tanpa cabang ini order\n// upgrade jatuh ke 'hybrid' dan tetap dikirimi link isi data.\nconst semuaUpgrade = items.length > 0 &&\n  items.every((li) => String(li.sku || '').toUpperCase().startsWith('UPG-'));\nconst jenisOrder = semuaUpgrade ? 'upgrade' : (adaDigital ? (adaCetak ? 'hybrid' : 'digital') : 'cetak_saja');\n\n// T2.15: dasar komisi = jumlah line item SETELAH diskon kupon (li.total),\n// BUKAN o.total yang bisa memuat fee kanal pembayaran\nconst dasarKomisi = items.reduce((s, li) => s + (parseFloat(li.total) || 0), 0);\n\n// F3.3 — komisi per JENIS produk. Digital 30%; barang fisik memakai rupiah\n// TETAP per paket (keputusan terkunci: 150/300/500rb) karena marjin cetak\n// tidak proporsional terhadap harga. Tanpa ini kupon RES- pada order Rp 2,9jt\n// membukukan komisi Rp 870rb — menghabiskan marjin produksinya.\nconst KOMISI_CETAK = { 'CETAK-HORMAT': 150000, 'CETAK-RESEPSI': 300000, 'CETAK-GRAND': 500000 };\nconst komisi = items.reduce((s, li) => {\n  const j = jenisItem(li);\n  const qty = parseInt(li.quantity, 10) || 1;\n  if (j === 'digital') return s + Math.round((parseFloat(li.total) || 0) * 0.3);\n  if (j === 'hybrid') return s + (KOMISI_CETAK[String(li.sku || '').toUpperCase()] || 0) * qty;\n  return s; // item satuan (à la carte): tidak berkomisi\n}, 0);\n\nconst kupon = ((o.coupon_lines && o.coupon_lines[0] && o.coupon_lines[0].code) || '').toUpperCase();\n\n// Token HARUS identik dgn undangan_token_halaman(order_id, 'isi-data') di PHP.\nif (!$env.FORM_TOKEN_SECRET) throw new Error('Env FORM_TOKEN_SECRET belum di-set di container n8n');\n// B9 — bahan HMAC BERCAKUP: `${o.id}|{halaman}`. Padanannya di PHP ada di\n// undangan_token_halaman() (mu-plugins/undangan-core/woocommerce.php);\n// mengubah salah satunya tanpa yang lain akan mematikan seluruh link.\nconst token = crypto.createHmac('sha256', $env.FORM_TOKEN_SECRET).update(String(o.id) + '|isi-data').digest('hex').slice(0, 16);\nconst linkForm = (jenisOrder === 'cetak_saja' || jenisOrder === 'upgrade')\n  ? ''\n  : `${$env.WP_URL}/isi-data/?order=${o.id}&key=${token}${paket ? `&paket=${paket}` : ''}`;\n\nconst tglOrder = String(o.date_paid || o.date_created || '').replace('T', ' ').slice(0, 16);\n\nreturn [{ json: {\n  order_id: String(o.id),\n  tgl_order: tglOrder,\n  nama,\n  nama_depan: namaDepan,\n  email,\n  wa,\n  paket,\n  kupon,\n  total: String(o.total),\n  token,\n  link_form: linkForm,\n  jenis_order: jenisOrder,\n  jenis_item: jenisSet.join('+'),\n  dasar_komisi: dasarKomisi,\n  komisi,\n  exec_id: String($execution.id),\n} }];"
+        "jsCode": "const crypto = require('crypto');\nconst o = $input.first().json;\n\n// Fungsi normalisasi nomor bersama (T2.14) — jaga identik dengan WF-02/WF-03\nfunction normalisasiWa(input) {\n  let d = String(input || '').replace(/\\D/g, '');\n  if (!d) return '';\n  if (d.startsWith('0')) d = '62' + d.slice(1);\n  else if (d.startsWith('620')) d = '62' + d.slice(3);\n  else if (d.startsWith('8')) d = '62' + d;\n  if (!d.startsWith('62') || d.length < 10 || d.length > 15) return '';\n  return d;\n}\n\nconst billing = o.billing || {};\nconst nama = [billing.first_name, billing.last_name].filter(Boolean).join(' ').trim() || 'Kak';\nconst namaDepan = billing.first_name || nama;\nconst email = billing.email || '';\nconst wa = normalisasiWa(billing.phone);\n\nconst items = Array.isArray(o.line_items) ? o.line_items : [];\n\n// F3.2 — jenis tiap line item dibaca dari SKU, sumber kebenaran yang sama\n// dengan mu-plugin cetak.php. Deteksi lama membaca NAMA line item pertama dan\n// mencari kata hemat|favorit|premium; nama paket hybrid (Hormat/Resepsi/Grand)\n// tidak memuat satu pun kata itu, sehingga paket jatuh ke '' dan WF-02\n// fallback ke `hemat`: pembeli Rp 2,9 juta menerima undangan tier Hemat.\nfunction jenisItem(li) {\n  const sku = String(li.sku || '').toUpperCase();\n  if (sku.startsWith('HARIH-')) return 'digital';\n  if (sku.startsWith('CETAK-') || sku.startsWith('UPG-')) return 'hybrid';\n  if (sku.startsWith('SATUAN-')) return 'satuan';\n  // Tanpa SKU dikenal: jatuh ke deteksi nama lama (order lawas & produk uji).\n  return /hemat|favorit|premium/i.test(String(li.name || '')) ? 'digital' : 'satuan';\n}\n\n// Tier undangan digital yang berhak diterima pembeli.\n// Paket hybrid membawa undangan setara PREMIUM (halaman harga menjanjikan\n// \"digital custom\"/\"setara paket Premium\") — inilah perbaikan bug tier.\nfunction tierItem(li) {\n  const j = jenisItem(li);\n  if (j === 'hybrid') return 'premium';\n  if (j !== 'digital') return '';\n  const nama = String(li.name || '').toLowerCase();\n  return ['hemat', 'favorit', 'premium'].find((p) => nama.includes(p)) || '';\n}\n\nconst jenisSet = [...new Set(items.map(jenisItem))];\nconst adaDigital = items.some((li) => jenisItem(li) === 'digital' || jenisItem(li) === 'hybrid');\nconst adaCetak = items.some((li) => ['hybrid', 'satuan'].includes(jenisItem(li)));\nconst PRIORITAS = { premium: 3, favorit: 2, hemat: 1, '': 0 };\nconst paket = items.map(tierItem).reduce((a, b) => (PRIORITAS[b] > PRIORITAS[a] ? b : a), '');\n// 'cetak_saja' = order tanpa komponen undangan digital (à la carte murni):\n// tidak boleh dikirimi link form isi data & tidak membuat baris `orders` baru.\n// D1 — order yang SELURUHNYA `UPG-*` adalah UPGRADE, bukan pesanan baru.\n// Undangannya sudah terbit dari pesanan ASAL, jadi pembeli TIDAK boleh diminta\n// mengisi data lagi — halaman upsell justru menjanjikan sebaliknya. Kalau ia\n// menurut dan mengisi, terbit undangan KEDUA dengan slug berbeda, dan link yang\n// mungkin sudah ia sebar ke tamu bukan lagi yang dicetak.\n// Catatan: `UPG-*` dihitung `hybrid` oleh jenisItem(), dan baris adaDigital\n// memperlakukan `hybrid` sebagai \"ada digital\" — jadi tanpa cabang ini order\n// upgrade jatuh ke 'hybrid' dan tetap dikirimi link isi data.\nconst semuaUpgrade = items.length > 0 &&\n  items.every((li) => String(li.sku || '').toUpperCase().startsWith('UPG-'));\nconst jenisOrder = semuaUpgrade ? 'upgrade' : (adaDigital ? (adaCetak ? 'hybrid' : 'digital') : 'cetak_saja');\n\n// R1 (2026-08-09) — SELURUH HITUNGAN KOMISI DICABUT. Di model grosir mitra\n// membeli di harga grosir dan mengambil seluruh selisih sendiri; arah uang\n// selalu mitra → hariH (B2). Tidak ada komisi yang dihitung, dicatat, atau\n// dibayarkan — jadi tidak ada pula alasan sah menyimpan rekening siapa pun.\n// `kupon` tetap dibaca: kodenya masih berguna untuk promo biasa.\n\nconst kupon = ((o.coupon_lines && o.coupon_lines[0] && o.coupon_lines[0].code) || '').toUpperCase();\n\n// Token HARUS identik dgn undangan_token_halaman(order_id, 'isi-data') di PHP.\nif (!$env.FORM_TOKEN_SECRET) throw new Error('Env FORM_TOKEN_SECRET belum di-set di container n8n');\n// B9 — bahan HMAC BERCAKUP: `${o.id}|{halaman}`. Padanannya di PHP ada di\n// undangan_token_halaman() (mu-plugins/undangan-core/woocommerce.php);\n// mengubah salah satunya tanpa yang lain akan mematikan seluruh link.\nconst token = crypto.createHmac('sha256', $env.FORM_TOKEN_SECRET).update(String(o.id) + '|isi-data').digest('hex').slice(0, 16);\nconst linkForm = (jenisOrder === 'cetak_saja' || jenisOrder === 'upgrade')\n  ? ''\n  : `${$env.WP_URL}/isi-data/?order=${o.id}&key=${token}${paket ? `&paket=${paket}` : ''}`;\n\nconst tglOrder = String(o.date_paid || o.date_created || '').replace('T', ' ').slice(0, 16);\n\nreturn [{ json: {\n  order_id: String(o.id),\n  tgl_order: tglOrder,\n  nama,\n  nama_depan: namaDepan,\n  email,\n  wa,\n  paket,\n  kupon,\n  total: String(o.total),\n  token,\n  link_form: linkForm,\n  jenis_order: jenisOrder,\n  jenis_item: jenisSet.join('+'),\n  exec_id: String($execution.id),\n} }];"
       },
       "id": "wf01-siapkan-data",
       "name": "Siapkan Data Order",
@@ -498,144 +498,6 @@
         880,
         -160
       ]
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "loose"
-          },
-          "conditions": [
-            {
-              "id": "c-kupon",
-              "leftValue": "={{ $json.kupon }}",
-              "rightValue": "RES-",
-              "operator": {
-                "type": "string",
-                "operation": "startsWith"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "id": "wf01-if-kupon",
-      "name": "Kupon Reseller?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2,
-      "position": [
-        660,
-        40
-      ]
-    },
-    {
-      "parameters": {
-        "authentication": "serviceAccount",
-        "resource": "sheet",
-        "operation": "append",
-        "documentId": {
-          "__rl": true,
-          "value": "={{ $env.SHEET_ID }}",
-          "mode": "id"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "komisi",
-          "mode": "name"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "tgl": "={{ $json.tgl_order.slice(0, 10) }}",
-            "order_id": "={{ $json.order_id }}",
-            "kode": "={{ $json.kupon }}",
-            "total_order": "={{ String($json.dasar_komisi) }}",
-            "komisi": "={{ String($json.komisi) }}",
-            "status": "UNPAID"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "tgl",
-              "displayName": "tgl",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "order_id",
-              "displayName": "order_id",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "kode",
-              "displayName": "kode",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "total_order",
-              "displayName": "total_order",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "komisi",
-              "displayName": "komisi",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "status",
-              "displayName": "status",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            }
-          ]
-        },
-        "options": {
-          "cellFormat": "RAW"
-        }
-      },
-      "id": "wf01-catat-komisi",
-      "name": "Catat Komisi (UNPAID)",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
-      "position": [
-        880,
-        120
-      ],
-      "retryOnFail": true,
-      "maxTries": 3,
-      "waitBetweenTries": 3000,
-      "credentials": {
-        "googleApi": {
-          "id": "GOOGLESAHARIH001",
-          "name": "Google SA hariH"
-        }
-      },
-      "notes": "Komisi 30% dari line item setelah diskon (T2.15) — bukan dari field total payload."
     },
     {
       "parameters": {
@@ -1172,7 +1034,7 @@
         ],
         [
           {
-            "node": "Kupon Reseller?",
+            "node": "Siapkan Pesan",
             "type": "main",
             "index": 0
           }
@@ -1184,35 +1046,6 @@
         [
           {
             "node": "Stop — Duplikat",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Kupon Reseller?": {
-      "main": [
-        [
-          {
-            "node": "Catat Komisi (UNPAID)",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Siapkan Pesan",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Catat Komisi (UNPAID)": {
-      "main": [
-        [
-          {
-            "node": "Siapkan Pesan",
             "type": "main",
             "index": 0
           }

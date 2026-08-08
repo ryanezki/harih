@@ -261,16 +261,11 @@ function harih_form_webhook_url(): string {
     return (string) get_option('n8n_form_webhook_url', '');
 }
 
-/**
- * URL webhook pendaftaran reseller (WF-03). Default: diturunkan dari URL form
- * (ganti path `form-undangan` → `daftar-reseller`) supaya tanpa konfigurasi
- * tambahan; override via konstanta bila path webhook berbeda.
- */
-function harih_reseller_webhook_url(): string {
-    if (defined('N8N_RESELLER_WEBHOOK_URL')) return (string) N8N_RESELLER_WEBHOOK_URL;
-    $form = harih_form_webhook_url();
-    return $form !== '' ? str_replace('form-undangan', 'daftar-reseller', $form) : '';
-}
+/* R1 (2026-08-09) — `harih_reseller_webhook_url()` DICABUT bersama seluruh
+   program reseller. Di model grosir arah uang selalu mitra → hariH (B2), jadi
+   tidak ada komisi, tidak ada nomor rekening mitra, dan tidak ada formulir yang
+   mengumpulkannya. Portal mitra menggantikannya lewat login WordPress (B3, M3).
+   Markup halaman lama ada di git — commit 826c8d2 ke belakang. */
 
 /* =========================================================================
  * Aset
@@ -278,7 +273,7 @@ function harih_reseller_webhook_url(): string {
 
 // Halaman toko: style child di atas Astra.
 add_action('wp_enqueue_scripts', function () {
-    if (is_singular('undangan') || is_page_template('page-isi-data.php') || is_page_template('page-katalog.php') || is_page_template('page-jadi-reseller.php') || is_page_template('page-harga-hybrid.php') || is_page_template('page-satuan.php') || is_page_template('page-upsell.php') || is_page_template('page-proof.php') || is_page_template('page-tamu.php') || is_page_template('page-rekap.php') || is_page_template('page-teks.php')) return;
+    if (is_singular('undangan') || is_page_template('page-isi-data.php') || is_page_template('page-katalog.php') || is_page_template('page-harga-hybrid.php') || is_page_template('page-satuan.php') || is_page_template('page-upsell.php') || is_page_template('page-proof.php') || is_page_template('page-tamu.php') || is_page_template('page-rekap.php') || is_page_template('page-teks.php')) return;
     wp_enqueue_style('harih-child', get_stylesheet_uri(), [], harih_ver('/style.css'));
 }, 20);
 
@@ -313,7 +308,6 @@ function harih_halaman_standalone(): bool {
     return is_singular('undangan')
         || is_page_template('page-isi-data.php')
         || is_page_template('page-katalog.php')
-        || is_page_template('page-jadi-reseller.php')
         || is_page_template('page-harga-hybrid.php')
         || is_page_template('page-satuan.php')
         || is_page_template('page-upsell.php')
@@ -391,20 +385,16 @@ add_action('wp_enqueue_scripts', function () {
     $is_undangan = is_singular('undangan');
     $is_isidata  = is_page_template('page-isi-data.php');
     $is_katalog  = is_page_template('page-katalog.php');
-    $is_reseller = is_page_template('page-jadi-reseller.php');
     $is_hybrid   = is_page_template('page-harga-hybrid.php') || is_page_template('page-satuan.php') || is_page_template('page-upsell.php') || is_page_template('page-proof.php') || is_page_template('page-tamu.php') || is_page_template('page-rekap.php') || is_page_template('page-teks.php');
-    if (!$is_undangan && !$is_isidata && !$is_katalog && !$is_reseller && !$is_hybrid) return;
+    if (!$is_undangan && !$is_isidata && !$is_katalog && !$is_hybrid) return;
 
     harih_buang_aset_asing();
 
-    if ($is_katalog || $is_reseller || $is_hybrid) {
+    if ($is_katalog || $is_hybrid) {
         // Font halaman toko SELF-HOSTED sejak redesain 2026-08-06 (@font-face di
         // katalog.css) — tidak lagi memanggil Google Fonts. Preload woff2 yang
         // dipakai di layar pertama supaya judul tidak berkedip ganti font.
         wp_enqueue_style('undangan-katalog', get_stylesheet_directory_uri() . '/katalog.css', [], harih_ver('/katalog.css'));
-        if ($is_reseller) {
-            wp_enqueue_script('undangan-reseller-js', get_stylesheet_directory_uri() . '/reseller.js', [], harih_ver('/reseller.js'), true);
-        }
         return;
     }
 
@@ -468,7 +458,7 @@ function harih_halaman_toko(): bool {
        membaca satu daftar yang sama. */
     static $tpl = [
         'page-katalog.php', 'page-harga-hybrid.php', 'page-satuan.php', 'page-upsell.php',
-        'page-proof.php', 'page-tamu.php', 'page-rekap.php', 'page-jadi-reseller.php',
+        'page-proof.php', 'page-tamu.php', 'page-rekap.php',
         'page-teks.php', 'page-isi-data.php',
     ];
     foreach ($tpl as $t) {
@@ -817,23 +807,14 @@ function harih_wa_pesan(string $paket): string {
     return harih_wa_link("Halo hariH, saya mau pesan {$paket}. Boleh info cara pembayarannya?");
 }
 
-/**
- * Program reseller aktif? (keputusan owner 2026-08-07: DITURUNKAN)
+/* R1 (2026-08-09) — `harih_reseller_aktif()` DICABUT.
  *
- * `get_page_by_path()` mengembalikan halaman apa pun statusnya, jadi menurunkan
- * halaman ke draft TIDAK cukup untuk menghilangkan tautannya — footer & katalog
- * akan tetap menaut ke 404. Penjaga ini memeriksa status terbit.
- *
- * Alasan program diturunkan: komisi 30% dari paket digital Rp 179rb = Rp 54.000.
- * Tidak ada orang serius yang bergerak untuk angka itu, sementara untuk paket
- * cetak kuponnya memang diblokir (komisi fisik rupiah tetap). Jadi program ini
- * menarik orang yang tidak berguna sambil menciptakan utang kepercayaan.
- * Menghidupkan kembali: terbitkan lagi halamannya — tidak ada kode yang dihapus.
+ * Penjaga itu memakai status terbit halaman `jadi-reseller` sebagai sakelar
+ * seluruh program: menerbitkan ulang halamannya menghidupkan kembali tautan
+ * footer, formulir norek, dan janji "komisi 30%" sekaligus — satu klik di
+ * wp-admin, tanpa satu baris kode pun berubah. Di model grosir janji itu sudah
+ * salah (B1), jadi sakelarnya dicabut, bukan dibiarkan mati.
  */
-function harih_reseller_aktif(): bool {
-    $p = get_page_by_path('jadi-reseller');
-    return $p instanceof WP_Post && $p->post_status === 'publish';
-}
 
 function harih_halaman_utilitas(): array {
     $ids = [];
@@ -893,10 +874,6 @@ add_filter('document_title_parts', function ($parts) {
         // "kartu fisik ber-QR", produk yang FAQ halaman ini SENDIRI argumentasikan
         // bukan tawaran utamanya ("kenapa undangan cetak lipat, bukan kartu QR kecil?").
         $parts['title'] = 'Undangan Cetak Beramplop Nama + Undangan Digital';
-        $parts['site']  = 'hariH';
-        unset($parts['tagline'], $parts['page']);
-    } elseif (is_page_template('page-jadi-reseller.php')) {
-        $parts['title'] = 'Jadi Reseller — Komisi 30% Tiap Order';
         $parts['site']  = 'hariH';
         unset($parts['tagline'], $parts['page']);
     }

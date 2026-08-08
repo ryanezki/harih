@@ -1,11 +1,10 @@
 <?php
 /**
  * Footer halaman toko — satu sumber untuk lima halaman publik.
- * Tautan legal & reseller muncul kondisional mengikuti halaman yang ada.
+ * Tautan legal muncul kondisional mengikuti halaman yang ada.
  */
 if (!defined('ABSPATH')) exit;
-$ada_harga    = (bool) get_page_by_path('harga');
-$ada_reseller = harih_reseller_aktif();
+$ada_harga = (bool) get_page_by_path('harga');
 ?>
 <footer class="kaki">
     <div class="kaki-atas">
@@ -19,7 +18,6 @@ $ada_reseller = harih_reseller_aktif();
             <a href="<?php echo esc_url(home_url('/kebijakan-privasi/')); ?>">Kebijakan Privasi</a>
             <a href="<?php echo esc_url(home_url('/kebijakan-refund/')); ?>">Refund</a>
             <?php if ($ada_harga) : ?><a href="<?php echo esc_url(home_url('/harga/')); ?>">Paket Cetak</a><?php endif; ?>
-            <?php if ($ada_reseller) : ?><a href="<?php echo esc_url(home_url('/jadi-reseller/')); ?>">Jadi Reseller</a><?php endif; ?>
         </nav>
     </div>
     <?php /* U23 — SINYAL KEPERCAYAAN. Hitungan pada TEKS TAMPAK beranda,

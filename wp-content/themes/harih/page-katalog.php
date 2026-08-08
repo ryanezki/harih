@@ -98,7 +98,6 @@ $harih_tema_sifat = [
     'tema-03' => 'dramatis · navy &amp; emas',
 ];
 
-$harih_ada_reseller = harih_reseller_aktif();
 $harih_ada_harga    = (bool) get_page_by_path('harga');
 $harih_aset         = get_stylesheet_directory_uri() . '/aset';
 ?><!DOCTYPE html>

@@ -5,7 +5,7 @@
    carousel tema, foto arch bersticker.
 
    Berkas ini dipakai 8 halaman: katalog (front page), /harga/, /satuan/,
-   /upsell/, /proof/, /tamu/, /rekap/, /jadi-reseller/. Token di :root adalah
+   /upsell/, /proof/, /tamu/, /rekap/, /teks/. Token di :root adalah
    satu-satunya tempat warna didefinisikan — blok khusus per halaman di bawah
    mewarisinya, jadi mengganti palet cukup di sini.
 
@@ -797,7 +797,13 @@ a { color: var(--c-accent-teks); }
 }
 
 
-/* ---------- Form reseller (page-jadi-reseller.php) ---------- */
+/* ---------- Formulir & kartu bersama ----------
+   Judul lama "Form reseller (page-jadi-reseller.php)" salah dan berbahaya:
+   halamannya dihapus di R1, tapi blok ini adalah SATU-SATUNYA definisi
+   `.field`, `.aturan`, dan `.hero .brand a` di berkas ini — dipakai katalog
+   (front page) dan /satuan/. Menghapusnya bersama halaman reseller merusak
+   dua halaman jualan yang hidup. Hanya `.form-kartu` yang kini yatim;
+   dibersihkan bersama M8 saat halaman jualan ditulis ulang. */
 
 .form-kartu {
     background: var(--c-surface);

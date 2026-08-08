@@ -9,7 +9,7 @@
 | Situs & wp-admin | `https://harih.id` · `https://harih.id/wp-admin` |
 | n8n (workflow & riwayat eksekusi) | `https://n8n.harih.id` |
 | Dashboard WAHA (WhatsApp) | hanya via SSH tunnel — lihat §5 |
-| Log operasional | Google Sheet: tab `orders`, `resellers`, `komisi` |
+| Log operasional | Google Sheet: tab `orders` · `resellers` (tanpa kolom bank/norek sejak R1) · `komisi` **dibekukan** |
 | SSH WordPress (Hostinger) | `ssh -p 65002 u803921702@147.93.80.20` → `domains/harih.id/public_html` |
 | SSH VPS (n8n/WAHA) | `ssh root@31.97.50.197` → `/opt/harih` |
 | Rahasia/env | `/opt/harih/.env` di VPS (salinan lokal dev: `vps/.env`, gitignored) |
@@ -27,7 +27,9 @@
 ssh root@31.97.50.197 'docker exec harih-n8n n8n list:workflow --active=true | grep -c "|"'
 ```
 
-Harus **9**. Kurang dari itu berarti ada workflow yang mati diam-diam, dan
+Harus **8** *(sejak R1, 9 Agustus 2026 — WF-04 Rekap Komisi dipensiunkan dan
+berkasnya dipindah ke `n8n/workflows/arsip/`)*. Kurang dari itu berarti ada
+workflow yang mati diam-diam, dan
 jenis kegagalan ini **tidak memicu alert apa pun** — WF-00 hanya menyala saat
 sebuah workflow *berjalan lalu gagal*, bukan saat ia tidak pernah berjalan.
 
@@ -67,7 +69,7 @@ akan terlihat dari sana.
 
 **4.3 Undangan jadi tapi WA tidak masuk** (`wa_status` = `GAGAL_KIRIM`/`TIDAK_TERDAFTAR`/`TIDAK_VALID`) — email delivery tetap terkirim. Kirim manual isi pesannya dari HP bisnis (link undangan ada di kolom `link_undangan`), atau perbaiki nomor di sheet lalu §5.2.
 
-**4.4 Refund** — proses via dashboard Duitku/WooCommerce sesuai Kebijakan Refund; lalu di sheet: tandai baris `orders` (mis. tambah catatan di kolom status) dan bila ada baris `komisi` terkait yang belum dibayar, hapus/tandai agar tidak ikut payout Senin.
+**4.4 Refund** — proses via dashboard Duitku/WooCommerce sesuai Kebijakan Refund; lalu di sheet: tandai baris `orders` (mis. tambah catatan di kolom status). *(Sejak R1 tidak ada lagi baris `komisi` yang perlu disesuaikan — tab itu dibekukan.)*
 
 ## 5. WhatsApp (WAHA)
 
@@ -83,11 +85,21 @@ Buka `http://localhost:3000/dashboard` → login user `harih`, password = nilai 
 
 wp-admin → WooCommerce → Settings → Advanced → Webhooks → buka webhook `wc-order` → Status: **Active** → Save. Cek juga daftar *Deliveries*-nya untuk melihat kenapa sempat gagal (n8n down? timeout?). Ambang auto-disable sudah dinaikkan ke 25 kegagalan (T1.11), dan rekonsiliasi WF-08 menampung order selama webhook mati — tidak ada order hilang, hanya tertunda ≤ 15 menit.
 
-## 7. Reseller
+## 7. Mitra *(dulu "Reseller")*
 
-- **Approve**: klik link "AKTIFKAN" di WA/email notifikasi pendaftar. Idempoten — klik dua kali aman. **Menolak**: abaikan link, lalu hapus/tandai barisnya di sheet `resellers`.
-- **Payout tiap Senin**: setelah WF-04 mengirim rekap (±09:00 WIB), transfer komisi sesuai rekap → di sheet `komisi`, ubah baris terkait `UNPAID` → `PAID`. Tidak ada rekap masuk padahal ada penjualan → cek eksekusi WF-04 di n8n.
-- **Kode disalahgunakan** (self-deal / spam): hapus kuponnya di WooCommerce → Marketing → Coupons, tandai baris reseller di sheet, informasikan via WA.
+⛔ **Program komisi DIHENTIKAN di R1, 9 Agustus 2026.** Tidak ada payout, tidak ada
+rekap Senin, dan **tidak ada nomor rekening mitra yang disimpan** — arah uang
+selalu mitra → hariH (B1/B2). WF-04 dipensiunkan dan berkasnya dipindah ke
+`n8n/workflows/arsip/`. Tab sheet `komisi` **dibekukan**: jangan diisi, jangan
+dihapus.
+
+- **Pendaftaran mitra** masih manual sampai **M7** menulis ulang WF-03. Alurnya
+  ada di `TASKS.md` bagian F0: owner menghubungi langsung, order dibuat manual
+  (jalur `A7`), retainer lewat transfer.
+- **Bila ada baris `PENDING` baru muncul di sheet `resellers`** tanpa Anda
+  menawarkan ke siapa pun: itu orang yang menemukan webhook lama. Abaikan atau
+  hapus barisnya. **Jangan klik link AKTIFKAN** — link itu masih membuat kupon
+  diskon 10% yang tidak lagi dibayangi komisi apa pun. Jalur itu ditutup di M1/M7.
 
 ## 7b. Masa aktif undangan
 

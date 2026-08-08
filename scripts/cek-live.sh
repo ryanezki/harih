@@ -114,10 +114,10 @@ kode=$(curl -sS -m 20 -o /dev/null -w '%{http_code}' -X POST "$BASE/xmlrpc.php" 
 if [ "$kode" = 403 ] || [ "$kode" = 404 ] || [ "$kode" = 405 ]; then hijau "xmlrpc.php ditolak ($kode)"; else merah "xmlrpc.php balas $kode (harus ditolak)"; fi
 
 # --- 8. Halaman toko lain ---
-# `jadi-reseller` DIKELUARKAN 2026-08-07: program reseller diturunkan (keputusan
-# owner). Halamannya kini draft, jadi 404 adalah keadaan yang BENAR — bukan
-# regresi. Diperiksa terbalik di bawah supaya kalau suatu saat tayang lagi tanpa
-# disengaja, itu yang ketahuan.
+# `jadi-reseller` DIKELUARKAN 2026-08-07 (diturunkan) lalu DIHAPUS 2026-08-09 di
+# R1 — template & JS-nya tidak ada lagi. 404 adalah keadaan yang BENAR. Diperiksa
+# terbalik di bawah: kalau halamannya tayang lagi, kini ia jatuh ke tema induk dan
+# menampilkan halaman kosong yang terindeks. Penggantinya /mitra/ (M8).
 for p in kontak syarat-ketentuan kebijakan-privasi kebijakan-refund; do
   kode=$(curl -sS -m 20 -o /dev/null -w '%{http_code}' "$BASE/$p/" 2>/dev/null)
   if [ "$kode" = 200 ]; then hijau "/$p/ 200"; else kuning "/$p/ HTTP $kode (belum publish?)"; fi
@@ -125,9 +125,22 @@ done
 
 kode=$(ambil "$BODY" "$HDR" "$BASE/jadi-reseller/")
 if [ "$kode" = 404 ]; then
-  hijau "/jadi-reseller/ diturunkan (404) — program reseller memang dihentikan"
+  hijau "/jadi-reseller/ dihapus (404) — program reseller memang dihentikan"
 else
-  kuning "/jadi-reseller/ balas $kode — halaman tayang lagi? Komisi 30% di sana TIDAK sesuai keputusan komisi cetak"
+  merah "/jadi-reseller/ balas $kode — templatenya sudah DIHAPUS (R1), jadi ini halaman kosong yang terindeks. Turunkan lagi ke draft."
+fi
+
+# R1 — Kebijakan Privasi tidak boleh lagi menjanjikan pembayaran komisi atau
+# menyebut penyimpanan rekening mitra. Arah uang selalu mitra → hariH (B2), jadi
+# klausa lama adalah janji yang tidak lagi kami lakukan sekaligus permukaan data
+# yang tidak lagi kami punya. Diperiksa pada halaman LIVE, bukan pada berkas md.
+kode=$(ambil "$BODY" "$HDR" "$BASE/kebijakan-privasi/")
+if [ "$kode" = 200 ] && grep -qi 'komisi' "$BODY"; then
+  merah "Kebijakan Privasi live MASIH menyebut komisi — publish-legal.py belum dijalankan setelah R1"
+elif [ "$kode" = 200 ]; then
+  hijau "Kebijakan Privasi live bersih dari klausa komisi/rekening mitra (R1)"
+else
+  kuning "Kebijakan Privasi: HTTP $kode — tidak bisa diperiksa"
 fi
 
 # --- 9. Webhook n8n aktif ---

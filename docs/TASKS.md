@@ -1,6 +1,6 @@
 # TASKS — hariH
 
-**Status:** aktif · **Ditulis ulang:** 2026-08-09 dari cetak biru konsultan bisnis (model grosir/mitra), setelah audit repo menyeluruh · **Kondisi:** 166 commit · smoke **32/32** live · `HARIH_VERSION 2.33.0` · **nol order.**
+**Status:** aktif · **Ditulis ulang:** 2026-08-09 dari cetak biru konsultan bisnis (model grosir/mitra), setelah audit repo menyeluruh · **Kondisi:** smoke **33/33** live · **8 workflow aktif** *(WF-04 dipensiunkan di R1)* · `HARIH_VERSION 2.33.0` · **nol order.**
 
 > Versi sebelumnya (891 baris — rencana B2C, 58 dari 61 item tuntas) diarsipkan di [`arsip/TASKS-2026-08-09.md`](./arsip/TASKS-2026-08-09.md). Dokumen ini hanya memuat **yang berlaku sekarang**. Riwayat lengkap ada di git log.
 
@@ -17,10 +17,11 @@
 **Titik masuk sesi berikutnya.** Rencana lama tuntas kecuali tiga item; dua di antaranya (`C8`, `A8`) dibawa ke sini, satu (`D3`) dibekukan.
 
 > ### ▶ MULAI DARI SINI
-> 1. **R1** — norek & komisi berhenti dikumpulkan dan disiarkan. Endpoint `daftar-reseller` **masih hidup sekarang** dan masih menerima nomor rekening. 🤖
-> 2. **R2** — retensi 90 hari akhirnya punya penegak *(eks-`C8`)*. Janji ini sudah tayang di Kebijakan Privasi sejak 22 Juli. 🤖
-> 3. **F0** — jual. Ini satu-satunya yang memindahkan angka. Nol kode. 👤
-> 4. **R3/R4** boleh disisipkan kapan saja; keduanya membuat F0 & F1 lebih murah.
+> 1. **R2** — retensi 90 hari akhirnya punya penegak *(eks-`C8`)*. Janji ini sudah tayang di Kebijakan Privasi sejak 22 Juli. 🤖
+> 2. **F0** — jual. Ini satu-satunya yang memindahkan angka. Nol kode. 👤
+> 3. **R3/R4** boleh disisipkan kapan saja; keduanya membuat F0 & F1 lebih murah.
+>
+> ✅ **R1 selesai & live 9 Agustus** — smoke 33/33, workflow aktif 9 → 8.
 
 **Apa yang berubah dari rencana lama.** Pelanggan utama berpindah dari **pengantin** ke **mitra (WO & percetakan)**; mitra dibayar lewat **harga grosir**, bukan komisi; yang dijual adalah **kapasitas + sistem**, bukan undangan. Platform tidak dibangun ulang — sekitar 8 task, sebagian besar hitungan jam.
 
@@ -151,7 +152,7 @@ Jangan dibuka ulang saat coding. `B1–B8` dari cetak biru konsultan, sejajar 1:
 
 > Cetak biru meminta nol kode selama masa jualan. Yang di bawah dikecualikan karena **hidup sekarang**: satu endpoint yang masih menerima nomor rekening, dan satu janji tertulis yang sudah tayang tanpa penegak. Sisanya (R3–R5) membuat F0 dan F1 lebih murah, dan totalnya di bawah satu hari.
 
-- [ ] **R1** 🤖 `jam` — **Norek & komisi berhenti dikumpulkan dan disiarkan**
+- [x] **R1** 🤖 `jam` — **Norek & komisi berhenti dikumpulkan dan disiarkan** → **SELESAI & LIVE 2026-08-09**
   Halaman `/jadi-reseller/` 404, tapi **webhook `daftar-reseller` masih aktif** — smoke test sendiri membuktikannya (*"WF-03 aktif (data kosong → 422)"*). Nomor rekening yang masuk disimpan **plaintext** di Sheets tab `resellers`, lalu **disiarkan ulang** ke WA dan email owner (`Payout: ${bank} ${norek}`); WF-04 menyiarkannya lagi tiap Senin. Di model grosir arah uang selalu mitra → hariH (**B2**), jadi seluruh kategori data ini tidak punya alasan berdiri — ini bukan menambal temuan privasi, ini menghapus permukaannya.
   **Langkah:**
   · `WF-01-order-intake.json` node `Siapkan Data Order` — cabut `KOMISI_CETAK` + kalkulasi `* 0.3`, dan cabang `RES-` yang menulis ke tab `komisi`
@@ -162,6 +163,15 @@ Jangan dibuka ulang saat coding. `B1–B8` dari cetak biru konsultan, sejajar 1:
   · variabel mati `$harih_ada_reseller` di `page-katalog.php:101` & `page-teks.php:22`
   ⚠️ **Jangan sentuh meta `rekening` pada CPT `undangan`** (`cpt.php:277`) — itu rekening **mempelai** untuk amplop digital, bukan data mitra.
   **Selesai bila:** `grep -ri 'norek\|bank' n8n/ wp-content/` nol di jalur aktif (di luar meta mempelai) · halaman Kebijakan Privasi live tidak lagi menyebut nomor rekening reseller · `n8n list:workflow --active=true` = **8** · nol kemunculan "30%" sebagai janji komisi di basis kode aktif · tab Sheets `komisi` dibekukan (tidak dihapus).
+
+  → **SELESAI & LIVE 2026-08-09.** Smoke **33/33** (satu pemeriksaan baru: Kebijakan Privasi live wajib bersih dari klausa komisi). Workflow aktif **9 → 8**. Yang dikerjakan melebihi rencana di tiga titik, masing-masing karena memeriksa berkasnya lebih dulu:
+  1. **Program reseller DIHAPUS, bukan dibersihkan copy-nya.** `harih_reseller_aktif()` memakai status terbit halaman sebagai sakelar seluruh program — satu klik "Publish" di wp-admin akan menghidupkan kembali tautan footer, formulir norek, dan janji "komisi 30%" sekaligus, tanpa satu baris kode berubah. Menyunting kalimatnya tidak menutup itu. `page-jadi-reseller.php` + `reseller.js` dihapus dari repo **dan dari server**; enam sambungan di `functions.php`, footer, katalog, dan `page-teks.php` ikut dicabut. PHP lint bersih di keempat berkas.
+  2. **`buat-toko.sh` ternyata akan MENERBITKAN ULANG halaman itu** (`--post_status=publish`) — sekarang tanpa template, jadi ia jatuh ke tema induk dan menayangkan halaman kosong yang terindeks. Bloknya dicabut. Ini kembaran `R5`, ditemukan bukan dicari.
+  3. **WF-04 dipindah ke `n8n/workflows/arsip/`.** Menonaktifkannya di n8n saja tidak cukup: ritual impor di README menyuruh mengimpor "sembilan berkas", jadi rebuild VPS berikutnya akan menghidupkannya kembali — lengkap dengan kode yang menyiarkan nomor rekening lewat WhatsApp. README, runbook, dan panduan manual diperbarui ke **8**.
+
+  ⚠️ **Nyaris merusak dua halaman jualan.** Blok CSS berjudul *"Form reseller (page-jadi-reseller.php)"* di `katalog.css` sempat saya hapus seluruhnya — padahal itu **satu-satunya** definisi `.field`, `.aturan`, dan `.hero .brand a` di berkas itu, dan keduanya dipakai beranda serta `/satuan/`. Ketahuan karena selektor yang terhapus dicocokkan ke templat yang masih hidup sebelum di-deploy, bukan sesudah. Blok dipulihkan; hanya judulnya yang dibetulkan. Hanya `.form-kartu` yang kini yatim — dibersihkan bersama M8.
+
+  **Sisa yang sengaja dibiarkan:** webhook `daftar-reseller` tetap aktif (ditulis ulang jadi onboarding mitra di **M7**) dan node `Buat Kupon WC` masih ada di WF-03 — jalur itu hanya bisa berjalan lewat klik approval owner, dan runbook §7 kini melarang mengkliknya. Penjaga kupon `RES-` di `cetak.php` **sengaja dipertahankan** sampai M1 mencabut mekanismenya; mencabutnya sekarang justru membuka jendela kupon 30% menghantam keranjang cetak.
 
 - [ ] **R2** 🤖 `hari` — **Retensi 90 hari akhirnya punya penegak** *(eks-`C8`)*
   [`kebijakan-privasi.md:59`](./konten-legal/kebijakan-privasi.md:59) menjanjikan data & foto dihapus **paling lambat 90 hari** setelah masa aktif berakhir; [`:71`](./konten-legal/kebijakan-privasi.md:71) menjanjikan hak penghapusan ditanggapi ≤7 hari kerja. Satu-satunya penegak, [`masa-aktif.php:85-88`](../wp-content/mu-plugins/undangan-core/masa-aktif.php:85), hanya `post_status => 'draft'`. **Medianya tetap publik.** Ini bukan fitur — ini janji tertulis yang belum ditepati, dan UU PDP 27/2022 adalah kerangkanya.

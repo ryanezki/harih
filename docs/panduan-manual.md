@@ -169,7 +169,7 @@ balas WA · cek alert · sekilas sheet `orders` · cek kolom `wa_status`.
 ```bash
 ssh root@31.97.50.197 'docker exec harih-n8n n8n list:workflow --active=true | grep -c "|"'
 ```
-Harus **9**. Workflow yang mati diam-diam **tidak memicu alert apa pun**.
+Harus **8** *(sejak R1, 9 Agustus 2026 — WF-04 Rekap Komisi dipensiunkan; tidak ada komisi di model grosir)*. Workflow yang mati diam-diam **tidak memicu alert apa pun**.
 
 **Nomor WA bisnis:** jangan logout dari HP, pakai wajar, jangan blast ke nomor tak dikenal. Sesi ter-ban = seluruh kanal pengiriman WA mati.
 
@@ -178,10 +178,10 @@ Harus **9**. Workflow yang mati diam-diam **tidak memicu alert apa pun**.
 # YANG TIDAK PERLU ANDA LAKUKAN
 
 **Sudah selesai & terverifikasi 7 Agustus:**
-musik 3 track hidup · GA4 aktif · cron dipindah ke hPanel · plugin lengkap (Duitku, FluentSMTP, LiteSpeed, Limit Login, Site Kit) · halaman legal tayang · backup mingguan jalan & restore-nya pernah diuji · 9 workflow aktif · pengecualian cache LiteSpeed untuk kelima halaman bertoken.
+musik 3 track hidup · GA4 aktif · cron dipindah ke hPanel · plugin lengkap (Duitku, FluentSMTP, LiteSpeed, Limit Login, Site Kit) · halaman legal tayang · backup mingguan jalan & restore-nya pernah diuji · 8 workflow aktif · pengecualian cache LiteSpeed untuk kelima halaman bertoken.
 
 **Sudah dihentikan, jangan dikerjakan:**
-- ~~Rekrut reseller~~ — halaman `/jadi-reseller/` **diturunkan 7 Agustus**. Komisi 30% dari paket digital Rp 179rb hanya **Rp 54.000**; tidak menggerakkan siapa pun, sementara untuk paket cetak kuponnya memang diblokir. Yang punya ekonomi nyata adalah **program vendor/WO** (langkah 3).
+- ~~Rekrut reseller berkomisi~~ — **program komisi dihentikan seluruhnya di R1, 9 Agustus.** Halamannya dihapus, bukan cuma diturunkan; WF-04 dipensiunkan; nomor rekening berhenti dikumpulkan. Alasannya bukan cuma Rp 54.000 yang tidak menggerakkan siapa pun — komisi membuat mitra merasa jadi pegawai Anda. Penggantinya **harga grosir**: mitra menentukan harga jualnya sendiri dan mengambil seluruh selisih (Rp 1,15 juta di paket yang sama). Lihat `TASKS.md` bagian F0.
 - ~~Beli alat baru~~ — tidak ada rupiah keluar sebelum ada pesanan berbayar.
 - ~~Naikkan paket hosting~~ — timeout yang pernah terlihat berasal dari jaringan lingkungan kerja, bukan dari situs.
 

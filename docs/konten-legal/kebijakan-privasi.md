@@ -2,7 +2,7 @@
 
 > Dipublikasikan sebagai halaman situs pada 22 Juli 2026.
 
-Terakhir diperbarui: 7 Agustus 2026
+Terakhir diperbarui: 9 Agustus 2026
 
 hariH (harih.id) menghormati privasi Anda. Kebijakan ini menjelaskan data apa yang kami kumpulkan, untuk apa, dan hak Anda — disusun dengan memperhatikan UU No. 27 Tahun 2022 tentang Pelindungan Data Pribadi.
 
@@ -17,9 +17,8 @@ hariH (harih.id) menghormati privasi Anda. Kebijakan ini menjelaskan data apa ya
 **Dari tamu undangan:**
 - Isian buku ucapan/RSVP: nama, ucapan, status kehadiran, jumlah tamu yang dibawa, dan sesi yang dihadiri. Kami tidak meminta kontak tamu.
 
-**Dari calon reseller** *(hanya bila Anda mendaftar di halaman Jadi Reseller)*:
-- Nama, nomor WhatsApp, **nama bank, dan nomor rekening**.
-- Rekening dipakai **semata-mata untuk membayarkan komisi** Anda; kami tidak menariknya untuk keperluan apa pun. Dasar pemrosesannya adalah pelaksanaan perjanjian kemitraan yang Anda ajukan sendiri.
+**Dari calon mitra** *(hanya bila Anda mendaftar sebagai mitra)*:
+- Nama dan nomor WhatsApp. **Tidak ada data rekening bank.** Mitra membeli di harga grosir, jadi pembayaran selalu mengalir dari mitra kepada kami — kami tidak pernah perlu mengirim uang kepada mitra, dan karena itu tidak pernah meminta nomor rekening siapa pun.
 
 **Otomatis:** log teknis standar server (alamat IP, waktu akses) untuk keamanan dan pencegahan penyalahgunaan, serta data statistik kunjungan melalui Google Analytics — lihat bagian 8.
 
@@ -28,7 +27,7 @@ hariH (harih.id) menghormati privasi Anda. Kebijakan ini menjelaskan data apa ya
 - Membuat, menerbitkan, dan mengirimkan undangan digital Anda.
 - Komunikasi transaksional: konfirmasi pembayaran, link pengisian data, pengiriman undangan, pengingat menjelang acara.
 - Operasional internal, pencatatan pesanan, dan dukungan pelanggan.
-- Bagi reseller terdaftar: verifikasi pendaftaran, penerbitan kode kupon, perhitungan dan **pembayaran komisi**.
+- Bagi mitra terdaftar: verifikasi pendaftaran, pembuatan akun, dan pencatatan pesanan yang Anda buat.
 
 Kami **tidak menjual** data pribadi Anda kepada pihak mana pun.
 
@@ -45,7 +44,7 @@ Data dibagikan terbatas sesuai keperluan layanan kepada:
 | Duitku | pemrosesan pembayaran |
 | Brevo | pengiriman email transaksional |
 | WhatsApp | pengiriman pesan transaksional |
-| Google (Workspace/Sheets) | pencatatan operasional pesanan, rekap komisi, dan data pendaftaran reseller |
+| Google (Workspace/Sheets) | pencatatan operasional pesanan dan data pendaftaran mitra |
 | Hostinger | infrastruktur hosting situs |
 | Google Analytics | statistik kunjungan halaman toko (lihat bagian 8) |
 | Jasa kurir/ekspedisi | pengiriman produk cetak fisik — nama, alamat & telepon penerima dibagikan sebatas keperluan kirim; nomor resi disimpan sebagai bukti |
@@ -59,7 +58,7 @@ Masing-masing tunduk pada kebijakan privasinya sendiri.
 - Data undangan dan foto disimpan selama masa aktif paket, dan dihapus/diarsipkan setelahnya (paling lambat 90 hari setelah masa aktif berakhir, kecuali diwajibkan lain oleh hukum).
 - Data pemesanan dan pembayaran disimpan sesuai kebutuhan pembukuan.
 - Daftar nama tamu mengikuti masa simpan data undangan pada butir pertama.
-- Data reseller (termasuk nomor rekening) disimpan selama kemitraan berjalan dan sesudahnya sebatas kebutuhan pembukuan komisi. Bila kemitraan diakhiri, ajukan penghapusan lewat halaman Kontak — lihat bagian 7.
+- **Kami tidak mengumpulkan dan tidak menyimpan nomor rekening mitra.** Mitra membeli di harga grosir, jadi pembayaran selalu mengalir dari mitra kepada kami dan tidak pernah sebaliknya. Data mitra yang disimpan terbatas pada nama, nomor WhatsApp, dan riwayat pesanannya. Bila kemitraan diakhiri, ajukan penghapusan lewat halaman Kontak — lihat bagian 7.
 - Cadangan (backup) rutin disimpan pada penyimpanan **berakses terbatas** di dua lokasi terpisah, dengan retensi 4 minggu. Cadangan tidak dibagikan ke pihak mana pun dan hanya dipakai untuk pemulihan.
 
 ## 6. Keamanan
