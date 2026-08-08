@@ -24,12 +24,12 @@
 
 **Mulai dari sini di sesi berikutnya.** `HARIH_VERSION 2.21.0` · 9 workflow aktif · smoke **32/32** · WAHA `healthy`, sesi `WORKING`.
 
-**27 dari 30 item selesai.** Sisa tiga di bawah. Ditambah **31 item** dari review UI/UX ([🎨 PU](#-pu--review-uiux-menyeluruh-8-agustus-2026)) — **PU-A (U1–U9) SELESAI & LIVE** *(v2.22.0, smoke 32/32)*.
+**27 dari 30 item selesai.** Sisa tiga di bawah. Ditambah **31 item** dari review UI/UX ([🎨 PU](#-pu--review-uiux-menyeluruh-8-agustus-2026)) — **PU-A (U1–U9) SELESAI & LIVE** *(v2.22.0)* · **PU-B U14–U19 SELESAI & LIVE** *(v2.23.0)*. Smoke 32/32.
 
 > ### ▶ MULAI DARI SINI
 > 1. **A8** — satu-satunya yang butuh tangan owner.
 > 2. **C8** lalu **D3**.
-> 3. **PU-B** (U10–U20) — undangan yang dilihat ratusan tamu per pesanan; di situ tiap cacat dikalikan 50–600 orang. **PU-D murni kerapian, jangan didahulukan.**
+> 3. **Sisa PU-B: U10 · U11 · U12 · U13 · U20** — U14–U19 sudah live (v2.23.0). Kelimanya `jam` dan menyentuh gerbang, musik, navigasi, buku tamu, dan kalender. **PU-D murni kerapian, jangan didahulukan.**
 > 4. Pada order cetak sungguhan pertama: periksa dua cabang `/proof/` yang belum pernah dilewati data nyata (lihat catatan ⚠️ di kotak PU-A).
 
 | | | |
@@ -490,6 +490,21 @@ Ketiga blok copy ([page-katalog.php:136](../wp-content/themes/harih/page-katalog
 
 > Tamu tidak membeli apa pun, tapi merekalah bukti sosial produk. Tiap cacat di sini dikalikan 50–600 orang per pesanan.
 
+> ## ◐ PU-B SEBAGIAN — **U14–U19 SELESAI & LIVE** 2026-08-08 *(v2.23.0)*
+>
+> Enam item aksesibilitas & semantik tuntas dalam satu commit (`dfe1d22`), di-deploy, dan **diukur pada elemen ter-render di KETIGA tema** — bukan dari berkas. Parser warnanya mengompositkan alpha dan mengenali sintaks `color(srgb …)`; dua jebakan yang pernah menghasilkan temuan palsu di proyek ini.
+>
+> | | tema-01 | tema-02 | tema-03 |
+> |---|---|---|---|
+> | teks diperiksa | 28 | 28 | 28 |
+> | **gagal AA** | **0** | **0** | **0** |
+> | rasio terendah | 4,62:1 | 4,64:1 | 6,46:1 |
+> | batas kontrol form | — | 3,14:1 | 3,18:1 |
+>
+> Sebelumnya terendahnya **2,60:1**. Ikut terverifikasi live: heading **7 → 17** dengan hierarki h2/h3 benar · `<figcaption>` di dalam `<figure>` · `aria-pressed` terpasang termasuk pada keadaan awal · pil aktif solid `rgb(63,92,79)` dengan tanda centang `"✓ "` (teks 4,97:1, latar 4,80:1 terhadap section) · dot galeri **6×6 → 24×24** (aktif 42×24) tanpa berubah rupa · gambar galeri `tabindex="0" role="button"` · select "Jumlah Tamu" kini di dalam `<label>` · input RSVP 16px di ketiganya. Smoke **32/32**.
+>
+> **Sisa PU-B (5 item, semuanya `jam`):** **U10** gerbang lanskap · **U11** MP3 1,8–2,2 MB otomatis · **U12** alamat 4 layar dari puncak · **U13** buku tamu (batas 50 + jebakan gulir) · **U20** kalender .ics.
+
 - [ ] **U10** 🤖 `jam` — **Gerbang bisa dibuka di orientasi lanskap**
   Tiga hal bersamaan menutupnya: `.gate { position: fixed; inset: 0; overflow: hidden }` ([undangan.css:211-219](../wp-content/themes/harih/undangan/shared/undangan.css:211)) mengklip alih-alih menggulir · `justify-content: space-between` + `padding: 7vh` ([:246-258](../wp-content/themes/harih/undangan/shared/undangan.css:246)) · `body` terkunci `overflow: hidden; height: 100dvh` ([:78](../wp-content/themes/harih/undangan/shared/undangan.css:78)). Pada 640×360 isi gerbang 532–557 px sementara layar 360 px; tombol duduk 124–150 px di bawah layar di **ketiga tema**. `elementFromPoint(320,350)` mengembalikan `.gate-bawah`, bukan tombolnya.
   **Langkah:** `.gate-inner { overflow-y: auto }` · `padding: clamp(16px, 7vh, 56px)` · blok `@media (orientation: landscape) and (max-height: 600px)` yang mengecilkan `.seal` 76→48, gap 14→8, dan `.cover-names` clamp atas 46→30 — dengan ketiganya isi turun ke ±340 px.
@@ -510,34 +525,34 @@ Ketiga blok copy ([page-katalog.php:136](../wp-content/themes/harih/page-katalog
   **Langkah:** tampilkan 5 lalu tombol *"Lihat semua ucapan (N)"* dalam alir halaman (buang kotak gulir); parameter `?hal=` + `total` di REST; cabang kosong yang tenang + cabang gagal-jaringan yang berbeda; `overflow-wrap: anywhere`. Sekalian isi ketiga demo dengan 6–8 ucapan contoh — calon pembeli sedang menilai produk dari halaman itu.
   **Selesai bila:** ucapan ke-51 bisa dilihat tamu · gulir halaman tidak terperangkap · demo tidak lagi kosong.
 
-- [ ] **U14** 🤖 `jam` — **`--c-gold` berhenti dipakai sebagai warna teks di mode terang**
+- [x] **U14** 🤖 `jam` — **`--c-gold` berhenti dipakai sebagai warna teks di mode terang**
   Token yang mewarnai **sepuluh judul section**, jam tiap butir susunan acara, tanggal Hijriah, sumber ayat, label QRIS, dan **nama bank tempat tamu transfer** — semuanya 9–12 px. Dihitung dua kali dengan metode berbeda (computed style live, lalu komposit alpha eksplisit dari token di berkas), hasilnya cocok: tema-01 `#b4923f` → **2,59:1** di section ber-tint, 2,76:1 tanpa tint, 2,95:1 di atas putih; tema-02 `#be7a4a` → 3,03–3,46:1. Ambangnya 4,5:1. Bahkan angka **Detik** hitung mundur (34–40 px) gagal ambang teks besar di 2,59:1. Di katalog: badge "PALING LARIS" `#fff` di atas `--c-gold` = **2,95:1** — satu-satunya penanda paket unggulan. tema-03 lulus (6,68–7,31:1), jadi ini murni cacat mode terang.
   **Bukti bahwa ini bisa diperbaiki tanpa menyentuh desain:** mode gelap katalog **sudah menyelesaikan masalah yang sama persis** lewat `--d-gold` + `--d-on-gold` → 8,50:1 dan 8,57:1.
   **Langkah:** jangan ubah `--c-gold` (ia warna ornamen, garis, titik lini masa — di sana kontras tinggi tidak dibutuhkan). Tambahkan `--c-gold-teks` khusus peran `color:`: tema-01 ±`#7a6220`, tema-02 ±`#8a5028`; tema-03 tetap. Untuk `.paket-badge`, ubah `--c-on-gold` jadi tinta gelap seperti pola `--d-on-gold` yang sudah terbukti.
   ⚠️ Ikut gagal SC 1.4.11 (3:1 non-teks): border `.hadir-btn.aktif` = 2,59:1 di tema-01.
   **Selesai bila:** ketujuh selektor teks ≥4,5:1 di ketiga tema · desain tidak berubah selain gelapnya emas pada teks.
 
-- [ ] **U15** 🤖 `jam` — **Keadaan terpilih diekspos, dan kotak isian punya batas yang terlihat**
+- [x] **U15** 🤖 `jam` — **Keadaan terpilih diekspos, dan kotak isian punya batas yang terlihat**
   `aria-pressed`, `aria-current`, `aria-selected` muncul **nol kali di seluruh tema**. Keadaan terpilih selalu hanya kelas CSS ([undangan.js:493](../wp-content/themes/harih/undangan/shared/undangan.js:493)) — untuk pil kehadiran, pil sesi, filter paket beranda, dan tombol mode gelap. Karena default-nya *"hadir"*, tamu berhalangan yang memakai pembaca layar bisa mengirim konfirmasi **HADIR tanpa sadar**, dan mempelai menghitung kursi & katering dari data yang salah. Sisi visualnya juga gagal: latar pil aktif dikomposit dengan benar = beda **1,13:1** dari yang tak aktif (syarat 3:1), teksnya 3,45:1 pada 10 px, bordernya 2,59:1.
   Terpisah tapi sekeluarga: kotak isian RSVP tidak punya batas yang terlihat — isian vs latar section **1,14:1**, border vs latar section **1,15:1** (tema-03: 1,03 dan 1,28).
   **Langkah:** `role="radiogroup"`/`aria-checked` untuk grup pilihan tunggal, atau minimal `aria-pressed` berbarengan dengan `classList.toggle`. Keadaan terpilih solid (`--c-accent` + `--c-accent-ink`, sudah terbukti 6,87:1 pada `.btn-ghost:hover`) plus penanda non-warna. Token `--c-line-input` terpisah dari `--c-line` dekoratif, target ≥3:1.
   **Selesai bila:** pembaca layar mengumumkan pilihan aktif · beda visual aktif/tak-aktif ≥3:1 · batas field ≥3:1 di ketiga tema.
 
-- [ ] **U16** 🤖 `menit` — **Semantik undangan: sepuluh judul jadi heading, figcaption masuk figure, select RSVP dapat label**
+- [x] **U16** 🤖 `menit` — **Semantik undangan: sepuluh judul jadi heading, figcaption masuk figure, select RSVP dapat label**
   **(a)** Semua judul section memakai `<p class="section-title">` — kecuali [rsvp.php:7](../wp-content/themes/harih/template-parts/undangan/rsvp.php:7) yang justru `<h2>`, membuktikan kelas itu memang dimaksudkan sebagai judul. HTML live hanya punya **tujuh heading** untuk dua belas section. *(Sepuluh judul, bukan sembilan — `acara.php` punya tiga di baris berbeda.)* **(b)** `<figcaption>` ditulis **di luar** `</figure>` ([amplop.php:85](../wp-content/themes/harih/template-parts/undangan/amplop.php:85)) sehingga keterkaitannya dengan gambar QRIS putus. **(c)** "Jumlah Tamu" dibungkus `<div>` dengan `<span>` tanpa `for` ([rsvp.php:31-36](../wp-content/themes/harih/template-parts/undangan/rsvp.php:31)) — nama aksesibelnya kosong, sementara dua field tetangganya sudah benar. **(d)** Teks bantuan panjang berada **di dalam** `<label>` di `/isi-data/` ([page-isi-data.php:163-165](../wp-content/themes/harih/page-isi-data.php:163), [:229-231](../wp-content/themes/harih/page-isi-data.php:229)) sehingga ikut jadi nama aksesibel field.
   Nol perubahan visual di keempatnya — `.section-title` sudah menetapkan `font`/`margin` sendiri, `.qris-cap` hanya mengatur margin/font/color.
   **Selesai bila:** dua belas section punya heading · `figcaption` anak `figure` · select punya nama aksesibel · petunjuk pindah ke `aria-describedby`.
 
-- [ ] **U17** 🤖 `menit` — **Tiga aksi tamu bisa dijalankan dengan keyboard**
+- [x] **U17** 🤖 `menit` — **Tiga aksi tamu bisa dijalankan dengan keyboard**
   **(a)** Lightbox galeri hanya dipicu `img.addEventListener('click')` ([undangan.js:334](../wp-content/themes/harih/undangan/shared/undangan.js:334)) — tidak bisa dibuka sama sekali tanpa mouse, dan saat terbuka tidak memindahkan fokus maupun menonaktifkan latar. **(b)** Facade peta & video memakai `{once: true}` pada listener `keydown` ([undangan.js:478-480](../wp-content/themes/harih/undangan/shared/undangan.js:478), [:413-415](../wp-content/themes/harih/undangan/shared/undangan.js:413)) — opsi `once` mencopot listener setiap kali **dipanggil**, bukan setiap kali berhasil, jadi satu ArrowDown untuk menggulir menghabiskan satu-satunya kesempatan dan **Enter mati permanen**. Diverifikasi di DOM live: setelah ArrowDown lalu Enter, iframe tidak pernah termuat; klik mouse tetap bekerja. **(c)** Tombol "Salin Nomor" di amplop yang masih tertutup ([amplop.php:40](../wp-content/themes/harih/template-parts/undangan/amplop.php:40)) tetap menerima fokus — `.amplop-wrap` memakai `grid-template-rows: 0fr` tanpa `hidden`/`inert`.
   **Langkah:** tombol/keyboard handler untuk lightbox + `inert` pada latar · buang `{once:true}` dari kedua `keydown` dan jaga idempotensi di `muat()`, atau lebih baik ganti `<div role="button">` jadi `<button>` sungguhan · pasang/lepas `inert` seiring `aria-expanded`.
   **Selesai bila:** ketiganya bisa dioperasikan Tab + Enter tanpa mouse.
 
-- [ ] **U18** 🤖 `menit` — **RSVP berhenti menanyakan yang sudah diketahui dan berhenti menyimpan jawaban orang sebelumnya**
+- [x] **U18** 🤖 `menit` — **RSVP berhenti menanyakan yang sudah diketahui dan berhenti menyimpan jawaban orang sebelumnya**
   **(a)** Nama tamu sudah diketahui dari `?to=` tapi hanya ditulis ke `.guest-name` di dalam gerbang ([undangan.js:19-21](../wp-content/themes/harih/undangan/shared/undangan.js:19)) — setelah gerbang naik ia hilang, dan `#rsvp-nama` dibiarkan kosong. Tamu mengetik ulang, mempelai menerima ejaan yang tidak cocok dengan daftar undangannya — padahal sisi pembeli sudah membangun tautan personal di **tiga** titik. Diperberat `autocomplete="off"` pada form ([rsvp.php:9](../wp-content/themes/harih/template-parts/undangan/rsvp.php:9)) yang ikut mematikan isian otomatis peramban. **(b)** Setelah kirim, `form.reset()` ([undangan.js:682](../wp-content/themes/harih/undangan/shared/undangan.js:682)) membersihkan **sebagian**: nama, pesan, dan jumlah kembali, tapi pil kehadiran & sesi tetap menyala pilihan orang sebelumnya — karena `undangan.js:492` menulis ke `.value` input `hidden`, yang ikut mengubah atribut `value` sehingga reset justru mengembalikannya ke pilihan itu. Diuji langsung di demo live; dugaan awal justru terbalik. **(c)** "Hadir Pada" & "Jumlah Tamu" dirender tanpa syarat, termasuk kepada yang menjawab **Berhalangan** dan pada undangan **resepsi-saja** — di sana RSVP tetap menawarkan Akad/Resepsi/Keduanya dengan "Keduanya" terpilih.
   **Selesai bila:** field nama terisi dari `?to=` dan tetap bisa disunting · reset mengembalikan seluruh kontrol ke keadaan awal · blok "Hadir Pada" hanya muncul bila kedua acara ada, dan menghilang saat Berhalangan dipilih.
 
-- [ ] **U19** 🤖 `menit` — **Sasaran sentuh, gerak, dan safe area**
+- [x] **U19** 🤖 `menit` — **Sasaran sentuh, gerak, dan safe area**
   **(a)** `.galeri-dots button` 6×6 px dengan jarak antar-pusat 14 px ([undangan.css:777-787](../wp-content/themes/harih/undangan/shared/undangan.css:777)) — **gagal WCAG 2.2 SC 2.5.8 lewat kedua jalur** (ukuran maupun spacing); `.mempelai-ig` 74×14 px juga gagal. *(`.btn-copy` 115×30 px **lulus** ambang 24×24 — hanya meleset dari rekomendasi platform; jangan dijual sebagai pelanggaran.)* **(b)** Ken Burns pada foto galeri ([:774](../wp-content/themes/harih/undangan/shared/undangan.css:774)) adalah satu-satunya animasi yang lolos dari **dua** blok `prefers-reduced-motion` ([:814-816](../wp-content/themes/harih/undangan/shared/undangan.css:814) dan [:1168-1183](../wp-content/themes/harih/undangan/shared/undangan.css:1168)) yang mendaftar 17 selektor lain satu per satu. **(c)** `viewport-fit=cover` dipasang di **sebelas** template, tapi `env(safe-area-inset-*)` hanya dipakai dua aturan — keduanya elemen khusus demo. Tombol musik yang dilihat tamu memakai `bottom: 18px` polos di atas home indicator iPhone. *(Inkonsistensi yang layak ditutup, bukan kehilangan ketukan yang terbukti — jangan dinaikkan levelnya.)*
   **Langkah:** `padding: 9px; background-clip: content-box` pada dot (visual tetap 6 px, target jadi 24×24) · tambahkan `.galeri-slide img` ke daftar reduced-motion, atau ganti daftar eksplisit dengan satu aturan menyapu agar tidak terulang · `calc(18px + env(safe-area-inset-bottom, 0px))` pada `.music-toggle` · `overscroll-behavior: contain` pada kedua slider horizontal.
   **Selesai bila:** dot ≥24×24 tanpa berubah rupa · nol animasi lolos saat reduced-motion menyala.
