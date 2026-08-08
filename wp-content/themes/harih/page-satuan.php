@@ -45,7 +45,8 @@ $harih_min_transaksi = defined('UNDANGAN_MIN_TRANSAKSI_SATUAN') ? UNDANGAN_MIN_T
 
 <header class="hero hero-ringkas">
     <h1>Beli satuan</h1>
-    <p class="hero-sub">Sudah punya undangan digital, tinggal butuh cetakannya? Semua item bisa dipesan terpisah. Kalau butuh beberapa item sekaligus, <strong>paket menyatukannya jadi satu proof &amp; satu pengiriman</strong>.</p>
+    <p class="hero-sub">Sudah punya undangan digital, tinggal butuh cetakannya? Semua item bisa dipesan terpisah.</p>
+    <p class="satuan-batas"><strong>Pembelian satuan tidak termasuk undangan digital, dan tidak mendapat Garansi Tepat Waktu.</strong> Keduanya hanya berlaku pada paket.</p>
     <div class="hero-cta">
         <a class="btn btn-utama" href="<?php echo esc_url(home_url('/harga/')); ?>">Lihat Paket Lengkap</a>
     </div>

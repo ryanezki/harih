@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) exit;
  * pengunjung & LiteSpeed tetap menyajikan berkas lama meski file di server
  * sudah baru, dan perbaikan tampilan terlihat "tidak berpengaruh".
  */
-const HARIH_VERSION = '2.28.1';
+const HARIH_VERSION = '2.30.0';
 
 /**
  * Versi aset PER BERKAS (U28).
@@ -736,6 +736,36 @@ function harih_bayar_online_siap(): bool {
  */
 function harih_wa_nomor(): string {
     return defined('HARIH_WA_CS') && HARIH_WA_CS !== '' ? (string) HARIH_WA_CS : '6282251975575';
+}
+
+/**
+ * Foto produk cetak (U22) — slot yang mengisi dirinya sendiri.
+ *
+ * Berkasnya ditaruh di `aset/produk/{slug}.jpg` (atau .webp/.png). Begitu ada,
+ * ia langsung tampil; selama belum ada, yang tampil placeholder jujur yang
+ * menyebut apa yang akan ada di situ. TIDAK ada mockup yang dikarang: gambar
+ * produk palsu di halaman seharga Rp 1,19–5,9 juta lebih berbahaya daripada
+ * tidak ada gambar sama sekali.
+ *
+ * `$ilustrasi = true` menandai gambar yang BUKAN foto produk sungguhan
+ * (mis. render AI) — labelnya ikut tampil di halaman, bukan disembunyikan.
+ */
+function harih_foto_produk(string $slug, string $alt, string $keterangan = '', bool $ilustrasi = false): string {
+    $dir_abs = get_stylesheet_directory() . '/aset/produk/';
+    $dir_url = get_stylesheet_directory_uri() . '/aset/produk/';
+    foreach (['webp', 'jpg', 'jpeg', 'png'] as $ext) {
+        $berkas = $slug . '.' . $ext;
+        if (!file_exists($dir_abs . $berkas)) continue;
+        $ukuran = @getimagesize($dir_abs . $berkas);
+        $dim = $ukuran ? sprintf(' width="%d" height="%d"', $ukuran[0], $ukuran[1]) : '';
+        $cap = $keterangan !== '' || $ilustrasi
+            ? '<figcaption class="produk-cap">' . esc_html($keterangan)
+              . ($ilustrasi ? ' <span class="produk-ilustrasi">ilustrasi</span>' : '') . '</figcaption>'
+            : '';
+        return '<figure class="produk-foto"><img src="' . esc_url($dir_url . $berkas) . '" alt="' . esc_attr($alt)
+             . '" loading="lazy" decoding="async"' . $dim . '>' . $cap . '</figure>';
+    }
+    return '<figure class="produk-foto produk-kosong" aria-hidden="true"><span>' . esc_html($alt) . '</span></figure>';
 }
 
 /** Nomor WA dalam bentuk yang bisa DIBACA & disalin manusia (U23). */

@@ -73,7 +73,10 @@
        sebelumnya nilai-nilai ini hardcoded di tengah berkas dan akan tetap
        terang (atau tetap gelap) saat seluruh halaman berganti mode. */
     --c-accent-soft: #35503f;          /* sage lebih terang: hover tombol & puncak gradasi */
-    --c-on-gold: #ffffff;              /* teks di atas keping emas (badge, stiker) */
+    /* U14 (lanjutan) — putih di atas --c-gold hanya 2,95:1, gagal AA untuk teks
+       11,5px di badge & stiker. Tinta gelap memberi 5,38:1, dan itu pola yang
+       SUDAH terbukti di mode gelap (--d-on-gold #1a1408 = 8,50:1). */
+    --c-on-gold: #2a2110;              /* teks di atas keping emas (badge, stiker) */
     --grad-unggulan: linear-gradient(170deg, #35503f 0%, #22352c 100%);
     --c-warn-bg: #fdf3e0;
     --c-warn-line: #e5c98c;
@@ -552,15 +555,21 @@ a { color: var(--c-accent-teks); }
     color: var(--c-accent-ink);
     box-shadow: var(--shadow-unggulan);
 }
+/* Badge kini kalimat pemandu ("Untuk resepsi gedung 300–500 tamu"), bukan dua
+   kata — jadi ia harus boleh membungkus alih-alih menindih isi kartu. */
 .paket-badge {
     position: absolute;
     top: -13px;
     left: 24px;
+    right: 24px;
+    max-width: max-content;
+    text-wrap: balance;
     background: var(--c-gold);
     color: var(--c-on-gold);
     font-size: 11.5px;
     font-weight: 800;
-    letter-spacing: .1em;
+    letter-spacing: .06em;
+    line-height: 1.4;
     text-transform: uppercase;
     padding: 6px 14px;
     border-radius: 999px;
@@ -963,6 +972,40 @@ a { color: var(--c-accent-teks); }
 .satuan-kartu h3 { font-size: 1.05rem; }
 .satuan-harga { font-size: 1.35rem; color: var(--c-ink); font-variant-numeric: tabular-nums; }
 .satuan-harga span { font-size: .8rem; color: var(--c-ink-2); }
+/* U22 — slot foto produk. `.produk-kosong` sengaja terbaca sebagai TEMPAT yang
+   menunggu foto, bukan sebagai foto yang gagal dimuat: nol ilusi. */
+.produk-hero { max-width: var(--lebar); margin: 0 auto 28px; padding: 0 var(--pad-x); display: grid; gap: 16px; grid-template-columns: 1fr; }
+@media (min-width: 720px) { .produk-hero { grid-template-columns: 1fr 1fr; } }
+.produk-foto { margin: 0; }
+.produk-foto img { width: 100%; height: auto; display: block; border-radius: var(--radius-kartu); box-shadow: var(--shadow); background: var(--c-surface); }
+.produk-cap { margin: 8px 2px 0; font-size: .82rem; line-height: 1.5; color: var(--c-ink-2); }
+.produk-ilustrasi {
+    display: inline-block; margin-left: 4px; padding: 2px 7px; border-radius: 999px;
+    background: var(--c-warn-bg); border: 1px solid var(--c-warn-line); color: var(--c-warn-ink);
+    font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+}
+.produk-kosong {
+    display: grid; place-items: center; text-align: center;
+    aspect-ratio: 4 / 3; padding: 20px;
+    border: 1.5px dashed var(--c-line-2); border-radius: var(--radius-kartu);
+    background: color-mix(in srgb, var(--c-ink) 3%, transparent);
+    color: var(--c-ink-soft); font-size: .82rem; line-height: 1.5;
+}
+.paket-card .produk-kosong { aspect-ratio: 16 / 9; margin-bottom: 14px; }
+.paket-card .produk-foto img { margin-bottom: 14px; }
+
+.satuan-batas {
+    max-width: 46rem;
+    margin: 14px auto 0;
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    background: var(--c-warn-bg);
+    border: 1px solid var(--c-warn-line);
+    color: var(--c-warn-ink);
+    font-size: .92rem;
+    line-height: 1.6;
+    text-align: left;
+}
 .satuan-min { font-size: .82rem; color: var(--c-gold); letter-spacing: .04em; }
 .satuan-ket { font-size: .86rem; color: var(--c-ink-2); flex: 1; }
 .satuan-kartu .btn { margin-top: 10px; }

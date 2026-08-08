@@ -39,8 +39,11 @@ $harih_paket = [
         'sku'    => 'HARIH-FAVORIT',
         'nama'   => 'Favorit',
         'harga'  => '179',
-        'sub'    => 'Paling laris — lengkap untuk hari bahagiamu.',
-        'badge'  => 'Paling Laris ✦',
+        'sub'    => 'Lengkap untuk hari bahagiamu — galeri, amplop digital, semua tema.',
+        // Cacat yang SAMA dengan "Paling Populer" di /harga/, dan sama-sama
+        // tayang: nol order pernah terjadi di seluruh katalog, digital maupun
+        // cetak. Diganti pemandu pilihan yang tidak mengarang jumlah.
+        'badge'  => 'Paling lengkap untuk harganya',
         'fitur'  => [
             'Semua fitur paket Hemat',
             'Galeri sampai 10 foto + kisah cinta',

@@ -30,6 +30,7 @@ $harih_cta = static fn(string $paket): string =>
 $harih_paket_cetak = [
     [
         'nama'  => 'Hormat',
+        'foto'  => 'paket-hormat',
         'harga' => '1.190.000',
         'sub'   => 'Untuk orang tua, sesepuh, dan atasan — yang pantas menerima undangan di tangan, bukan sekadar link.',
         'fitur' => [
@@ -45,6 +46,7 @@ $harih_paket_cetak = [
     ],
     [
         'nama'  => 'Resepsi',
+        'foto'  => 'paket-resepsi',
         'harga' => '2.900.000',
         'sub'   => 'Resepsi gedung: undangan di layar semua tamu, undangan cetak untuk yang dihormati, souvenir bernama Anda.',
         'fitur' => [
@@ -57,10 +59,16 @@ $harih_paket_cetak = [
             'Gratis ongkir ke seluruh Indonesia',
         ],
         'spek'  => 'A4 dilipat jadi A5 · desain seragam dengan undangan digital',
-        'badge' => 'Paling Populer',
+        // Keputusan owner 2026-08-08 — badge "Paling Populer" DICABUT: nol order
+        // cetak pernah terjadi, jadi itu klaim palsu yang sedang tayang. Yang
+        // rusak bila ketahuan bukan satu badge, melainkan kepercayaan pada
+        // ketiga garansi. Penggantinya tetap memandu pilihan tanpa mengarang
+        // apa pun — ia menyebut UNTUK SIAPA, bukan berapa banyak yang membeli.
+        'badge' => 'Untuk resepsi gedung 300–500 tamu',
     ],
     [
         'nama'  => 'Grand',
+        'foto'  => 'paket-grand',
         'harga' => '5.900.000',
         'sub'   => 'Resepsi besar dengan panitia: dari undangan cetak premium sampai ID panitia, semua satu desain.',
         'fitur' => [
@@ -78,8 +86,15 @@ $harih_paket_cetak = [
     ],
 ];
 
+/* ⚠️ Tabel ini HARDCODE sementara `/satuan/` membaca harga dari WooCommerce —
+   dan justru itu yang melahirkan U24: tabel ini dihargai waktu produknya masih
+   kartu QR Rp 9.500 lalu tidak pernah ikut diperbarui saat produknya berganti.
+   Bila mengubah harga di sini, ubah JUGA produk WooCommerce-nya (dan
+   sebaliknya) sampai tabel ini dibuat membaca dari WC seperti pelajaran C5.
+   Terakhir disamakan 2026-08-08: undangan lipat 15.000 -> 35.000 (SKU
+   SATUAN-UNDANGAN-LIPAT, product id 85). */
 $harih_satuan = [
-    ['Undangan cetak lipat + amplop bernama', 'Rp 15.000/pcs', 'min. 50'],
+    ['Undangan cetak lipat + amplop bernama', 'Rp 35.000/pcs', 'min. 50'],
     ['Kartu undangan ber-QR (bagi luas)',     'Rp 9.500/pcs',  'min. 100'],
     ['Kartu ber-QR holographic',              'Rp 14.000/pcs', 'min. 100'],
     ['Label souvenir',                        'Rp 2.000/pcs',  'min. 200'],
@@ -122,6 +137,13 @@ $harih_satuan = [
 </header>
 
 <main>
+    <?php /* U22 — bukti visual paling menentukan: nama tamu TERCETAK di amplop.
+             Seluruh salinan penjualan menuntut pembeli membayangkannya. */ ?>
+    <section class="produk-hero">
+        <?php echo harih_foto_produk('amplop-nama', 'Amplop dengan nama tamu tercetak langsung, bukan stiker', 'Nama tiap tamu dicetak langsung pada amplopnya', true); ?>
+        <?php echo harih_foto_produk('undangan-terbuka', 'Undangan lipat terbuka memperlihatkan QR di halaman dalam', 'QR di halaman dalam membuka undangan digital kalian', true); ?>
+    </section>
+
     <section class="garansi">
         <h2>Tiga garansi, tertulis di <a href="<?php echo esc_url(home_url('/syarat-ketentuan/')); ?>">Syarat &amp; Ketentuan</a> — bukan sekadar slogan</h2>
         <div class="garansi-grid">
@@ -159,6 +181,9 @@ $harih_satuan = [
             <?php foreach ($harih_paket_cetak as $p) : ?>
             <article class="paket-card<?php echo $p['badge'] ? ' unggulan' : ''; ?>">
                 <?php if ($p['badge']) : ?><p class="paket-badge"><?php echo esc_html($p['badge']); ?></p><?php endif; ?>
+                <?php /* U22 — slot foto per paket. Kosong sampai berkasnya ada di
+                         aset/produk/; tidak ada mockup yang dikarang. */ ?>
+                <?php if (!empty($p['foto'])) echo harih_foto_produk($p['foto'], 'Paket ' . $p['nama'] . ' — isi lengkap', '', true); ?>
                 <h3><?php echo esc_html($p['nama']); ?></h3>
                 <p class="paket-harga-full">Rp <strong><?php echo esc_html($p['harga']); ?></strong></p>
                 <p class="paket-sub"><?php echo esc_html($p['sub']); ?></p>
@@ -228,7 +253,20 @@ $harih_satuan = [
                  dan gratis ongkir memang bernilai Rp 150.000 di struktur biaya
                  kami. Penetapan harga satuan vs paket = keputusan owner,
                  dicatat di TASKS. */ ?>
-        <p>Semua item bisa dibeli terpisah — minimum order per item, dan <strong>minimum Rp 1.000.000 per transaksi</strong>. Paket menyatukannya jadi <strong>satu proof, satu pengiriman, dan satu desain yang seragam</strong> — plus gratis ongkir ke seluruh Indonesia dan Garansi Tepat Waktu.</p>
+        <?php /* Keputusan owner 2026-08-08 — PEMBEDANYA DIBUAT STRUKTURAL, bukan
+                 sekadar angka. Selama paket dan satuan berisi barang yang SAMA
+                 dan hanya beda jumlah, pembeli selalu bisa membuka kalkulator
+                 dan kita selalu kalah di salah satu tingkat. Dua hal di bawah
+                 tidak bisa dibeli satuan sama sekali, jadi keduanya berhenti
+                 sebanding — dan selisih harganya menjelaskan dirinya sendiri.
+                 Harga satuan undangan lipat juga dinaikkan 15rb -> 35rb: tabel
+                 lama dihargai waktu produknya masih kartu QR Rp 9.500, dan tidak
+                 pernah ikut diperbarui saat produknya berganti jadi undangan
+                 lipat + amplop yang bahannya lebih mahal dan kerjanya lebih
+                 panjang. Satuan memang SENGAJA dibuat mahal supaya paket
+                 terlihat murah; sebelum ini alat yang sama terpasang terbalik. */ ?>
+        <p>Semua item bisa dibeli terpisah — minimum order per item, dan <strong>minimum Rp 1.000.000 per transaksi</strong>.</p>
+        <p class="satuan-batas"><strong>Pembelian satuan tidak termasuk undangan digital, dan tidak mendapat Garansi Tepat Waktu.</strong> Keduanya hanya berlaku pada paket, karena keduanya menuntut data dan jadwal produksi yang kami pegang dari awal.</p>
         <div class="satuan-tabel-wrap">
             <table class="satuan-tabel">
                 <thead><tr><th>Item</th><th>Harga</th><th>Minimum</th></tr></thead>
