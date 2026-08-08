@@ -24,9 +24,12 @@
 
 **Mulai dari sini di sesi berikutnya.** `HARIH_VERSION 2.21.0` · 9 workflow aktif · smoke **32/32** · WAHA `healthy`, sesi `WORKING`.
 
-**27 dari 30 item selesai.** Sisa tiga di bawah — ditambah **31 item baru** dari review UI/UX (bagian [🎨 PU](#-pu--review-uiux-menyeluruh-8-agustus-2026), belum satu pun dikerjakan).
+**27 dari 30 item selesai.** Sisa tiga di bawah. Ditambah **31 item** dari review UI/UX ([🎨 PU](#-pu--review-uiux-menyeluruh-8-agustus-2026)) — **PU-A (U1–U9) sudah dikerjakan, tapi BELUM di-deploy dan belum di-`php -l`.**
 
-> **Urutan kerja yang disarankan:** habiskan **A8** (satu-satunya yang butuh tangan owner) lalu **C8/D3**, baru masuk **PU-A** — kelompok itu membela pembeli yang uangnya sudah masuk, dan tiga itemnya (U1, U5, U6) menghapus pekerjaan pelanggan **tanpa suara**. **PU-D murni kerapian; jangan dikerjakan sebelum PU-A dan PU-B.**
+> ### ▶ MULAI DARI SINI
+> 1. **`php -l`** enam berkas PHP yang disentuh PU-A, lalu **deploy**, lalu **uji happy-path**, lalu periksa **U4** dengan order uji. Jaringan ke Hostinger & VPS tertutup sepanjang sesi 8 Agustus sehingga ketiganya tertunda — rinciannya di kotak ✅ di bagian PU-A.
+> 2. Sesudah itu: **A8** (satu-satunya yang butuh tangan owner), lalu **C8/D3**.
+> 3. Baru **PU-B** (undangan yang dilihat ratusan tamu). **PU-D murni kerapian — jangan didahulukan.**
 
 | | | |
 |---|---|---|
@@ -403,50 +406,75 @@ Ketiga blok copy ([page-katalog.php:136](../wp-content/themes/harih/page-katalog
 
 > Kegagalan di sini terjadi **setelah uangnya masuk** — jenis kerusakan yang tidak bisa ditambal dengan diskon.
 
-- [ ] **U1** 🤖 `jam` — **Kirim dikunci selama kompresi, dan foto yang ditolak berhenti lenyap**
+> ## ✅ SELURUH PU-A DIKERJAKAN 2026-08-08 — **BELUM DI-DEPLOY**
+>
+> Sembilan item tuntas di repo dalam enam commit (`0ae932c` · `9d1a0c7` · `3a5a7e4` · `e8aedb2` · `2967cac` · `6581c08`). `HARIH_VERSION 2.21.0 → 2.22.0`.
+>
+> **Cara verifikasinya:** berkas aslinya **dijalankan**, bukan dibaca — `isi-data.js` + `isi-data.css` + font asli dimuat di peramban lewat harness yang digenerasi mekanis dari `page-isi-data.php`, dengan XHR disadap untuk merekam payload. Skenario yang dulu dipakai membuktikan bug-nya dijalankan ulang, dan hasilnya berbalik:
+>
+> | Yang dulu terjadi | Sekarang |
+> |---|---|
+> | Kirim saat kompresi → `jumlah_foto=2`, panel "Data diterima!" | **0 XHR**, pesan *"Foto masih disiapkan…"*; setelah selesai → `jumlah_foto=10` |
+> | 10 foto, no. 3 & 6 ditolak → 8 thumbnail, pesan **kosong** | 8 thumbnail, penghitung *"8 dari 10"*, **2 catatan bertahan** menyebut namanya |
+> | `2025-03-08` → `checkValidity()` **true** | ditolak peramban; layar periksa menampilkan *"Sabtu, 12 Desember 2026"* |
+> | `/isi-data/` meluber 57 px (360) & 663 px (1280) | `scrollWidth == clientWidth`, **nol** elemen meluber |
+> | RSVP tema-02/03 input 15 px → zoom paksa iOS | seluruh kontrol teks terukur **16 px** |
+> | Salin/CSV saat daftar belum disimpan → berkas diam-diam beda dari cetakan | ekspor **dihentikan** dengan sebab; pulih setelah Simpan |
+> | 601 nama → baru ketahuan setelah 1 nama hilang | peringatan menyala **sebelum** Simpan ditekan |
+>
+> Logika penguraian daftar tamu diuji atas **7 kasus tepi** (650 ditolak · tepat 600 lolos · duplikat digabung · TAB & titik koma dipotong · koma **dipertahankan** untuk gelar akademik · baris kosong dibersihkan). Bersarang sintaks alternatif keempat template PHP ditelusuri token per token — kedalaman akhir 0.
+>
+> **⚠️ Tiga hal yang BELUM dilakukan, jangan dianggap selesai:**
+> 1. **`php -l` belum dijalankan** atas berkas PHP yang disentuh. Jalur jaringan ke Hostinger **dan** VPS tertutup serentak sepanjang sesi (kontrol ke host luar normal) — pola yang sudah tercatat di *"Wajib dibaca"* no. 8. Struktur diperiksa dengan cara lain, tapi itu **bukan pengganti lint**.
+> 2. **Belum di-deploy**, jadi nol di antaranya live.
+> 3. **U4 belum pernah diuji dengan order sungguhan** — ia menuntut order WooCommerce + undangan nyata. Jalankan bersama `scripts/uji-happy-path.py` saat deploy.
+>
+> **Langkah berikutnya, berurutan:** `php -l` keenam berkas → deploy → uji happy-path → periksa U4 dengan order uji → baru tandai LIVE.
+
+- [x] **U1** 🤖 `jam` — **Kirim dikunci selama kompresi, dan foto yang ditolak berhenti lenyap**
   Dua cacat di satu berkas, keduanya menghapus pekerjaan pembeli tanpa suara. **(a)** Tombol Kirim aktif selagi `await kompres()` berjalan ([isi-data.js:152](../wp-content/themes/harih/undangan/shared/isi-data.js:152), [:168](../wp-content/themes/harih/undangan/shared/isi-data.js:168)); handler submit hanya memeriksa `state.uploading` ([:293](../wp-content/themes/harih/undangan/shared/isi-data.js:293)). **(b)** Penolakan foto ditulis ke satu elemen `#pesan-foto` yang **ditimpa di awal iterasi berikutnya** ([:167](../wp-content/themes/harih/undangan/shared/isi-data.js:167)) lalu **dikosongkan** bila foto terakhir lolos ([:184](../wp-content/themes/harih/undangan/shared/isi-data.js:184)). Diuji dengan menjalankan berkasnya di Chrome atas berkas sintetis: 10 foto, no. 3 & 6 di bawah `MIN_SISI_TOLAK` → 8 thumbnail, `#pesan-foto` panjang **0 karakter**.
   **Langkah:** tambahkan `state.memproses` (set di awal handler `change`, dilepas di `finally`) yang men-`disable` tombol dan mengubah labelnya jadi *"Menyiapkan foto…"*, plus jaring kedua di handler submit. Kumpulkan penolakan ke array dan render **setelah** loop ke wilayah terpisah yang bertahan; tambahkan penghitung permanen *"8 dari 10 foto terpilih"* di bawah `.foto-grid`.
   **Selesai bila:** submit selama kompresi ditolak dengan pesan · foto ditolak tetap terbaca setelah seluruh loop selesai · penghitung cocok dengan jumlah thumbnail.
 
-- [ ] **U2** 🤖 `menit` — **`/isi-data/` berhenti menggulir horizontal, dan tiga form berhenti memicu zoom iOS**
+- [x] **U2** 🤖 `menit` — **`/isi-data/` berhenti menggulir horizontal, dan tiga form berhenti memicu zoom iOS**
   **(a)** Satu radio tak terlihat meluberkan halaman **57 px pada 360 px dan 663 px pada 1280 px**: `.tata-opsi input { position: absolute }` ([isi-data.css:256](../wp-content/themes/harih/undangan/shared/isi-data.css:256)) sementara `.tata-opsi` ([:245-255](../wp-content/themes/harih/undangan/shared/isi-data.css:245)) tidak punya `position: relative`, **dan** radio itu tersapu `.field input { width: 100% }` ([:159](../wp-content/themes/harih/undangan/shared/isi-data.css:159)) karena bersarang di dalam `.field`. Containing block-nya jatuh ke viewport. Polanya sudah benar tepat di atasnya — `.tema-card { position: relative }` ([:182](../wp-content/themes/harih/undangan/shared/isi-data.css:182)).
   **(b)** Input 15 px memicu zoom paksa iOS. Aturannya **sudah tertulis di repo** — `/* 16px: di bawah itu iOS memperbesar halaman sendiri */` ([katalog.css:486](../wp-content/themes/harih/katalog.css:486)) — tapi hanya menempel pada tiga field mainan di beranda. RSVP tema-02 & tema-03 terukur 15 px di situs live; tema-01 aman hanya karena menimpanya sendiri ([tema-01/style.css:105](../wp-content/themes/harih/undangan/tema-01/style.css:105)).
   **Langkah:** `position: relative` pada `.tata-opsi`, dan persempit selektor :159 jadi `.field > input:not([type=radio])…`. Naikkan 15 → 16 px di [undangan.css:984](../wp-content/themes/harih/undangan/shared/undangan.css:984) (menutup tema-02 & 03 sekaligus), [isi-data.css:165](../wp-content/themes/harih/undangan/shared/isi-data.css:165), [katalog.css:987](../wp-content/themes/harih/katalog.css:987).
   ⚠️ Yang benar-benar memicu zoom hanya input **teks & textarea** (±25 dari 42 kontrol); `type=date`/`time`/`select` membuka picker dan tidak memperbesar — jangan pakai "seluruh field" sebagai justifikasi.
   **Selesai bila:** `documentElement.scrollWidth === clientWidth` pada 360 & 1280 px · ketiga tema melaporkan 16 px pada field RSVP.
 
-- [ ] **U3** 🤖 `jam` — **Tanggal acara tidak lagi menerima tahun yang sudah lewat**
+- [x] **U3** 🤖 `jam` — **Tanggal acara tidak lagi menerima tahun yang sudah lewat**
   `<input type="date" name="tanggal_akad">` ([page-isi-data.php:132](../wp-content/themes/harih/page-isi-data.php:132)) dan `tanggal_resepsi` ([:154](../wp-content/themes/harih/page-isi-data.php:154)) tanpa `min`/`max`. Diverifikasi lewat API validasi peramban: diisi `2025-03-08`, `form.checkValidity()` → **true**, jadi `reportValidity()` ([isi-data.js:297](../wp-content/themes/harih/undangan/shared/isi-data.js:297)) meloloskannya. Kedua jalur hilir juga tidak menjaring: `cpt.php:261-263` memetakan keduanya ke `sanitize_text_field` saja. Hasilnya baru terlihat saat **tamu** membaca *"Acara telah berlangsung"* ([countdown.php:33](../wp-content/themes/harih/template-parts/undangan/countdown.php:33)) — dan pembeli digital tidak pernah melihat layar periksa apa pun antara Kirim dan tayang (`/proof/` khusus cetak).
   **Langkah:** `min="<?php echo esc_attr(current_time('Y-m-d')); ?>"` pada kedua input. Lebih kuat: satu panel ringkas sebelum XHR berangkat — *"Sabtu, 14 November 2026 · 19.00 WIB · Graha Kencana"* + tombol "Ya, kirim". Tiga puluh enam field, satu aksi yang tidak bisa dibatalkan, nol layar konfirmasi.
   **Selesai bila:** tanggal lampau ditolak peramban · panel konfirmasi tampil dengan tanggal terformat manusia.
 
-- [ ] **U4** 🤖 `jam` — **Membuka ulang link isi-data berhenti menampilkan form kosong di atas data yang sudah masuk**
+- [x] **U4** 🤖 `jam` — **Membuka ulang link isi-data berhenti menampilkan form kosong di atas data yang sudah masuk**
   Token HMAC tanpa komponen waktu ([woocommerce.php:48-51](../wp-content/mu-plugins/undangan-core/woocommerce.php:48)) → link berlaku selamanya, yang **bagus** untuk pemulihan. Tapi template tidak memeriksa status pengiriman sama sekali: setelah `undangan_token_sah()` lolos, ia langsung merender `<form>` bersih ([page-isi-data.php:75](../wp-content/themes/harih/page-isi-data.php:75)); `#panel-sukses` hanya elemen `hidden` yang dibuka JS pada sesi yang sama. Pembeli yang membuka ulang tautan dari WhatsApp untuk **memeriksa** apa yang ia kirim melihat form kosong — dan sebagian akan mengisinya lagi.
   **Langkah:** sebelum merender form, cek keberadaan undangan untuk order itu (pola `undangan_cari_undangan_order()` sudah ada sejak D1). Bila ada, ganti form dengan panel *"Data pesanan #N sudah kami terima pada {tanggal}"* + tautan ke undangan jadi + tombol "Ada yang perlu diperbaiki?" ke `/kontak/`.
   **Selesai bila:** membuka ulang link setelah kirim menampilkan panel, bukan form.
 
-- [ ] **U5** 🤖 `jam` — **Batas yang menghapus data berhenti bisu: 600 nama, nama ganda, 1.200 karakter**
+- [x] **U5** 🤖 `jam` — **Batas yang menghapus data berhenti bisu: 600 nama, nama ganda, 1.200 karakter**
   Tiga pemotongan senyap di dua halaman. **(a)** 600 nama dipotong lalu dihitung setelahnya ([page-tamu.php:83](../wp-content/themes/harih/page-tamu.php:83), [:87](../wp-content/themes/harih/page-tamu.php:87)); textarea tanpa `maxlength`, `.tamu-hitung` tidak pernah menyebut 600. **(b)** Komentar kodenya sendiri sudah mengenali salah-tempel multi-kolom ([:81-82](../wp-content/themes/harih/page-tamu.php:81)) tapi penanganannya cuma `array_filter(array_map('trim', …))` — nol `array_unique` di seluruh berkas, nol pembersihan tab/koma. **(c)** `turut_mengundang` & `rundown` ber-`maxlength="1200"` tanpa penghitung ([page-isi-data.php:125](../wp-content/themes/harih/page-isi-data.php:125), [:152](../wp-content/themes/harih/page-isi-data.php:152)) — padahal pola `#ls-count` sudah ada untuk `love_story` ([:180](../wp-content/themes/harih/page-isi-data.php:180)). Ditambah `'numberposts' => 500` tanpa catatan di [page-rekap.php:41](../wp-content/themes/harih/page-rekap.php:41).
   **Langkah:** tampilkan batas sejak awal (*"120 / 600 nama"*); bila kelebihan, **kembalikan seluruh ketikan ke textarea** memakai pola `$kembali` yang sudah ada ([:75-79](../wp-content/themes/harih/page-tamu.php:75)) alih-alih menyimpan separuh; normalkan pemisah lalu laporkan duplikat yang digabung; duplikasi `#ls-count` untuk kedua textarea.
   **Selesai bila:** menempel 650 nama menghasilkan galat + ketikan utuh kembali, bukan "Tersimpan — 600".
 
-- [ ] **U6** 🤖 `jam` — **Daftar tamu berhenti menampilkan dua angka berbeda di satu layar**
+- [x] **U6** 🤖 `jam` — **Daftar tamu berhenti menampilkan dua angka berbeda di satu layar**
   `baris()` membaca `ta.value` — isi textarea **hidup** ([page-tamu.php:198](../wp-content/themes/harih/page-tamu.php:198)) — dan menyuapi penghitung, tombol "Salin semua link", dan CSV. Sementara `.tamu-daftar` dirender PHP dari `get_post_meta('daftar_tamu')`, yaitu data **tersimpan**. Setelah menambah 50 nama tanpa menekan Simpan: penghitung 170, CSV 170 baris, daftar di bawahnya 120 — dan **yang dicetak di amplop tetap 120**. Nol penanda "belum disimpan", nol `beforeunload`, padahal `/isi-data/` sudah punya keduanya ([isi-data.js:24](../wp-content/themes/harih/undangan/shared/isi-data.js:24), [:265](../wp-content/themes/harih/undangan/shared/isi-data.js:265)).
   Terpisah tapi satu berkas: mengubah daftar **setelah proof disetujui** dijawab *"Tersimpan — 125 nama tamu."* tanpa syarat ([:87](../wp-content/themes/harih/page-tamu.php:87)); peringatan bahwa versi itu mungkin bukan yang dicetak hanya masuk `add_order_note()` ([:94-101](../wp-content/themes/harih/page-tamu.php:94)) yang **cuma terlihat admin**. Halaman ini tidak pernah membaca `_proof_disetujui` untuk keperluan tampilan — grep mengembalikan tepat satu kemunculan, di dalam cabang penulisan catatan. *(Tidak mengunci keras adalah keputusan sadar dan benar — yang hilang kalimatnya, bukan kuncinya.)*
   **Selesai bila:** penanda "belum disimpan" muncul saat kotor · ekspor & penghitung sepakat dengan yang dicetak · pesan sukses pasca-persetujuan menyebut konsekuensinya + tautan WA.
 
-- [ ] **U7** 🤖 `menit` — **Halaman proof: tombol setujui menunggu snapshot, jalur revisi tidak ikut hilang, berkasnya dimuat lebih dulu**
+- [x] **U7** 🤖 `menit` — **Halaman proof: tombol setujui menunggu snapshot, jalur revisi tidak ikut hilang, berkasnya dimuat lebih dulu**
   **(a)** Syarat tombol adalah `if (!$disetujui && $berkas)` ([page-proof.php:140](../wp-content/themes/harih/page-proof.php:140)) — **tanpa** `$snapshot`, sementara seluruh section pemeriksaan data bersyarat `if ($snapshot)` ([:112](../wp-content/themes/harih/page-proof.php:112)). Bila CS menempel URL proof tapi lupa mencentang "Bekukan snapshot" (kotak terpisah di [proof.php:175](../wp-content/mu-plugins/undangan-core/proof.php:175)), pembeli melihat gambar + paragraf tanggung jawab hukum + tombol setujui — **tanpa tabel data yang ia setujui**. `_proof_hash` lalu mengunci berkas saja, nol data ([proof.php:245](../wp-content/mu-plugins/undangan-core/proof.php:245)). Dipastikan tidak ada pembekuan otomatis di tempat lain: `undangan_bekukan_snapshot()` punya tepat satu pemanggil.
   **(b)** Tautan *"Ada yang perlu diperbaiki?"* berada **di dalam** blok `!$disetujui` ([:148](../wp-content/themes/harih/page-proof.php:148)) — begitu disetujui, satu-satunya jalur pemulihan ikut lenyap, tepat di jendela waktu ia paling dibutuhkan.
   **(c)** Berkas proof — satu-satunya alasan halaman ini ada — dimuat `loading="lazy"` ([:101](../wp-content/themes/harih/page-proof.php:101)) dan tidak punya tautan unduh.
   **Selesai bila:** tombol muncul hanya bila `$snapshot` ada, dengan cabang `else` yang jujur · peringatan admin bila `_proof_url` terisi tapi `_snapshot_hash` kosong · `.proof-batal` hidup di kedua keadaan dengan teks berbeda · gambar pertama `eager` + `fetchpriority="high"` + tautan `download`.
 
-- [ ] **U8** 🤖 `jam` — **Empat halaman bertoken berhenti jadi pulau**
+- [x] **U8** 🤖 `jam` — **Empat halaman bertoken berhenti jadi pulau**
   Hanya dua dari empat saling menautkan (`/tamu/` ↔ `/rekap/`); footer `/proof/` dan `/upsell/` cuma Kontak + S&K, jadi **keduanya jalan buntu**. Nol penanda langkah di keempat berkas (grep `langkah`/`step`: nihil), padahal linknya tiba terpencar lewat WhatsApp berhari-hari jarak. Ikut di ronde ini: tabel rekap terpotong di HP — `.rekap-tabel` tanpa pembungkus `overflow-x` ([katalog.css:1014](../wp-content/themes/harih/katalog.css:1014)) sementara `overflow-x: clip` pada `.katalog-body` naik ke viewport dan ditafsirkan `hidden`, jadi kolom Waktu **hilang total, bukan sekadar sempit** — sementara polanya sudah ada di berkas yang sama (`.satuan-tabel-wrap`, [:858](../wp-content/themes/harih/katalog.css:858)); `/upsell/` merender **2** kartu ke grid yang dikunci 4 kolom ([katalog.css:868](../wp-content/themes/harih/katalog.css:868)) sehingga kartunya menyusut sampai ±119 px dan badge 148 px menindih padding; dan blok hitung mundur tidak menyebut konsekuensinya, padahal kalimatnya **sudah ditulis** di cabang kedaluwarsa ([page-upsell.php:134](../wp-content/themes/harih/page-upsell.php:134)).
   **Langkah:** tautan silang bertoken memakai pola `add_query_arg` + `undangan_token_halaman()` yang sudah dipakai [page-tamu.php:162](../wp-content/themes/harih/page-tamu.php:162) · satu partial peta langkah dipakai keempatnya · bungkus tabel rekap · penimpa grid bercakup `.upsell-body` · pindahkan kalimat konsekuensi ke atas.
   **Selesai bila:** tiap halaman menautkan minimal satu saudaranya · tabel rekap bisa digeser di 360 px · `/upsell/` dua kolom.
 
-- [ ] **U9** 🤖 `jam` — **Sisa pekerjaan form `/isi-data/`: legenda, pola, sampul, timeout, progres**
+- [x] **U9** 🤖 `jam` — **Sisa pekerjaan form `/isi-data/`: legenda, pola, sampul, timeout, progres**
   Delapan hal kecil di form yang menuntut ±10 menit dan 36 field. **(a)** Enam field `required` diberi `*` tapi grep `wajib` tidak mengembalikan apa pun — nol legenda; penanda opsional punya tiga konvensi, salah satunya (`.opsional`) **tanpa gaya sama sekali** di CSS. **(b)** Server menolak koordinat & warna dress code lewat regex ketat ([cpt.php:83-95](../wp-content/mu-plugins/undangan-core/cpt.php:83)) yang tidak dicerminkan di klien — Plus Code atau koma-desimal lolos submit lalu **dibuang senyap**. **(c)** Copy menyatakan taruhannya sendiri (*"Foto pertama menjadi sampul dan preview WhatsApp"*, [:185](../wp-content/themes/harih/page-isi-data.php:185)) tanpa cara memilihnya dan tanpa badge penanda. **(d)** `xhr.timeout = 180000` berlaku untuk seluruh round trip termasuk pemrosesan WF-02, dan pesannya menyuruh **mengirim ulang** sesuatu yang mungkin sudah masuk. **(e)** Persentase unggah ditulis ke `role="status"` → dibacakan puluhan sampai ratusan kali, sementara bar-nya sendiri tanpa `role="progressbar"`. **(f)** Empat celah atribut papan ketik: `autocapitalize="words"` pada `nama_pria`/`nama_wanita`/`ortu_*`, `autocapitalize="none" autocorrect="off"` pada `ig_*`. **(g)** `.tema-card` tanpa indikator fokus padahal `.tata-opsi` sudah punya ([isi-data.css:258](../wp-content/themes/harih/undangan/shared/isi-data.css:258)). **(h)** `.row-2` dua kolom di semua lebar ([isi-data.css:173](../wp-content/themes/harih/undangan/shared/isi-data.css:173)) padahal `katalog.css` memakai pola mobile-first yang benar untuk kelas bernama sama.
   ⚠️ Klaim "kolom date menyusut jadi 136 px dan teksnya terpotong" **tidak terbukti** — lebar min-content-nya 161 px dan `1fr` = `minmax(auto,1fr)` menahan di situ. Kerjakan (h) sebagai kerapian, bukan sebagai perbaikan kerusakan.
   **Selesai bila:** legenda tayang · `pattern` menolak koordinat salah di klien · tombol "Jadikan sampul" + badge · pesan timeout membedakan fase unggah dari fase proses · `aria-valuenow` di bar, bukan persen di live region.
