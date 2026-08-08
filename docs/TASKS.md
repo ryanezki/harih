@@ -24,12 +24,13 @@
 
 **Mulai dari sini di sesi berikutnya.** `HARIH_VERSION 2.21.0` · 9 workflow aktif · smoke **32/32** · WAHA `healthy`, sesi `WORKING`.
 
-**27 dari 30 item selesai.** Sisa tiga di bawah. Ditambah **31 item** dari review UI/UX ([🎨 PU](#-pu--review-uiux-menyeluruh-8-agustus-2026)) — **PU-A (U1–U9) sudah dikerjakan, tapi BELUM di-deploy dan belum di-`php -l`.**
+**27 dari 30 item selesai.** Sisa tiga di bawah. Ditambah **31 item** dari review UI/UX ([🎨 PU](#-pu--review-uiux-menyeluruh-8-agustus-2026)) — **PU-A (U1–U9) SELESAI & LIVE** *(v2.22.0, smoke 32/32)*.
 
 > ### ▶ MULAI DARI SINI
-> 1. **`php -l`** enam berkas PHP yang disentuh PU-A, lalu **deploy**, lalu **uji happy-path**, lalu periksa **U4** dengan order uji. Jaringan ke Hostinger & VPS tertutup sepanjang sesi 8 Agustus sehingga ketiganya tertunda — rinciannya di kotak ✅ di bagian PU-A.
-> 2. Sesudah itu: **A8** (satu-satunya yang butuh tangan owner), lalu **C8/D3**.
-> 3. Baru **PU-B** (undangan yang dilihat ratusan tamu). **PU-D murni kerapian — jangan didahulukan.**
+> 1. **A8** — satu-satunya yang butuh tangan owner.
+> 2. **C8** lalu **D3**.
+> 3. **PU-B** (U10–U20) — undangan yang dilihat ratusan tamu per pesanan; di situ tiap cacat dikalikan 50–600 orang. **PU-D murni kerapian, jangan didahulukan.**
+> 4. Pada order cetak sungguhan pertama: periksa dua cabang `/proof/` yang belum pernah dilewati data nyata (lihat catatan ⚠️ di kotak PU-A).
 
 | | | |
 |---|---|---|
@@ -406,9 +407,18 @@ Ketiga blok copy ([page-katalog.php:136](../wp-content/themes/harih/page-katalog
 
 > Kegagalan di sini terjadi **setelah uangnya masuk** — jenis kerusakan yang tidak bisa ditambal dengan diskon.
 
-> ## ✅ SELURUH PU-A DIKERJAKAN 2026-08-08 — **BELUM DI-DEPLOY**
+> ## ✅ SELURUH PU-A **SELESAI & LIVE** 2026-08-08 *(v2.22.0)*
 >
-> Sembilan item tuntas di repo dalam enam commit (`0ae932c` · `9d1a0c7` · `3a5a7e4` · `e8aedb2` · `2967cac` · `6581c08`). `HARIH_VERSION 2.21.0 → 2.22.0`.
+> Sembilan item tuntas dalam enam commit (`0ae932c` · `9d1a0c7` · `3a5a7e4` · `e8aedb2` · `2967cac` · `6581c08`), di-deploy, dan **diverifikasi di produksi**. `php -l` **7/7 bersih** · smoke test **32/32** · LiteSpeed di-purge.
+>
+> **Terverifikasi LIVE, bukan dari membaca kode:**
+> · `/isi-data/` order **173** (punya undangan) → panel *"sudah kami terima"*, **nol `<form>`, nol input foto** · order tanpa undangan → form utuh dengan `#tolak-foto`, `#foto-hitung`, `#panel-konfirmasi`, `#progress-pct`, `role="progressbar"`, legenda, 6× `autocapitalize="words"`, `min="2026-08-08"` di kedua tanggal (WIB benar), dan ketiga `pattern` — **U4 akhirnya teruji dua arah dengan order sungguhan**
+> · `/tamu/` → `"/ 600 nama"`, `#tamu-belum-simpan`, `#tamu-lewat-batas`, `#tamu-peringatan-ekspor`, `bolehEkspor` 3×, `beforeunload`
+> · `/proof/` → order 173 **sudah disetujui**, dan yang tampil justru bukti U7(c) bekerja: *"Baru menemukan kesalahan? …masih bisa kami tahan"*. Sebelumnya seluruh blok itu lenyap begitu proof disetujui
+> · `/rekap/` → satu RSVP uji dikirim supaya tabelnya benar-benar dirender; `.satuan-tabel-wrap` membungkus `<table>` dengan bersarang benar (`<table>` di dalam, `</div>` menutup sesudah `</table>`), lalu **ucapan uji dihapus permanen — produksi kembali 0 ucapan**
+> · aset tersaji dengan isi baru: `state.memproses` 5× · `tolak-foto` · `tampilKonfirmasi` · `btn-sampul` · `.tata-opsi { position: relative }` · `font: 400 16px/1.5` di isi-data.css **dan** undangan.css · **nol** aturan `.field input` aktif tersisa di tema-01
+>
+> ⚠️ **Dua cabang belum pernah dilewati data nyata** (bukan gagal — kodenya terpasang di server, keadaannya saja yang belum muncul): `fetchpriority="high"` + tautan unduh di `/proof/` hanya berlaku untuk proof ber-**gambar**, sementara order 173 memakai PDF; dan gerbang *"Data cetakmu belum kami kunci"* hanya menyala bila `_proof_url` terisi tapi snapshot kosong — order 173 punya snapshot lengkap. Periksa keduanya pada order cetak sungguhan pertama.
 >
 > **Cara verifikasinya:** berkas aslinya **dijalankan**, bukan dibaca — `isi-data.js` + `isi-data.css` + font asli dimuat di peramban lewat harness yang digenerasi mekanis dari `page-isi-data.php`, dengan XHR disadap untuk merekam payload. Skenario yang dulu dipakai membuktikan bug-nya dijalankan ulang, dan hasilnya berbalik:
 >
@@ -424,12 +434,7 @@ Ketiga blok copy ([page-katalog.php:136](../wp-content/themes/harih/page-katalog
 >
 > Logika penguraian daftar tamu diuji atas **7 kasus tepi** (650 ditolak · tepat 600 lolos · duplikat digabung · TAB & titik koma dipotong · koma **dipertahankan** untuk gelar akademik · baris kosong dibersihkan). Bersarang sintaks alternatif keempat template PHP ditelusuri token per token — kedalaman akhir 0.
 >
-> **⚠️ Tiga hal yang BELUM dilakukan, jangan dianggap selesai:**
-> 1. **`php -l` belum dijalankan** atas berkas PHP yang disentuh. Jalur jaringan ke Hostinger **dan** VPS tertutup serentak sepanjang sesi (kontrol ke host luar normal) — pola yang sudah tercatat di *"Wajib dibaca"* no. 8. Struktur diperiksa dengan cara lain, tapi itu **bukan pengganti lint**.
-> 2. **Belum di-deploy**, jadi nol di antaranya live.
-> 3. **U4 belum pernah diuji dengan order sungguhan** — ia menuntut order WooCommerce + undangan nyata. Jalankan bersama `scripts/uji-happy-path.py` saat deploy.
->
-> **Langkah berikutnya, berurutan:** `php -l` keenam berkas → deploy → uji happy-path → periksa U4 dengan order uji → baru tandai LIVE.
+> *Catatan proses: jaringan ke Hostinger & VPS sempat tertutup serentak berjam-jam sementara kontrol ke host luar normal — pola "Wajib dibaca" no. 8. Lint & deploy tertunda sampai jalurnya pulih, lalu dijalankan penuh. Jangan membaca `HTTP 000` sebagai situs mati.*
 
 - [x] **U1** 🤖 `jam` — **Kirim dikunci selama kompresi, dan foto yang ditolak berhenti lenyap**
   Dua cacat di satu berkas, keduanya menghapus pekerjaan pembeli tanpa suara. **(a)** Tombol Kirim aktif selagi `await kompres()` berjalan ([isi-data.js:152](../wp-content/themes/harih/undangan/shared/isi-data.js:152), [:168](../wp-content/themes/harih/undangan/shared/isi-data.js:168)); handler submit hanya memeriksa `state.uploading` ([:293](../wp-content/themes/harih/undangan/shared/isi-data.js:293)). **(b)** Penolakan foto ditulis ke satu elemen `#pesan-foto` yang **ditimpa di awal iterasi berikutnya** ([:167](../wp-content/themes/harih/undangan/shared/isi-data.js:167)) lalu **dikosongkan** bila foto terakhir lolos ([:184](../wp-content/themes/harih/undangan/shared/isi-data.js:184)). Diuji dengan menjalankan berkasnya di Chrome atas berkas sintetis: 10 foto, no. 3 & 6 di bawah `MIN_SISI_TOLAK` → 8 thumbnail, `#pesan-foto` panjang **0 karakter**.
