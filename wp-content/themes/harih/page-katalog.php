@@ -152,10 +152,10 @@ $harih_aset         = get_stylesheet_directory_uri() . '/aset';
     <div class="hero-visual">
         <div class="hero-panggung">
             <div class="hero-arch hero-arch-1" data-naik>
-                <img src="<?php echo esc_url($harih_aset . '/demo/harih-cincin-buket.jpg'); ?>" alt="" width="600" height="800" fetchpriority="high" decoding="async">
+                <?php echo harih_gambar('demo/harih-cincin-buket.jpg', '', ['width' => 600, 'height' => 800, 'fetchpriority' => 'high', 'decoding' => 'async']); ?>
             </div>
             <div class="hero-arch hero-arch-2">
-                <img src="<?php echo esc_url($harih_aset . '/demo/harih-gaun-detail.jpg'); ?>" alt="" width="600" height="800" loading="lazy" decoding="async">
+                <?php echo harih_gambar('demo/harih-gaun-detail.jpg', '', ['width' => 600, 'height' => 800, 'loading' => 'lazy', 'decoding' => 'async']); ?>
             </div>
             <span class="stiker stiker-1">±5 Menit Jadi</span>
             <span class="stiker stiker-2">Mulai <?php echo esc_html(harih_harga_mulai()); ?>rb</span>
@@ -202,7 +202,7 @@ $harih_marquee = str_replace('✦', '<i>✦</i>', $harih_marquee);
         <div class="tema-track">
             <?php foreach ($harih_temas as $harih_tid => $harih_label) : ?>
             <a class="tema-kartu" href="<?php echo esc_url(home_url('/u/demo-' . $harih_tid . '/')); ?>" target="_blank" rel="noopener">
-                <span class="tema-gambar"><img src="<?php echo esc_url($harih_aset . '/og/og-' . $harih_tid . '.jpg'); ?>" alt="Contoh <?php echo esc_attr(harih_nama_tema($harih_label)); ?>" width="1200" height="630" loading="lazy" decoding="async"></span>
+                <span class="tema-gambar"><?php echo harih_gambar('og/og-' . $harih_tid . '.jpg', 'Contoh ' . harih_nama_tema($harih_label), ['width' => 1200, 'height' => 630, 'loading' => 'lazy', 'decoding' => 'async']); ?></span>
                 <span class="tema-baris">
                     <span>
                         <span class="tema-nama"><?php echo esc_html(harih_nama_tema($harih_label)); ?></span>
@@ -303,7 +303,7 @@ $harih_marquee = str_replace('✦', '<i>✦</i>', $harih_marquee);
     <?php if ($harih_ada_harga) : ?>
     <section class="band-cetak" id="cetak">
         <div class="band-kartu">
-            <img class="band-foto" src="<?php echo esc_url($harih_aset . '/demo/harih-cincin-sepatu.jpg'); ?>" alt="" width="1200" height="800" loading="lazy" decoding="async">
+            <?php echo harih_gambar('demo/harih-cincin-sepatu.jpg', '', ['class' => 'band-foto', 'width' => 1200, 'height' => 800, 'loading' => 'lazy', 'decoding' => 'async']); ?>
             <div class="band-scrim" aria-hidden="true"></div>
             <div class="band-isi">
                 <p class="band-badge">Undangan Cetak</p>

@@ -897,7 +897,12 @@ body.is-locked .pratinjau-nama { display: none; } /* gerbang tetap sinematik */
     padding: 11px;
     border: 1px solid color-mix(in srgb, var(--c-gold) 55%, transparent);
 }
-.qris-panel img { display: block; width: 100%; border: 1px solid rgba(20, 35, 28, .3); padding: 10px; box-sizing: border-box; background: #fff; }
+/* D3 — `aspect-ratio` mengunci kotaknya SEBELUM gambarnya tiba. Ini sumber CLS
+   terakhir di halaman undangan: galeri slider & kolase sudah dikunci tinggi/
+   aspect-ratio oleh CSS-nya sendiri, sementara panel QRIS tidak — sehingga
+   isi di bawahnya melompat saat gambar QRIS termuat. QR selalu bujur sangkar,
+   jadi 1/1 aman tanpa perlu tahu dimensi berkasnya. */
+.qris-panel img { display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: contain; border: 1px solid rgba(20, 35, 28, .3); padding: 10px; box-sizing: border-box; background: #fff; }
 .qris-cap { margin: 24px 0 0; font: 400 10px/1.6 var(--font-label); letter-spacing: .2em; text-transform: uppercase; color: var(--c-ink-soft); }
 
 

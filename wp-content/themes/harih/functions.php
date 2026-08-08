@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) exit;
  * pengunjung & LiteSpeed tetap menyajikan berkas lama meski file di server
  * sudah baru, dan perbaikan tampilan terlihat "tidak berpengaruh".
  */
-const HARIH_VERSION = '2.30.0';
+const HARIH_VERSION = '2.31.0';
 
 /**
  * Versi aset PER BERKAS (U28).
@@ -216,6 +216,38 @@ function harih_og_default(string $tema = ''): string {
         ? "og-{$tema}.jpg"
         : 'og-katalog.jpg';
     return get_stylesheet_directory_uri() . '/aset/og/' . $file;
+}
+
+/**
+ * <picture> dengan sumber WebP bila berdampingannya ada (U31).
+ *
+ * WebP dibangun LOKAL oleh scripts/buat-webp.php — bukan lewat layanan optimasi
+ * pihak ketiga. Alasannya tercatat di skrip itu: layanan semacam itu mengunggah
+ * isi media library (foto pranikah pelanggan, QRIS mempelai) ke server orang
+ * lain, dan itu pemroses data baru yang wajib masuk Kebijakan Privasi lebih
+ * dulu. Terukur pada aset tema: 1.061.697 → 356.176 byte (-66%).
+ *
+ * Turun anggun: bila `.webp`-nya tidak ada, yang keluar `<img>` biasa persis
+ * seperti sebelumnya. Jadi menghapus berkas WebP tidak pernah merusak halaman.
+ *
+ * ⚠️ JANGAN dipakai untuk `og:image` — dukungan WebP di pratinjau
+ * WhatsApp/Facebook tidak andal, dan kartu OG justru gambar yang paling tidak
+ * boleh gagal tampil.
+ */
+function harih_gambar(string $rel, string $alt, array $attr = []): string {
+    $abs_dir = get_stylesheet_directory() . '/aset/';
+    $url_dir = get_stylesheet_directory_uri() . '/aset/';
+    $webp    = preg_replace('/\.(jpe?g|png)$/i', '.webp', $rel);
+
+    $atribut = '';
+    foreach ($attr as $k => $v) {
+        $atribut .= $v === true ? ' ' . $k : sprintf(' %s="%s"', $k, esc_attr((string) $v));
+    }
+    $img = '<img src="' . esc_url($url_dir . $rel) . '" alt="' . esc_attr($alt) . '"' . $atribut . '>';
+
+    if ($webp === $rel || !file_exists($abs_dir . $webp)) return $img;
+
+    return '<picture><source srcset="' . esc_url($url_dir . $webp) . '" type="image/webp">' . $img . '</picture>';
 }
 
 /** Foto demo (P0.2/P0.3) — stok berlisensi, ikut dalam tema. Lihat docs/aset-lisensi.md. */

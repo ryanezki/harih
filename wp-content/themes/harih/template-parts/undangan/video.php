@@ -14,7 +14,9 @@ $yt = harih_youtube_id($u['video_url']);
     <?php if ($yt !== '') : ?>
         <div class="video-frame" data-reveal data-delay="180">
             <div class="video-frame-dalam" data-yt="<?php echo esc_attr($yt); ?>" role="button" tabindex="0" aria-label="Putar live streaming">
-                <img src="<?php echo esc_url('https://i.ytimg.com/vi/' . $yt . '/hqdefault.jpg'); ?>" alt="" loading="lazy" decoding="async">
+                <?php /* D3 — hqdefault YouTube SELALU 480x360, jadi dimensinya bisa ditulis
+         dan kotaknya terkunci sebelum gambar pihak ketiga itu tiba. */ ?>
+        <img src="<?php echo esc_url('https://i.ytimg.com/vi/' . $yt . '/hqdefault.jpg'); ?>" alt="" width="480" height="360" loading="lazy" decoding="async">
                 <span class="video-play" aria-hidden="true"></span>
             </div>
         </div>
