@@ -992,6 +992,12 @@ a { color: var(--c-accent-teks); }
 }
 .tamu-hitung { margin: 10px 0 16px; font-size: .88rem; color: var(--c-ink-2); font-variant-numeric: tabular-nums; }
 .tamu-lebih { color: var(--c-gold); }
+/* U5/U6 — penanda keadaan pada baris hitungan & peringatan ekspor. Memakai
+   token peringatan (dihitung: 5,87:1 dan 5,72:1 di atas --c-bg) alih-alih
+   --c-gold yang hanya 2,76:1; keduanya sudah punya varian mode gelap. */
+.tamu-belum { color: var(--c-warn-ink); }
+.tamu-galat { color: var(--c-error); }
+p.tamu-galat { max-width: 640px; margin: 0 auto 16px; padding: 0 20px; font-size: .88rem; line-height: 1.55; }
 .tamu-link { max-width: 720px; margin: 36px auto 0; padding: 0 20px; }
 .tamu-link h2 { text-align: center; }
 .tamu-link > p { text-align: center; color: var(--c-ink-2); font-size: .93rem; margin-bottom: 16px; }

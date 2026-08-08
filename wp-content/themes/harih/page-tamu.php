@@ -62,6 +62,17 @@ $pesan   = '';
 $galat   = '';
 $kembali = ''; // ketikan pemesan, dikembalikan ke textarea bila simpan gagal
 
+/* U5 — batas nama. Angkanya dipakai server DAN tampil di layar sejak awal;
+   sebelumnya ia hanya hidup di dalam array_slice() dan tidak pernah sampai ke
+   orang yang mengetiknya (di-grep ke seluruh tema + mu-plugin: nol string yang
+   pernah dirender). Nilainya juga sudah tayang di Kebijakan Privasi. */
+const HARIH_MAKS_TAMU = 600;
+
+/* U6 — status proof dibaca untuk KEPERLUAN TAMPILAN, bukan cuma untuk menulis
+   catatan order. Sebelumnya `_proof_disetujui` hanya muncul satu kali di berkas
+   ini, di dalam cabang add_order_note() yang tidak pernah dilihat pemesan. */
+$harih_proof_disetujui = (string) $order->get_meta('_proof_disetujui');
+
 if (($_POST['harih_simpan_tamu'] ?? '') === '1') {
     $isi = sanitize_textarea_field(wp_unslash((string) ($_POST['daftar_tamu'] ?? '')));
 
@@ -78,26 +89,93 @@ if (($_POST['harih_simpan_tamu'] ?? '') === '1') {
         $galat   = 'Undangan untuk pesanan ini belum terbit, jadi daftar tamu belum bisa disimpan. Isi data undanganmu dulu — atau hubungi CS bila kamu merasa ini keliru.';
         $kembali = $isi;
     } else {
-        // Batas 600 nama: di atas itu hampir pasti salah tempel (kolom lain ikut
-        // tersalin), dan halaman jadi berat di HP.
-        $baris = array_slice(array_values(array_filter(array_map('trim', explode("\n", $isi)))), 0, 600);
-        $sebelum = (string) get_post_meta($undangan_id, 'daftar_tamu', true);
-        $sesudah = implode("\n", $baris);
-        update_post_meta($undangan_id, 'daftar_tamu', $sesudah);
-        $pesan = sprintf('Tersimpan — %d nama tamu.', count($baris));
+        /* U5 — PEMBERSIHAN & PEMERIKSAAN, bukan pemotongan senyap.
+           Yang lama: array_slice(…, 0, 600) memotong lalu count() menghitung
+           SESUDAHNYA, sehingga 650 nama tersimpan 600 dan dilaporkan
+           "Tersimpan — 600 nama tamu.". Komentar kodenya sendiri sudah menyebut
+           salah-tempel multi-kolom sebagai sebab, tapi tidak pernah
+           menanganinya. */
+        $mentah = array_values(array_filter(array_map('trim', explode("\n", $isi)), static function ($s) {
+            return $s !== '';
+        }));
 
-        /* C6 — daftar tamu kini ikut dibekukan ke snapshot proof. Perubahan
-           SETELAH proof disetujui sengaja TIDAK dilarang: pemesan yang baru
-           menemukan satu nama salah ketik akan terjebak, dan CS-nya cuma satu
-           orang. Yang dilakukan: mencatatnya di order supaya sebelum masuk
-           mesin ketahuan bahwa yang dicetak mungkin bukan yang disetujui. */
-        if ($sebelum !== $sesudah && $order->get_meta('_proof_disetujui')) {
-            $order->add_order_note(sprintf(
-                'Daftar tamu DIUBAH pemesan setelah proof disetujui — sekarang %d nama (sebelumnya %d). Snapshot yang disetujui tidak ikut berubah; pastikan versi mana yang dicetak sebelum produksi.',
-                count($baris),
-                count(array_filter(array_map('trim', explode("\n", $sebelum))))
-            ));
-            $order->save();
+        // Tempelan dari Excel/Sheets membawa kolom lain dipisah TAB (atau titik
+        // koma). Koma sengaja TIDAK dipakai sebagai pemisah — nama Indonesia
+        // sering memuatnya secara sah ("Ahmad Fauzi, S.T.") dan memenggalnya
+        // justru merusak data yang benar.
+        $ada_kolom = false;
+        $bersih = [];
+        foreach ($mentah as $b) {
+            if (strpbrk($b, "\t;") !== false) {
+                $ada_kolom = true;
+                // preg_split, bukan strtok: strtok menyimpan STATE global antar
+                // pemanggilan dan mudah salah pakai di dalam loop.
+                $b = trim(preg_split('/[\t;]/', $b, 2)[0]);
+            }
+            if ($b !== '') $bersih[] = $b;
+        }
+
+        // Duplikat: dibandingkan tanpa peduli huruf besar/kecil dan spasi ganda,
+        // yang pertama dipertahankan supaya urutan pemesan tidak berubah.
+        $terlihat = [];
+        $unik = [];
+        $ganda = [];
+        foreach ($bersih as $b) {
+            $kunci = mb_strtolower(preg_replace('/\s+/u', ' ', $b));
+            if (isset($terlihat[$kunci])) { $ganda[] = $b; continue; }
+            $terlihat[$kunci] = true;
+            $unik[] = $b;
+        }
+
+        if (count($unik) > HARIH_MAKS_TAMU) {
+            // Kelebihan TIDAK dibuang diam-diam: seluruh ketikan dikembalikan
+            // dan tidak ada yang disimpan, memakai pola $kembali yang sudah
+            // dipakai cabang nonce di atas. Menyimpan separuh diam-diam adalah
+            // kerusakan yang tidak bisa dilihat pemesan sampai amplop tercetak.
+            $galat = sprintf(
+                'Daftar berisi %d nama — batas kami %d. Tidak ada yang disimpan supaya tidak ada nama yang hilang diam-diam. Kurangi %d nama lalu tekan Simpan lagi; ketikanmu masih utuh di bawah.',
+                count($unik),
+                HARIH_MAKS_TAMU,
+                count($unik) - HARIH_MAKS_TAMU
+            );
+            $kembali = $isi;
+        } else {
+            $sebelum = (string) get_post_meta($undangan_id, 'daftar_tamu', true);
+            $sesudah = implode("\n", $unik);
+            update_post_meta($undangan_id, 'daftar_tamu', $sesudah);
+
+            $pesan = sprintf('Tersimpan — %d nama tamu.', count($unik));
+            if ($ganda) {
+                $contoh = array_slice(array_unique($ganda), 0, 3);
+                $pesan .= sprintf(
+                    ' %d nama ganda digabung (%s%s).',
+                    count($ganda),
+                    implode(', ', $contoh),
+                    count(array_unique($ganda)) > 3 ? ', …' : ''
+                );
+            }
+            if ($ada_kolom) {
+                $pesan .= ' Beberapa baris berisi lebih dari satu kolom — kami pakai kolom pertamanya saja.';
+            }
+
+            /* C6 — daftar tamu kini ikut dibekukan ke snapshot proof. Perubahan
+               SETELAH proof disetujui sengaja TIDAK dilarang: pemesan yang baru
+               menemukan satu nama salah ketik akan terjebak, dan CS-nya cuma satu
+               orang. Yang dilakukan: mencatatnya di order supaya sebelum masuk
+               mesin ketahuan bahwa yang dicetak mungkin bukan yang disetujui. */
+            if ($sebelum !== $sesudah && $harih_proof_disetujui) {
+                $order->add_order_note(sprintf(
+                    'Daftar tamu DIUBAH pemesan setelah proof disetujui — sekarang %d nama (sebelumnya %d). Snapshot yang disetujui tidak ikut berubah; pastikan versi mana yang dicetak sebelum produksi.',
+                    count($unik),
+                    count(array_filter(array_map('trim', explode("\n", $sebelum))))
+                ));
+                $order->save();
+
+                /* U6 — dan pemesan IKUT DIBERI TAHU. Sebelumnya peringatan ini
+                   hanya masuk catatan order yang cuma terlihat admin, sementara
+                   layar pemesan tetap berbunyi "Tersimpan" polos. */
+                $pesan .= ' ⚠️ Proof pesanan ini sudah kamu setujui, jadi perubahan ini TIDAK otomatis ikut tercetak — beri tahu kami lewat WhatsApp supaya kami cek sebelum masuk mesin.';
+            }
         }
     }
 }
@@ -133,6 +211,18 @@ $link   = $undangan_id ? get_permalink($undangan_id) : '';
 
     <?php if ($pesan) : ?><p class="proof-notif"><?php echo esc_html($pesan); ?></p><?php endif; ?>
 
+    <?php /* U6 — spanduk tetap, bukan hanya pesan sesaat setelah menyimpan.
+             Pemesan yang membuka halaman ini seminggu setelah menyetujui proof
+             harus tahu taruhannya SEBELUM ia mengetik, bukan sesudah. */ ?>
+    <?php if ($harih_proof_disetujui) : ?>
+    <p class="proof-notif proof-galat">
+        Proof pesanan ini sudah kamu setujui pada <strong><?php echo esc_html(wp_date('j F Y', strtotime($harih_proof_disetujui))); ?></strong>.
+        Perubahan daftar di sini <strong>tidak otomatis ikut tercetak</strong> —
+        <a href="<?php echo esc_url(harih_wa_link("Halo hariH, saya mengubah daftar tamu pesanan #{$order_id} setelah proof disetujui.")); ?>" target="_blank" rel="noopener">beri tahu kami lewat WhatsApp</a>
+        supaya kami cek sebelum masuk mesin.
+    </p>
+    <?php endif; ?>
+
     <section class="tamu-form">
         <form method="post">
             <?php wp_nonce_field('harih_tamu_' . $order_id, '_harih_nonce'); ?>
@@ -142,11 +232,15 @@ $link   = $undangan_id ? get_permalink($undangan_id) : '';
                 <textarea name="daftar_tamu" id="daftar-tamu" rows="10" placeholder="Bapak Hendra &amp; Ibu Sari&#10;Keluarga Besar Wicaksono&#10;Damar Prasetyo"><?php echo esc_textarea($kembali !== '' ? $kembali : $daftar); ?></textarea>
             </label>
             <p class="tamu-hitung">
-                <span id="tamu-jumlah"><?php echo esc_html(count($nama)); ?></span> nama
+                <?php /* U5 — batasnya tampil sejak awal, bukan baru diketahui
+                         setelah nama ke-601 hilang. */ ?>
+                <span id="tamu-jumlah"><?php echo esc_html(count($nama)); ?></span> / <?php echo esc_html(HARIH_MAKS_TAMU); ?> nama
+                <span id="tamu-belum-simpan" class="tamu-belum" hidden>· <strong>belum disimpan</strong></span>
                 <?php if ($harih_jatah) : ?>
                     · jatah amplop bernama paketmu: <strong><?php echo esc_html($harih_jatah); ?></strong>
                     <span id="tamu-lebih" class="tamu-lebih"<?php echo count($nama) > $harih_jatah ? '' : ' hidden'; ?>>— kelebihan dicetak sebagai amplop polos, atau tambah lewat item satuan</span>
                 <?php endif; ?>
+                <span id="tamu-lewat-batas" class="tamu-galat" hidden>— melewati batas <?php echo esc_html(HARIH_MAKS_TAMU); ?>; kurangi dulu, kalau tidak Simpan akan ditolak</span>
             </p>
             <button type="submit" class="btn btn-utama btn-blok">Simpan daftar tamu</button>
         </form>
@@ -161,6 +255,11 @@ $link   = $undangan_id ? get_permalink($undangan_id) : '';
             <button type="button" class="btn btn-garis" id="unduh-csv">Unduh CSV</button>
             <a class="btn btn-garis" href="<?php echo esc_url(add_query_arg(['order' => $order_id, 'key' => undangan_token_halaman($order_id, 'rekap')], home_url('/rekap/'))); ?>">Rekap kehadiran</a>
         </div>
+        <?php /* U6 — kedua tombol ekspor membaca TEXTAREA (daftar hidup),
+                 sementara amplop dicetak dari data TERSIMPAN. Selama keduanya
+                 berbeda, ekspor dihentikan dengan sebab yang jelas alih-alih
+                 diam-diam menghasilkan berkas yang tidak sama dengan cetakan. */ ?>
+        <p class="tamu-galat" id="tamu-peringatan-ekspor" hidden>Daftar di layar belum disimpan, jadi belum sama dengan yang akan dicetak. Tekan <strong>Simpan daftar tamu</strong> dulu.</p>
         <ul class="tamu-daftar" id="tamu-daftar" data-link="<?php echo esc_attr($link); ?>">
             <?php foreach (array_slice($nama, 0, 300) as $n) : ?>
             <li>
@@ -192,7 +291,24 @@ $link   = $undangan_id ? get_permalink($undangan_id) : '';
     var ta = document.getElementById('daftar-tamu');
     var jumlah = document.getElementById('tamu-jumlah');
     var lebih = document.getElementById('tamu-lebih');
+    var lewat = document.getElementById('tamu-lewat-batas');
+    var belumSimpan = document.getElementById('tamu-belum-simpan');
+    var peringatanEkspor = document.getElementById('tamu-peringatan-ekspor');
     var jatah = <?php echo (int) $harih_jatah; ?>;
+    var maks = <?php echo (int) HARIH_MAKS_TAMU; ?>;
+
+    /* U6 — `kotor` menandai bahwa isi textarea sudah menyimpang dari yang
+       TERSIMPAN. Selama itu, tiga hal di halaman ini bisa saling bertentangan:
+       penghitung & ekspor membaca textarea, sementara daftar di bawah dan
+       AMPLOP YANG DICETAK berasal dari data tersimpan. Pola `kotor` +
+       beforeunload diambil dari isi-data.js yang sudah memakainya sejak C2. */
+    var kotor = false;
+
+    function tandaiKotor(nilai) {
+        kotor = nilai;
+        if (belumSimpan) belumSimpan.hidden = !nilai;
+        if (peringatanEkspor && !nilai) peringatanEkspor.hidden = true;
+    }
 
     function baris() {
         return (ta.value || '').split('\n').map(function (s) { return s.trim(); }).filter(Boolean);
@@ -202,7 +318,29 @@ $link   = $undangan_id ? get_permalink($undangan_id) : '';
             var n = baris().length;
             jumlah.textContent = n;
             if (lebih) lebih.hidden = !(jatah && n > jatah);
+            // U5 — peringatan MUNCUL sebelum Simpan ditekan, bukan sesudah
+            // ketikannya ditolak.
+            if (lewat) lewat.hidden = n <= maks;
+            tandaiKotor(true);
         });
+    }
+
+    // Menyimpan berarti halaman dimuat ulang; penanda tidak boleh menahan itu.
+    var formTamu = ta && ta.form;
+    if (formTamu) formTamu.addEventListener('submit', function () { tandaiKotor(false); });
+
+    window.addEventListener('beforeunload', function (e) {
+        if (kotor) { e.preventDefault(); e.returnValue = ''; }
+    });
+
+    /** Ekspor hanya sah bila layar == tersimpan. */
+    function bolehEkspor() {
+        if (!kotor) return true;
+        if (peringatanEkspor) {
+            peringatanEkspor.hidden = false;
+            peringatanEkspor.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }
+        return false;
     }
 
     var daftar = document.getElementById('tamu-daftar');
@@ -214,6 +352,7 @@ $link   = $undangan_id ? get_permalink($undangan_id) : '';
 
     var btnSalin = document.getElementById('salin-semua');
     if (btnSalin) btnSalin.addEventListener('click', function () {
+        if (!bolehEkspor()) return;
         var teks = semuaLink().join('\n');
         var selesai = function () {
             var asli = btnSalin.textContent;
@@ -231,6 +370,7 @@ $link   = $undangan_id ? get_permalink($undangan_id) : '';
 
     var btnCsv = document.getElementById('unduh-csv');
     if (btnCsv) btnCsv.addEventListener('click', function () {
+        if (!bolehEkspor()) return;
         // CSV dipakai dua arah: mencetak nama di amplop, dan mengirim link
         // personal massal. Baris header ikut supaya bisa langsung dibuka Excel.
         var isi = 'nama,link\n' + baris().map(function (n) {
