@@ -47,6 +47,8 @@
 **Data uji yang SENGAJA disimpan** — jangan dihapus tanpa konfirmasi; `R2` sudah mengecualikannya lewat `undangan_dikecualikan_hapus()`: pesanan `TEST-173` + undangan `174` (`/u/test-rangga-sekar/`), ditandai `_harih_uji=1`, baris sheet `orders` order_id 173.
 ⚠️ Untuk meta ORDER, `wp post meta get` **berbohong** — HPOS aktif, metanya tidak di `wp_postmeta`. Pakai `wp eval '$o=wc_get_order(173); var_export($o->get_meta("_harih_uji"));'`.
 
+**Peta konsep satu halaman:** [`konsep-mitra.svg`](./konsep-mitra.svg) — aliran uang · produk & harga · alur order · permukaan white-label · kuota · fase & gerbang. Sumbernya [`konsep-mitra.excalidraw`](./konsep-mitra.excalidraw) (seret ke excalidraw.com untuk mengedit); keduanya dibangun ulang oleh [`scripts/buat-konsep.py`](../scripts/buat-konsep.py) — **ubah skripnya, jangan gambarnya**, supaya angka di diagram tidak pernah menyimpang dari keputusan di dokumen ini.
+
 **Yang lahir sesi ini dan akan dipakai terus:** `/u/demo-mitra/` (demo white-label, satu slot dipakai bergantian) · [`scripts/demo-mitra.sh`](../scripts/demo-mitra.sh) · `undangan_hapus_data_undangan()` untuk permintaan penghapusan pelanggan ([`runbook.md`](./runbook.md) §7b-2) · `undangan_get_mitra()` sebagai whitelist mitra.
 
 ---
