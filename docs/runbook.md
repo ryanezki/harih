@@ -114,6 +114,43 @@ Halaman undangan otomatis dinonaktifkan (jadi `draft`) setelah masa aktif paketn
   ```
 - Aturan hari ada di `wp-content/mu-plugins/undangan-core/masa-aktif.php` (otoritas). Nilainya juga tersalin di WF-05 hanya untuk menghitung waktu peringatan.
 
+## 7b-2. Retensi 90 hari & permintaan penghapusan data (R2)
+
+Kebijakan Privasi §5 menjanjikan data & foto **dihapus paling lambat 90 hari
+setelah masa aktif berakhir**, dan §7 menjanjikan permintaan penghapusan
+ditanggapi **≤ 7 hari kerja**. Keduanya kini ditegakkan kode, pass kedua di cron
+harian yang sama.
+
+**Apa yang dihapus** saat 90 hari terlewat sejak `nonaktif_sejak`: foto galeri &
+gambar QRIS (berkas + baris media library, termasuk seluruh ukuran turunannya) ·
+seluruh post `ucapan` tamu (memuat nomor WA tamu) · daftar nama tamu · kartu OG ·
+**seluruh meta undangan di luar allowlist** · dan `_snapshot` + `_proof_ip` pada
+order-nya.
+
+**Apa yang sengaja BERTAHAN:** postnya sendiri (slug-nya masih dipakai halaman
+410 supaya tamu yang membuka link lama dapat penjelasan) · `order_id`, `paket`,
+`template_id`, `tanggal_resepsi`, `nonaktif_sejak` · dan `_snapshot_hash` +
+`_proof_hash` + `_proof_disetujui` pada order — cukup membuktikan pelanggan
+pernah menyetujui proof (S&K §12.1) **tanpa menyimpan isinya lagi**.
+
+**Dikecualikan:** undangan demo, undangan tanpa `order_id`, dan pesanan bertanda
+`_harih_uji=1` (yaitu `TEST-173` — sumber berkas sampel cetak).
+
+- Lihat apa yang akan dihapus, tanpa efek apa pun:
+  ```
+  wp eval 'print_r(undangan_jalankan_hapus_data(true));'
+  ```
+- **Permintaan penghapusan dari pelanggan (§7, ≤7 hari kerja)** — jalankan
+  langsung pada satu undangan, tidak perlu menunggu 90 hari:
+  ```
+  wp eval 'print_r(undangan_hapus_data_undangan(174));'
+  ```
+  Cari ID-nya di wp-admin → Undangan. Setelah itu balas pelanggan; halaman
+  undangannya perlu di-set `Draft` terpisah bila masih tayang.
+- ⚠️ **Tidak bisa dibatalkan.** Berkasnya benar-benar dihapus dari disk —
+  itulah janjinya. Cadangan mingguan menyimpan retensi 4 minggu; setelah itu
+  tidak ada jalan pulang.
+
 ## 7c. Pesanan MANUAL lewat WhatsApp — panduan lengkap
 
 > **Kenapa manual.** `duitku_environment` masih `sandbox`; tombol bayar online

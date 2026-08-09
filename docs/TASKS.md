@@ -17,11 +17,12 @@
 **Titik masuk sesi berikutnya.** Rencana lama tuntas kecuali tiga item; dua di antaranya (`C8`, `A8`) dibawa ke sini, satu (`D3`) dibekukan.
 
 > ### ▶ MULAI DARI SINI
-> 1. **R2** — retensi 90 hari akhirnya punya penegak *(eks-`C8`)*. Janji ini sudah tayang di Kebijakan Privasi sejak 22 Juli. 🤖
-> 2. **F0** — jual. Ini satu-satunya yang memindahkan angka. Nol kode. 👤
-> 3. **R3/R4** boleh disisipkan kapan saja; keduanya membuat F0 & F1 lebih murah.
+> 1. **F0** — jual. Ini satu-satunya yang memindahkan angka. Nol kode. 👤
+> 2. **R4** — kaki undangan bercabang + satu demo white-label. Setengah hari, dipakai langsung di F0.3. 🤖
+> 3. **R3** — uji kebocoran cache harga per-role; menentukan bentuk M1. 🤝
+> 4. **R5** — `menit`, sekalian saja.
 >
-> ✅ **R1 selesai & live 9 Agustus** — smoke 33/33, workflow aktif 9 → 8.
+> ✅ **R1 & R2 selesai & live 9 Agustus.** Utang paling keras sudah lunas: nomor rekening berhenti dikumpulkan, dan janji retensi 90 hari akhirnya punya penegak. Smoke 33/33 · workflow aktif 9 → 8.
 
 **Apa yang berubah dari rencana lama.** Pelanggan utama berpindah dari **pengantin** ke **mitra (WO & percetakan)**; mitra dibayar lewat **harga grosir**, bukan komisi; yang dijual adalah **kapasitas + sistem**, bukan undangan. Platform tidak dibangun ulang — sekitar 8 task, sebagian besar hitungan jam.
 
@@ -173,11 +174,21 @@ Jangan dibuka ulang saat coding. `B1–B8` dari cetak biru konsultan, sejajar 1:
 
   **Sisa yang sengaja dibiarkan:** webhook `daftar-reseller` tetap aktif (ditulis ulang jadi onboarding mitra di **M7**) dan node `Buat Kupon WC` masih ada di WF-03 — jalur itu hanya bisa berjalan lewat klik approval owner, dan runbook §7 kini melarang mengkliknya. Penjaga kupon `RES-` di `cetak.php` **sengaja dipertahankan** sampai M1 mencabut mekanismenya; mencabutnya sekarang justru membuka jendela kupon 30% menghantam keranjang cetak.
 
-- [ ] **R2** 🤖 `hari` — **Retensi 90 hari akhirnya punya penegak** *(eks-`C8`)*
+- [x] **R2** 🤖 `hari` — **Retensi 90 hari akhirnya punya penegak** *(eks-`C8`)* → **SELESAI & LIVE 2026-08-09**
   [`kebijakan-privasi.md:59`](./konten-legal/kebijakan-privasi.md:59) menjanjikan data & foto dihapus **paling lambat 90 hari** setelah masa aktif berakhir; [`:71`](./konten-legal/kebijakan-privasi.md:71) menjanjikan hak penghapusan ditanggapi ≤7 hari kerja. Satu-satunya penegak, [`masa-aktif.php:85-88`](../wp-content/mu-plugins/undangan-core/masa-aktif.php:85), hanya `post_status => 'draft'`. **Medianya tetap publik.** Ini bukan fitur — ini janji tertulis yang belum ditepati, dan UU PDP 27/2022 adalah kerangkanya.
   **Langkah:** pass kedua di cron `undangan_cek_masa_aktif` (`masa-aktif.php:114-116`), membaca `nonaktif_sejak` yang **sudah ditulis** di `:87`. Yang dihapus: lampiran galeri & QRIS di uploads · post `ucapan` terkait · meta `daftar_tamu` · kartu OG *(`og.php:225/256` sudah punya `unlink` di `before_delete_post` — hook itu selama ini tidak pernah menyala karena tidak ada yang menghapus permanen)*. Pakai flag `$dry_run` yang sudah terpasang di `:66/:85/:92` sebelum menyalakannya.
   ⚠️ **Kecualikan `_harih_uji=1` dan undangan demo** — pengecualian demo sudah ada di `:57-60`, uji belum. Menghapus `TEST-173`/undangan 174 berarti kehilangan sumber berkas sampel cetak.
   **Selesai bila:** satu undangan uji yang dilewatkan 90 hari kehilangan medianya — **URL media membalas 404**, post `ucapan` hilang, kartu OG hilang — sementara `TEST-173` dan ketiga demo utuh.
+
+  → **SELESAI & LIVE 2026-08-09.** Dua harness dijalankan **di produksi** dengan data yang dibuat & dibersihkan sendiri: **31 + 13 pemeriksaan, nol gagal**, dan produksi kembali persis ke keadaan semula (4 undangan, 1 order). Yang paling penting terbukti langsung, bukan disimpulkan: **URL foto galeri dan QRIS membalas 404** setelah pass berjalan — itu isi janjinya.
+  **Bentuknya berbeda dari rencana di tiga titik, semuanya karena membaca kodenya lebih dulu:**
+  1. **Allowlist, bukan daftar-yang-dihapus.** CPT ini punya **45** meta dan akan bertambah (M2 menambah `mitra_id`). Daftar hapus akan tertinggal diam-diam tiap kali meta baru lahir — dan yang tertinggal justru data pribadi. Sekarang meta baru terhapus secara bawaan; yang perlu bertahan harus disebut sengaja. Enam yang bertahan: `order_id`, `paket`, `template_id`, `tanggal_resepsi`, `nonaktif_sejak`, `data_dihapus`.
+  2. **Media ternyata attachment tanpa `post_parent`.** WF-02 mengunggahnya lewat `POST /wp/v2/media` lalu menyimpan `source_url`-nya sebagai meta — jadi tidak ada relasi induk-anak yang bisa dipakai. Resolusi URL→attachment dibuat dua lapis: `attachment_url_to_postid()`, lalu cadangan yang mencocokkan path relatif ke `_wp_attached_file` (satu-satunya nilai yang tidak ikut berubah bila URL situs bergeser). Bila keduanya gagal, berkasnya tetap dihapus langsung — dibatasi ke dalam `uploads/` lewat perbandingan `realpath()`.
+  3. **`_snapshot` di order ternyata menyimpan `daftar_tamu` juga** — jadi tanpa langkah tambahan, daftar 600 nama tamu tetap tersimpan di order meski sudah hilang dari undangannya. Kini `_snapshot` & `_proof_ip` ikut dihapus sementara `_snapshot_hash`, `_proof_hash`, dan `_proof_disetujui` **dipertahankan**: cukup membuktikan pelanggan pernah menyetujui proof (S&K §12.1) tanpa menyimpan isinya lagi. Hash-nya bertahan, datanya tidak.
+
+  ⚠️ **`wp post meta get` berbohong soal pesanan uji.** Ia mengembalikan kosong untuk `_harih_uji` pada order 173 — sempat terbaca seperti penjaga `TEST-173` tidak terpasang. Penyebabnya **HPOS aktif**: meta order tidak lagi di `wp_postmeta`. Lewat `$order->get_meta()` nilainya `'1'` dan penjaganya benar. Untuk meta order, `wp post meta get` bukan alat yang sah.
+
+  **Sekalian menutup janji §7** (hak penghapusan ≤7 hari kerja): `undangan_hapus_data_undangan($id)` adalah satu fungsi yang dipakai dua jalur — cron 90 hari dan permintaan pelanggan. Prosedurnya di [`runbook.md`](./runbook.md) §7b-2.
 
 - [ ] **R3** 🤝 `jam` — **Kebocoran harga grosir diuji SEBELUM M1 ditulis, bukan sesudah**
   Ini kegagalan paling mahal di seluruh rencana: LiteSpeed menyajikan halaman katalog ter-cache milik user login ke publik → daftar harga grosir bocor ke pengantin. Produksi mengirim `max-age=604800` sebagai default menyeluruh, dan `?to=` memang sengaja tidak memecah cache — jadi asumsi "cache per-user" tidak boleh dipakai tanpa bukti.
