@@ -14,22 +14,39 @@
 
 ## ⏸ CHECKPOINT — mulai dari sini
 
-**Titik masuk sesi berikutnya.** Rencana lama tuntas kecuali tiga item; dua di antaranya (`C8`, `A8`) dibawa ke sini, satu (`D3`) dibekukan.
+**Titik masuk sesi berikutnya.** Sesi 9 Agustus: dokumen ini ditulis ulang dari cetak biru konsultan, **seluruh P0 (R1–R5) dikerjakan sampai live**, lalu penawarannya dikunci di putaran kedua konsultan. Rencana lama tuntas — `C8` diserap ke `R2`, `A8` jadi keputusan owner, `D3` dibekukan.
 
 > ### ▶ MULAI DARI SINI
-> **P0 habis. Tidak ada lagi kode yang menahan apa pun.**
+> **Tidak ada lagi kode yang menahan apa pun. Yang tersisa: mengangkat telepon.**
 >
-> 1. **F0 — jual.** Ini satu-satunya yang memindahkan angka. Nol kode, dan alat jualannya sudah di tangan: `bash demo-mitra.sh "Nama Toko"` menghasilkan undangan live berlabel nama toko calon mitra. 👤
-> 2. **Penawarannya sudah terkunci** (putaran kedua konsultan, 9 Agustus): dua paket grosir saja — Hormat dicabut · pembalik risiko ada di grosir · **retainer tidak disebut di percakapan pertama**. Tidak ada lagi keputusan yang menahan F0.
+> 1. **F0 — jual.** Satu-satunya yang memindahkan angka. Alat & kata-katanya sudah siap:
+>    · `bash demo-mitra.sh "Nama Toko"` → undangan live berlabel nama toko calon mitra
+>    · pesan pembukanya di [`copywriting-pesan.md`](./copywriting-pesan.md) **bagian 9**
+>    · langkah owner di [`panduan-manual.md`](./panduan-manual.md) langkah 0–1
+> 2. **F0.1 menahan pengiriman daftar harga** — dua angka grosir (Resepsi & Grand) belum dikunci. Itu satu jam kerja owner, dan tanpanya bagian 9b tidak bisa dikirim.
 > 3. M1–M8 **terkunci** sampai [Gerbang 0](#-f0--jual-dulu-nol-fitur-baru-minggu-ini) lolos: 3 mitra membayar order grosir pertama.
 >
-> ✅ **Seluruh P0 (R1–R5) selesai 9 Agustus.** Norek berhenti dikumpulkan · retensi 90 hari punya penegak · kaki undangan bisa berlabel nama mitra · harga per-role terbukti tidak bocor lewat cache · drift harga provisioning ditutup. Smoke **33/33** · workflow aktif 9 → 8 · meta CPT 45 → 46.
+> ✅ **Seluruh P0 (R1–R5) selesai & live 9 Agustus.** Norek berhenti dikumpulkan · retensi 90 hari punya penegak · kaki undangan bisa berlabel nama mitra · harga per-role terbukti tidak bocor lewat cache · drift harga provisioning ditutup. Smoke **33/33** · workflow aktif 9 → 8 · meta CPT 45 → 46 · 6 commit.
+
+**Empat kali sesi ini hampir mengirim yang salah, dan semuanya tertangkap sebelum deploy** — dicatat karena polanya berulang, bukan untuk gaya-gayaan:
+
+| Nyaris | Ketahuan karena |
+|---|---|
+| Blok CSS "Form reseller" dihapus — padahal satu-satunya definisi `.field`/`.aturan`, dipakai beranda & `/satuan/` | selektor yang terhapus dicocokkan ke templat yang masih hidup **sebelum** deploy |
+| Uji "`mitra_id` palsu" lulus tanpa menguji apa pun — `update_post_meta` menyisakan baris kosong, nilai palsu jadi baris kedua | prasyarat ujinya sendiri ikut diperiksa (`COUNT(*)` baris meta) |
+| Harness R3 melaporkan "KEBOCORAN TERBUKTI" — `set -u` mematikan seluruh permintaan anonim | tiap permintaan juga mencetak kode HTTP; yang anonim kosong |
+| `_harih_uji` terbaca kosong → penjaga `TEST-173` seolah tidak terpasang | dibaca ulang lewat `$order->get_meta()`; ternyata **HPOS** |
+
+**Aturannya sekarang eksplisit:** harness yang gagal **tidak boleh** menghasilkan kesimpulan — ia harus menolak menyimpulkan.
 
 **Apa yang berubah dari rencana lama.** Pelanggan utama berpindah dari **pengantin** ke **mitra (WO & percetakan)**; mitra dibayar lewat **harga grosir**, bukan komisi; yang dijual adalah **kapasitas + sistem**, bukan undangan. Platform tidak dibangun ulang — sekitar 8 task, sebagian besar hitungan jam.
 
 **Yang TIDAK berubah dan tidak boleh disentuh:** pipeline WF-01 → WF-02 · arsitektur tema sebagai *skin* + whitelist `template_id` · Antrean Cetak, alur proof, `_proof_hash`, `_harih_uji` · hardening & rate limit · Garansi Tepat Waktu H-14 · pembeda inti **nama tiap tamu tercetak langsung di amplopnya**.
 
-**Data uji yang SENGAJA disimpan** — jangan dihapus tanpa konfirmasi, dan **R2 wajib mengecualikannya**: pesanan `TEST-173` + undangan `174` (`/u/test-rangga-sekar/`), ditandai `_harih_uji=1`, baris sheet `orders` order_id 173.
+**Data uji yang SENGAJA disimpan** — jangan dihapus tanpa konfirmasi; `R2` sudah mengecualikannya lewat `undangan_dikecualikan_hapus()`: pesanan `TEST-173` + undangan `174` (`/u/test-rangga-sekar/`), ditandai `_harih_uji=1`, baris sheet `orders` order_id 173.
+⚠️ Untuk meta ORDER, `wp post meta get` **berbohong** — HPOS aktif, metanya tidak di `wp_postmeta`. Pakai `wp eval '$o=wc_get_order(173); var_export($o->get_meta("_harih_uji"));'`.
+
+**Yang lahir sesi ini dan akan dipakai terus:** `/u/demo-mitra/` (demo white-label, satu slot dipakai bergantian) · [`scripts/demo-mitra.sh`](../scripts/demo-mitra.sh) · `undangan_hapus_data_undangan()` untuk permintaan penghapusan pelanggan ([`runbook.md`](./runbook.md) §7b-2) · `undangan_get_mitra()` sebagai whitelist mitra.
 
 ---
 

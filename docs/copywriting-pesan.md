@@ -14,8 +14,8 @@
 | `{{nama_pria}}` `{{nama_wanita}}` | form isi data |
 | `{{tgl_acara}}` | sheet `orders` → tgl_acara |
 | `{{masa_aktif}}` | dari paket: "sampai H+7" / "sampai H+30" / "sampai 1 tahun setelah acara" |
-| `{{nama_reseller}}` `{{kode_reseller}}` `{{bank}}` `{{norek}}` | sheet `resellers` |
-| `{{rincian}}` `{{total_komisi}}` `{{periode}}` | WF-04 agregasi sheet `komisi` |
+| ~~`{{nama_reseller}}` `{{kode_reseller}}` `{{bank}}` `{{norek}}`~~ | **dicabut R1** — tidak ada komisi, dan nomor rekening mitra tidak pernah dikumpulkan (`B2`) |
+| ~~`{{rincian}}` `{{total_komisi}}` `{{periode}}`~~ | **dicabut R1** — WF-04 dipensiunkan |
 | `{{link_katalog}}` | `https://harih.id/` |
 
 ---
@@ -154,82 +154,19 @@ Terima kasih sudah mempercayakan undangan digital kalian ke hariH — semoga men
 — hariH
 ```
 
-*(Opsional bila program referral aktif: tambahkan baris "Gunakan kode `{{kode_referral}}` untuk diskon 10%.")*
+*(~~Opsional bila program referral aktif: kode diskon 10%~~ — **dicabut R1.** Kupon `RES-` dan seluruh mekanisme referral diganti harga grosir per role; jangan hidupkan kembali kalimat ini tanpa membuka `B1`.)*
 
 ---
 
-## 6. Welcome Kit Reseller (WF-03)
+## 6–7. ~~Welcome Kit Reseller~~ · ~~Rekap Komisi Mingguan~~ — **DICABUT R1 (2026-08-09)**
 
-### 6a. Pesan utama
-
-```
-Selamat bergabung sebagai reseller hariH, {{nama_reseller}}! 🎉
-
-Kode kuponmu: *{{kode_reseller}}*
-
-Cara kerjanya:
-1️⃣ Bagikan katalog: {{link_katalog}}
-2️⃣ Pembeli memasukkan kode *{{kode_reseller}}* saat checkout → mereka hemat *10%*
-3️⃣ Kamu dapat komisi *30%* dari setiap order 💸
-
-Rekap + payout komisi dikirim tiap *Senin pagi*.
-
-Aturan singkat:
-• Promosikan ke kenalan & media sosialmu sendiri (bukan spam grup acak)
-• Kode tidak berlaku untuk pembelian sendiri
-
-Caption siap pakai menyusul di pesan berikutnya 👇
-— hariH
-```
-
-### 6b. Contoh caption promosi (pesan lanjutan, siap di-forward)
-
-```
-Contoh caption — tinggal salin & sesuaikan:
-
-1) Buat kamu yang mau nikah tapi budget undangan mepet 👰🤵
-Undangan digital mulai *99rb*, jadi dalam *hitungan menit*, bisa dibuka semua tamu dari WhatsApp. Ada RSVP, galeri foto, amplop digital.
-Cek: {{link_katalog}} — pakai kode *{{kode_reseller}}* biar hemat 10%!
-
-2) Nikahan makin praktis ✨ Nggak perlu cetak ratusan undangan — kirim 1 link, semua tamu kebagian, nama tamu bisa otomatis muncul. Mulai 99 ribu aja.
-{{link_katalog}} · kode diskon: *{{kode_reseller}}*
-
-3) [Untuk story] Bantu share dong 🙏 Temen/saudara ada yang mau nikah? Undangan digital cantik + cepet + murah meriah. DM aku atau langsung ke {{link_katalog}}, jangan lupa kode *{{kode_reseller}}* ya!
-```
-
----
-
-## 7. Rekap Komisi Mingguan (WF-04, Senin 09:00 WIB)
-
-### 7a. Ke tiap reseller
-
-```
-💸 *Rekap Komisi hariH* — {{periode}}
-
-Halo {{nama_reseller}}! Ini hasil penjualanmu minggu lalu:
-
-{{rincian}}
-
-Total komisi: *Rp {{total_komisi}}*
-Payout ke {{bank}} {{norek}} diproses hari ini.
-
-Terima kasih & semangat terus! 🚀
-— hariH
-```
-
-*(Format baris `{{rincian}}`: `• #1023 · Favorit · komisi Rp 48.300`)*
-
-### 7b. Ke owner
-
-```
-📊 *[hariH] Rekap komisi — {{periode}}*
-
-{{jumlah_reseller}} reseller aktif · total payout *Rp {{total_semua}}*
-
-{{rincian_per_reseller}}
-
-✅ Setelah transfer, ubah status di sheet `komisi` → PAID.
-```
+> ⛔ **Kedua bagian ini dihapus, bukan diarsipkan — isinya adalah janji yang tidak lagi kami lakukan.**
+>
+> Template lama menjanjikan *"komisi 30% dari setiap order"* dan *"payout ke {bank} {norek} diproses hari ini"*. Di model grosir **arah uang selalu mitra → hariH** (`B2`): tidak ada komisi yang dihitung, tidak ada payout, dan nomor rekening mitra tidak pernah dikumpulkan. WF-04 dipensiunkan, WF-03 menyusul di `M7`.
+>
+> Membiarkan teksnya di sini "sebagai arsip" berbahaya: berkas ini adalah tempat orang menyalin kalimat saat memasang workflow. Riwayat lengkapnya ada di git sampai commit `d6ec7ee`.
+>
+> Penggantinya: **bagian 9** di bawah — pesan pembuka ke calon mitra, memakai penawaran yang sudah dikunci (`B9` · `B13` · `B14` · `B15`).
 
 ---
 
@@ -259,3 +196,84 @@ Customer mungkin sudah bayar tapi belum menerima apa pun — prioritaskan.
 > Tindakan: SSH ke VPS → `ssh -L 3000:127.0.0.1:3000 user@vps` → buka `http://localhost:3000/dashboard` → login API key → restart/scan ulang QR sesi `default`.
 >
 > Setelah pulih, cek kolom `wa_status` di sheet `orders` untuk pesan yang perlu dikirim ulang.
+
+---
+
+## 9. Pembuka ke calon mitra — F0.3 *(ditulis tangan owner, bukan otomatis)*
+
+> **Bukan copywriting yang dipoles, dan sengaja begitu.** Halaman jualan `/mitra/` (`M8`) memang harus dibangun dari **keberatan nyata** yang dikumpulkan `F0.5` — bukan dari tebakan. Tapi percakapan pertama harus terjadi lebih dulu supaya ada keberatan untuk dikumpulkan. Jadi yang di bawah hanya **penawaran terkunci yang dituliskan apa adanya**: nol bujukan, nol klaim yang belum ditepati alur. Ganti sendiri kalimatnya sesuai cara Anda bicara — yang tidak boleh berubah adalah isinya.
+>
+> Aturan yang mengikat teks ini: `B9` (Hormat tidak ditawarkan) · `B13` (yang dijual slot produksi) · `B14` (pembalik risiko, syaratnya bisa diamati) · `B15` (**jangan sebut langganan bulanan**).
+
+### 9a. Pesan pertama — WA, ke pelanggan percetakan & WO yang sudah kenal
+
+```
+Halo Pak/Bu {{nama}}, ini {{owner}} dari {{percetakan}}.
+
+Saya lagi buka satu layanan baru: *undangan digital + undangan cetak
+lipat beramplop nama tamu* — dan saya cari beberapa partner untuk
+menjualnya pakai nama tokonya sendiri.
+
+Jadi undangannya tampil atas nama *{{nama_toko}}*, bukan nama saya.
+Bapak/Ibu ambil harga partner, mau dijual berapa pun terserah — selisihnya
+diambil sendiri, saya tidak perlu tahu.
+
+Ini contohnya, sudah pakai nama toko Bapak/Ibu:
+{{link_demo}}
+
+Boleh saya kirim daftar harga partnernya?
+```
+
+*`{{link_demo}}` dibuat lewat `bash demo-mitra.sh "{{nama_toko}}"` — lihat [`panduan-manual.md`](./panduan-manual.md) langkah 0.*
+
+### 9b. Susulan — daftar harga + pembalik risiko
+
+```
+Ini harga partnernya, {{nama}}:
+
+📦 *Paket Resepsi* — 100 undangan cetak lipat + amplop nama tamu
+   + undangan digital
+   Harga partner *Rp {{grosir_resepsi}}* · harga saya ke publik Rp 2.900.000
+
+📦 *Paket Grand* — 150 undangan cetak premium + undangan digital
+   Harga partner *Rp {{grosir_grand}}* · harga saya ke publik Rp 5.900.000
+
+Bapak/Ibu bebas menentukan harga jual sendiri.
+
+Yang saya jamin:
+*Order pertama telat dari H-14 sebelum acara, atau kliennya menolak
+hasilnya — uangnya saya kembalikan penuh, cetakannya tetap diambil.*
+
+Kapasitas saya *8 order cetak per bulan*, jadi saya pegang urutan masuk.
+```
+
+> ⚠️ **Yang TIDAK boleh masuk pesan ini:**
+> · Paket Hormat Rp 1,19 jt — dicabut dari daftar partner (`B9`)
+> · langganan/retainer bulanan — belum waktunya (`B15`)
+> · *"tawarkan ke 5 pengantin"* — syarat lama yang dicabut, tidak bisa diverifikasi siapa pun (`B14`)
+> · janji checkout otomatis — Duitku masih sandbox, semua pembayaran manual (`A7`)
+
+### 9c. Saat mitra kembali untuk order kedua — *baru di sini* retainer disebut
+
+> Momen yang tepat menurut `B15`: mitra kembali, dan slot bulan itu sudah diambil orang lain. Satu kalimat, tanpa tanda bintang.
+
+```
+Bulan ini slotnya sudah penuh, {{nama}} — kepakai lima order yang masuk duluan.
+
+Kalau mau, saya bisa kunci slot atas nama {{nama_toko}} tiap bulan:
+*Rp {{retainer}}/bulan, seluruhnya jadi saldo order bulan itu.*
+Kalau bulan itu tidak dipakai, saldonya hangus.
+
+Jadi bulan depan Bapak/Ibu tidak perlu antre.
+```
+
+**Catat jawabannya — ya maupun tidak — beserta alasannya (`F0.6`).** Itu data pertama tentang apakah retainer punya pembeli.
+
+### 9d. Variabel bagian 9
+
+| Variabel | Isi |
+|---|---|
+| `{{nama_toko}}` | nama toko/usaha calon mitra — dipakai juga di `demo-mitra.sh` |
+| `{{link_demo}}` | `https://harih.id/u/demo-mitra/` setelah skrip dijalankan |
+| `{{grosir_resepsi}}` `{{grosir_grand}}` | dikunci di `F0.1` — **belum diputuskan, jangan dikirim sebelum ada angkanya** |
+| `{{retainer}}` | angka retainer, masih menunggu keputusan owner #2 |
