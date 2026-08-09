@@ -19,11 +19,12 @@
 > ### ▶ MULAI DARI SINI
 > **Tidak ada lagi kode yang menahan apa pun. Yang tersisa: mengangkat telepon.**
 >
-> 1. **F0 — jual.** Satu-satunya yang memindahkan angka. Alat & kata-katanya sudah siap:
+> 1. **F0.2 — susun 30 nama.** 20 WO + 10 percetakan, Tangerang & Jakarta Barat. Ini satu-satunya yang tersisa sebelum menelepon. 👤
+> 2. **F0.3 — hubungi semuanya.** Semua bahannya sudah jadi dan tidak ada lagi yang perlu diputuskan:
+>    · harga **terkunci** — Resepsi Rp 1.650.000 · Grand Rp 3.400.000, ambil di tempat (**B16**)
 >    · `bash demo-mitra.sh "Nama Toko"` → undangan live berlabel nama toko calon mitra
->    · pesan pembukanya di [`copywriting-pesan.md`](./copywriting-pesan.md) **bagian 9**
+>    · pesan pembuka **siap kirim, angkanya sudah terisi** — [`copywriting-pesan.md`](./copywriting-pesan.md) bagian 9
 >    · langkah owner di [`panduan-manual.md`](./panduan-manual.md) langkah 0–1
-> 2. **F0.1 menahan pengiriman daftar harga** — dua angka grosir (Resepsi & Grand) belum dikunci. Itu satu jam kerja owner, dan tanpanya bagian 9b tidak bisa dikirim.
 > 3. M1–M8 **terkunci** sampai [Gerbang 0](#-f0--jual-dulu-nol-fitur-baru-minggu-ini) lolos: 3 mitra membayar order grosir pertama.
 >
 > ✅ **Seluruh P0 (R1–R5) selesai & live 9 Agustus.** Norek berhenti dikumpulkan · retensi 90 hari punya penegak · kaki undangan bisa berlabel nama mitra · harga per-role terbukti tidak bocor lewat cache · drift harga provisioning ditutup. Smoke **33/33** · workflow aktif 9 → 8 · meta CPT 45 → 46 · 6 commit.
@@ -159,6 +160,21 @@ Usul saya di K1 — "Hormat dicabut, **atau** lantai Rp 850rb" — diuji konsult
 
 **Risiko jangkar harga lebih parah di jalur mitra daripada di eceran** — dan itu yang mengunci keputusannya. Pembeli eceran memilih sekali seumur hidup; mitra memilih **20–40 kali setahun**. Satu kebiasaan buruk berulang sepanjang tahun. Hormat tetap dijual penuh di katalog eceran, di mana tugasnya memang jadi pembanding — dan pembanding tidak dimasukkan ke daftar grosir. → **B9**
 
+### 🔴 K9 — "kaki tetap menampilkan nama mitra selamanya" bertabrakan dengan kode R4
+
+**B17** menjanjikan kredit mitra terus tampil setelah mitra berhenti. Tapi `harih_mitra_brand()` sengaja **memvalidasi ulang saat render** (itu justru penjaga yang membuat R4 aman): slug yang tidak ada di `undangan_get_mitra()` jatuh ke brand hariH.
+
+**Akibatnya, mencabut satu mitra dari option `harih_mitra_brand` akan diam-diam mengembalikan SELURUH undangan lama mitra itu ke brand hariH** — di depan ratusan tamu, tanpa satu pun galat, dan persis melanggar janji yang dijual di `/mitra/`. Tidak ada yang akan menyadarinya sampai mitra itu menelepon.
+
+**Aturannya:** pisahkan **tercatat** dari **aktif**.
+
+| | Tempatnya | Sifatnya |
+|---|---|---|
+| **Tercatat** — nama boleh dirender di kaki | option `harih_mitra_brand` | **append-only. Jangan pernah menghapus entri** |
+| **Aktif** — berhak membeli di harga grosir | role `harih_mitra` / kolom `status` (M1, M7) | dicabut kapan saja tanpa menyentuh yang di atas |
+
+Sudah ditulis sebagai peringatan di docblock `undangan_get_mitra()` ([`cpt.php`](../wp-content/mu-plugins/undangan-core/cpt.php)) supaya terbaca oleh orang yang sedang membuka berkasnya, bukan hanya di dokumen ini. **M1 wajib tidak menggabungkan keduanya.**
+
 ---
 
 ## Keputusan terkunci
@@ -182,6 +198,9 @@ Jangan dibuka ulang saat coding. `B1–B8` dari cetak biru konsultan, sejajar 1:
 | **B13** | Retainer dijual sebagai **slot produksi terkunci**, bukan sebagai akses portal | Portal white-label sudah beredar mulai ±Rp 50rb/bulan (K4). Yang tidak bisa ditiru: mutu cetak, amplop bernama, tiga garansi |
 | **B14** | **Pembalik risiko ada di GROSIR, bukan di retainer** — dan syaratnya wajib **bisa diamati**: *"Order pertamamu telat dari H-14 atau kliennya menolak hasilnya — uangmu kembali penuh, cetakannya tetap kamu ambil."* | Syarat lama *"tawarkan ke 5 pengantin"* **tidak bisa diverifikasi siapa pun** — jaminan seperti itu berakhir jadi sengketa, atau jadi jaminan tanpa syarat yang ditanggung diam-diam. Keduanya menempatkan owner pada posisi kalah |
 | **B15** | **Retainer ditawarkan di order ke-2/ke-3, bukan di percakapan pertama** — satu kalimat tanpa tanda bintang: *"Slot dikunci atas namamu. Saldo hangus akhir bulan."* | Dua alat komitmen tidak boleh menumpuk di satu tempat. Di order kedua mitra bukan orang asing lagi: dia sudah membeli, sudah melihat hasilnya, dan baru saja kehilangan slot. **Dia tidak butuh jaminan — dia butuh slotnya** |
+| **B16** | **Harga grosir FINAL — Resepsi Rp 1.650.000 · Grand Rp 3.400.000.** Berlaku **ambil di tempat, Jabodetabek**. Mitra minta kirim → **+Rp 150.000 flat**, disebut di muka, bukan biaya tersembunyi | HPP tanpa ongkir (350rb / 570rb) → marjin per jam tangan **765rb** & **1,29jt**, lolos lantai B10 dengan ruang lebih lega. Ambil di tempat bukan penghematan yang dipotong dari harga: itu **alasan mitra datang ke bengkel**, dan mitra yang pernah datang jauh lebih sulit pindah. Add-on Rp 150rb menutup ongkir nyata Jawa (Rp 35–50rb) dengan sisa |
+| **B17** | **Undangan mitra tidak pernah dimatikan, dan kaki undangan tetap menampilkan nama mitra — selamanya**, termasuk setelah mitra berhenti | Mematikan undangan klien orang lain adalah cara tercepat kehilangan seluruh jaringan. Kredit yang terus jalan di depan ratusan tamu selama setahun **bukan kerugian yang ditelan — itu alasan dia kembali.** ⚠️ Konsekuensi kode: daftar `harih_mitra_brand` **append-only**, lihat K9 |
+| **B18** | **Kunci harga retainer = 12 bulan pertama, bukan "selamanya"** — dan hanya ditawarkan ke mitra yang **sudah order dua kali** | Menjanjikan "selamanya" ke orang yang belum pernah membeli adalah membayar di muka untuk kesetiaan yang belum ada. Sejak B15 kalimat kelangkaan itu memang tidak lagi diucapkan ke orang asing |
 
 **Metrik yang dilacak — dan hanya ini:** mitra aktif berbayar (target F1: **3**) · isian slot cetak (≥ 50%) · attach rate cetak (≥ 15%) · retensi mitra bulan ke-2 (≥ 80%).
 **Berhenti dilacak sampai ada 8 mitra:** pageview · bounce rate · skor Lighthouse · jumlah tema.
@@ -280,8 +299,17 @@ Jangan dibuka ulang saat coding. `B1–B8` dari cetak biru konsultan, sejajar 1:
 
 > Tidak ada task fitur di fase ini. Kalau ada fitur baru dikerjakan minggu ini, fase ini gagal. P0 di atas adalah pengecualian yang sudah dibatasi — utang, risiko, dan satu alat jualan.
 
-- [ ] **F0.1** 👤 `jam` — **Kunci DUA angka grosir.** Hormat sudah dicabut (**B9**), jadi yang tersisa Resepsi & Grand — dan keduanya sudah lolos lantai **B10** di harga usulan konsultan (735rb & 1,31jt per jam tangan, lantai 600rb). Yang benar-benar perlu diverifikasi tinggal **bahan terkini** dan **ongkir ke mitra Jabodetabek** (bisa jauh di bawah alokasi Rp 150rb, atau nol bila mitra ambil sendiri).
+- [x] **F0.1** 👤 `jam` — **Kunci DUA angka grosir** → **TERKUNCI 2026-08-09** *(**B16**)*
   **Selesai bila:** dua angka grosir tertulis di dokumen ini — Resepsi & Grand — masing-masing lolos ≥ Rp 600rb/jam tangan dengan HPP terkini.
+
+  | | Eceran | **Grosir** | HPP *(tanpa ongkir)* | Marjin | Jam tangan | **/jam tangan** | Spread mitra |
+  |---|---|---|---|---|---|---|---|
+  | **Resepsi** (100) | 2,9 jt | **Rp 1.650.000** | 350rb | 1,30 jt | 1,7 | **765rb** ✅ | 1,25 jt (43%) |
+  | **Grand** (150) | 5,9 jt | **Rp 3.400.000** | 570rb | 2,83 jt | 2,2 | **1,29 jt** ✅ | 2,50 jt (42%) |
+
+  → **Diverifikasi ulang terhadap pengukuran 8 Agustus, semuanya cocok:** HPP tanpa ongkir = HPP lama − Rp 150rb alokasi, dan sama dengan bahan terukur (100 × Rp 3.200 + setup ≈ 350rb · 150 × Rp 3.200 + kertas premium ≈ 570rb). Kenaikan marjin/jam tangan **676rb → 765rb** dan **1,22jt → 1,29jt** tepat. Per jam dinding pun aman: 325rb & 496rb.
+  **Ongkir yang hilang tidak dipotong dari harga** — jadi bantalan untuk kenaikan bahan dan untuk order pertama yang pasti berantakan. Harga grosir turun itu satu arah; sekali turun tidak bisa dinaikkan lagi ke mitra yang sama.
+  **Bahan Rp 3.200/unit diukur 8 Agustus.** Bila ada nota lebih baru, ganti angkanya — tapi **harga grosir tidak ikut berubah kecuali bahan naik >40%**, dan jangan menunda kirim daftar harga untuk menunggu nota.
 - [ ] **F0.2** 👤 `jam` — **Susun daftar 20 WO + 10 percetakan** di Tangerang & Jakarta Barat. Sekalian verifikasi K4: cek satu-dua tawaran white-label pemain besar, catat harga & isinya apa adanya.
   **Selesai bila:** 30 nama + nomor WA tertulis di satu tempat, dan angka pembanding K4 sudah diganti dengan yang benar-benar dilihat.
 - [ ] **F0.3** 👤 `hari` — **Hubungi semuanya. Yang dijual hanya GROSIR.** Manual sepenuhnya. Tawaran = harga grosir (dua paket) + pembalik risiko **B14** + demo dari **R4**, undangan live berlabel nama toko mereka.
@@ -325,7 +353,8 @@ Estimasi: 5–8 hari kerja. Urutan grup adalah urutan kerja.
 
 - [ ] **M6** 🤖 `jam` — **Order mitra tidak mati minggu depan.** `masa-aktif.php`: order ber-`mitra_id` → masa aktif minimal 1 tahun, abaikan aturan H+7 tanpa memandang tier *(peta tier ada di `:29-31`)*.
   **Alasan bisnis:** undangan yang mati bukan komplain ke hariH — itu komplain ke mitra, di depan kliennya. Sekali kejadian, mitranya hilang.
-  ⚠️ Bergantung pada keputusan owner #1 (nasib undangan mitra yang berhenti bayar).
+  ✅ **Penghalangnya sudah lepas** (**B17**, 9 Agustus): undangan mitra **tidak pernah dimatikan** karena mitranya berhenti berlangganan — masa aktifnya jalan terus sampai habis, dan kakinya tetap menampilkan nama mitra. Jadi M6 murni soal masa aktif, tanpa cabang "mitra masih bayar atau tidak".
+  ⚠️ Jangan menulis logika yang membaca status langganan di sini. Lihat **K9**: yang boleh dicabut adalah hak *membeli*, bukan yang sudah terbit.
   **Selesai bila:** order mitra bertahan 1 tahun; order publik tetap kedaluwarsa sesuai tiernya.
 
 - [ ] **M7** 🤝 `jam` — **WF-03 jadi onboarding mitra.** Buat user WordPress role `harih_mitra` + kirim kredensial via WA & email. Tab Sheets `resellers` → `mitra`: `user_id · nama · wa · jatah_slot · tgl_mulai · status` — **tanpa kolom bank & norek** (sudah dicabut di R1).
@@ -335,6 +364,10 @@ Estimasi: 5–8 hari kerja. Urutan grup adalah urutan kerja.
 - [ ] **M8** 🤖 `hari` — **Halaman jualan `/mitra/` + `/harga/` berhenti meng-hardcode harga cetak.** Berkas: `themes/harih/page-mitra.php` (baru) · `page-harga-hybrid.php`.
   Susunan: judul (hasil transformasi, bukan fitur) → matematika untung **dua paket** (Hormat tidak muncul — **B9**) → cara kerja 3 langkah → pembalik risiko **B14** apa adanya → satu CTA. **Dibangun dari keberatan nyata F0.5, bukan tebakan.**
   ⛔ **Halaman ini menjual grosir, bukan retainer** (**B15**). Retainer tidak punya tempat di halaman yang dibaca orang asing.
+  **Tiga kalimat yang WAJIB ada, semuanya keputusan terkunci:**
+  · harga grosir **Rp 1.650.000 / Rp 3.400.000, ambil di tempat** — kirim +Rp 150rb flat se-Jabodetabek, disebut di muka (**B16**)
+  · *"Undangan klienmu tidak akan pernah saya matikan"* — dan namamu tetap di kakinya, juga kalau kamu berhenti (**B17**). Ini menghapus keberatan terbesar yang belum sempat diucapkan siapa pun
+  · pembalik risiko **B14** apa adanya, dengan syarat yang bisa diamati
   Berlaku disiplin `C3`/`U21`: nol klaim yang tidak ditepati alur — kalau tombolnya membuka WhatsApp, jangan menulis "checkout otomatis". Dan **B11**: jangan menjual "hanya 8 slot" sebagai kelangkaan.
   Sekalian: harga cetak di `page-harga-hybrid.php` dibaca lewat `harih_harga_*`, bukan ditulis ulang (K6) — sekarang ada **dua** tingkat harga yang bisa saling menyimpang.
   **Selesai bila:** nol angka harga hardcode di kedua halaman · setiap klaim di halaman bisa ditunjuk alurnya.
@@ -386,10 +419,9 @@ Kalau ada yang mengusulkan salah satu di atas, jawabannya: *"tunjukkan mitra yan
 
 ## 👤 Keputusan yang menunggu owner
 
-1. **Undangan mitra yang berhenti bayar — dimatikan, dibekukan, atau tetap hidup sampai masa aktifnya habis?** Saran: **tetap hidup sampai masa aktifnya habis.** Mematikan undangan klien orang lain adalah cara tercepat kehilangan seluruh jaringan mitra, dan biaya marginalnya mendekati nol. **Menahan M6** — tapi tidak menahan F0.
-2. **"10 mitra pertama Rp 590rb selamanya"** — dikunci selamanya, atau berjangka (mis. 24 bulan)? Kurang mendesak sejak **B15**: retainer tidak lagi diucapkan ke orang asing, jadi kalimat kelangkaan itu belum akan dipakai.
-3. **Duitku (`A8`)** — kejar approval + tiga pertanyaan (profil nominal Rp 99–299rb vs paket Rp 5,9jt · mekanisme refund · plafon per kanal). **Tidak memblokir apa pun**; jalur manual `A7` cukup untuk 8 order/bulan.
-4. **Ongkir Indonesia Timur** — dibiarkan ditanggung slack, atau diberi syarat? Terburuk (Grand ke Indonesia Timur) ±Rp 200rb vs alokasi Rp 150rb; mayoritas Jawa ±Rp 35–50rb.
+**Kosong. Tidak ada satu pun keputusan yang tertahan** — seluruhnya terjawab 9 Agustus. Yang tersisa hanya **pekerjaan**, ada di [👤 Aksi owner](#-aksi-owner--yang-masih-menunggu-tangan-anda).
+
+*(`A8` Duitku dipindah ke sana: itu mengejar pihak ketiga, bukan memutuskan sesuatu.)*
 
 ### ✅ Terjawab 9 Agustus — putaran kedua konsultan
 
@@ -400,6 +432,10 @@ Kalau ada yang mengusulkan salah satu di atas, jawabannya: *"tunjukkan mitra yan
 | Paket Hormat: dicabut dari grosir, atau lantai Rp 850rb | **DICABUT.** Lantai Rp 850rb pun gagal lantai B10 (429rb/jam tangan), dan satu-satunya harga yang lolos menyisakan spread mitra 11,3% — tidak ada yang mau menjualnya | **B9** · K8 |
 | Lantai marjin per jam tangan | Dinaikkan **2× → 3×** patokan (Rp 400rb → **Rp 600rb**). Resepsi & Grand tetap lolos, jadi nol harga berubah | **B10** |
 | Kapan retainer ditawarkan | **Order ke-2/ke-3**, bukan percakapan pertama. Gerbang 0 otomatis jadi murni grosir | **B15** · **B12** |
+| Dua angka harga grosir | **Resepsi Rp 1.650.000 · Grand Rp 3.400.000**, ambil di tempat; kirim +Rp 150rb flat Jabodetabek | **B16** · F0.1 |
+| Undangan mitra yang berhenti bayar | **Tetap hidup sampai masa aktifnya habis — dan kaki tetap menampilkan nama mitra selamanya.** Bukan kerugian yang ditelan; itu alasan dia kembali | **B17** · K9 |
+| "Rp 590rb selamanya" | **Dicabut, bukan cuma dibatasi.** Ganti kunci harga **12 bulan**, hanya ke mitra yang sudah order dua kali | **B18** |
+| Ongkir Indonesia Timur | **Ditanggung slack, tanpa syarat zona.** Selisih terburuk Rp 50rb pada order bermarjin jutaan; syarat zona membebani 100% pembeli demi kasus <5% | — |
 
 **Terbawa dari dokumen lama, masih berlaku:** jalur bayar manual = ya, seluruh CTA ke WhatsApp · Garansi Tepat Waktu punya syarat mulai, bukan rumus geser · bobot terukur 1,4/2,6/3,8 kg sudah hidup di WooCommerce · harga satuan 15rb → 35rb, pembedanya struktural · badge "Paling Populer" dicabut · WebP dibangun sendiri, bukan QUIC.cloud · foto produk = render AI berlabel *"ilustrasi"* sampai foto asli ada.
 

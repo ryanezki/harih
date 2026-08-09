@@ -38,6 +38,19 @@ function undangan_sanitize_template_id($value): string {
  * R4 harus jalan sekarang untuk dipakai menawar. Saat M1/M7 membuat user
  * mitra sungguhan, `user_nicename`-nya bisa langsung jadi slug di sini —
  * bentuk metanya tidak perlu berubah.
+ *
+ * ⛔ **DAFTAR INI HANYA BERTAMBAH — JANGAN PERNAH MENGHAPUS MITRA DARI SINI.**
+ * Keputusan owner 2026-08-09: mitra yang berhenti berlangganan **tetap
+ * mendapat kredit namanya di kaki undangan selamanya** — itu bukan kerugian
+ * yang ditelan, itu alasan dia kembali. `harih_mitra_brand()` memvalidasi
+ * ulang saat render, jadi mencabut satu entri di sini **diam-diam mengembalikan
+ * SELURUH undangan lama mitra itu ke brand hariH** — di depan ratusan tamu,
+ * tanpa satu pun galat, dan melanggar janji "undangan klienmu tidak akan
+ * pernah saya matikan" yang dijual di `/mitra/`.
+ *
+ * Yang benar: pisahkan **tercatat** dari **aktif**. Daftar ini = tercatat
+ * (append-only, untuk render). Hak membeli di harga grosir = status aktif,
+ * tempatnya di role/`status` mitra (M1/M7) — bukan di sini.
  */
 function undangan_get_mitra(): array {
     $bersih = [];

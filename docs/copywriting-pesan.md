@@ -233,16 +233,25 @@ Ini harga partnernya, {{nama}}:
 
 📦 *Paket Resepsi* — 100 undangan cetak lipat + amplop nama tamu
    + undangan digital
-   Harga partner *Rp {{grosir_resepsi}}* · harga saya ke publik Rp 2.900.000
+   Harga partner *Rp 1.650.000* · harga saya ke publik Rp 2.900.000
 
 📦 *Paket Grand* — 150 undangan cetak premium + undangan digital
-   Harga partner *Rp {{grosir_grand}}* · harga saya ke publik Rp 5.900.000
+   Harga partner *Rp 3.400.000* · harga saya ke publik Rp 5.900.000
 
 Bapak/Ibu bebas menentukan harga jual sendiri.
+
+Harga partner ini *ambil di tempat* (Jabodetabek). Kalau mau saya
+kirimkan, tambah *Rp 150.000* flat — saya sebutkan di depan supaya tidak
+ada biaya yang muncul belakangan.
 
 Yang saya jamin:
 *Order pertama telat dari H-14 sebelum acara, atau kliennya menolak
 hasilnya — uangnya saya kembalikan penuh, cetakannya tetap diambil.*
+
+Dan ini yang biasanya belum sempat ditanyakan orang:
+*undangan klien Bapak/Ibu tidak akan pernah saya matikan* — masa
+aktifnya jalan terus, dan nama {{nama_toko}} tetap ada di kakinya,
+juga kalau nanti kita berhenti kerja sama.
 
 Kapasitas saya *8 order cetak per bulan*, jadi saya pegang urutan masuk.
 ```
@@ -275,5 +284,5 @@ Jadi bulan depan Bapak/Ibu tidak perlu antre.
 |---|---|
 | `{{nama_toko}}` | nama toko/usaha calon mitra — dipakai juga di `demo-mitra.sh` |
 | `{{link_demo}}` | `https://harih.id/u/demo-mitra/` setelah skrip dijalankan |
-| `{{grosir_resepsi}}` `{{grosir_grand}}` | dikunci di `F0.1` — **belum diputuskan, jangan dikirim sebelum ada angkanya** |
-| `{{retainer}}` | angka retainer, masih menunggu keputusan owner #2 |
+| ~~`{{grosir_resepsi}}` `{{grosir_grand}}`~~ | **sudah terkunci 9 Agu, ditulis langsung di teks:** Resepsi Rp 1.650.000 · Grand Rp 3.400.000, ambil di tempat (`B16`) |
+| `{{retainer}}` | angka retainer — kunci harganya berlaku **12 bulan**, bukan selamanya (`B18`), dan hanya ditawarkan ke mitra yang sudah order dua kali |
