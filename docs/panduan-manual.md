@@ -66,8 +66,15 @@ berdekatan, karena yang kedua akan melihat nama yang pertama.
 **Langkah:**
 1. Daftar **pelanggan percetakan** yang menikah, atau punya anak/saudara yang menikah tahun ini.
 2. Daftar **WO** yang pernah mencetak di tempat Anda.
-3. Tunjukkan **sampel fisik** yang sudah Anda cetak — itu yang menjual, bukan link.
+3. Tunjukkan **sampel fisik** yang sudah Anda cetak — itu yang menjual, bukan link. Lalu kirim link demo dari langkah 0, yang sudah berlabel nama toko mereka.
 4. Sudut penawaran untuk WO: *"undangannya tampil dengan nama Anda, dan Anda ambil marjinnya."*
+5. Tutup dengan pembalik risikonya, apa adanya:
+   > *"Order pertamamu telat dari H-14 atau kliennya menolak hasilnya — uangmu kembali penuh, cetakannya tetap kamu ambil."*
+
+**Dua pagar yang mengubah isi percakapan ini (keputusan 9 Agustus):**
+
+- ⛔ **Jangan sebut langganan bulanan sama sekali.** Meminta orang yang belum pernah membeli apa pun untuk berlangganan adalah permintaan tersulit yang bisa diajukan — dan ia menenggelamkan tawaran grosir yang justru mudah diterima. Langganan ditawarkan nanti, **saat mitra kembali untuk order kedua dan slot bulan itu sudah diambil orang lain.** Saat itu ia bukan orang asing lagi: dia tidak butuh jaminan, dia butuh slotnya.
+- ⛔ **Paket Hormat (Rp 1,19 jt) tidak masuk daftar grosir.** Hanya Resepsi & Grand. Alasannya slot: Hormat memakai satu dari delapan slot untuk marjin Rp 515rb, sementara Grand memakai slot yang sama untuk Rp 2,88 juta — **biaya peluang Rp 2,37 juta per slot**. Hormat tetap dijual penuh di katalog eceran; di sana tugasnya memang jadi pembanding.
 
 **Satu pagar supaya tidak menipu diri sendiri:** teman yang beli karena kasihan **tidak dihitung**. Pelanggan yang sudah pernah bayar — dihitung.
 
