@@ -93,6 +93,9 @@ $undangan = [
     'catatan_lokasi_akad' => $m('catatan_lokasi_akad'),
     'nuansa'          => $nuansa,
     'nuansa_teks'     => $nuansa_teks,
+    // R4 — brand kaki undangan. Selalu terisi: mitra bila `mitra_id` sah,
+    // hariH bila tidak. Divalidasi ulang di dalam helper, bukan di sini.
+    'mitra'           => function_exists('harih_mitra_brand') ? harih_mitra_brand($id) : ['nama' => 'hariH', 'url' => home_url('/'), 'mitra' => false],
     // Dipertahankan HANYA untuk kompatibilitas: undangan lama tidak punya meta
     // `nuansa`, jadi nilainya diturunkan dari toggle Islami yang lama.
     'salam_islami'    => $nuansa === 'islam',

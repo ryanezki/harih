@@ -17,12 +17,11 @@
 **Titik masuk sesi berikutnya.** Rencana lama tuntas kecuali tiga item; dua di antaranya (`C8`, `A8`) dibawa ke sini, satu (`D3`) dibekukan.
 
 > ### ▶ MULAI DARI SINI
-> 1. **F0** — jual. Ini satu-satunya yang memindahkan angka. Nol kode. 👤
-> 2. **R4** — kaki undangan bercabang + satu demo white-label. Setengah hari, dipakai langsung di F0.3. 🤖
-> 3. **R3** — uji kebocoran cache harga per-role; menentukan bentuk M1. 🤝
-> 4. **R5** — `menit`, sekalian saja.
+> 1. **F0** — jual. Ini satu-satunya yang memindahkan angka. Nol kode, dan alat jualannya sudah siap: `bash demo-mitra.sh "Nama Toko"`. 👤
+> 2. **R3** — uji kebocoran cache harga per-role; menentukan bentuk M1. 🤝
+> 3. **R5** — `menit`, sekalian saja.
 >
-> ✅ **R1 & R2 selesai & live 9 Agustus.** Utang paling keras sudah lunas: nomor rekening berhenti dikumpulkan, dan janji retensi 90 hari akhirnya punya penegak. Smoke 33/33 · workflow aktif 9 → 8.
+> ✅ **R1, R2, R4 selesai & live 9 Agustus.** Utang paling keras lunas (norek berhenti dikumpulkan · retensi 90 hari punya penegak), dan kaki undangan sudah bisa berlabel nama mitra. Smoke 33/33 · workflow aktif 9 → 8 · meta CPT 45 → 46.
 
 **Apa yang berubah dari rencana lama.** Pelanggan utama berpindah dari **pengantin** ke **mitra (WO & percetakan)**; mitra dibayar lewat **harga grosir**, bukan komisi; yang dijual adalah **kapasitas + sistem**, bukan undangan. Platform tidak dibangun ulang — sekitar 8 task, sebagian besar hitungan jam.
 
@@ -196,11 +195,21 @@ Jangan dibuka ulang saat coding. `B1–B8` dari cetak biru konsultan, sejajar 1:
   **Hasilnya menentukan bentuk M1:** bila cache tidak memisahkan user login → grosir **hanya** dihitung di keranjang/checkout (Store API, tidak pernah ter-cache) dan ditampilkan di portal mitra; `woocommerce_get_price_html` **tidak** disentuh di katalog publik.
   **Selesai bila:** ketiga sesi terbukti tidak saling mencemari, atau ketidakmampuannya terdokumentasi di sini beserta konsekuensinya pada M1.
 
-- [ ] **R4** 🤖 `jam` — **Kaki undangan bisa dikondisikan, dan owner punya demo white-label untuk menawar**
+- [x] **R4** 🤖 `jam` — **Kaki undangan bisa dikondisikan, dan owner punya demo white-label untuk menawar** → **SELESAI & LIVE 2026-08-09**
   Inti M2, dimajukan karena inilah setengah hari dengan pengaruh terbesar pada closing: menunjukkan undangan **live berlabel nama toko calon mitra** mengalahkan menjelaskannya. Kakinya sudah ada — [`penutup.php:35`](../wp-content/themes/harih/template-parts/undangan/penutup.php:35) merender *"Undangan digital oleh hariH"* di setiap undangan (K3); yang dikerjakan adalah membuatnya bercabang.
   **Langkah:** helper `harih_mitra_brand( $undangan_id ) : array{nama, logo_url, wa}` dengan **whitelist wajib** persis pola `undangan_get_temas()` — nilai meta tidak pernah dipercaya apa adanya. Cabang: order mitra → *"Undangan oleh **[Nama Mitra]**"* · order publik → teks sekarang + ajakan jadi mitra. Lalu satu undangan demo berlabel nama toko sungguhan untuk dipakai di F0.3.
   ⚠️ HTML undangan di-cache **7 hari** — purge LiteSpeed setelah deploy dan verifikasi dengan query pembeda (`?cb=…`), jangan menilai dari muatan pertama.
   **Selesai bila:** demo mitra menampilkan nama toko, demo publik menampilkan hariH, dan `mitra_id` yang dipalsukan tidak mengubah apa pun.
+
+  → **SELESAI & LIVE 2026-08-09.** Ketiganya diperiksa pada HTML yang benar-benar dikirim, dengan query pembeda (`?cb=`) supaya cache 7 hari tidak menipu: `/u/demo-mitra/` berbunyi *"Undangan digital oleh **Percetakan Melati**"*, ketiga demo publik tetap *"oleh hariH"*, keempatnya `noindex`. Smoke **33/33**.
+  **Alat jualannya nyata, bukan sekadar kodenya:** [`scripts/demo-mitra.sh`](../scripts/demo-mitra.sh) — `bash demo-mitra.sh "Percetakan Melati"` menghasilkan satu URL berlabel nama toko calon mitra dalam hitungan detik, dipakai di tengah percakapan F0.3. Satu slot dipakai bergantian; URL-nya tetap, isinya menyesuaikan. Prosedurnya jadi langkah 0 di [`panduan-manual.md`](./panduan-manual.md).
+  **Slug, bukan user ID.** Rencana M2 menyebut `mitra_id` = user ID ber-role `harih_mitra`, tapi role itu baru lahir di M1 — sementara R4 harus jalan sekarang. `mitra_id` jadi **slug** yang divalidasi terhadap `undangan_get_mitra()` (option `harih_mitra_brand`), persis peran `undangan_get_temas()` untuk `template_id`. Saat M1/M7 membuat user mitra sungguhan, `user_nicename`-nya langsung jadi slug — bentuk metanya tidak perlu berubah. Meta 45 → **46**, dan `mitra_id` sengaja ditambahkan ke allowlist retensi R2.
+  **Whitelist-nya dua lapis, dan lapis kedua yang benar-benar menahan:** sanitizer menolak saat menulis, tapi nilai yang sudah tersimpan tidak ikut berubah ketika mitranya kemudian dicabut dari daftar — kaki yang masih menyebut nama mitra yang sudah tidak bekerja sama persis kegagalan yang harus dicegah. Karena itu `harih_mitra_brand()` memvalidasi ulang **saat render**. Terbukti: mitra dihapus dari daftar sementara metanya tertinggal → kaki jatuh ke hariH.
+  **17 pemeriksaan lulus** — termasuk `javascript:` dibuang dari `url` mitra, entri tanpa nama dibuang, dan path traversal ditolak.
+
+  ⚠️ **Satu uji sempat lulus palsu, dan itu yang paling penting dicatat.** Pemeriksaan "nilai `mitra_id` palsu" awalnya menulis lewat `update_post_meta()` lebih dulu — yang tersanitasi jadi `''` dan **meninggalkan satu baris kosong**. Baris palsu yang ditulis langsung ke DB sesudahnya jadi baris KEDUA, sementara `get_post_meta(..., true)` membaca yang pertama. Jadi tiga asersi berikutnya lulus tanpa pernah menguji apa pun. Diulang dengan baris lama dihapus dulu → nilai palsu benar-benar efektif di DB, dan render **tetap** hariH. Tanpa memeriksa prasyaratnya sendiri, laporan ini akan menyatakan penjaga yang tidak pernah diuji.
+
+  **Sisa untuk M2:** whitelist disambungkan ke role `harih_mitra`, dan WF-01 mengisi `mitra_id` dari pemilik order. Ajakan *"jadi mitra"* di kaki undangan publik **sengaja belum dipasang** — halaman `/mitra/` baru lahir di M8, dan disiplin `C3`/`U21` melarang menaut ke alur yang belum ada.
 
 - [ ] **R5** 🤖 `menit` — **`buat-toko.sh` berhenti bisa memutar balik harga yang sudah diputuskan**
   [`buat-toko.sh:238`](../scripts/buat-toko.sh:238) masih menulis `SATUAN-UNDANGAN-LIPAT` di **15.000**, sementara harga live sudah **35.000** sejak keputusan owner 8 Agustus (`U24`). Menjalankan ulang skrip provisioning akan mengembalikannya diam-diam. Di model dua tingkat harga, jenis drift ini berlipat.

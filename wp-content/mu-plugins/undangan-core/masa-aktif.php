@@ -136,7 +136,14 @@ const UNDANGAN_RETENSI_HARI = 90;
  * Semuanya non-pribadi dan dibutuhkan pembukuan atau halaman 410.
  */
 function undangan_meta_dipertahankan(): array {
-    return ['order_id', 'paket', 'template_id', 'tanggal_resepsi', 'nonaktif_sejak', 'data_dihapus'];
+    return [
+        'order_id', 'paket', 'template_id', 'tanggal_resepsi', 'nonaktif_sejak', 'data_dihapus',
+        // R4 — `mitra_id` bukan data pribadi mempelai melainkan relasi bisnis,
+        // dan setelah pembersihan postnya jadi satu-satunya catatan mitra mana
+        // yang menjual pesanan ini. Ditambahkan sengaja: allowlist bekerja
+        // dengan cara membuang apa pun yang tidak disebut di sini.
+        'mitra_id',
+    ];
 }
 
 /**

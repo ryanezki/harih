@@ -816,6 +816,41 @@ function harih_wa_pesan(string $paket): string {
  * salah (B1), jadi sakelarnya dicabut, bukan dibiarkan mati.
  */
 
+/**
+ * Brand yang tampil di kaki undangan — mitra bila sah, hariH bila tidak (R4).
+ *
+ * Divalidasi ulang SAAT RENDER, bukan hanya saat meta disimpan. Sanitizer di
+ * `cpt.php` menolak slug asing pada saat menulis, tapi nilai yang sudah
+ * terlanjur tersimpan tidak ikut berubah ketika mitranya kemudian dihapus dari
+ * daftar — dan kaki undangan yang masih menyebut nama mitra yang sudah tidak
+ * bekerja sama adalah persis kegagalan yang harus dicegah. Pola yang sama
+ * dengan `harih_tema_aktif()` terhadap `template_id`.
+ *
+ * @return array{slug:string,nama:string,url:string,wa:string,mitra:bool}
+ */
+function harih_mitra_brand(int $undangan_id): array {
+    $bawaan = [
+        'slug'  => '',
+        'nama'  => 'hariH',
+        'url'   => home_url('/?utm_source=undangan&utm_medium=footer'),
+        'wa'    => '',
+        'mitra' => false,
+    ];
+
+    if ($undangan_id <= 0 || !function_exists('undangan_get_mitra')) return $bawaan;
+
+    $slug = sanitize_key((string) get_post_meta($undangan_id, 'mitra_id', true));
+    if ($slug === '') return $bawaan;
+
+    $daftar = undangan_get_mitra();
+    if (!isset($daftar[$slug])) return $bawaan;
+
+    $m   = $daftar[$slug];
+    $url = $m['url'] !== '' ? $m['url'] : ($m['wa'] !== '' ? 'https://wa.me/' . $m['wa'] : '');
+
+    return ['slug' => $slug, 'nama' => $m['nama'], 'url' => $url, 'wa' => $m['wa'], 'mitra' => true];
+}
+
 function harih_halaman_utilitas(): array {
     $ids = [];
     // `/upsell/` bertoken (403 tanpa token) dan `/satuan/` adalah pembanding

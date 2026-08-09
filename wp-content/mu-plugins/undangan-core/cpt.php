@@ -23,6 +23,45 @@ function undangan_sanitize_template_id($value): string {
     return array_key_exists($value, undangan_get_temas()) ? $value : 'tema-01';
 }
 
+/**
+ * Daftar mitra white-label (R4, inti M2). Satu-satunya sumber kebenaran
+ * `mitra_id` — persis peran `undangan_get_temas()` untuk `template_id`.
+ *
+ * Disimpan di option `harih_mitra_brand`, bentuknya `{slug: {nama, url, wa}}`.
+ * Nilainya dibersihkan SETIAP KALI dibaca, bukan hanya saat ditulis: option
+ * bisa diubah dari wp-admin, WP-CLI, atau impor database, dan yang berbahaya
+ * di sini adalah `url` — ia jadi tautan keluar di kaki undangan yang dibuka
+ * ratusan tamu. Entri tanpa `nama` dibuang: kaki tanpa nama bukan white-label,
+ * cuma tautan misterius.
+ *
+ * Sengaja slug, bukan user ID: role `harih_mitra` baru lahir di M1, sementara
+ * R4 harus jalan sekarang untuk dipakai menawar. Saat M1/M7 membuat user
+ * mitra sungguhan, `user_nicename`-nya bisa langsung jadi slug di sini —
+ * bentuk metanya tidak perlu berubah.
+ */
+function undangan_get_mitra(): array {
+    $bersih = [];
+    foreach ((array) get_option('harih_mitra_brand', []) as $slug => $m) {
+        $slug = sanitize_key((string) $slug);
+        if ($slug === '' || !is_array($m)) continue;
+
+        $nama = sanitize_text_field((string) ($m['nama'] ?? ''));
+        if ($nama === '') continue;
+
+        $url = esc_url_raw((string) ($m['url'] ?? ''), ['http', 'https']);
+        $wa  = preg_replace('/\D+/', '', (string) ($m['wa'] ?? ''));
+
+        $bersih[$slug] = ['nama' => $nama, 'url' => $url, 'wa' => (string) $wa];
+    }
+    return $bersih;
+}
+
+/** `mitra_id` di luar daftar → '' (jatuh ke brand hariH), bukan disimpan apa adanya. */
+function undangan_sanitize_mitra_id($value): string {
+    $value = sanitize_key((string) $value);
+    return array_key_exists($value, undangan_get_mitra()) ? $value : '';
+}
+
 function undangan_sanitize_paket($value): string {
     $value = sanitize_key((string) $value);
     return in_array($value, ['hemat', 'favorit', 'premium'], true) ? $value : 'hemat';
@@ -301,6 +340,8 @@ add_action('init', function () {
     'koordinat'       => 'undangan_sanitize_koordinat',   // "lat,lng" venue resepsi
     'koordinat_akad'  => 'undangan_sanitize_koordinat',   // idem — venue akad
     'dompet'          => 'undangan_sanitize_dompet',      // "Nama|URL" per baris, host di-whitelist
+    // --- R4 (2026-08-09), inti M2 dimajukan. 45 → 46 meta. ---
+        'mitra_id'        => 'undangan_sanitize_mitra_id',    // slug di undangan_get_mitra(); '' = brand hariH
     ];
 
     foreach ($fields as $field => $sanitize) {

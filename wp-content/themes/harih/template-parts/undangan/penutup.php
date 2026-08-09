@@ -32,5 +32,21 @@ if ($u['wa_cp'] !== '') {
     <?php if ($judul_musik !== '') : ?>
         <p class="penutup-musik">&#9834;&nbsp;<?php echo esc_html($judul_musik); ?></p>
     <?php endif; ?>
-    <p class="credit">Undangan digital oleh <a href="<?php echo esc_url(home_url('/?utm_source=undangan&utm_medium=footer')); ?>">hariH</a></p>
+    <?php
+    /* R4 — kaki bercabang. Untuk order mitra, nama yang tampil adalah nama
+       MITRA: itu nilai tambah yang dijual ke WO & percetakan, dan alasan
+       mereka memakainya lagi. Untuk order publik, tetap hariH persis seperti
+       sebelumnya — ajakan "jadi mitra" belum dipasang karena halaman /mitra/
+       baru lahir di M8, dan disiplin C3/U21 melarang menaut ke alur yang
+       belum ada. Tautan mitra dipasang nofollow: ini tautan pihak ketiga yang
+       muncul di ratusan halaman undangan sekaligus. */
+    $brand = $u['mitra'] ?? ['nama' => 'hariH', 'url' => home_url('/'), 'mitra' => false];
+    ?>
+    <p class="credit">Undangan digital oleh
+        <?php if ($brand['url'] !== '') : ?>
+            <a href="<?php echo esc_url($brand['url']); ?>"<?php echo !empty($brand['mitra']) ? ' target="_blank" rel="noopener nofollow"' : ''; ?>><?php echo esc_html($brand['nama']); ?></a>
+        <?php else : ?>
+            <?php echo esc_html($brand['nama']); ?>
+        <?php endif; ?>
+    </p>
 </section>

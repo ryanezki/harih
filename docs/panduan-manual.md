@@ -33,6 +33,25 @@ Sampel `TEST-173` dicetak & dilipat sungguhan. **Tidak perlu diulang.** Hasil le
 
 # MINGGU INI
 
+## 🟢 0. Alat yang sudah siap: demo berlabel nama toko calon mitra — *30 detik*
+
+Sebelum menelepon, siapkan satu link yang **sudah memakai nama toko mereka** di
+kaki undangan. Menjelaskan white-label lewat kalimat jauh lebih lemah daripada
+mengirim link yang tinggal dibuka.
+
+```
+ssh -p 65002 u803921702@147.93.80.20
+cd domains/harih.id/public_html && bash demo-mitra.sh "Percetakan Melati"
+```
+
+Keluarannya satu URL: `https://harih.id/u/demo-mitra/` — kakinya berbunyi
+**"Undangan digital oleh Percetakan Melati"**. Untuk calon berikutnya jalankan
+lagi dengan nama lain; URL-nya tetap sama, isinya menyesuaikan. Tambahkan
+alamat Instagram/web mereka sebagai argumen kedua bila mau namanya jadi tautan.
+
+⚠️ Satu slot dipakai bergantian — jangan kirim ke dua calon dalam waktu
+berdekatan, karena yang kedua akan melihat nama yang pertama.
+
 ## 🔴 1. Hubungi 5 WO + pelanggan percetakan Anda — *inilah akuisisinya*
 
 **Kenapa ini, bukan iklan atau SEO.** Anda tidak mulai dari nol. Yang sudah pernah membayar Anda sudah percaya Anda bisa mengirim tepat waktu — dan **kepercayaan itulah bagian tersulit dari jualan Rp 2,9 juta.**
