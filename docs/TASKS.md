@@ -17,11 +17,13 @@
 **Titik masuk sesi berikutnya.** Rencana lama tuntas kecuali tiga item; dua di antaranya (`C8`, `A8`) dibawa ke sini, satu (`D3`) dibekukan.
 
 > ### ▶ MULAI DARI SINI
-> 1. **F0** — jual. Ini satu-satunya yang memindahkan angka. Nol kode, dan alat jualannya sudah siap: `bash demo-mitra.sh "Nama Toko"`. 👤
-> 2. **R3** — uji kebocoran cache harga per-role; menentukan bentuk M1. 🤝
-> 3. **R5** — `menit`, sekalian saja.
+> **P0 habis. Tidak ada lagi kode yang menahan apa pun.**
 >
-> ✅ **R1, R2, R4 selesai & live 9 Agustus.** Utang paling keras lunas (norek berhenti dikumpulkan · retensi 90 hari punya penegak), dan kaki undangan sudah bisa berlabel nama mitra. Smoke 33/33 · workflow aktif 9 → 8 · meta CPT 45 → 46.
+> 1. **F0 — jual.** Ini satu-satunya yang memindahkan angka. Nol kode, dan alat jualannya sudah di tangan: `bash demo-mitra.sh "Nama Toko"` menghasilkan undangan live berlabel nama toko calon mitra. 👤
+> 2. Sebelum menelepon, jawab dulu **keputusan owner #1 & #4** — keduanya akan ditanya di percakapan pertama.
+> 3. M1–M8 **terkunci** sampai [Gerbang 0](#-f0--jual-dulu-nol-fitur-baru-minggu-ini) lolos: 3 mitra membayar.
+>
+> ✅ **Seluruh P0 (R1–R5) selesai 9 Agustus.** Norek berhenti dikumpulkan · retensi 90 hari punya penegak · kaki undangan bisa berlabel nama mitra · harga per-role terbukti tidak bocor lewat cache · drift harga provisioning ditutup. Smoke **33/33** · workflow aktif 9 → 8 · meta CPT 45 → 46.
 
 **Apa yang berubah dari rencana lama.** Pelanggan utama berpindah dari **pengantin** ke **mitra (WO & percetakan)**; mitra dibayar lewat **harga grosir**, bukan komisi; yang dijual adalah **kapasitas + sistem**, bukan undangan. Platform tidak dibangun ulang — sekitar 8 task, sebagian besar hitungan jam.
 
@@ -158,7 +160,7 @@ Jangan dibuka ulang saat coding. `B1–B8` dari cetak biru konsultan, sejajar 1:
   · `WF-01-order-intake.json` node `Siapkan Data Order` — cabut `KOMISI_CETAK` + kalkulasi `* 0.3`, dan cabang `RES-` yang menulis ke tab `komisi`
   · `WF-03-onboarding-reseller.json` — cabut field `bank` & `norek` dari validasi, dari append Sheets, **dan dari teks WA + HTML email ke owner**
   · `WF-04-rekap-komisi.json` — **nonaktifkan lewat n8n**, jangan dihapus dari repo. ⚠️ JSON tidak punya field `active` (K6); mematikannya hanya bisa dari n8n
-  · [`page-jadi-reseller.php`](../wp-content/themes/harih/page-jadi-reseller.php) + [`functions.php:899`](../wp-content/themes/harih/functions.php:899) — cabut 7 titik klaim "komisi 30%" dan field bank/norek di formulir + [`reseller.js`](../wp-content/themes/harih/reseller.js)
+  · `page-jadi-reseller.php` + [`functions.php`](../wp-content/themes/harih/functions.php) — cabut 7 titik klaim "komisi 30%" dan field bank/norek di formulir + `reseller.js` *(kedua berkas itu akhirnya DIHAPUS, bukan disunting — lihat catatan hasil di bawah; markup lamanya ada di git sampai commit `826c8d2`)*
   · [`kebijakan-privasi.md:62`](./konten-legal/kebijakan-privasi.md:62) — cabut klausa *"Data reseller (termasuk nomor rekening)…"*, terbitkan ulang lewat `scripts/publish-legal.py`
   · variabel mati `$harih_ada_reseller` di `page-katalog.php:101` & `page-teks.php:22`
   ⚠️ **Jangan sentuh meta `rekening` pada CPT `undangan`** (`cpt.php:277`) — itu rekening **mempelai** untuk amplop digital, bukan data mitra.
@@ -189,11 +191,27 @@ Jangan dibuka ulang saat coding. `B1–B8` dari cetak biru konsultan, sejajar 1:
 
   **Sekalian menutup janji §7** (hak penghapusan ≤7 hari kerja): `undangan_hapus_data_undangan($id)` adalah satu fungsi yang dipakai dua jalur — cron 90 hari dan permintaan pelanggan. Prosedurnya di [`runbook.md`](./runbook.md) §7b-2.
 
-- [ ] **R3** 🤝 `jam` — **Kebocoran harga grosir diuji SEBELUM M1 ditulis, bukan sesudah**
+- [x] **R3** 🤝 `jam` — **Kebocoran harga grosir diuji SEBELUM M1 ditulis, bukan sesudah** → **LULUS 2026-08-09**
   Ini kegagalan paling mahal di seluruh rencana: LiteSpeed menyajikan halaman katalog ter-cache milik user login ke publik → daftar harga grosir bocor ke pengantin. Produksi mengirim `max-age=604800` sebagai default menyeluruh, dan `?to=` memang sengaja tidak memecah cache — jadi asumsi "cache per-user" tidak boleh dipakai tanpa bukti.
   **Langkah:** buat satu user uji, buka katalog dalam **tiga sesi berdampingan** (publik · user biasa · admin), bandingkan header `x-litespeed-cache` **dan** harga yang benar-benar ter-render. Periksa setelan LiteSpeed *"Do not cache logged-in users"*. Ulangi 2–3 kali — `cek-live.sh` bisa memberi gagal palsu.
   **Hasilnya menentukan bentuk M1:** bila cache tidak memisahkan user login → grosir **hanya** dihitung di keranjang/checkout (Store API, tidak pernah ter-cache) dan ditampilkan di portal mitra; `woocommerce_get_price_html` **tidak** disentuh di katalog publik.
   **Selesai bila:** ketiga sesi terbukti tidak saling mencemari, atau ketidakmampuannya terdokumentasi di sini beserta konsekuensinya pada M1.
+
+  → **LULUS 2026-08-09 — M1 boleh memakai harga per-role di katalog.** Diuji dengan mu-plugin sementara yang menanam penanda berbeda menurut status login, lalu permintaan HTTP nyata lewat edge LiteSpeed dari luar (bukan dari server ke dirinya sendiri). Tiga putaran, masing-masing sampai cache benar-benar **HIT** di kedua sisi:
+
+  | | `x-litespeed-cache` | `Cache-Control` | isi |
+  |---|---|---|---|
+  | anonim | `hit` | `public, max-age=604800` | uid=0 · harga publik |
+  | login | `hit,private` | `no-cache, must-revalidate, max-age=0, no-store, private` | uid=3 · harga grosir |
+
+  Ember publik **tidak pernah** memuat body milik user login, dan sebaliknya. Setelan yang membuatnya bekerja: **`cache-priv = 1`** (TTL privat 1800 dtk). `/cart/`, `/checkout/`, `/my-account/` tidak mengirim header cache sama sekali. Jadi rencana cadangan di M1 — "grosir hanya di keranjang, jangan sentuh katalog" — **tidak diperlukan**; `woocommerce_get_price_html` aman difilter.
+
+  ⚠️ **Tapi ada syaratnya, dan ini harus masuk M1:** yang memisahkan keduanya adalah **satu setelan LiteSpeed**, bukan properti kode kita. Bila `cache-priv` suatu saat mati — pembaruan plugin, migrasi hosting, tombol "reset" di wp-admin — harga grosir langsung mengalir ke ember publik tanpa satu pun galat. **M1 wajib menambahkan pemeriksaan ini ke `cek-live.sh`** supaya regresinya ketahuan oleh smoke test, bukan oleh mitra yang mengirim tangkapan layar.
+
+  🟠 **Temuan sampingan yang mengenai M8:** beranda dikirim dengan `public, max-age=604800` — **peramban pengunjung anonim menyimpannya 7 hari**. `wp litespeed-purge all` hanya membersihkan cache server; yang sudah ada di peramban tidak bisa dijangkau. Artinya setiap perubahan harga baru sampai ke pengunjung lama **sampai seminggu kemudian**. Bukan cacat baru (undangan sudah lama begitu), tapi jadi penting begitu ada dua tingkat harga.
+
+  ⚠️ **Putaran pertama melaporkan "KEBOCORAN TERBUKTI" — dan itu palsu.** Harness-nya memakai array kosong di bawah `set -u`, sehingga **seluruh permintaan anonim gagal senyap** dan hasil kosong terbaca sebagai "bukan uid=0". Ketahuan karena tiap permintaan juga mencetak kode HTTP, dan yang anonim kosong. Pelajaran yang sama untuk kelima kalinya: hasil pertama yang tampak seperti bug diperiksa ulang dengan metode berbeda. Harness sekarang menolak menyimpulkan apa pun bila permintaannya sendiri gagal.
+  Sisa uji dibersihkan: mu-plugin sementara dihapus, user uji dihapus, cache di-purge, penanda nol di HTML live.
 
 - [x] **R4** 🤖 `jam` — **Kaki undangan bisa dikondisikan, dan owner punya demo white-label untuk menawar** → **SELESAI & LIVE 2026-08-09**
   Inti M2, dimajukan karena inilah setengah hari dengan pengaruh terbesar pada closing: menunjukkan undangan **live berlabel nama toko calon mitra** mengalahkan menjelaskannya. Kakinya sudah ada — [`penutup.php:35`](../wp-content/themes/harih/template-parts/undangan/penutup.php:35) merender *"Undangan digital oleh hariH"* di setiap undangan (K3); yang dikerjakan adalah membuatnya bercabang.
@@ -211,9 +229,12 @@ Jangan dibuka ulang saat coding. `B1–B8` dari cetak biru konsultan, sejajar 1:
 
   **Sisa untuk M2:** whitelist disambungkan ke role `harih_mitra`, dan WF-01 mengisi `mitra_id` dari pemilik order. Ajakan *"jadi mitra"* di kaki undangan publik **sengaja belum dipasang** — halaman `/mitra/` baru lahir di M8, dan disiplin `C3`/`U21` melarang menaut ke alur yang belum ada.
 
-- [ ] **R5** 🤖 `menit` — **`buat-toko.sh` berhenti bisa memutar balik harga yang sudah diputuskan**
+- [x] **R5** 🤖 `menit` — **`buat-toko.sh` berhenti bisa memutar balik harga yang sudah diputuskan** → **SELESAI 2026-08-09**
   [`buat-toko.sh:238`](../scripts/buat-toko.sh:238) masih menulis `SATUAN-UNDANGAN-LIPAT` di **15.000**, sementara harga live sudah **35.000** sejak keputusan owner 8 Agustus (`U24`). Menjalankan ulang skrip provisioning akan mengembalikannya diam-diam. Di model dua tingkat harga, jenis drift ini berlipat.
   **Selesai bila:** skrip menulis 35.000, dan tidak ada lagi harga di skrip yang berbeda dari harga live.
+
+  → **SELESAI 2026-08-09.** Kedelapan belas SKU di skrip dibandingkan satu per satu terhadap harga live (`wp wc product list`): **`SATUAN-UNDANGAN-LIPAT` satu-satunya yang meleset**, sekarang 35.000 dan **18 dari 18 cocok**.
+  ⚠️ **Bahayanya lebih sempit dari yang saya tulis di rencana.** `buat_satuan` melewati SKU yang sudah ada, jadi menjalankan ulang skrip terhadap toko yang hidup **tidak** membalik harga. Yang berbahaya adalah **pembangunan ulang dari nol** — pindah hosting, restore DB kosong, staging: di sana harga yang salah lahir kembali tanpa satu pun peringatan. Tetap diperbaiki, dengan alasannya ditulis di sebelah angkanya supaya tidak dikembalikan orang berikutnya.
 
 ---
 
@@ -246,13 +267,14 @@ Estimasi: 5–8 hari kerja. Urutan grup adalah urutan kerja.
 
 - [ ] **M1** 🤖 `hari` — **Role `harih_mitra` + harga per role.** Berkas: `mu-plugins/undangan-core/mitra.php` (baru) · ubah `woocommerce.php`.
   `add_role('harih_mitra')` kapabilitas setara `customer` · field produk `_harga_mitra` · filter `woocommerce_product_get_price` + `get_regular_price`. **Cabut seluruh logika kupon `RES-`** ([`cetak.php:193-213`](../wp-content/mu-plugins/undangan-core/cetak.php:193)) — mekanismenya diganti, jadi penjaganya ikut hilang.
-  ⚠️ **Bentuk penampilan harga ditentukan hasil R3.** Bila cache tidak memisahkan user login, `woocommerce_get_price_html` **tidak** disentuh di katalog; grosir hanya hidup di keranjang (Store API) + portal.
+  ✅ **R3 sudah menjawab: harga per-role AMAN di katalog.** Cache publik dan cache privat terbukti tidak pernah bercampur, jadi `woocommerce_get_price_html` boleh difilter seperti biasa — rencana cadangan "grosir hanya di keranjang" tidak diperlukan.
+  ⚠️ **Tapi yang memisahkannya adalah satu setelan LiteSpeed (`cache-priv = 1`), bukan properti kode kita.** Bila setelan itu mati — pembaruan plugin, migrasi hosting, tombol reset di wp-admin — harga grosir mengalir ke ember publik **tanpa satu pun galat**. Karena itu M1 **wajib menambahkan pemeriksaan tiga sesi ke `cek-live.sh`**: regresinya harus ketahuan oleh smoke test, bukan oleh mitra yang mengirim tangkapan layar.
   ⚠️ Checkout memakai **WooCommerce Blocks** — `woocommerce_checkout_fields` & `woocommerce_after_checkout_validation` tidak berlaku. Pelajaran ini sudah terulang tiga kali.
   ⚠️ Deteksi paket WF-01 berbasis **SKU**, bukan harga — pastikan `_harga_mitra` tidak mengubah tier yang terdeteksi.
   **Selesai bila:** produk yang sama membebankan Rp 179rb ke publik dan Rp 99rb ke mitra di checkout · nol kemunculan `RES-` di basis kode aktif · tiga sesi berdampingan tidak saling mencemari.
 
-- [ ] **M2** 🤖 `jam` — **Meta `mitra_id` + white-label penuh.** Sisa setelah R4: tambah meta `mitra_id` (45 → 46) di `cpt.php`, sambungkan whitelist ke user ber-role `harih_mitra`, dan **WF-01 mengisi `mitra_id` dari pemilik order**.
-  **Selesai bila:** undangan dari order mitra menampilkan nama mitra tanpa disetel tangan.
+- [ ] **M2** 🤖 `jam` — **`mitra_id` terisi sendiri dari order, bukan disetel tangan.** Meta, whitelist, helper brand, dan kaki bercabang **sudah selesai di R4** (45 → 46). Yang tersisa dua: (1) `undangan_get_mitra()` disambungkan ke user ber-role `harih_mitra` — slug = `user_nicename`, jadi bentuk metanya tidak berubah; (2) **WF-01 mengisi `mitra_id` dari pemilik order**.
+  **Selesai bila:** order dari akun mitra menghasilkan undangan berlabel nama mitra tanpa satu pun langkah manual.
 
 - [ ] **M3** 🤖 `hari` — **Portal mitra.** Berkas: `themes/harih/page-mitra-portal.php` (baru). Isi: daftar order + status · sisa slot bulan ini · daftar harga grosir · tombol order baru · link form isi data per order.
   Otentikasi `is_user_logged_in()` + cek role (**B3**), bukan token — ini halaman ber-login pertama di proyek.

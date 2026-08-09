@@ -233,7 +233,14 @@ buat_satuan() {
   echo "  - $sku dibuat (ID $id) — $nama @ Rp $harga (min $minqty)"
 }
 
-buat_satuan SATUAN-UNDANGAN-LIPAT 'Undangan Cetak Lipat + Amplop'  15000   50 'A4 dilipat jadi A5, beserta amplop dengan nama tamu tercetak. Desain seragam dengan undangan digital. Minimum 50 pcs.'
+# R5 (2026-08-09): 15.000 → 35.000. Angka lama sudah dicabut owner 8 Agustus
+# (U24) karena satuan yang lebih murah dari komponen paket membuat paket
+# terlihat mahal; pembedanya dibuat struktural (satuan tanpa digital & tanpa
+# garansi). Skrip ini melewati SKU yang sudah ada, jadi harga live tidak akan
+# terbalik saat dijalankan ulang — yang berbahaya adalah PEMBANGUNAN ULANG dari
+# nol (pindah hosting, restore DB kosong, staging): di sana harga yang salah
+# lahir kembali tanpa satu pun peringatan.
+buat_satuan SATUAN-UNDANGAN-LIPAT 'Undangan Cetak Lipat + Amplop'  35000   50 'A4 dilipat jadi A5, beserta amplop dengan nama tamu tercetak. Desain seragam dengan undangan digital. Minimum 50 pcs.'
 buat_satuan SATUAN-KARTU-QR      'Kartu Undangan Ber-QR'          9500  100 'Kartu kecil ber-QR untuk dibagikan luas (bukan pengganti undangan cetak). Art carton 260gsm, laminasi doff. Minimum 100 pcs.'
 buat_satuan SATUAN-KARTU-HOLO    'Kartu Ber-QR Holographic'      14000  100 'Holographic foil + art carton 260gsm. Minimum 100 pcs.'
 buat_satuan SATUAN-LABEL-SOUV    'Label Souvenir'                 2000  200 'Label bernama & bertanggal untuk souvenir. Minimum 200 pcs.'
