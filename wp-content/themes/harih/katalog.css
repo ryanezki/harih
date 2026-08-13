@@ -695,14 +695,20 @@ a { color: var(--c-accent-teks); }
 .teks-isi li::marker { color: var(--c-gold); }
 .teks-isi strong { color: var(--c-ink); }
 .teks-isi a { color: var(--c-accent-teks); text-underline-offset: 3px; }
+/* Dulu kartu ber-bar emas 3px di sisi kiri. Dua hal salah sekaligus: bar
+   berwarna tebal di satu sisi adalah penekanan yang dipalsukan oleh kroma,
+   dan perlakuan itu diberikan juga kepada baris TANGGAL TERBIT — mendandani
+   metadata sebagai kutipan penting. Sisipan dibedakan oleh SUARA, bukan oleh
+   chrome: ukuran turun, warna meredup, teks menjorok. Nol kotak, nol garis. */
 .teks-isi blockquote {
     margin: 18px 0;
-    padding: 16px 20px;
-    background: var(--c-surface);
-    border: 1.5px solid var(--c-line);
-    border-left: 3px solid var(--c-gold);
-    border-radius: var(--radius);
-    color: var(--c-ink-2);
+    padding: 0 0 0 20px;
+    background: none;
+    border: 0;
+    border-radius: 0;
+    color: var(--c-ink-soft);
+    font-size: var(--fs-sm);
+    line-height: 1.7;
 }
 .teks-isi blockquote p:last-child { margin-bottom: 0; }
 .teks-isi table {
@@ -852,15 +858,20 @@ a { color: var(--c-accent-teks); }
 .garansi h2 { text-align: center; margin-bottom: 22px; }
 .garansi h2 a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
 .garansi-grid { display: grid; gap: 14px; grid-template-columns: 1fr; }
+/* Bar emas 3px dicabut. Ketiga kartu ini adalah jangkar kepercayaan untuk
+   transaksi Rp 5,9 juta, dan bar di tepi adalah cara paling lemah untuk
+   mengatakannya — ia menandai kartunya, bukan janjinya. Penekanan dipindahkan
+   ke kalimat yang benar-benar mengikat kami ("uang kembali 100%", "seluruh
+   batch kami ganti"), yang di markup memang sudah <strong>. */
 .garansi-card {
     border: 1px solid var(--c-line);
-    border-left: 3px solid var(--c-gold);
     border-radius: var(--radius);
     background: var(--c-surface);
     padding: 18px 20px;
 }
 .garansi-card h3 { font-size: var(--fs-md); margin-bottom: 6px; }
 .garansi-card p { font-size: var(--fs-base); color: var(--c-ink-2); line-height: 1.65; }
+.garansi-card p strong { color: var(--c-ink); font-weight: 800; }
 
 .paket-harga-full { text-align: center; font-size: var(--fs-lg); color: var(--c-ink-2); margin: 2px 0 8px; }
 .paket-harga-full strong { font-size: var(--fs-d1); color: var(--c-ink); letter-spacing: .01em; }
