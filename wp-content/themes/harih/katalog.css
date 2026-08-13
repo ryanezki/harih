@@ -1,7 +1,7 @@
 /* =============================================================================
    hariH — lapisan visual katalog & halaman standalone
    Redesain 2026-08-06 "Gen-Z editorial" (handoff desain): DM Serif Display
-   beraksen italic berwarna + Figtree, kartu chunky ber-radius besar, marquee,
+   beraksen italic berwarna + Figtree, kartu chunky ber-radius besar,
    carousel tema, foto arch bersticker.
 
    Berkas ini dipakai 8 halaman: katalog (front page), /harga/, /satuan/,
@@ -74,9 +74,9 @@
        terang (atau tetap gelap) saat seluruh halaman berganti mode. */
     --c-accent-soft: #35503f;          /* sage lebih terang: hover tombol & puncak gradasi */
     /* U14 (lanjutan) — putih di atas --c-gold hanya 2,95:1, gagal AA untuk teks
-       11,5px di badge & stiker. Tinta gelap memberi 5,38:1, dan itu pola yang
+       11,5px di badge. Tinta gelap memberi 5,38:1, dan itu pola yang
        SUDAH terbukti di mode gelap (--d-on-gold #1a1408 = 8,50:1). */
-    --c-on-gold: #2a2110;              /* teks di atas keping emas (badge, stiker) */
+    --c-on-gold: #2a2110;              /* teks di atas keping emas (badge) */
     --grad-unggulan: linear-gradient(170deg, #35503f 0%, #22352c 100%);
     --c-warn-bg: #fdf3e0;
     --c-warn-line: #e5c98c;
@@ -350,7 +350,23 @@ a { color: var(--c-accent-teks); }
 
 .hero { text-align: center; padding: clamp(28px, 5vw, 48px) var(--pad-x) clamp(24px, 4vw, 36px); max-width: 760px; margin: 0 auto; }
 .hero-sub { color: var(--c-ink-soft); max-width: 34rem; margin: .75rem auto 1.5rem; }
-.hero-cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; align-items: center; }
+/* Aksi kedua sengaja BUKAN tombol: satu pil di layar ini, satu aksi utama.
+   Sebelumnya dua pil berdampingan, dan yang SEKUNDER justru 60% lebih lebar
+   karena labelnya lebih panjang (221px vs 138px di 390px) — hierarki yang
+   ditentukan panjang teks, bukan oleh keputusan. */
+.hero-tautan {
+    color: var(--c-ink-2);
+    font-weight: 700;
+    font-size: var(--fs-sm);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-thickness: 1px;
+    text-decoration-color: var(--c-line-2);
+    padding: 12px 4px;
+    transition: color .2s ease, text-decoration-color .2s ease;
+}
+.hero-tautan:hover, .hero-tautan:focus-visible { color: var(--c-accent-teks); text-decoration-color: currentColor; }
+.hero-cta { display: flex; gap: 12px 22px; justify-content: center; flex-wrap: wrap; align-items: center; }
 
 .hero-utama {
     max-width: var(--lebar);
@@ -371,20 +387,9 @@ a { color: var(--c-accent-teks); }
 }
 .hero-utama .hero-sub { margin: 0 0 26px; max-width: 32rem; font-size: clamp(15px, 2vw, 17px); }
 .hero-utama .hero-cta { justify-content: flex-start; margin-bottom: 18px; }
-.hero-badge {
-    display: inline-block;
-    background: var(--c-surface);
-    border: 1.5px solid var(--c-line);
-    border-radius: 999px;
-    padding: 8px 16px;
-    font-size: var(--fs-2xs);
-    font-weight: 800;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    color: var(--c-accent-teks);
-    margin: 0 0 18px;
-}
-.hero-trust { margin: 0; font-size: var(--fs-xs); color: var(--c-ink-soft); }
+.hero-trust {
+    text-wrap: pretty;
+    max-width: 30rem; margin: 0; font-size: var(--fs-xs); color: var(--c-ink-soft); }
 .hero-trust strong { color: var(--c-ink); }
 
 .hero-visual { flex: 1 1 300px; display: flex; justify-content: center; }
@@ -400,39 +405,6 @@ a { color: var(--c-accent-teks); }
 .hero-arch-1 { left: 0; top: 0; width: 62%; }
 .hero-arch-1 img { animation: kenburns 20s ease-in-out infinite alternate; }
 .hero-arch-2 { right: 0; bottom: 0; width: 56%; border: 6px solid var(--c-bg); box-shadow: 0 30px 60px color-mix(in srgb, var(--c-accent-deep) 28%, transparent); }
-
-.stiker {
-    position: absolute;
-    font-weight: 800;
-    font-size: clamp(11px, 1.4vw, 13px);
-    letter-spacing: .06em;
-    padding: 10px 16px;
-    border-radius: 999px;
-    white-space: nowrap;
-}
-.stiker-1 { left: -2%; bottom: 14%; background: var(--c-gold); color: var(--c-on-gold); transform: rotate(-7deg); box-shadow: 0 10px 24px color-mix(in srgb, var(--c-gold) 40%, transparent); animation: wiggle 4s ease-in-out infinite; }
-.stiker-2 { right: 2%; top: 6%; background: var(--c-surface); color: var(--c-accent-teks); border: 1.5px solid var(--c-accent-teks); transform: rotate(6deg); }
-.stiker-3 { right: -1%; bottom: 40%; background: var(--c-accent-deep); color: var(--c-accent-ink); font-weight: 700; transform: rotate(-4deg); }
-
-/* ---------- 3. Marquee ---------- */
-
-.marquee {
-    background: var(--c-accent-deep);
-    color: var(--c-accent-ink);
-    overflow: hidden;
-    padding: 14px 0;
-    border-top: 1px solid color-mix(in srgb, var(--c-gold-light) 35%, transparent);
-    border-bottom: 1px solid color-mix(in srgb, var(--c-gold-light) 35%, transparent);
-}
-.marquee-jalur { display: flex; width: max-content; animation: marquee 26s linear infinite; }
-.marquee-jalur span {
-    font-family: var(--font-display);
-    font-style: italic;
-    font-size: var(--fs-2xl);
-    white-space: nowrap;
-    padding-right: 12px;
-}
-.marquee-jalur i { color: var(--c-gold-light); font-style: normal; }
 
 /* ---------- 4. Cara pesan ---------- */
 
@@ -655,19 +627,8 @@ a { color: var(--c-accent-teks); }
 .band-foto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .band-scrim { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(24, 38, 30, .78), rgba(24, 38, 30, .86)); }
 .band-isi { position: relative; max-width: 620px; margin: 0 auto; }
-.band-badge {
-    display: inline-block;
-    border: 1.5px solid color-mix(in srgb, var(--c-gold-light) 70%, transparent);
-    color: var(--c-gold-light);
-    font-weight: 800;
-    font-size: var(--fs-2xs);
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    padding: 8px 16px;
-    border-radius: 999px;
-    margin: 0 0 16px;
-}
 .band-isi h2 { font-size: clamp(28px, 4vw, 40px); margin: 0 0 14px; }
+.band-utama { font-size: var(--fs-lg); line-height: 1.55; margin: 0 0 10px; max-width: 34rem; }
 .band-isi p { color: var(--c-ivory-muted); margin: 0 0 26px; font-size: var(--fs-base); }
 
 /* ---------- 8. FAQ ---------- */
@@ -769,11 +730,8 @@ a { color: var(--c-accent-teks); }
 
 /* ---------- Gerak ---------- */
 
-@keyframes marquee { to { transform: translateX(-50%); } }
 @keyframes kenburns { from { transform: scale(1); } to { transform: scale(1.12); } }
 @keyframes rise { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
-@keyframes wiggle { 0%, 100% { transform: rotate(-7deg); } 50% { transform: rotate(-3deg); } }
-
 /* Reveal saat masuk layar — progressive enhancement lewat scroll-timeline.
    Peramban tanpa dukungan mengabaikan seluruh aturan ini dan langsung
    menampilkan keadaan akhir; sengaja TANPA JS supaya tidak ada risiko konten
@@ -788,9 +746,7 @@ a { color: var(--c-accent-teks); }
 
 /* Hormati preferensi sistem: matikan seluruh gerak dekoratif. */
 @media (prefers-reduced-motion: reduce) {
-    .marquee-jalur,
-    .hero-arch-1 img,
-    .stiker-1 { animation: none !important; }
+    .hero-arch-1 img { animation: none !important; }
     [data-naik] { animation: none !important; opacity: 1 !important; transform: none !important; }
     .paket-card:hover, .tema-kartu:hover { transform: none; }
     * { scroll-behavior: auto !important; }

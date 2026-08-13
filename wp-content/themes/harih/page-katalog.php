@@ -126,12 +126,11 @@ $harih_aset         = get_stylesheet_directory_uri() . '/aset';
 
 <section class="hero hero-utama">
     <div class="hero-teks">
-        <p class="hero-badge">Undangan Digital · No Ribet</p>
-        <h1>Undangan nikah yang <em class="aksen-emas">aesthetic</em>, jadi dalam <em class="aksen-sage">hitungan menit</em>.</h1>
-        <p class="hero-sub">Pilih paket, bayar, isi data dari HP — undangan cantikmu langsung terkirim ke WhatsApp &amp; email. Tanpa antre desainer, tanpa nunggu berhari-hari.</p>
+        <h1>Undangan pernikahan, digital dan <em class="aksen-sage">tercetak</em>.</h1>
+        <p class="hero-sub">Semua tamu menerima undangan digitalnya lewat WhatsApp. Untuk orang tua dan yang paling Anda hormati, undangan yang sama dicetak — dengan nama mereka di amplopnya.</p>
         <div class="hero-cta">
-            <a class="btn btn-utama" href="#paket">Lihat Paket →</a>
-            <a class="btn btn-garis" href="#tema">Intip Contohnya</a>
+            <a class="btn btn-utama" href="#paket">Lihat paket</a>
+            <a class="hero-tautan" href="#tema">Lihat contoh undangan</a>
         </div>
         <?php /* Baris trust (temuan review A2): kanal pembayaran disebut sebelum
                  pengunjung menekan apa pun — keberatan "aman tidak?" dijawab di muka. */ ?>
@@ -142,7 +141,7 @@ $harih_aset         = get_stylesheet_directory_uri() . '/aset';
                  pembeli ke chat yang pesan pra-isinya justru MENANYAKAN cara
                  bayar. Kelas cacat yang sama dengan B5/B6/B7: halaman tayang
                  menjanjikan hal yang keputusan atau kode tidak dukung. */ ?>
-        <p class="hero-trust"><strong>Mulai Rp <?php echo esc_html(harih_harga_mulai()); ?>rb</strong>, sekali bayar · <?php
+        <p class="hero-trust">Digital <strong>mulai Rp <?php echo esc_html(harih_harga_mulai()); ?>rb</strong><?php if ($harih_ada_harga) : ?> · cetak <strong>mulai Rp 1,19 juta</strong><?php endif; ?> · <?php
             echo harih_bayar_online_siap()
                 ? 'QRIS, VA &amp; e-wallet — gateway berlisensi'
                 : 'konfirmasi &amp; pembayaran lewat CS WhatsApp';
@@ -156,29 +155,14 @@ $harih_aset         = get_stylesheet_directory_uri() . '/aset';
             <div class="hero-arch hero-arch-2">
                 <?php echo harih_gambar('demo/harih-gaun-detail.jpg', '', ['width' => 600, 'height' => 800, 'loading' => 'lazy', 'decoding' => 'async']); ?>
             </div>
-            <span class="stiker stiker-1">±5 Menit Jadi</span>
-            <span class="stiker stiker-2">Mulai <?php echo esc_html(harih_harga_mulai()); ?>rb</span>
-            <span class="stiker stiker-3">langsung ke WA ✦</span>
         </div>
     </div>
 </section>
 
-<?php
-/* Marquee: konten diduplikasi 2× agar loop translateX(-50%) mulus. */
-$harih_marquee = 'jadi dalam hitungan menit ✦ mulai Rp ' . harih_harga_mulai() . 'rb sekali bayar ✦ langsung terkirim ke WhatsApp ✦ RSVP &amp; ucapan tamu ✦ amplop digital ✦ nama tamu otomatis di link ✦ ';
-$harih_marquee = str_replace('✦', '<i>✦</i>', $harih_marquee);
-?>
-<div class="marquee" aria-hidden="true">
-    <div class="marquee-jalur">
-        <span><?php echo $harih_marquee; ?></span>
-        <span><?php echo $harih_marquee; ?></span>
-    </div>
-</div>
 
 <main>
     <section class="cara">
         <h2>Tiga langkah, <em class="aksen-emas">beres</em>.</h2>
-        <p class="seksi-sub">Semuanya dari HP, sambil rebahan juga bisa.</p>
         <div class="cara-grid">
             <div class="cara-kartu" data-naik><span class="cara-no">1</span><strong><?php echo harih_bayar_online_siap() ? 'Pilih paket &amp; bayar' : 'Chat WhatsApp'; ?></strong><span><?php
                 echo harih_bayar_online_siap()
@@ -195,7 +179,7 @@ $harih_marquee = str_replace('✦', '<i>✦</i>', $harih_marquee);
              satu kartu penuh per geseran. */ ?>
     <section class="tema" id="tema">
         <div class="tema-kepala">
-            <h2>Intip dulu <em class="aksen-sage">hasilnya</em></h2>
+            <h2>Contoh <em class="aksen-sage">undangan</em></h2>
             <p>Geser untuk lihat semua tema →</p>
         </div>
         <div class="tema-track">
@@ -253,8 +237,8 @@ $harih_marquee = str_replace('✦', '<i>✦</i>', $harih_marquee);
     </section>
 
     <section class="paket" id="paket">
-        <h2>Pilih <em class="aksen-emas">paketmu</em></h2>
-        <p class="seksi-sub">Sekali bayar, tanpa biaya tersembunyi.</p>
+        <h2>Undangan <em class="aksen-sage">digital</em></h2>
+        <p class="seksi-sub">Sekali bayar, tanpa biaya tersembunyi. Diterima semua tamu lewat satu tautan.</p>
 
         <?php /*
           Satu pertanyaan sebelum tabel harga. Tujuannya bukan segmentasi
@@ -305,10 +289,10 @@ $harih_marquee = str_replace('✦', '<i>✦</i>', $harih_marquee);
             <?php echo harih_gambar('demo/harih-cincin-sepatu.jpg', '', ['class' => 'band-foto', 'width' => 1200, 'height' => 800, 'loading' => 'lazy', 'decoding' => 'async']); ?>
             <div class="band-scrim" aria-hidden="true"></div>
             <div class="band-isi">
-                <p class="band-badge">Undangan Cetak</p>
-                <h2>Buat orang tua &amp; sesepuh: undangan cetak beramplop nama, <em class="aksen-emas-muda">satu desain</em> dengan undangan digitalmu.</h2>
+                <h2>Undangan <em class="aksen-emas-muda">cetak</em></h2>
+                <p class="band-utama">Beramplop nama tamu, satu desain dengan undangan digitalmu — untuk orang tua dan yang paling Anda hormati.</p>
                 <p>Detail acara terbaca tanpa HP, QR-nya membuka undangan digital kalian. Dari data yang sama, gratis ongkir ke seluruh Indonesia.</p>
-                <a class="btn btn-terang" href="<?php echo esc_url(home_url('/harga/')); ?>">Lihat Paket Cetak</a>
+                <a class="btn btn-terang" href="<?php echo esc_url(home_url('/harga/')); ?>">Lihat paket cetak</a>
             </div>
         </div>
     </section>
@@ -334,8 +318,8 @@ $harih_marquee = str_replace('✦', '<i>✦</i>', $harih_marquee);
              dibiarkan buntu tanpa ajakan. */ ?>
     <section class="cta-penutup">
         <h2>Hari bahagiamu, <em class="aksen-emas-muda">diundang dengan indah</em>.</h2>
-        <p>Mulai Rp <?php echo esc_html(harih_harga_mulai()); ?> ribu, sekali bayar — jadi dalam hitungan menit.</p>
-        <a class="btn btn-terang" href="#paket">Pilih Paket Sekarang →</a>
+        <p>Digital untuk semua tamu, cetak untuk yang paling Anda hormati — dari satu desain yang sama.</p>
+        <a class="btn btn-terang" href="#paket">Lihat paket</a>
     </section>
 </main>
 
