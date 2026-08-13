@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) exit;
  * pengunjung & LiteSpeed tetap menyajikan berkas lama meski file di server
  * sudah baru, dan perbaikan tampilan terlihat "tidak berpengaruh".
  */
-const HARIH_VERSION = '2.36.0';
+const HARIH_VERSION = '2.36.1';
 
 /**
  * Versi aset PER BERKAS (U28).
@@ -726,6 +726,31 @@ function harih_harga_mulai(int $cadangan = 99): int {
         if ($p && (float) $p->get_price() > 0) $harga[] = (float) $p->get_price();
     }
     return $harga ? max(1, (int) floor(min($harga) / 1000)) : $cadangan;
+}
+
+/**
+ * Harga cetak termurah, dibaca dari WooCommerce (bukan ditulis ulang).
+ *
+ * Dipasang saat distill beranda menaruh "cetak mulai Rp 1,19 juta" di baris
+ * trust — sebagai LITERAL. Itu persis cacat yang sudah dua kali menggigit
+ * proyek ini: C5 (angka 99 tertulis di enam tempat) dan U24 (tabel satuan
+ * dihargai saat produknya masih kartu QR, lalu tidak ikut diperbarui).
+ * Sekali harga cetak berubah di WooCommerce, beranda akan berbohong tanpa
+ * ada yang tahu. Formatnya "1,19 juta" — bentuk yang memang dipakai halaman.
+ */
+function harih_harga_cetak_mulai(string $cadangan = '1,19 juta'): string {
+    if (!function_exists('wc_get_product_id_by_sku')) return $cadangan;
+    $harga = [];
+    foreach (['CETAK-HORMAT', 'CETAK-RESEPSI', 'CETAK-GRAND'] as $sku) {
+        $id = (int) wc_get_product_id_by_sku($sku);
+        $p  = $id ? wc_get_product($id) : null;
+        if ($p && (float) $p->get_price() > 0) $harga[] = (float) $p->get_price();
+    }
+    if (!$harga) return $cadangan;
+    $juta = min($harga) / 1000000;
+    // Dibulatkan KE BAWAH, sama seperti harih_harga_mulai(): kalimat "mulai"
+    // tidak boleh pernah menyebut angka di atas harga sebenarnya.
+    return number_format(floor($juta * 100) / 100, 2, ',', '.') . ' juta';
 }
 
 /**

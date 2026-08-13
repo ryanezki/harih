@@ -141,7 +141,7 @@ $harih_aset         = get_stylesheet_directory_uri() . '/aset';
                  pembeli ke chat yang pesan pra-isinya justru MENANYAKAN cara
                  bayar. Kelas cacat yang sama dengan B5/B6/B7: halaman tayang
                  menjanjikan hal yang keputusan atau kode tidak dukung. */ ?>
-        <p class="hero-trust">Digital <strong>mulai Rp <?php echo esc_html(harih_harga_mulai()); ?>rb</strong><?php if ($harih_ada_harga) : ?> · cetak <strong>mulai Rp 1,19 juta</strong><?php endif; ?> · <?php
+        <p class="hero-trust">Digital <strong>mulai Rp <?php echo esc_html(harih_harga_mulai()); ?>rb</strong><?php if ($harih_ada_harga) : ?> · cetak <strong>mulai Rp <?php echo esc_html(harih_harga_cetak_mulai()); ?></strong><?php endif; ?> · <?php
             echo harih_bayar_online_siap()
                 ? 'QRIS, VA &amp; e-wallet — gateway berlisensi'
                 : 'konfirmasi &amp; pembayaran lewat CS WhatsApp';

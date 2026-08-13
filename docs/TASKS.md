@@ -1,6 +1,6 @@
 # TASKS — hariH
 
-**Status:** aktif · **Ditulis ulang:** 2026-08-09 dari cetak biru konsultan bisnis (model grosir/mitra), setelah audit repo menyeluruh · **Kondisi:** smoke **33/33** live · **8 workflow aktif** *(WF-04 dipensiunkan di R1)* · `HARIH_VERSION 2.33.0` · **nol order.**
+**Status:** aktif · **Ditulis ulang:** 2026-08-09 dari cetak biru konsultan bisnis (model grosir/mitra), setelah audit repo menyeluruh · **Kondisi:** smoke **33/33** live · **8 workflow aktif** *(WF-04 dipensiunkan di R1)* · `HARIH_VERSION 2.36.1` · **nol order.**
 
 > Versi sebelumnya (891 baris — rencana B2C, 58 dari 61 item tuntas) diarsipkan di [`arsip/TASKS-2026-08-09.md`](./arsip/TASKS-2026-08-09.md). Dokumen ini hanya memuat **yang berlaku sekarang**. Riwayat lengkap ada di git log.
 
@@ -27,6 +27,8 @@
 >    · langkah owner di [`panduan-manual.md`](./panduan-manual.md) langkah 0–1
 > 3. M1–M8 **terkunci** sampai [Gerbang 0](#-f0--jual-dulu-nol-fitur-baru-minggu-ini) lolos: 3 mitra membayar order grosir pertama.
 >
+> ✅ **Lapis UI selesai & live 14 Agustus** *(jalur terpisah — tidak menahan F0)*. Beranda di-*distill* ke inti: badge, marquee, stiker, dan sub-baris slang dicabut; skala tipografi diremap ke token `--fs-*`; foto produk WebP dipasang; badge "Paling Populer" dicabut karena **nol order** membuatnya klaim palsu. Harga satuan naik ke Rp 35.000/pcs berikut aturannya (*satuan tidak termasuk undangan digital, tanpa Garansi Tepat Waktu*). Baris harga cetak di beranda kini **dibaca dari WooCommerce** lewat `harih_harga_cetak_mulai()`, bukan ditulis sebagai angka — sumber drift yang sama seperti eks-C5 & U24. `2.36.1` · smoke 33/33.
+>
 > ✅ **Seluruh P0 (R1–R5) selesai & live 9 Agustus.** Norek berhenti dikumpulkan · retensi 90 hari punya penegak · kaki undangan bisa berlabel nama mitra · harga per-role terbukti tidak bocor lewat cache · drift harga provisioning ditutup. Smoke **33/33** · workflow aktif 9 → 8 · meta CPT 45 → 46 · 6 commit.
 
 **Empat kali sesi ini hampir mengirim yang salah, dan semuanya tertangkap sebelum deploy** — dicatat karena polanya berulang, bukan untuk gaya-gayaan:
@@ -43,6 +45,7 @@
 **Apa yang berubah dari rencana lama.** Pelanggan utama berpindah dari **pengantin** ke **mitra (WO & percetakan)**; mitra dibayar lewat **harga grosir**, bukan komisi; yang dijual adalah **kapasitas + sistem**, bukan undangan. Platform tidak dibangun ulang — sekitar 8 task, sebagian besar hitungan jam.
 
 **Yang TIDAK berubah dan tidak boleh disentuh:** pipeline WF-01 → WF-02 · arsitektur tema sebagai *skin* + whitelist `template_id` · Antrean Cetak, alur proof, `_proof_hash`, `_harih_uji` · hardening & rate limit · Garansi Tepat Waktu H-14 · pembeda inti **nama tiap tamu tercetak langsung di amplopnya**.
+🔒 **Desain undangan dibekukan 6 Agustus** — jangan diiterasi visual tanpa diminta. Termasuk garis emas `.acara-card` (`border-left: 2px`) di `tema-01/style.css:150` dan `tema-03/style.css:149`: detektor craft menandainya, owner memutuskan **dibiarkan**. Bukan temuan baru; jangan "diperbaiki" lagi.
 
 **Data uji yang SENGAJA disimpan** — jangan dihapus tanpa konfirmasi; `R2` sudah mengecualikannya lewat `undangan_dikecualikan_hapus()`: pesanan `TEST-173` + undangan `174` (`/u/test-rangga-sekar/`), ditandai `_harih_uji=1`, baris sheet `orders` order_id 173.
 ⚠️ Untuk meta ORDER, `wp post meta get` **berbohong** — HPOS aktif, metanya tidak di `wp_postmeta`. Pakai `wp eval '$o=wc_get_order(173); var_export($o->get_meta("_harih_uji"));'`.
